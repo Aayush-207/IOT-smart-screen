@@ -105,3 +105,24 @@ export function eventDisplayWindow(
     endTime: eventEnd.toISOString(),
   };
 }
+
+export function isCutoffPassed(eventDate: string, now = new Date()): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) return false;
+  const eventStart = new Date(`${eventDate}T00:00:00.000Z`).getTime();
+  const deadline = eventStart - 7 * dayMs;
+  return now.getTime() >= deadline;
+}
+
+export function evaluateCutoffStatus(asset: ContentAsset, now = new Date()): ContentAsset {
+  if (asset.status === 'APPROVED' || asset.status === 'REJECTED' || asset.status === 'INELIGIBLE') {
+    return asset;
+  }
+  if (asset.eventDate && isCutoffPassed(asset.eventDate, now)) {
+    return {
+      ...asset,
+      status: 'INELIGIBLE',
+      rejectionReason: '7-day deadline passed before reaching full approval.',
+    };
+  }
+  return asset;
+}

@@ -1,13 +1,22 @@
 import {
   Activity,
   CalendarDays,
+  FileText,
   Home,
   Images,
   Monitor,
   Radio,
+  Shield,
 } from 'lucide-react';
 
-export type ViewTab = 'overview' | 'content' | 'schedules' | 'devices' | 'insights';
+export type ViewTab =
+  | 'overview'
+  | 'content'
+  | 'schedules'
+  | 'devices'
+  | 'insights'
+  | 'security'
+  | 'architecture';
 
 interface SidebarProps {
   activeTab: ViewTab;
@@ -22,6 +31,8 @@ const items = [
   { id: 'schedules', label: 'Schedule', mobileLabel: 'Plan', icon: CalendarDays },
   { id: 'devices', label: 'Screens', mobileLabel: 'Screens', icon: Monitor },
   { id: 'insights', label: 'Health', mobileLabel: 'Health', icon: Activity },
+  { id: 'security', label: 'Audit Log', mobileLabel: 'Audit', icon: Shield },
+  { id: 'architecture', label: 'Blueprint', mobileLabel: 'Docs', icon: FileText },
 ] as const;
 
 export function Sidebar({

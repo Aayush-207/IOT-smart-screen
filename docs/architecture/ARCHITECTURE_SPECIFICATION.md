@@ -36,9 +36,14 @@ Every entity contains an immutable `organization_id` (Tenant scope). For the pil
 2. **Location Hierarchy**: `Organization` -> `Campus` -> `Building` -> `Floor` -> `Zone` -> `Location`
 3. **User & Identity**: `id`, `organization_id`, `cognito_sub`, `email`, `role`, `department_id`, `status`
 4. **Device Inventory**: `id`, `organization_id`, `location_id`, `thing_name`, `certificate_arn`, `mac_address`, `status` (`ONLINE`, `STALE`, `OFFLINE`, `MAINTENANCE`), `last_heartbeat_at`, `current_manifest_version`
-5. **Content Asset**: `id`, `organization_id`, `submitter_id`, `title`, `description`, `media_url`, `media_type`, `sha256`, `status` (`QUARANTINED`, `PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `EXPIRED`)
-6. **Schedule Rule**: `id`, `organization_id`, `playlist_id`, `target_type` (`DEVICE`, `ZONE`, `BUILDING`, `CAMPUS`), `target_id`, `start_time`, `end_time`, `priority`, `recurrence_rrul`
-7. **Compiled Manifest**: `id`, `device_id`, `version`, `payload_hash`, `valid_from`, `valid_until`, `items_json`, `created_at`
+5. **Content Asset**: `id`, `organization_id`, `submitter_id`, `title`, `description`, `media_url`, `media_type`, `sha256`, `status` (`AWAITING_POSTER`, `QUARANTINED`, `PENDING_APPROVAL`, `APPROVED`, `REJECTED`, `INELIGIBLE`, `EXPIRED`)
+
+### 2.1 Multi-Tier Poster Approval & Time-Gated Broadcast Engine:
+- **Event Creation**: Created by Club President (`AWAITING_POSTER`).
+- **Brand Kit & Poster Upload**: Club Design Lead downloads official Brand Asset Kit and attaches poster (`PENDING_APPROVAL`, stage: `PRESIDENT`).
+- **Sequential Approval Chain**: `Club President` -> `Club HOD` -> `Campus Admin` -> `APPROVED`. Rejection resets to `PRESIDENT` stage and requires re-upload.
+- **Continuous 21-Day Broadcast Window**: Approved events inside the 21-day event window are automatically compiled into active kiosk manifests.
+- **7-Day Hard Cutoff Deadline**: Unapproved posters for events < 7 days away automatically transition to `INELIGIBLE`. Only Campus Admin can override `INELIGIBLE` assets.
 
 ---
 

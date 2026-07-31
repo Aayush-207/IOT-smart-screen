@@ -40,7 +40,30 @@ export const INITIAL_SCHEDULES: ScheduleRule[] = [];
 
 export const MOCK_TELEMETRY: TelemetryEvent[] = [];
 
-export const MOCK_AUDIT_LOGS: AuditLogRecord[] = [];
+export const MOCK_AUDIT_LOGS: AuditLogRecord[] = [
+  {
+    id: 'aud_init_01',
+    organizationId: 'org_mit_adt',
+    actor: 'System Initialization',
+    action: 'SYSTEM_BOOTSTRAP',
+    resource: 'SECURITY_DOMAIN',
+    resourceId: 'org_mit_adt',
+    timestamp: new Date(Date.now() - 3600000 * 24).toISOString(),
+    ipAddress: '127.0.0.1',
+    details: 'AWS IoT Certificate Authority & Cognito JWT Issuer boundary verified.',
+  },
+  {
+    id: 'aud_init_02',
+    organizationId: 'org_mit_adt',
+    actor: 'Gaurav Khandelwal',
+    action: 'RBAC_VERIFY',
+    resource: 'USER_ROLE',
+    resourceId: 'role_admin',
+    timestamp: new Date(Date.now() - 3600000 * 12).toISOString(),
+    ipAddress: '192.168.1.100',
+    details: 'Authenticated as Campus Admin. Scope: org_mit_adt full fleet authority.',
+  },
+];
 
 export const SAMPLE_COMPILED_MANIFEST: CompiledManifest = {
   manifestVersion: 'v1.0.0',

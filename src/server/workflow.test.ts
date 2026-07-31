@@ -2,7 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import type { ContentAsset } from '../types';
-import { advanceApproval, eventDisplayWindow } from '../workflow';
+import {
+  advanceApproval,
+  evaluateCutoffStatus,
+  eventDisplayWindow,
+  isCutoffPassed,
+} from '../workflow';
 
 const poster: ContentAsset = {
   id: 'cnt_workflow',
@@ -71,4 +76,25 @@ test('a club cannot approve another club poster', () => {
     () => advanceApproval(poster, 'PRESIDENT', 'club_robotics', 'Wrong user'),
     /cannot approve/,
   );
+});
+
+test('7-day cutoff marks unapproved posters as ineligible', () => {
+  // Event on Aug 10, Cutoff on Aug 3.
+  const nowPassed = new Date('2026-08-05T00:00:00.000Z');
+  const nowSafe = new Date('2026-08-01T00:00:00.000Z');
+
+  assert.equal(isCutoffPassed('2026-08-10', nowPassed), true);
+  assert.equal(isCutoffPassed('2026-08-10', nowSafe), false);
+
+  const pendingPoster: ContentAsset = {
+    ...poster,
+    eventDate: '2026-08-10',
+    status: 'PENDING_APPROVAL',
+  };
+
+  const evaluated = evaluateCutoffStatus(pendingPoster, nowPassed);
+  assert.equal(evaluated.status, 'INELIGIBLE');
+
+  const safeEvaluated = evaluateCutoffStatus(pendingPoster, nowSafe);
+  assert.equal(safeEvaluated.status, 'PENDING_APPROVAL');
 });

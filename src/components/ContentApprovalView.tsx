@@ -4,6 +4,8 @@ import {
   Check,
   CheckCircle2,
   Clock3,
+  Download,
+  FileCheck,
   ImagePlus,
   Search,
   ShieldCheck,
@@ -79,6 +81,7 @@ export function ContentApprovalView({
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showBrandKit, setShowBrandKit] = useState(false);
   const [reviewing, setReviewing] = useState<ContentAsset | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -203,20 +206,31 @@ export function ContentApprovalView({
             Every poster follows the same verified path before reaching a screen.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setCreating(true)}
-          disabled={!canSubmit}
-          title={
-            canSubmit
-              ? 'Submit a new event poster'
-              : 'Switch to Design Lead to submit a poster'
-          }
-          className="cc-button-primary disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Upload className="h-4 w-4" />
-          Submit poster
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowBrandKit(true)}
+            className="cc-button-secondary"
+            title="Download brand logos and sizing rules"
+          >
+            <Download className="h-4 w-4" />
+            Brand Asset Kit
+          </button>
+          <button
+            type="button"
+            onClick={() => setCreating(true)}
+            disabled={!canSubmit}
+            title={
+              canSubmit
+                ? 'Submit a new event poster'
+                : 'Switch to Design Lead to submit a poster'
+            }
+            className="cc-button-primary disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Upload className="h-4 w-4" />
+            Submit poster
+          </button>
+        </div>
       </section>
 
       <section
@@ -666,6 +680,88 @@ export function ContentApprovalView({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {showBrandKit && (
+        <div
+          className="cc-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Brand Asset Kit & Guidelines"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setShowBrandKit(false);
+          }}
+        >
+          <div className="cc-dialog w-full max-w-2xl p-0">
+            <header className="flex items-center justify-between border-b border-[var(--border)] p-4 sm:p-5">
+              <div className="flex items-center gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <FileCheck className="h-5 w-5" />
+                </span>
+                <div>
+                  <h2 className="text-base font-bold sm:text-lg">Brand Asset Kit & Guidelines</h2>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    Official MIT ADT University logo specifications & kiosk display rules
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBrandKit(false)}
+                className="cc-icon-button"
+                aria-label="Close brand kit modal"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </header>
+
+            <div className="space-y-4 p-4 text-xs sm:p-5">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3">
+                  <strong className="block text-sm font-semibold">16:9 Landscape & 9:16 Portrait</strong>
+                  <p className="mt-1 leading-relaxed text-[var(--muted-foreground)]">
+                    Target 1920x1080 resolution. Keep poster file size under 5 MB (JPEG/PNG).
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3">
+                  <strong className="block text-sm font-semibold">Safe Padding (60px)</strong>
+                  <p className="mt-1 leading-relaxed text-[var(--muted-foreground)]">
+                    Keep primary event details and QR codes 60px away from display edges.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-4 space-y-3">
+                <strong className="block text-sm font-semibold text-[var(--foreground)]">
+                  Official Brand Assets
+                </strong>
+                <p className="text-[var(--muted-foreground)]">
+                  Use authorized university and club logos to guarantee first-pass approval.
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <a
+                    download="MIT_ADT_University_Logo.svg"
+                    href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='60' viewBox='0 0 200 60'%3E%3Crect width='200' height='60' rx='8' fill='%230f172a'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2338bdf8' font-family='sans-serif' font-weight='bold' font-size='16'%3EMIT ADT LOGO%3C/text%3E%3C/svg%3E"
+                    className="cc-button-secondary text-xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download SVG Logo
+                  </a>
+                  <a
+                    download="1080p_Poster_Canvas_Guide.png"
+                    href={fallbackImage}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="cc-button-secondary text-xs"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    1080p Canvas Template
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

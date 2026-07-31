@@ -12,11 +12,13 @@ export type ApprovalStage =
   | 'REJECTED';
 
 export type ContentStatus = 
+  | 'AWAITING_POSTER'
   | 'QUARANTINED'
   | 'SUBMITTED'
   | 'PENDING_APPROVAL'
   | 'APPROVED'
   | 'REJECTED'
+  | 'INELIGIBLE'
   | 'EXPIRED';
 
 export type ScheduleTargetType = 'DEVICE' | 'ZONE' | 'BUILDING' | 'CAMPUS';

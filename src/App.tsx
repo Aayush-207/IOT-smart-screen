@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 
+import { ArchitectureView } from './components/ArchitectureView';
+import { AuditLogView } from './components/AuditLogView';
 import { ContentApprovalView } from './components/ContentApprovalView';
 import { DeviceManagementView } from './components/DeviceManagementView';
 import { KioskSimulatorModal } from './components/KioskSimulatorModal';
@@ -15,6 +17,7 @@ import {
   INITIAL_CONTENT,
   INITIAL_DEVICES,
   INITIAL_SCHEDULES,
+  MOCK_AUDIT_LOGS,
   MOCK_TELEMETRY,
 } from './mockData';
 import type {
@@ -123,6 +126,7 @@ export function App() {
   const [telemetry, setTelemetry] = useState<TelemetryEvent[]>(
     initialWorkspace.telemetry,
   );
+  const [auditLogs, setAuditLogs] = useState<AuditLogRecord[]>(MOCK_AUDIT_LOGS);
   const [theme, setTheme] = useState<ThemeOption>(initialTheme);
   const [simulatingDeviceId, setSimulatingDeviceId] = useState<string | null>(
     null,
@@ -138,6 +142,26 @@ export function App() {
   const currentClub =
     CLUBS.find((club) => club.id === currentClubId) ?? CLUBS[0];
   const currentUserName = accountForRole(currentClub, currentRole);
+
+  const logAuditEvent = (
+    action: string,
+    resource: string,
+    resourceId: string,
+    details: string,
+  ) => {
+    const record: AuditLogRecord = {
+      id: `aud_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      organizationId: 'org_mit_adt',
+      actor: currentUserName,
+      action,
+      resource,
+      resourceId,
+      timestamp: new Date().toISOString(),
+      ipAddress: '192.168.1.100',
+      details,
+    };
+    setAuditLogs((items) => [record, ...items]);
+  };
   const pendingApprovals = contentList.filter(
     (content) => content.status === 'PENDING_APPROVAL',
   ).length;
@@ -483,6 +507,12 @@ export function App() {
                 currentUserName={currentUserName}
                 onAddContent={(asset) => {
                   setContentList((items) => [asset, ...items]);
+                  logAuditEvent(
+                    'SUBMIT_CONTENT',
+                    'CONTENT_ASSET',
+                    asset.id,
+                    `Submitted poster "${asset.title}" for club approval.`,
+                  );
                   syncToServer('/v1/content', 'POST', {
                     ...asset,
                     mediaUrl: asset.mediaUrl.startsWith('blob:')
@@ -490,8 +520,30 @@ export function App() {
                       : asset.mediaUrl,
                   });
                 }}
-                onAdvanceApproval={advanceContentApproval}
-                onRejectContent={rejectContent}
+                onAdvanceApproval={(id) => {
+                  const asset = contentList.find((c) => c.id === id);
+                  advanceContentApproval(id);
+                  if (asset) {
+                    logAuditEvent(
+                      'APPROVE_CONTENT',
+                      'CONTENT_ASSET',
+                      id,
+                      `Approved poster "${asset.title}" as ${currentRole}.`,
+                    );
+                  }
+                }}
+                onRejectContent={(id, reason) => {
+                  const asset = contentList.find((c) => c.id === id);
+                  rejectContent(id, reason);
+                  if (asset) {
+                    logAuditEvent(
+                      'REJECT_CONTENT',
+                      'CONTENT_ASSET',
+                      id,
+                      `Requested changes on "${asset.title}": ${reason}`,
+                    );
+                  }
+                }}
                 createRequest={createRequest}
               />
             )}
@@ -503,6 +555,12 @@ export function App() {
                 currentUserName={currentUserName}
                 onAddSchedule={(schedule) => {
                   setSchedules((items) => [schedule, ...items]);
+                  logAuditEvent(
+                    'CREATE_SCHEDULE',
+                    'SCHEDULE_RULE',
+                    schedule.id,
+                    `Created broadcast "${schedule.title}" for ${schedule.targetName}.`,
+                  );
                   syncToServer('/v1/schedules', 'POST', schedule);
                 }}
                 onUpdateSchedule={(id, status) => {
@@ -510,6 +568,12 @@ export function App() {
                     items.map((schedule) =>
                       schedule.id === id ? { ...schedule, status } : schedule,
                     ),
+                  );
+                  logAuditEvent(
+                    'UPDATE_SCHEDULE',
+                    'SCHEDULE_RULE',
+                    id,
+                    `Updated broadcast status to ${status}.`,
                   );
                   syncToServer(
                     `/v1/schedules/${encodeURIComponent(id)}`,
@@ -524,10 +588,32 @@ export function App() {
                 devices={devices}
                 contentList={contentList}
                 onOpenKioskSim={setSimulatingDeviceId}
-                onRestartDevice={restartDevice}
-                onUpdateDevice={updateDevice}
+                onRestartDevice={(id) => {
+                  restartDevice(id);
+                  logAuditEvent(
+                    'RESTART_DEVICE',
+                    'IOT_THING',
+                    id,
+                    `Requested app restart on smart screen ${id}.`,
+                  );
+                }}
+                onUpdateDevice={(id) => {
+                  updateDevice(id);
+                  logAuditEvent(
+                    'UPDATE_DEVICE',
+                    'IOT_THING',
+                    id,
+                    `Dispatched OTA software update to screen ${id}.`,
+                  );
+                }}
                 onAddDevice={(device) => {
                   setDevices((items) => [device, ...items]);
+                  logAuditEvent(
+                    'REGISTER_DEVICE',
+                    'IOT_THING',
+                    device.id,
+                    `Enrolled new smart screen "${device.displayName}" in ${device.location.building}.`,
+                  );
                   syncToServer('/v1/devices', 'POST', device);
                 }}
               />
@@ -537,6 +623,12 @@ export function App() {
                 telemetry={telemetry}
                 devices={devices}
               />
+            )}
+            {activeTab === 'security' && (
+              <AuditLogView logs={auditLogs} />
+            )}
+            {activeTab === 'architecture' && (
+              <ArchitectureView />
             )}
           </div>
         </main>

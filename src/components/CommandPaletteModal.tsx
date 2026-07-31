@@ -57,7 +57,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     { label: 'Fleet Devices & Kiosks', tab: 'devices' as ViewTab, icon: Tv },
     { label: 'Content Upload & Approvals', tab: 'content' as ViewTab, icon: ImageIcon },
     { label: 'Schedules & Manifest Rules', tab: 'schedules' as ViewTab, icon: Calendar },
-    { label: 'Telemetry & Analytics', tab: 'telemetry' as ViewTab, icon: BarChart3 },
+    { label: 'Telemetry & Analytics', tab: 'insights' as ViewTab, icon: BarChart3 },
     { label: 'Security & Audit Logs', tab: 'security' as ViewTab, icon: Shield },
     { label: 'Architecture & System Blueprint', tab: 'architecture' as ViewTab, icon: FileText },
   ].filter(i => i.label.toLowerCase().includes(query.toLowerCase()));
