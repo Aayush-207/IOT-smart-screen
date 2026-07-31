@@ -1,0 +1,749 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.campuscast.example/device/mqtt/v1.json",
+  "title": "CampusCast MQTT Message Contracts",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/heartbeatMessage"
+    },
+    {
+      "$ref": "#/$defs/playbackBatchMessage"
+    },
+    {
+      "$ref": "#/$defs/ackMessage"
+    },
+    {
+      "$ref": "#/$defs/diagnosticsMessage"
+    },
+    {
+      "$ref": "#/$defs/manifestRequestMessage"
+    },
+    {
+      "$ref": "#/$defs/commandMessage"
+    },
+    {
+      "$ref": "#/$defs/manifestResponseMessage"
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "thingName": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9:_-]{1,128}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "envelope": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "messageId",
+        "thingName",
+        "sentAt",
+        "correlationId",
+        "payload"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "messageId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "thingName": {
+          "$ref": "#/$defs/thingName"
+        },
+        "sentAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "payload": {}
+      }
+    },
+    "heartbeatMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "$ref": "#/$defs/heartbeatPayload"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "heartbeatPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uptimeSeconds",
+        "appVersion",
+        "appVersionCode",
+        "playbackState",
+        "freeStorageBytes",
+        "totalStorageBytes"
+      ],
+      "properties": {
+        "uptimeSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "appVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "appVersionCode": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "configVersion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "activeManifestId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "activeManifestVersion": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "readyManifestId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "playbackState": {
+          "type": "string",
+          "enum": [
+            "STARTING",
+            "PLAYING",
+            "FALLBACK",
+            "DEGRADED",
+            "STOPPED"
+          ]
+        },
+        "freeStorageBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalStorageBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "networkType": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 32
+        },
+        "signalStrength": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "temperatureCelsius": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "clockOffsetMs": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "lastRestartReason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "lastError": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/error"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "playbackBatchMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "events"
+              ],
+              "properties": {
+                "events": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "items": {
+                    "$ref": "#/$defs/playbackEvent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "playbackEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "eventType",
+        "result",
+        "contentItemId",
+        "contentVersionId",
+        "manifestId",
+        "startedAt"
+      ],
+      "properties": {
+        "eventId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "eventType": {
+          "type": "string",
+          "enum": [
+            "STARTED",
+            "COMPLETED",
+            "SKIPPED",
+            "FAILED"
+          ]
+        },
+        "result": {
+          "type": "string",
+          "enum": [
+            "SUCCESS",
+            "FAILURE"
+          ]
+        },
+        "contentItemId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "contentVersionId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "manifestId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "startedAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "endedAt": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "durationMs": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "errorCode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        }
+      }
+    },
+    "ackMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "$ref": "#/$defs/ackPayload"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ackPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subjectType",
+        "subjectId",
+        "status",
+        "occurredAt"
+      ],
+      "properties": {
+        "subjectType": {
+          "type": "string",
+          "enum": [
+            "COMMAND",
+            "MANIFEST"
+          ]
+        },
+        "subjectId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "RECEIVED",
+            "STARTED",
+            "DOWNLOADING",
+            "READY",
+            "ACTIVATED",
+            "SUCCEEDED",
+            "FAILED",
+            "REJECTED",
+            "EXPIRED"
+          ]
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "error": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/error"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      }
+    },
+    "diagnosticsMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "commandId",
+                "capturedAt",
+                "summary"
+              ],
+              "properties": {
+                "commandId": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "capturedAt": {
+                  "$ref": "#/$defs/timestamp"
+                },
+                "summary": {
+                  "type": "object",
+                  "maxProperties": 100
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "manifestRequestMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "desiredManifestId",
+                "desiredManifestVersion"
+              ],
+              "properties": {
+                "desiredManifestId": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "desiredManifestVersion": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "currentManifestId": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/uuid"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "commandMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "commandId",
+                "type",
+                "issuedAt",
+                "expiresAt",
+                "idempotencyKey",
+                "parameters"
+              ],
+              "properties": {
+                "commandId": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "REFRESH_MANIFEST",
+                    "APPLY_CONFIG",
+                    "CLEAR_CACHE",
+                    "COLLECT_DIAGNOSTICS",
+                    "RESTART_APP",
+                    "REBOOT_DEVICE"
+                  ]
+                },
+                "issuedAt": {
+                  "$ref": "#/$defs/timestamp"
+                },
+                "expiresAt": {
+                  "$ref": "#/$defs/timestamp"
+                },
+                "idempotencyKey": {
+                  "type": "string",
+                  "minLength": 8,
+                  "maxLength": 128
+                },
+                "parameters": {
+                  "type": "object",
+                  "maxProperties": 100
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "manifestResponseMessage": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "manifestId",
+                "manifestVersion",
+                "sha256"
+              ],
+              "properties": {
+                "manifestId": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "manifestVersion": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "sha256": {
+                  "$ref": "#/$defs/sha256"
+                },
+                "manifest": {
+                  "type": "object"
+                },
+                "manifestUrl": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https://"
+                },
+                "urlExpiresAt": {
+                  "$ref": "#/$defs/timestamp"
+                }
+              },
+              "oneOf": [
+                {
+                  "required": [
+                    "manifest"
+                  ],
+                  "not": {
+                    "required": [
+                      "manifestUrl"
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "manifestUrl",
+                    "urlExpiresAt"
+                  ],
+                  "not": {
+                    "required": [
+                      "manifest"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "retryable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "configShadowState": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "configVersion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "heartbeatIntervalSeconds": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 3600
+        },
+        "downloadConcurrency": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "cacheBudgetBytes": {
+          "type": "integer",
+          "minimum": 104857600
+        }
+      }
+    },
+    "playbackShadowState": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "manifestId": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "manifestVersion": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "UNKNOWN",
+            "REQUESTED",
+            "DOWNLOADING",
+            "READY",
+            "ACTIVE",
+            "FAILED"
+          ]
+        },
+        "lastErrorCode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "otaJobDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "artifact",
+        "constraints"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "operation": {
+          "const": "INSTALL_APPLICATION"
+        },
+        "artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "versionName",
+            "versionCode",
+            "url",
+            "sha256",
+            "signature",
+            "byteLength"
+          ],
+          "properties": {
+            "versionName": {
+              "type": "string"
+            },
+            "versionCode": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "signature": {
+              "type": "string",
+              "minLength": 1
+            },
+            "byteLength": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "constraints": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimumAndroidApi",
+            "minimumFreeBytes",
+            "allowDowngrade"
+          ],
+          "properties": {
+            "minimumAndroidApi": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minimumFreeBytes": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "allowDowngrade": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

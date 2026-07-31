@@ -1,0 +1,559 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Search, X } from 'lucide-react';
+
+import { ContentApprovalView } from './components/ContentApprovalView';
+import { DeviceManagementView } from './components/DeviceManagementView';
+import { KioskSimulatorModal } from './components/KioskSimulatorModal';
+import { Navbar, type ThemeOption } from './components/Navbar';
+import { OverviewView } from './components/OverviewView';
+import { ScheduleCalendarView } from './components/ScheduleCalendarView';
+import { Sidebar, type ViewTab } from './components/Sidebar';
+import { TelemetryAnalyticsView } from './components/TelemetryAnalyticsView';
+import {
+  CLUBS,
+  INITIAL_CONTENT,
+  INITIAL_DEVICES,
+  INITIAL_SCHEDULES,
+  MOCK_TELEMETRY,
+} from './mockData';
+import type {
+  ContentAsset,
+  Device,
+  ScheduleRule,
+  UserRole,
+} from './types';
+import {
+  accountForRole,
+  advanceApproval,
+  canApprove,
+  eventDisplayWindow,
+} from './workflow';
+
+const workspaceKey = 'campuscast-workspace-v2';
+const persistedPosterFallback =
+  'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=85';
+
+interface WorkspaceState {
+  devices: Device[];
+  contentList: ContentAsset[];
+  schedules: ScheduleRule[];
+}
+
+function loadWorkspace(): WorkspaceState {
+  try {
+    const stored = JSON.parse(localStorage.getItem(workspaceKey) ?? 'null') as
+      | Partial<WorkspaceState>
+      | null;
+    if (
+      stored &&
+      Array.isArray(stored.devices) &&
+      Array.isArray(stored.contentList) &&
+      Array.isArray(stored.schedules)
+    ) {
+      return {
+        devices: stored.devices,
+        contentList: stored.contentList,
+        schedules: stored.schedules,
+      };
+    }
+  } catch {
+    try {
+      localStorage.removeItem(workspaceKey);
+    } catch {
+      // Ignore unavailable browser storage and use the built-in workspace.
+    }
+  }
+  return {
+    devices: INITIAL_DEVICES,
+    contentList: INITIAL_CONTENT,
+    schedules: INITIAL_SCHEDULES,
+  };
+}
+
+function initialTheme(): ThemeOption {
+  try {
+    return localStorage.getItem('campuscast-theme') === 'dark' ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+}
+
+export function App() {
+  const initialWorkspace = useMemo(loadWorkspace, []);
+  const [activeTab, setActiveTab] = useState<ViewTab>('overview');
+  const [devices, setDevices] = useState<Device[]>(initialWorkspace.devices);
+  const [contentList, setContentList] = useState<ContentAsset[]>(
+    initialWorkspace.contentList,
+  );
+  const [schedules, setSchedules] = useState<ScheduleRule[]>(
+    initialWorkspace.schedules,
+  );
+  const [theme, setTheme] = useState<ThemeOption>(initialTheme);
+  const [simulatingDeviceId, setSimulatingDeviceId] = useState<string | null>(
+    null,
+  );
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [createRequest, setCreateRequest] = useState(0);
+  const [serverConnected, setServerConnected] = useState(false);
+  const [currentRole, setCurrentRole] = useState<UserRole>('DESIGN_LEAD');
+  const [currentClubId, setCurrentClubId] = useState(CLUBS[0].id);
+  const restartTimers = useRef<number[]>([]);
+
+  const currentClub =
+    CLUBS.find((club) => club.id === currentClubId) ?? CLUBS[0];
+  const currentUserName = accountForRole(currentClub, currentRole);
+  const pendingApprovals = contentList.filter(
+    (content) => content.status === 'PENDING_APPROVAL',
+  ).length;
+  const deviceAttentionCount = devices.filter(
+    (device) => device.status !== 'ONLINE',
+  ).length;
+  const attentionCount = pendingApprovals + deviceAttentionCount;
+  const activeSimDevice =
+    devices.find((device) => device.id === simulatingDeviceId) ?? devices[0];
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch('/v1/bootstrap', {
+      headers: { accept: 'application/json' },
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (
+          !response.ok ||
+          !response.headers.get('content-type')?.includes('application/json')
+        ) {
+          return;
+        }
+        const data = (await response.json()) as Partial<WorkspaceState>;
+        if (
+          Array.isArray(data.devices) &&
+          Array.isArray(data.contentList) &&
+          Array.isArray(data.schedules)
+        ) {
+          setDevices(data.devices);
+          setContentList(data.contentList);
+          setSchedules(data.schedules);
+          setServerConnected(true);
+        }
+      })
+      .catch(() => {
+        // The standalone dashboard intentionally falls back to browser storage.
+      });
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem('campuscast-theme', theme);
+    } catch {
+      // Theme persistence is optional when browser storage is unavailable.
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    const safeContent = contentList.map((content) =>
+      content.mediaUrl.startsWith('blob:')
+        ? { ...content, mediaUrl: persistedPosterFallback }
+        : content,
+    );
+    try {
+      localStorage.setItem(
+        workspaceKey,
+        JSON.stringify({ devices, contentList: safeContent, schedules }),
+      );
+    } catch {
+      // The active session remains usable if storage is full or blocked.
+    }
+  }, [contentList, devices, schedules]);
+
+  useEffect(
+    () => () => {
+      restartTimers.current.forEach(window.clearTimeout);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const openSearch = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+      if (event.key === 'Escape') setSearchOpen(false);
+    };
+    window.addEventListener('keydown', openSearch);
+    return () => window.removeEventListener('keydown', openSearch);
+  }, []);
+
+  const searchResults = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return [];
+    return [
+      ...contentList
+        .filter(
+          (content) =>
+            content.title.toLowerCase().includes(query) ||
+            content.category.toLowerCase().includes(query),
+        )
+        .slice(0, 4)
+        .map((content) => ({
+          id: content.id,
+          title: content.title,
+          description: 'Content',
+          action: () => setActiveTab('content' as const),
+        })),
+      ...devices
+        .filter(
+          (device) =>
+            device.displayName.toLowerCase().includes(query) ||
+            device.location.building.toLowerCase().includes(query),
+        )
+        .slice(0, 4)
+        .map((device) => ({
+          id: device.id,
+          title: device.displayName,
+          description: `Screen · ${device.location.building}`,
+          action: () => {
+            setActiveTab('devices');
+            setSimulatingDeviceId(device.id);
+          },
+        })),
+    ];
+  }, [contentList, devices, search]);
+
+  const openComposer = () => {
+    setActiveTab('content');
+    if (currentRole === 'DESIGN_LEAD') {
+      setCreateRequest((value) => value + 1);
+    }
+  };
+
+  const syncToServer = (path: string, method: 'POST' | 'PATCH', body?: unknown) => {
+    if (!serverConnected) return;
+    void fetch(path, {
+      method,
+      headers: { 'content-type': 'application/json' },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    }).catch(() => setServerConnected(false));
+  };
+
+  const advanceContentApproval = (id: string) => {
+    const asset = contentList.find((content) => content.id === id);
+    if (!asset) return;
+
+    let approved: ContentAsset;
+    try {
+      approved = advanceApproval(
+        asset,
+        currentRole,
+        currentClubId,
+        currentUserName,
+      );
+    } catch {
+      return;
+    }
+
+    setContentList((items) =>
+      items.map((content) => (content.id === id ? approved : content)),
+    );
+    syncToServer(`/v1/content/${encodeURIComponent(id)}/approve`, 'POST', {
+      role: currentRole,
+      clubId: currentClubId,
+      actorName: currentUserName,
+    });
+
+    if (approved.status !== 'APPROVED' || !approved.eventDate) return;
+    const window = eventDisplayWindow(approved.eventDate);
+    const active = new Date(window.effectiveStart) <= new Date();
+    const schedule: ScheduleRule = {
+      id: `sch_event_${approved.id}`,
+      organizationId: 'org_mit_adt',
+      title: `${approved.title} · 21-day event campaign`,
+      contentId: approved.id,
+      targetType: 'CAMPUS',
+      targetId: 'mit_adt_main',
+      targetName: 'All campus screens',
+      startTime: window.effectiveStart,
+      endTime: window.endTime,
+      priority: 10,
+      createdBy: currentUserName,
+      status: active ? 'ACTIVE' : 'SCHEDULED',
+    };
+    setSchedules((items) => [
+      schedule,
+      ...items.filter((item) => item.id !== schedule.id),
+    ]);
+    syncToServer('/v1/schedules', 'POST', schedule);
+    if (active) {
+      setDevices((items) =>
+        items.map((device) =>
+          device.status === 'ONLINE'
+            ? { ...device, activeContentId: approved.id }
+            : device,
+        ),
+      );
+    }
+  };
+
+  const rejectContent = (id: string, reason: string) => {
+    const asset = contentList.find((content) => content.id === id);
+    if (!asset || !canApprove(asset, currentRole, currentClubId)) return;
+    const rejected: ContentAsset = {
+      ...asset,
+      status: 'REJECTED',
+      approvalStage: 'REJECTED',
+      rejectionReason: reason,
+      approvalHistory: [
+        ...(asset.approvalHistory ?? []),
+        {
+          stage: currentRole,
+          actorName: currentUserName,
+          action: 'REJECTED',
+          timestamp: new Date().toISOString(),
+          note: reason,
+        },
+      ],
+    };
+    setContentList((items) =>
+      items.map((content) => (content.id === id ? rejected : content)),
+    );
+    syncToServer(`/v1/content/${encodeURIComponent(id)}/reject`, 'POST', {
+      role: currentRole,
+      clubId: currentClubId,
+      actorName: currentUserName,
+      reason,
+    });
+  };
+
+  const restartDevice = (id: string) => {
+    setDevices((items) =>
+      items.map((device) =>
+        device.id === id ? { ...device, status: 'MAINTENANCE' } : device,
+      ),
+    );
+    syncToServer(`/v1/devices/${encodeURIComponent(id)}/restart`, 'POST');
+    const timer = window.setTimeout(() => {
+      setDevices((items) =>
+        items.map((device) =>
+          device.id === id
+            ? {
+                ...device,
+                status: 'ONLINE',
+                lastHeartbeatAt: new Date().toISOString(),
+              }
+            : device,
+        ),
+      );
+    }, 1_500);
+    restartTimers.current.push(timer);
+  };
+
+  const resetWorkspace = () => {
+    try {
+      localStorage.removeItem(workspaceKey);
+    } catch {
+      // Resetting the active session does not depend on browser storage.
+    }
+    syncToServer('/v1/reset', 'POST');
+    setDevices(INITIAL_DEVICES);
+    setContentList(INITIAL_CONTENT);
+    setSchedules(INITIAL_SCHEDULES);
+    setActiveTab('overview');
+    setSimulatingDeviceId(null);
+    setCurrentRole('DESIGN_LEAD');
+    setCurrentClubId(CLUBS[0].id);
+  };
+
+  const openAttention = () =>
+    setActiveTab(pendingApprovals > 0 ? 'content' : 'devices');
+
+  return (
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      <Navbar
+        activeNotificationCount={attentionCount}
+        currentTheme={theme}
+        onThemeChange={setTheme}
+        onCreate={openComposer}
+        onSearch={() => setSearchOpen(true)}
+        onAttention={openAttention}
+        onResetWorkspace={resetWorkspace}
+        clubs={CLUBS}
+        currentRole={currentRole}
+        currentClubId={currentClubId}
+        currentUserName={currentUserName}
+        onRoleChange={setCurrentRole}
+        onClubChange={setCurrentClubId}
+      />
+      <div className="flex min-h-[calc(100vh-64px)]">
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          pendingApprovalCount={pendingApprovals}
+          deviceAttentionCount={deviceAttentionCount}
+        />
+        <main className="min-w-0 flex-1 overflow-y-auto px-4 pb-24 pt-6 sm:px-6 lg:px-8 md:pb-8">
+          <div className="mx-auto max-w-[1240px]">
+            {activeTab === 'overview' && (
+              <OverviewView
+                devices={devices}
+                contentList={contentList}
+                schedules={schedules}
+                telemetry={MOCK_TELEMETRY}
+                onOpenKioskSim={(id) =>
+                  setSimulatingDeviceId(id ?? devices[0]?.id ?? null)
+                }
+                onNavigateTab={setActiveTab}
+                onCreateContent={openComposer}
+                currentUserName={currentUserName}
+                canCreateContent={currentRole === 'DESIGN_LEAD'}
+              />
+            )}
+            {activeTab === 'content' && (
+              <ContentApprovalView
+                contentList={contentList}
+                clubs={CLUBS}
+                currentRole={currentRole}
+                currentClubId={currentClubId}
+                currentUserName={currentUserName}
+                onAddContent={(asset) => {
+                  setContentList((items) => [asset, ...items]);
+                  syncToServer('/v1/content', 'POST', {
+                    ...asset,
+                    mediaUrl: asset.mediaUrl.startsWith('blob:')
+                      ? persistedPosterFallback
+                      : asset.mediaUrl,
+                  });
+                }}
+                onAdvanceApproval={advanceContentApproval}
+                onRejectContent={rejectContent}
+                createRequest={createRequest}
+              />
+            )}
+            {activeTab === 'schedules' && (
+              <ScheduleCalendarView
+                schedules={schedules}
+                contentList={contentList}
+                currentRole={currentRole}
+                currentUserName={currentUserName}
+                onAddSchedule={(schedule) => {
+                  setSchedules((items) => [schedule, ...items]);
+                  syncToServer('/v1/schedules', 'POST', schedule);
+                }}
+                onUpdateSchedule={(id, status) => {
+                  setSchedules((items) =>
+                    items.map((schedule) =>
+                      schedule.id === id ? { ...schedule, status } : schedule,
+                    ),
+                  );
+                  syncToServer(
+                    `/v1/schedules/${encodeURIComponent(id)}`,
+                    'PATCH',
+                    { status },
+                  );
+                }}
+              />
+            )}
+            {activeTab === 'devices' && (
+              <DeviceManagementView
+                devices={devices}
+                contentList={contentList}
+                onOpenKioskSim={setSimulatingDeviceId}
+                onRestartDevice={restartDevice}
+              />
+            )}
+            {activeTab === 'insights' && (
+              <TelemetryAnalyticsView
+                telemetry={MOCK_TELEMETRY}
+                devices={devices}
+              />
+            )}
+          </div>
+        </main>
+      </div>
+
+      {simulatingDeviceId && activeSimDevice && (
+        <KioskSimulatorModal
+          device={activeSimDevice}
+          contentList={contentList}
+          onClose={() => setSimulatingDeviceId(null)}
+        />
+      )}
+
+      {searchOpen && (
+        <div
+          className="cc-overlay items-start pt-[12vh]"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search CampusCast"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSearchOpen(false);
+          }}
+        >
+          <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl">
+            <label className="flex h-14 items-center gap-3 border-b border-[var(--border)] px-4">
+              <Search className="h-4 w-4 text-[var(--muted-foreground)]" />
+              <span className="sr-only">Search</span>
+              <input
+                autoFocus
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search content or screens"
+                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--muted-foreground)]"
+              />
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                className="cc-icon-button"
+                aria-label="Close search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </label>
+            <div className="max-h-[360px] overflow-y-auto p-2">
+              {search.trim() && searchResults.length === 0 && (
+                <p className="px-3 py-8 text-center text-sm text-[var(--muted-foreground)]">
+                  No matching content or screens.
+                </p>
+              )}
+              {!search.trim() && (
+                <div className="px-3 py-6 text-center">
+                  <p className="text-sm font-medium">Find anything quickly</p>
+                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                    Try a poster title, category, building, or screen name.
+                  </p>
+                </div>
+              )}
+              {searchResults.map((result) => (
+                <button
+                  type="button"
+                  key={result.id}
+                  onClick={() => {
+                    result.action();
+                    setSearchOpen(false);
+                    setSearch('');
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-[var(--surface-raised)]"
+                >
+                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--surface-raised)]">
+                    <Search className="h-3.5 w-3.5" />
+                  </span>
+                  <span>
+                    <strong className="block text-sm font-medium">{result.title}</strong>
+                    <small className="text-xs text-[var(--muted-foreground)]">
+                      {result.description}
+                    </small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;

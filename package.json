@@ -1,0 +1,39 @@
+{
+  "name": "campuscast-smart-screen",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "dev": "vite",
+    "start": "tsx src/server/index.ts",
+    "build": "tsc && vite build",
+    "build:platform": "turbo run build",
+    "dev:api": "pnpm --filter @campuscast/api dev",
+    "dev:gateway": "pnpm --filter @campuscast/device-gateway dev",
+    "dev:worker": "pnpm --filter @campuscast/worker dev",
+    "test:platform": "turbo run test",
+    "test:local": "tsx --test src/server/*.test.ts",
+    "test": "pnpm test:local && pnpm test:platform",
+    "typecheck:platform": "turbo run typecheck",
+    "lint": "tsc --noEmit && turbo run typecheck",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^0.344.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.1",
+    "turbo": "^2.10.7",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.6"
+  }
+}

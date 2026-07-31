@@ -1,0 +1,1702 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+enum OrganizationalUnitType {
+  COLLEGE
+  DEPARTMENT
+  CLUB
+  COMMITTEE
+  OTHER
+}
+
+enum RoleScopeType {
+  ORGANIZATION
+  CAMPUS
+  BUILDING
+  ZONE
+  ORGANIZATIONAL_UNIT
+}
+
+enum ContentStatus {
+  DRAFT
+  PROCESSING
+  READY_TO_SUBMIT
+  SUBMITTED
+  UNDER_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+  SCHEDULED
+  LIVE
+  EXPIRED
+  RETIRED
+  ARCHIVED
+}
+
+enum ContentVersionStatus {
+  UPLOADING
+  PROCESSING
+  VALIDATION_FAILED
+  READY
+  SUBMITTED
+  APPROVED
+  REJECTED
+  SUPERSEDED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum AssetVariant {
+  ORIGINAL
+  NORMALIZED
+  THUMBNAIL
+  POSTER_DISPLAY
+  VIDEO_DISPLAY
+}
+
+enum UploadStatus {
+  CREATED
+  UPLOADING
+  UPLOADED
+  PROCESSING
+  VALID
+  INVALID
+  ABANDONED
+}
+
+enum JobStatus {
+  PENDING
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  DEAD_LETTERED
+  CANCELLED
+}
+
+enum ApprovalRequestStatus {
+  PENDING
+  IN_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ApprovalStepStatus {
+  PENDING
+  ACTIVE
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+  SKIPPED
+}
+
+enum ApprovalDecisionType {
+  APPROVE
+  REJECT
+  REQUEST_CHANGES
+}
+
+enum PlaylistStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ScheduleStatus {
+  DRAFT
+  PUBLISHED
+  ACTIVE
+  PAUSED
+  EXPIRED
+  CANCELLED
+  ARCHIVED
+}
+
+enum ScheduleKind {
+  ONE_TIME
+  RECURRING
+}
+
+enum ScheduleTargetType {
+  ORGANIZATION
+  CAMPUS
+  BUILDING
+  ZONE
+  DEVICE_GROUP
+  DEVICE
+}
+
+enum DeviceLifecycleStatus {
+  PENDING_PROVISIONING
+  ACTIVE
+  MAINTENANCE
+  QUARANTINED
+  RETIRED
+}
+
+enum DeviceConnectivityStatus {
+  UNKNOWN
+  ONLINE
+  STALE
+  OFFLINE
+  DEGRADED
+}
+
+enum DeviceCertificateStatus {
+  PENDING
+  ACTIVE
+  ROTATING
+  REVOKED
+  EXPIRED
+  COMPROMISED
+}
+
+enum ProvisioningStatus {
+  CREATED
+  CLAIMED
+  PROVISIONING
+  SUCCEEDED
+  FAILED
+  REVOKED
+}
+
+enum DeviceCommandType {
+  REFRESH_MANIFEST
+  APPLY_CONFIG
+  CLEAR_CACHE
+  COLLECT_DIAGNOSTICS
+  RESTART_APP
+  REBOOT_DEVICE
+}
+
+enum DeviceCommandStatus {
+  PENDING
+  PUBLISHED
+  RECEIVED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  EXPIRED
+  CANCELLED
+}
+
+enum DeviceCommandEventType {
+  CREATED
+  PUBLISHED
+  RECEIVED
+  STARTED
+  SUCCEEDED
+  FAILED
+  EXPIRED
+  CANCELLED
+}
+
+enum ManifestStatus {
+  COMPILED
+  PUBLISHED
+  SUPERSEDED
+  EXPIRED
+  INVALID
+}
+
+enum ManifestDeliveryStatus {
+  PENDING
+  NOTIFIED
+  REQUESTED
+  DOWNLOADING
+  READY
+  ACTIVATED
+  REJECTED
+  FAILED
+  EXPIRED
+}
+
+enum ManifestDeliveryEventType {
+  CREATED
+  NOTIFIED
+  REQUESTED
+  DOWNLOAD_STARTED
+  READY
+  ACTIVATED
+  REJECTED
+  FAILED
+  EXPIRED
+}
+
+enum LogSeverity {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  CRITICAL
+}
+
+enum PlaybackEventType {
+  STARTED
+  COMPLETED
+  SKIPPED
+  FAILED
+}
+
+enum PlaybackResult {
+  SUCCESS
+  FAILURE
+}
+
+enum AggregateGranularity {
+  HOUR
+  DAY
+  WEEK
+  MONTH
+}
+
+enum NotificationType {
+  CONTENT_SUBMITTED
+  CONTENT_APPROVED
+  CONTENT_REJECTED
+  CONTENT_CHANGES_REQUESTED
+  SCHEDULE_PUBLISHED
+  SCHEDULE_FAILED
+  DEVICE_OFFLINE
+  DEVICE_DEGRADED
+  DEVICE_RECOVERED
+  OTA_STARTED
+  OTA_FAILED
+  OTA_SUCCEEDED
+  SYSTEM
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENDING
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+enum OtaArtifactStatus {
+  DRAFT
+  VALIDATED
+  RELEASED
+  DEPRECATED
+  REVOKED
+}
+
+enum OtaCampaignStatus {
+  DRAFT
+  SCHEDULED
+  RUNNING
+  PAUSED
+  SUCCEEDED
+  FAILED
+  ABORTED
+  CANCELLED
+}
+
+enum OtaExecutionStatus {
+  QUEUED
+  IN_PROGRESS
+  SUCCEEDED
+  FAILED
+  TIMED_OUT
+  REJECTED
+  CANCELLED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PUBLISHED
+  FAILED
+}
+
+enum AsyncOperationStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+model Organization {
+  id              String             @id @default(uuid()) @db.Uuid
+  slug            String             @unique
+  name            String
+  status          OrganizationStatus @default(ACTIVE)
+  defaultTimezone String             @default("Asia/Kolkata")
+  settings        Json               @default("{}")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  deletedAt       DateTime?
+
+  memberships          Membership[]
+  invitations          Invitation[]
+  roles                Role[]
+  campuses             Campus[]
+  organizationalUnits  OrganizationalUnit[]
+  categories           Category[]
+  contentItems         ContentItem[]
+  approvalWorkflows    ApprovalWorkflow[]
+  playlists            Playlist[]
+  schedules            Schedule[]
+  devices              Device[]
+  deviceGroups         DeviceGroup[]
+  manifests            DeviceManifest[]
+  commands             DeviceCommand[]
+  notifications        Notification[]
+  otaArtifacts         OtaArtifact[]
+  otaCampaigns         OtaCampaign[]
+  playbackEvents       PlaybackEvent[]
+  playbackAggregates   PlaybackAggregate[]
+  auditLogs            AuditLog[]
+  idempotencyKeys      IdempotencyKey[]
+  outboxEvents         OutboxEvent[]
+  inboxMessages        InboxMessage[]
+  asyncOperations      AsyncOperation[]
+
+  @@index([status, deletedAt])
+}
+
+model User {
+  id             String     @id @default(uuid()) @db.Uuid
+  cognitoSubject String     @unique
+  email          String     @unique
+  displayName    String
+  phone          String?
+  avatarUrl      String?
+  status         UserStatus @default(ACTIVE)
+  lastLoginAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  deletedAt      DateTime?
+
+  memberships        Membership[]
+  sessions           Session[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  invitationsSent    Invitation[]       @relation("InvitationSender")
+
+  @@index([status, deletedAt])
+}
+
+model Membership {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  userId         String           @db.Uuid
+  status         MembershipStatus @default(INVITED)
+  joinedAt       DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
+
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  roleAssignments   MembershipRole[]
+  notificationPreferences NotificationPreference[]
+  contentItems      ContentItem[]      @relation("ContentSubmitter")
+  contentVersions   ContentVersion[]   @relation("ContentVersionCreator")
+  approvalRequests  ApprovalRequest[]  @relation("ApprovalRequester")
+  approvalSteps     ApprovalStep[]     @relation("ApprovalStepAssignee")
+  approvalDecisions ApprovalDecision[] @relation("ApprovalReviewer")
+  schedulesCreated  Schedule[]         @relation("ScheduleCreator")
+  playlistCreated   Playlist[]         @relation("PlaylistCreator")
+  commandsIssued    DeviceCommand[]    @relation("CommandIssuer")
+  otaCampaigns      OtaCampaign[]      @relation("OtaCampaignCreator")
+  asyncOperations   AsyncOperation[]    @relation("AsyncOperationCreator")
+
+  @@unique([organizationId, userId])
+  @@index([userId, status])
+  @@index([organizationId, status, deletedAt])
+}
+
+model Invitation {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  email          String
+  tokenHash      String   @unique
+  invitedById    String?  @db.Uuid
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User?        @relation("InvitationSender", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, email])
+  @@index([expiresAt, acceptedAt, revokedAt])
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+}
+
+model Role {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String
+  description    String?
+  isSystem       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permissions  RolePermission[]
+  assignments  MembershipRole[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId, deletedAt])
+}
+
+model RolePermission {
+  roleId       String   @db.Uuid
+  permissionId String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model MembershipRole {
+  id                   String        @id @default(uuid()) @db.Uuid
+  membershipId         String        @db.Uuid
+  roleId               String        @db.Uuid
+  scopeType            RoleScopeType @default(ORGANIZATION)
+  campusId             String?       @db.Uuid
+  buildingId           String?       @db.Uuid
+  zoneId               String?       @db.Uuid
+  organizationalUnitId String?       @db.Uuid
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  membership        Membership         @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  role              Role               @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  campus            Campus?            @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  building          Building?          @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  zone              Zone?              @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  organizationalUnit OrganizationalUnit? @relation(fields: [organizationalUnitId], references: [id], onDelete: Cascade)
+
+  @@index([membershipId])
+  @@index([roleId])
+  @@index([campusId])
+  @@index([buildingId])
+  @@index([zoneId])
+  @@index([organizationalUnitId])
+}
+
+model Session {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @db.Uuid
+  tokenHash            String   @unique
+  encryptedRefreshToken String?
+  userAgent            String?
+  ipAddress            String?  @db.Inet
+  lastSeenAt           DateTime @default(now())
+  expiresAt            DateTime
+  revokedAt            DateTime?
+  revokeReason         String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt, expiresAt])
+  @@index([expiresAt])
+}
+
+model OrganizationalUnit {
+  id             String                 @id @default(uuid()) @db.Uuid
+  organizationId String                 @db.Uuid
+  parentId       String?                @db.Uuid
+  type           OrganizationalUnitType
+  code           String?
+  name           String
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  parent       OrganizationalUnit?    @relation("UnitHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children     OrganizationalUnit[]   @relation("UnitHierarchy")
+  roleScopes   MembershipRole[]
+  contentItems ContentItem[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, type, deletedAt])
+  @@index([parentId])
+}
+
+model Campus {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  code           String
+  name           String
+  timezone       String
+  address        Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  buildings    Building[]
+  roleScopes   MembershipRole[]
+  scheduleTargets ScheduleTarget[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, deletedAt])
+}
+
+model Building {
+  id        String   @id @default(uuid()) @db.Uuid
+  campusId  String   @db.Uuid
+  code      String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  campus          Campus           @relation(fields: [campusId], references: [id], onDelete: Restrict)
+  zones           Zone[]
+  roleScopes      MembershipRole[]
+  scheduleTargets ScheduleTarget[]
+
+  @@unique([campusId, code])
+  @@index([campusId, deletedAt])
+}
+
+model Zone {
+  id          String   @id @default(uuid()) @db.Uuid
+  buildingId  String   @db.Uuid
+  code        String
+  name        String
+  floorLabel  String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  building       Building         @relation(fields: [buildingId], references: [id], onDelete: Restrict)
+  locations      Location[]
+  roleScopes     MembershipRole[]
+  scheduleTargets ScheduleTarget[]
+  playbackAggregates PlaybackAggregate[]
+
+  @@unique([buildingId, code])
+  @@index([buildingId, deletedAt])
+}
+
+model Location {
+  id                 String   @id @default(uuid()) @db.Uuid
+  zoneId             String   @db.Uuid
+  code               String
+  name               String
+  description        String?
+  orientation        String?
+  networkProfile     Json?
+  installationDetails Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  deletedAt          DateTime?
+
+  zone    Zone     @relation(fields: [zoneId], references: [id], onDelete: Restrict)
+  devices Device[]
+
+  @@unique([zoneId, code])
+  @@index([zoneId, deletedAt])
+}
+
+model Category {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String
+  slug           String
+  color          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contentItems  ContentItem[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId, deletedAt])
+}
+
+model ContentItem {
+  id                   String        @id @default(uuid()) @db.Uuid
+  organizationId       String        @db.Uuid
+  ownerUnitId          String?       @db.Uuid
+  categoryId           String?       @db.Uuid
+  submittedById        String        @db.Uuid
+  currentVersionId     String?       @unique @db.Uuid
+  title                String
+  description          String?
+  eventType            String?
+  eventStartsAt        DateTime?
+  eventEndsAt          DateTime?
+  hardExpiresAt        DateTime?
+  status               ContentStatus @default(DRAFT)
+  version              Int           @default(1)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  deletedAt            DateTime?
+
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  ownerUnit      OrganizationalUnit? @relation(fields: [ownerUnitId], references: [id], onDelete: Restrict)
+  category       Category?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  submittedBy    Membership           @relation("ContentSubmitter", fields: [submittedById], references: [id], onDelete: Restrict)
+  currentVersion ContentVersion?      @relation("CurrentContentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  versions       ContentVersion[]     @relation("ContentVersions")
+  playlistItems  PlaylistItem[]
+  playbackEvents PlaybackEvent[]
+  playbackAggregates PlaybackAggregate[]
+
+  @@index([organizationId, status, deletedAt])
+  @@index([organizationId, categoryId, createdAt])
+  @@index([ownerUnitId, status])
+  @@index([submittedById, createdAt])
+  @@index([hardExpiresAt])
+}
+
+model ContentVersion {
+  id                String               @id @default(uuid()) @db.Uuid
+  organizationId    String               @db.Uuid
+  contentItemId     String               @db.Uuid
+  createdById       String               @db.Uuid
+  versionNumber     Int
+  mediaType         MediaType
+  status            ContentVersionStatus @default(UPLOADING)
+  titleSnapshot     String
+  metadataSnapshot  Json                 @default("{}")
+  validationSummary Json?
+  approvedAt        DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  contentItem      ContentItem      @relation("ContentVersions", fields: [contentItemId], references: [id], onDelete: Restrict)
+  currentFor       ContentItem?     @relation("CurrentContentVersion")
+  createdBy        Membership       @relation("ContentVersionCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  assets           MediaAsset[]
+  uploads          Upload[]
+  approvalRequests ApprovalRequest[]
+  playlistItems    PlaylistItem[]
+  playbackEvents   PlaybackEvent[]
+  playbackAggregates PlaybackAggregate[]
+
+  @@unique([contentItemId, versionNumber])
+  @@index([organizationId, status, createdAt])
+  @@index([createdById, createdAt])
+}
+
+model MediaAsset {
+  id               String       @id @default(uuid()) @db.Uuid
+  organizationId   String       @db.Uuid
+  contentVersionId String       @db.Uuid
+  variant          AssetVariant
+  mediaType        MediaType
+  bucket           String
+  objectKey        String
+  sha256           String
+  byteLength       BigInt
+  mimeType         String
+  width            Int?
+  height           Int?
+  durationMs       Int?
+  createdAt        DateTime     @default(now())
+  deletedAt        DateTime?
+
+  contentVersion ContentVersion @relation(fields: [contentVersionId], references: [id], onDelete: Restrict)
+
+  @@unique([bucket, objectKey])
+  @@unique([contentVersionId, variant])
+  @@index([organizationId, sha256])
+  @@index([contentVersionId])
+}
+
+model Upload {
+  id                String       @id @default(uuid()) @db.Uuid
+  organizationId    String       @db.Uuid
+  contentVersionId  String       @db.Uuid
+  status            UploadStatus @default(CREATED)
+  quarantineBucket  String
+  quarantineKey     String
+  expectedMimeType  String?
+  expectedByteLength BigInt?
+  expectedSha256    String?
+  actualMimeType    String?
+  actualByteLength  BigInt?
+  actualSha256      String?
+  failureCode       String?
+  failureMessage    String?
+  uploadExpiresAt   DateTime
+  completedAt       DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  deletedAt         DateTime?
+
+  contentVersion ContentVersion @relation(fields: [contentVersionId], references: [id], onDelete: Restrict)
+  jobs           UploadJob[]
+
+  @@unique([quarantineBucket, quarantineKey])
+  @@index([organizationId, status, createdAt])
+  @@index([contentVersionId])
+  @@index([uploadExpiresAt, status])
+}
+
+model UploadJob {
+  id          String    @id @default(uuid()) @db.Uuid
+  uploadId    String    @db.Uuid
+  bullJobId   String?   @unique
+  status      JobStatus @default(PENDING)
+  attempt     Int       @default(0)
+  maxAttempts Int       @default(5)
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  errorCode   String?
+  errorDetail Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  upload Upload @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@index([uploadId, createdAt])
+  @@index([status, createdAt])
+}
+
+model ApprovalWorkflow {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String
+  description    String?
+  isDefault      Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  version        Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  steps        ApprovalWorkflowStep[]
+  requests     ApprovalRequest[]
+
+  @@unique([organizationId, name, version])
+  @@index([organizationId, isActive, deletedAt])
+}
+
+model ApprovalWorkflowStep {
+  id                  String   @id @default(uuid()) @db.Uuid
+  workflowId          String   @db.Uuid
+  stepNumber          Int
+  name                String
+  requiredPermission  String?
+  approvalsRequired   Int      @default(1)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  workflow      ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  requestSteps  ApprovalStep[]
+
+  @@unique([workflowId, stepNumber])
+}
+
+model ApprovalRequest {
+  id               String                @id @default(uuid()) @db.Uuid
+  organizationId   String                @db.Uuid
+  contentVersionId String                @db.Uuid
+  workflowId       String                @db.Uuid
+  requestedById    String                @db.Uuid
+  status           ApprovalRequestStatus @default(PENDING)
+  currentStep      Int                   @default(1)
+  submittedAt      DateTime              @default(now())
+  resolvedAt       DateTime?
+  cancelledAt      DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  contentVersion ContentVersion  @relation(fields: [contentVersionId], references: [id], onDelete: Restrict)
+  workflow       ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Restrict)
+  requestedBy    Membership      @relation("ApprovalRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  steps          ApprovalStep[]
+  decisions      ApprovalDecision[]
+
+  @@index([organizationId, status, submittedAt])
+  @@index([contentVersionId, createdAt])
+  @@index([requestedById, createdAt])
+}
+
+model ApprovalStep {
+  id             String             @id @default(uuid()) @db.Uuid
+  requestId      String             @db.Uuid
+  workflowStepId String             @db.Uuid
+  assignedToId   String?            @db.Uuid
+  stepNumber     Int
+  status         ApprovalStepStatus @default(PENDING)
+  activatedAt    DateTime?
+  resolvedAt     DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  request      ApprovalRequest      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  workflowStep ApprovalWorkflowStep @relation(fields: [workflowStepId], references: [id], onDelete: Restrict)
+  assignedTo   Membership?          @relation("ApprovalStepAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  decisions    ApprovalDecision[]
+
+  @@unique([requestId, stepNumber])
+  @@index([assignedToId, status])
+  @@index([status, activatedAt])
+}
+
+model ApprovalDecision {
+  id         String               @id @default(uuid()) @db.Uuid
+  requestId  String               @db.Uuid
+  stepId     String               @db.Uuid
+  reviewerId String               @db.Uuid
+  decision   ApprovalDecisionType
+  comment    String?
+  decidedAt  DateTime             @default(now())
+  createdAt  DateTime             @default(now())
+
+  request  ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  step     ApprovalStep    @relation(fields: [stepId], references: [id], onDelete: Restrict)
+  reviewer Membership      @relation("ApprovalReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+
+  @@unique([stepId, reviewerId])
+  @@index([requestId, decidedAt])
+  @@index([stepId, decidedAt])
+  @@index([reviewerId, decidedAt])
+}
+
+model Playlist {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  createdById    String         @db.Uuid
+  name           String
+  description    String?
+  status         PlaylistStatus @default(DRAFT)
+  version        Int            @default(1)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    Membership   @relation("PlaylistCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  items        PlaylistItem[]
+  revisions    ScheduleRevision[]
+
+  @@unique([organizationId, name, version])
+  @@index([organizationId, status, deletedAt])
+}
+
+model PlaylistItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  playlistId       String   @db.Uuid
+  contentItemId    String   @db.Uuid
+  contentVersionId String   @db.Uuid
+  position         Int
+  durationMs       Int
+  enabled          Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  playlist       Playlist       @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  contentItem    ContentItem    @relation(fields: [contentItemId], references: [id], onDelete: Restrict)
+  contentVersion ContentVersion @relation(fields: [contentVersionId], references: [id], onDelete: Restrict)
+
+  @@unique([playlistId, position])
+  @@index([contentItemId])
+  @@index([contentVersionId])
+}
+
+model Schedule {
+  id             String         @id @default(uuid()) @db.Uuid
+  organizationId String         @db.Uuid
+  createdById    String         @db.Uuid
+  name           String
+  status         ScheduleStatus @default(DRAFT)
+  currentRevision Int           @default(1)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  createdBy    Membership        @relation("ScheduleCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  revisions    ScheduleRevision[]
+
+  @@index([organizationId, status, deletedAt])
+  @@index([createdById, createdAt])
+}
+
+model ScheduleRevision {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  scheduleId     String       @db.Uuid
+  playlistId     String       @db.Uuid
+  revisionNumber Int
+  kind           ScheduleKind
+  timezone       String
+  startsAt       DateTime
+  endsAt         DateTime?
+  recurrenceRule String?
+  priority       Int          @default(0)
+  isEmergency    Boolean      @default(false)
+  publishedAt    DateTime?
+  createdAt      DateTime     @default(now())
+
+  schedule   Schedule             @relation(fields: [scheduleId], references: [id], onDelete: Restrict)
+  playlist   Playlist             @relation(fields: [playlistId], references: [id], onDelete: Restrict)
+  targets    ScheduleTarget[]
+  occurrences ScheduleOccurrence[]
+  manifestSources ManifestSource[]
+
+  @@unique([scheduleId, revisionNumber])
+  @@index([organizationId, startsAt, endsAt])
+  @@index([playlistId])
+}
+
+model ScheduleTarget {
+  id                 String             @id @default(uuid()) @db.Uuid
+  scheduleRevisionId String             @db.Uuid
+  targetType         ScheduleTargetType
+  campusId           String?            @db.Uuid
+  buildingId         String?            @db.Uuid
+  zoneId             String?            @db.Uuid
+  deviceGroupId      String?            @db.Uuid
+  deviceId           String?            @db.Uuid
+  createdAt          DateTime           @default(now())
+
+  scheduleRevision ScheduleRevision @relation(fields: [scheduleRevisionId], references: [id], onDelete: Cascade)
+  campus           Campus?          @relation(fields: [campusId], references: [id], onDelete: Cascade)
+  building         Building?        @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  zone             Zone?            @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  deviceGroup      DeviceGroup?     @relation(fields: [deviceGroupId], references: [id], onDelete: Cascade)
+  device           Device?          @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleRevisionId])
+  @@index([campusId])
+  @@index([buildingId])
+  @@index([zoneId])
+  @@index([deviceGroupId])
+  @@index([deviceId])
+}
+
+model ScheduleOccurrence {
+  id                 String   @id @default(uuid()) @db.Uuid
+  organizationId     String   @db.Uuid
+  scheduleRevisionId String   @db.Uuid
+  startsAt           DateTime
+  endsAt             DateTime
+  occurrenceKey      String
+  createdAt          DateTime @default(now())
+
+  scheduleRevision ScheduleRevision @relation(fields: [scheduleRevisionId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleRevisionId, occurrenceKey])
+  @@index([organizationId, startsAt, endsAt])
+}
+
+model Device {
+  id              String                @id @default(uuid()) @db.Uuid
+  organizationId  String                @db.Uuid
+  locationId      String?               @db.Uuid
+  thingName       String                @unique
+  serialNumber    String?
+  displayName     String
+  lifecycleStatus DeviceLifecycleStatus @default(PENDING_PROVISIONING)
+  hardwareModel   String?
+  androidVersion  String?
+  capabilities    Json                  @default("{}")
+  installedAt     DateTime?
+  version         Int                   @default(1)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  deletedAt       DateTime?
+
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  location          Location?          @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  runtimeState      DeviceRuntimeState?
+  certificates      DeviceCertificate[]
+  provisioning      DeviceProvisioning[]
+  groupMemberships  DeviceGroupMember[]
+  scheduleTargets   ScheduleTarget[]
+  manifests         DeviceManifest[]
+  commands          DeviceCommand[]
+  heartbeats        DeviceHeartbeat[]
+  logs              DeviceLog[]
+  metrics           DeviceMetric[]
+  otaExecutions     OtaExecution[]
+  otaCampaignTargets OtaCampaignTarget[]
+  playbackEvents    PlaybackEvent[]
+  playbackAggregates PlaybackAggregate[]
+
+  @@unique([organizationId, serialNumber])
+  @@index([organizationId, lifecycleStatus, deletedAt])
+  @@index([locationId])
+}
+
+model DeviceRuntimeState {
+  deviceId                 String                   @id @db.Uuid
+  connectivityStatus       DeviceConnectivityStatus @default(UNKNOWN)
+  lastSeenAt               DateTime?
+  lastHeartbeatSequence    BigInt?
+  activeManifestId         String?                  @db.Uuid
+  readyManifestId          String?                  @db.Uuid
+  appVersion               String?
+  configVersion            Int?
+  freeStorageBytes         BigInt?
+  totalStorageBytes        BigInt?
+  networkType              String?
+  clockOffsetMs            Int?
+  lastErrorCode            String?
+  lastErrorAt              DateTime?
+  updatedAt                DateTime                 @updatedAt
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([connectivityStatus, lastSeenAt])
+  @@index([activeManifestId])
+}
+
+model DeviceGroup {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  name           String
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  members         DeviceGroupMember[]
+  scheduleTargets ScheduleTarget[]
+  otaTargets      OtaCampaignTarget[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId, deletedAt])
+}
+
+model DeviceGroupMember {
+  deviceGroupId String   @db.Uuid
+  deviceId      String   @db.Uuid
+  createdAt     DateTime @default(now())
+
+  deviceGroup DeviceGroup @relation(fields: [deviceGroupId], references: [id], onDelete: Cascade)
+  device      Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@id([deviceGroupId, deviceId])
+  @@index([deviceId])
+}
+
+model DeviceCertificate {
+  id             String                  @id @default(uuid()) @db.Uuid
+  deviceId       String                  @db.Uuid
+  certificateId  String                  @unique
+  certificateArn String                  @unique
+  status         DeviceCertificateStatus @default(PENDING)
+  issuedAt       DateTime
+  activatedAt    DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  fingerprint    String?
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Restrict)
+
+  @@index([deviceId, status])
+  @@index([expiresAt, status])
+}
+
+model DeviceProvisioning {
+  id                  String             @id @default(uuid()) @db.Uuid
+  deviceId            String             @db.Uuid
+  status              ProvisioningStatus @default(CREATED)
+  method              String
+  claimTokenHash      String?            @unique
+  awsRequestId        String?
+  expiresAt           DateTime?
+  claimedAt           DateTime?
+  completedAt         DateTime?
+  failureCode         String?
+  failureDetail       Json?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Restrict)
+
+  @@index([deviceId, status])
+  @@index([expiresAt, status])
+}
+
+model DeviceHeartbeat {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  deviceId       String   @db.Uuid
+  messageId      String   @unique
+  sequence       BigInt?
+  occurredAt     DateTime
+  receivedAt     DateTime @default(now())
+  appVersion     String?
+  activeManifestVersion Int?
+  playbackState  String?
+  freeStorageBytes BigInt?
+  networkType    String?
+  payload        Json?
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, occurredAt])
+  @@index([deviceId, occurredAt(sort: Desc)])
+  @@index([receivedAt])
+}
+
+model DeviceMetric {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  deviceId       String   @db.Uuid
+  metric         String
+  value          Decimal  @db.Decimal(20, 6)
+  unit           String?
+  occurredAt     DateTime
+  receivedAt     DateTime @default(now())
+  tags           Json?
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, metric, occurredAt])
+  @@index([deviceId, metric, occurredAt(sort: Desc)])
+}
+
+model DeviceLog {
+  id             String      @id @default(uuid()) @db.Uuid
+  organizationId String      @db.Uuid
+  deviceId       String      @db.Uuid
+  messageId      String?     @unique
+  severity       LogSeverity
+  eventType      String
+  message        String
+  context        Json?
+  occurredAt     DateTime
+  receivedAt     DateTime    @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, severity, occurredAt])
+  @@index([deviceId, occurredAt(sort: Desc)])
+}
+
+model DeviceCommand {
+  id               String              @id @default(uuid()) @db.Uuid
+  organizationId   String              @db.Uuid
+  deviceId         String              @db.Uuid
+  issuedById       String?             @db.Uuid
+  commandType      DeviceCommandType
+  status           DeviceCommandStatus @default(PENDING)
+  idempotencyKey   String
+  correlationId    String
+  payload          Json                @default("{}")
+  issuedAt         DateTime            @default(now())
+  expiresAt        DateTime
+  lastPublishedAt  DateTime?
+  completedAt      DateTime?
+  result           Json?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  device       Device        @relation(fields: [deviceId], references: [id], onDelete: Restrict)
+  issuedBy     Membership?   @relation("CommandIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+  events       DeviceCommandEvent[]
+
+  @@unique([deviceId, idempotencyKey])
+  @@index([organizationId, status, createdAt])
+  @@index([deviceId, issuedAt(sort: Desc)])
+  @@index([expiresAt, status])
+}
+
+model DeviceCommandEvent {
+  id          String                 @id @default(uuid()) @db.Uuid
+  commandId   String                 @db.Uuid
+  messageId   String?                @unique
+  type        DeviceCommandEventType
+  occurredAt  DateTime
+  receivedAt  DateTime               @default(now())
+  errorCode   String?
+  detail      Json?
+
+  command DeviceCommand @relation(fields: [commandId], references: [id], onDelete: Cascade)
+
+  @@index([commandId, occurredAt])
+}
+
+model DeviceManifest {
+  id                String         @id @default(uuid()) @db.Uuid
+  organizationId    String         @db.Uuid
+  deviceId          String         @db.Uuid
+  manifestVersion   Int
+  schemaVersion     Int
+  status            ManifestStatus @default(COMPILED)
+  sourceFingerprint String
+  bucket            String
+  objectKey         String
+  sha256            String
+  byteLength        BigInt
+  validFrom         DateTime
+  validUntil        DateTime?
+  compiledAt        DateTime       @default(now())
+  publishedAt       DateTime?
+  supersededAt      DateTime?
+  createdAt         DateTime       @default(now())
+
+  organization Organization             @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  device       Device                   @relation(fields: [deviceId], references: [id], onDelete: Restrict)
+  sources      ManifestSource[]
+  delivery     ManifestDelivery?
+  playbackEvents PlaybackEvent[]
+
+  @@unique([deviceId, manifestVersion])
+  @@unique([bucket, objectKey])
+  @@index([organizationId, status, validFrom])
+  @@index([deviceId, status, manifestVersion(sort: Desc)])
+  @@index([sourceFingerprint])
+}
+
+model ManifestSource {
+  manifestId         String @db.Uuid
+  scheduleRevisionId String @db.Uuid
+
+  manifest         DeviceManifest   @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  scheduleRevision ScheduleRevision @relation(fields: [scheduleRevisionId], references: [id], onDelete: Restrict)
+
+  @@id([manifestId, scheduleRevisionId])
+  @@index([scheduleRevisionId])
+}
+
+model ManifestDelivery {
+  id            String                 @id @default(uuid()) @db.Uuid
+  manifestId    String                 @unique @db.Uuid
+  status        ManifestDeliveryStatus @default(PENDING)
+  notifiedAt    DateTime?
+  requestedAt   DateTime?
+  readyAt       DateTime?
+  activatedAt   DateTime?
+  failedAt      DateTime?
+  lastErrorCode String?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  manifest DeviceManifest          @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  events   ManifestDeliveryEvent[]
+
+  @@index([status, updatedAt])
+}
+
+model ManifestDeliveryEvent {
+  id         String                    @id @default(uuid()) @db.Uuid
+  deliveryId String                    @db.Uuid
+  messageId  String?                   @unique
+  type       ManifestDeliveryEventType
+  occurredAt DateTime
+  receivedAt DateTime                  @default(now())
+  errorCode  String?
+  detail     Json?
+
+  delivery ManifestDelivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId, occurredAt])
+}
+
+model PlaybackEvent {
+  id               String            @id @default(uuid()) @db.Uuid
+  organizationId   String            @db.Uuid
+  deviceId         String            @db.Uuid
+  contentItemId    String            @db.Uuid
+  contentVersionId String            @db.Uuid
+  manifestId       String?           @db.Uuid
+  messageId        String            @unique
+  eventType        PlaybackEventType
+  result           PlaybackResult
+  startedAt        DateTime
+  endedAt          DateTime?
+  durationMs       Int?
+  errorCode        String?
+  receivedAt       DateTime          @default(now())
+  metadata         Json?
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  device         Device         @relation(fields: [deviceId], references: [id], onDelete: Restrict)
+  contentItem    ContentItem    @relation(fields: [contentItemId], references: [id], onDelete: Restrict)
+  contentVersion ContentVersion @relation(fields: [contentVersionId], references: [id], onDelete: Restrict)
+  manifest       DeviceManifest? @relation(fields: [manifestId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, startedAt])
+  @@index([deviceId, startedAt(sort: Desc)])
+  @@index([contentItemId, startedAt])
+  @@index([contentVersionId, startedAt])
+}
+
+model PlaybackAggregate {
+  id               String               @id @default(uuid()) @db.Uuid
+  organizationId   String               @db.Uuid
+  deviceId         String?              @db.Uuid
+  zoneId           String?              @db.Uuid
+  contentItemId    String?              @db.Uuid
+  contentVersionId String?              @db.Uuid
+  granularity      AggregateGranularity
+  bucketStart      DateTime
+  bucketEnd        DateTime
+  playStarts       Int                  @default(0)
+  playCompletions  Int                  @default(0)
+  playFailures     Int                  @default(0)
+  totalDurationMs  BigInt               @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  device         Device?         @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  zone           Zone?           @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  contentItem    ContentItem?    @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  contentVersion ContentVersion? @relation(fields: [contentVersionId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, granularity, bucketStart])
+  @@index([deviceId, granularity, bucketStart])
+  @@index([zoneId, granularity, bucketStart])
+  @@index([contentItemId, granularity, bucketStart])
+}
+
+model Notification {
+  id             String               @id @default(uuid()) @db.Uuid
+  organizationId String               @db.Uuid
+  userId         String               @db.Uuid
+  type           NotificationType
+  severity       NotificationSeverity @default(INFO)
+  status         NotificationStatus   @default(UNREAD)
+  title          String
+  body           String
+  resourceType   String?
+  resourceId     String?
+  deduplicationKey String?
+  readAt         DateTime?
+  archivedAt     DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries   NotificationDelivery[]
+
+  @@unique([userId, deduplicationKey])
+  @@index([organizationId, userId, status, createdAt(sort: Desc)])
+  @@index([resourceType, resourceId])
+}
+
+model NotificationPreference {
+  id             String              @id @default(uuid()) @db.Uuid
+  membershipId   String              @db.Uuid
+  type           NotificationType
+  channel        NotificationChannel
+  enabled        Boolean             @default(true)
+  minimumSeverity NotificationSeverity @default(INFO)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, type, channel])
+}
+
+model NotificationDelivery {
+  id             String              @id @default(uuid()) @db.Uuid
+  notificationId String              @db.Uuid
+  channel        NotificationChannel
+  status         DeliveryStatus      @default(PENDING)
+  provider       String?
+  providerMessageId String?
+  attemptCount   Int                 @default(0)
+  nextAttemptAt  DateTime?
+  deliveredAt    DateTime?
+  failedAt       DateTime?
+  errorCode      String?
+  errorDetail    Json?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, channel])
+  @@index([status, nextAttemptAt])
+  @@index([provider, providerMessageId])
+}
+
+model OtaArtifact {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  versionName    String
+  versionCode    Int
+  status         OtaArtifactStatus @default(DRAFT)
+  bucket         String
+  objectKey      String
+  sha256         String
+  byteLength     BigInt
+  signature      String
+  minAndroidApi  Int?
+  maxAndroidApi  Int?
+  releaseNotes   String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  campaigns    OtaCampaign[]
+
+  @@unique([organizationId, versionCode])
+  @@unique([bucket, objectKey])
+  @@index([organizationId, status])
+}
+
+model OtaCampaign {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  artifactId     String            @db.Uuid
+  createdById    String            @db.Uuid
+  name           String
+  status         OtaCampaignStatus @default(DRAFT)
+  awsJobId       String?           @unique
+  rolloutConfig  Json
+  abortConfig    Json
+  scheduledAt    DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization        @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  artifact     OtaArtifact          @relation(fields: [artifactId], references: [id], onDelete: Restrict)
+  createdBy    Membership           @relation("OtaCampaignCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  targets      OtaCampaignTarget[]
+  executions   OtaExecution[]
+
+  @@index([organizationId, status, createdAt])
+  @@index([artifactId])
+}
+
+model OtaCampaignTarget {
+  id            String  @id @default(uuid()) @db.Uuid
+  campaignId    String  @db.Uuid
+  deviceGroupId String? @db.Uuid
+  deviceId      String? @db.Uuid
+  createdAt     DateTime @default(now())
+
+  campaign    OtaCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  deviceGroup DeviceGroup? @relation(fields: [deviceGroupId], references: [id], onDelete: Cascade)
+  device      Device?      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@index([deviceGroupId])
+  @@index([deviceId])
+}
+
+model OtaExecution {
+  id                String             @id @default(uuid()) @db.Uuid
+  campaignId        String             @db.Uuid
+  deviceId          String             @db.Uuid
+  awsExecutionNumber BigInt?
+  status            OtaExecutionStatus @default(QUEUED)
+  queuedAt          DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  lastStatusAt      DateTime?
+  installedVersion String?
+  errorCode         String?
+  statusDetail      Json?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  campaign OtaCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  device   Device      @relation(fields: [deviceId], references: [id], onDelete: Restrict)
+  events   OtaExecutionEvent[]
+
+  @@unique([campaignId, deviceId])
+  @@index([deviceId, createdAt])
+  @@index([status, lastStatusAt])
+}
+
+model OtaExecutionEvent {
+  id          String             @id @default(uuid()) @db.Uuid
+  executionId String             @db.Uuid
+  status      OtaExecutionStatus
+  occurredAt  DateTime
+  detail      Json?
+  createdAt   DateTime           @default(now())
+
+  execution OtaExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@index([executionId, occurredAt])
+}
+
+model AuditLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  actorUserId    String?  @db.Uuid
+  actorType      String
+  action         String
+  resourceType   String
+  resourceId     String?
+  outcome        String
+  correlationId  String
+  ipAddress      String?  @db.Inet
+  userAgent      String?
+  before         Json?
+  after          Json?
+  metadata       Json?
+  occurredAt     DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  actorUser    User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, occurredAt(sort: Desc)])
+  @@index([organizationId, resourceType, resourceId])
+  @@index([actorUserId, occurredAt(sort: Desc)])
+  @@index([correlationId])
+}
+
+model IdempotencyKey {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  key            String
+  operation      String
+  requestHash    String
+  responseStatus Int?
+  responseBody   Json?
+  resourceType   String?
+  resourceId     String?
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  completedAt    DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, operation, key])
+  @@index([expiresAt])
+}
+
+model AsyncOperation {
+  id             String               @id @default(uuid()) @db.Uuid
+  organizationId String               @db.Uuid
+  createdById    String?              @db.Uuid
+  type           String
+  status         AsyncOperationStatus @default(PENDING)
+  progress       Float?
+  resourceType   String?
+  resourceId     String?
+  result         Json?
+  errorCode      String?
+  errorDetail    Json?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  expiresAt      DateTime
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    Membership?  @relation("AsyncOperationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status, createdAt])
+  @@index([createdById, createdAt])
+  @@index([expiresAt])
+}
+
+model OutboxEvent {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  aggregateType  String
+  aggregateId    String
+  eventType      String
+  eventVersion   Int          @default(1)
+  payload        Json
+  status         OutboxStatus @default(PENDING)
+  attemptCount   Int          @default(0)
+  availableAt    DateTime     @default(now())
+  publishedAt    DateTime?
+  lastError      String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, availableAt])
+  @@index([organizationId, aggregateType, aggregateId])
+}
+
+model InboxMessage {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  consumer       String
+  messageId      String
+  messageType    String
+  processedAt    DateTime @default(now())
+  result         Json?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([consumer, messageId])
+  @@index([organizationId, processedAt])
+}
