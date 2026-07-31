@@ -8,6 +8,7 @@ import {
   Download,
   FileCheck,
   ImagePlus,
+  Plus,
   QrCode,
   Search,
   ShieldAlert,
@@ -18,7 +19,7 @@ import {
   XCircle,
 } from 'lucide-react';
 
-import type { Club, ContentAsset, UserRole } from '../types';
+import type { Club, ContentAsset, EventItem, UserRole } from '../types';
 import {
   canApprove,
   calculateProposedPosterDueDate,
@@ -28,11 +29,13 @@ import {
 
 interface ContentApprovalViewProps {
   contentList: ContentAsset[];
+  events?: EventItem[];
   clubs: Club[];
   currentRole: UserRole;
   currentClubId: string;
   currentUserName: string;
   onAddContent: (asset: ContentAsset) => void;
+  onAddEvent?: (event: EventItem) => void;
   onAdvanceApproval: (id: string) => void;
   onRejectContent: (id: string, reason: string) => void;
   createRequest: number;
@@ -72,11 +75,13 @@ function stageIndex(asset: ContentAsset): number {
 
 export function ContentApprovalView({
   contentList,
+  events = [],
   clubs,
   currentRole,
   currentClubId,
   currentUserName,
   onAddContent,
+  onAddEvent,
   onAdvanceApproval,
   onRejectContent,
   createRequest,
@@ -84,23 +89,33 @@ export function ContentApprovalView({
   const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
   const [creating, setCreating] = useState(false);
+  const [creatingEvent, setCreatingEvent] = useState(false);
   const [showBrandKit, setShowBrandKit] = useState(false);
   const [reviewing, setReviewing] = useState<ContentAsset | null>(null);
   const [rejectionReasonInput, setRejectionReasonInput] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
+
+  // Poster submission form fields
+  const [selectedEventId, setSelectedEventId] = useState(events[0]?.id || '');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [venue, setVenue] = useState('');
+  const [eventDate, setEventDate] = useState('2026-08-25');
+  const [venue, setVenue] = useState('Tech Block A Auditorium');
   const [mediaUrl, setMediaUrl] = useState(fallbackImage);
   const [selfCertified, setSelfCertified] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Event creation form fields (President-First)
+  const [evtTitle, setEvtTitle] = useState('');
+  const [evtDescription, setEvtDescription] = useState('');
+  const [evtDate, setEvtDate] = useState('2026-08-25');
+  const [evtVenue, setEvtVenue] = useState('Central Amphitheatre');
+  const [evtClubId, setEvtClubId] = useState(currentClubId);
+  const [evtError, setEvtError] = useState<string | null>(null);
+
   const currentClub = clubs.find((club) => club.id === currentClubId) ?? clubs[0];
   const canSubmit = currentRole === 'DESIGN_LEAD';
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60_000)
-    .toISOString()
-    .slice(0, 10);
+  const canCreateEvent = ['PRESIDENT', 'CLUB_HOD', 'ADMIN'].includes(currentRole);
 
   useEffect(() => {
     if (createRequest > 0 && canSubmit) setCreating(true);
@@ -116,634 +131,530 @@ export function ContentApprovalView({
           content.clubName?.toLowerCase().includes(query);
         const inQueue =
           currentRole === 'DESIGN_LEAD'
-            ? content.clubId === currentClubId &&
-              content.submitterName === currentUserName
+            ? content.clubId === currentClubId && content.submitterName === currentUserName
             : canApprove(content, currentRole, currentClubId);
-        const matchesFilter =
-          filter === 'all' ||
-          (filter === 'queue' && inQueue) ||
-          (filter === 'approved' && (content.status === 'approved' || content.status === 'live')) ||
-          (filter === 'escalated' && content.status === 'escalated_admin');
-        return matchesSearch && matchesFilter;
+
+        if (filter === 'queue') return matchesSearch && inQueue;
+        if (filter === 'approved') return matchesSearch && (content.status === 'approved' || content.status === 'live');
+        if (filter === 'escalated') return matchesSearch && content.status === 'escalated_admin';
+        return matchesSearch;
       }),
-    [
-      contentList,
-      currentClubId,
-      currentRole,
-      currentUserName,
-      filter,
-      search,
-    ],
+    [contentList, currentClubId, currentRole, currentUserName, filter, search],
   );
 
-  const queueCount = contentList.filter((content) =>
-    currentRole === 'DESIGN_LEAD'
-      ? content.clubId === currentClubId &&
-        content.submitterName === currentUserName
-      : canApprove(content, currentRole, currentClubId),
-  ).length;
+  const queueCount = useMemo(
+    () =>
+      contentList.filter((content) =>
+        currentRole === 'DESIGN_LEAD'
+          ? content.clubId === currentClubId && content.submitterName === currentUserName
+          : canApprove(content, currentRole, currentClubId),
+      ).length,
+    [contentList, currentClubId, currentRole, currentUserName],
+  );
 
-  const escalatedCount = contentList.filter(
-    (c) => c.status === 'escalated_admin',
-  ).length;
+  const escalatedCount = useMemo(
+    () => contentList.filter((content) => content.status === 'escalated_admin').length,
+    [contentList],
+  );
 
-  const resetComposer = () => {
-    if (mediaUrl.startsWith('blob:')) URL.revokeObjectURL(mediaUrl);
-    setCreating(false);
-    setTitle('');
-    setDescription('');
-    setEventDate('');
-    setVenue('');
-    setMediaUrl(fallbackImage);
-    setSelfCertified(false);
-    setValidationError(null);
+  const handleCreateEventSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!evtTitle.trim() || !evtDate) {
+      setEvtError('Event title and date are required.');
+      return;
+    }
+
+    const club = clubs.find((c) => c.id === evtClubId) ?? currentClub;
+    const posterDueAt = calculateProposedPosterDueDate(evtDate);
+
+    const newEvt: EventItem = {
+      id: `evt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      organizationId: 'org_mit_adt',
+      clubId: evtClubId,
+      clubName: club.name,
+      title: evtTitle,
+      description: evtDescription,
+      eventDate: evtDate,
+      venue: evtVenue,
+      status: 'design_in_progress',
+      posterDueAt,
+      expectedUploadAt: posterDueAt,
+      designProgress: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (onAddEvent) {
+      onAddEvent(newEvt);
+    }
+    setCreatingEvent(false);
+    setEvtTitle('');
+    setEvtDescription('');
+    setEvtError(null);
   };
 
-  const submitPoster = (event: React.FormEvent) => {
-    event.preventDefault();
-    const cleanTitle = title.trim();
-    if (!cleanTitle || !eventDate || !currentClub) {
-      setValidationError('Add the poster title and event date.');
+  const handlePosterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !mediaUrl.trim() || !eventDate) {
+      setValidationError('Poster title, image URL, and event date are required.');
       return;
     }
 
     if (!selfCertified) {
-      setValidationError('You must confirm self-certification against the Brand Asset Kit.');
+      setValidationError('You must certify compliance with the Brand Asset Kit.');
       return;
     }
 
-    try {
-      const posterDueAt = calculateProposedPosterDueDate(eventDate);
-      const createdAt = new Date().toISOString();
-      const asset: ContentAsset = {
-        id: `cnt_${Date.now()}`,
-        organizationId: 'org_mit_adt',
-        eventId: `evt_${Date.now()}`,
-        title: cleanTitle,
-        description: description.trim(),
-        category: 'EVENT',
-        submitterName: currentUserName,
-        submitterRole: roleLabels.DESIGN_LEAD,
-        mediaUrl,
-        mimeType: 'image/png',
-        fileSizeBytes: 2_400_000,
-        dimensions: '1920x1080',
-        sha256: crypto.randomUUID().replace(/-/g, '').padEnd(64, '0'),
-        durationSeconds: 15,
-        status: 'pending_president_approval',
-        createdAt,
-        clubId: currentClub.id,
-        clubName: currentClub.name,
-        eventDate,
-        venue: venue || 'Campus Main Foyer',
-        approvalStage: 'PRESIDENT',
-        rejectionCount: 0,
-        selfCertified: true,
-        posterDueAt,
-        designProgress: 100,
-        version: 1,
-        approvalHistory: [
-          {
-            id: `step_${Date.now()}`,
-            contentId: `cnt_${Date.now()}`,
-            approverRole: 'DESIGN_LEAD',
-            approverName: currentUserName,
-            decision: 'SUBMITTED',
-            comment: 'Uploaded event poster with Brand Asset Kit self-certification.',
-            timestamp: createdAt,
-          },
-        ],
-      };
-      onAddContent(asset);
-      resetComposer();
-      setFilter('queue');
-    } catch (error) {
-      setValidationError(
-        error instanceof Error ? error.message : 'Choose a valid event date.',
-      );
-    }
+    const posterDueAt = calculateProposedPosterDueDate(eventDate);
+    const newAsset: ContentAsset = {
+      id: `cnt_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      organizationId: 'org_mit_adt',
+      eventId: selectedEventId || `evt_${Date.now()}`,
+      title,
+      description,
+      category: 'EVENT',
+      submitterName: currentUserName,
+      submitterRole: 'DESIGN_LEAD',
+      mediaUrl,
+      mimeType: 'image/png',
+      fileSizeBytes: 2500000,
+      dimensions: '1920x1080',
+      sha256: 'a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef',
+      durationSeconds: 15,
+      status: 'pending_president_approval',
+      createdAt: new Date().toISOString(),
+      clubId: currentClubId,
+      clubName: currentClub.name,
+      eventDate,
+      venue,
+      approvalStage: 'PRESIDENT',
+      rejectionCount: 0,
+      selfCertified: true,
+      posterDueAt,
+      designProgress: 100,
+      version: 1,
+      approvalHistory: [
+        {
+          id: `step_${Date.now()}`,
+          contentId: `cnt_${Date.now()}`,
+          approverRole: 'DESIGN_LEAD',
+          approverName: currentUserName,
+          decision: 'SUBMITTED',
+          comment: 'Poster submitted with self-certified Brand Asset Kit verification.',
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+
+    onAddContent(newAsset);
+    setCreating(false);
+    setTitle('');
+    setDescription('');
+    setSelfCertified(false);
+    setValidationError(null);
   };
 
   return (
-    <div className="cc-page">
+    <div className="cc-page space-y-6">
+      {/* Header */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="cc-eyebrow">Multi-Tier Approval Engine</p>
-          <h1 className="cc-page-title">Poster Governance & Escalation Queue</h1>
+          <p className="cc-eyebrow">Approval Workflow & Governance</p>
+          <h1 className="cc-page-title text-white">Event Poster Approval Chain</h1>
           <p className="cc-page-description">
-            Sequential approvals (President → HOD → Admin), 2nd rejection ceiling escalation, and Brand Asset Kit controls.
+            Design Lead Submission → President Approval → HOD Sign-off → Admin Final Broadcast Approval.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowBrandKit(true)}
-            className="cc-button-secondary"
-            title="Download brand logos and placement guidelines"
-          >
-            <Download className="h-4 w-4" />
-            Brand Asset Kit
-          </button>
+          {canCreateEvent && (
+            <button
+              type="button"
+              onClick={() => setCreatingEvent(true)}
+              className="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-xs font-semibold text-white flex items-center gap-2 transition"
+            >
+              <CalendarDays className="w-4 h-4 text-indigo-400" />
+              Create Event (President)
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => setCreating(true)}
             disabled={!canSubmit}
-            title={
-              canSubmit
-                ? 'Submit a new event poster'
-                : 'Switch to Design Lead to submit a poster'
-            }
-            className="cc-button-primary disabled:cursor-not-allowed disabled:opacity-50"
+            className="cc-button-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload className="h-4 w-4" />
+            <Upload className="w-4 h-4" />
             Submit Poster
           </button>
         </div>
       </section>
 
-      {/* Escalation Alert Notice if items hit rejection ceiling */}
-      {escalatedCount > 0 && (
-        <section className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="h-5 w-5 text-amber-400 shrink-0" />
-            <div>
-              <strong className="text-sm font-semibold text-amber-300">
-                {escalatedCount} Poster{escalatedCount > 1 ? 's' : ''} Escalated to Admin (Rejection Ceiling Reached)
-              </strong>
-              <p className="text-xs text-amber-200/80">
-                Posters rejected twice at any stage are auto-escalated straight to Campus Admin to break infinite rejection loops.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setFilter('escalated')}
-            className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition"
-          >
-            View Escalated Queue
-          </button>
-        </section>
-      )}
-
-      <section
-        aria-label="Poster approval hierarchy"
-        className="grid gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-3 sm:grid-cols-2 xl:grid-cols-4"
-      >
-        {workflowSteps.map(([id, label, description], index) => (
-          <div
-            key={id}
-            className="flex items-center gap-3 rounded-xl bg-[var(--surface-raised)] p-3"
-          >
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--accent-soft)] text-xs font-bold text-[var(--accent)]">
-              {index + 1}
-            </span>
-            <span>
-              <strong className="block text-sm">{label}</strong>
-              <small className="text-[var(--muted-foreground)]">
-                {description}
-              </small>
-            </span>
-          </div>
-        ))}
-      </section>
-
-      <section className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--accent-soft)] p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <UserRoundCheck className="h-5 w-5 text-[var(--accent)]" />
-          <div>
-            <strong className="block text-sm">
-              {currentUserName} · {roleLabels[currentRole]}
-            </strong>
-            <small className="text-[var(--muted-foreground)]">
-              {currentRole === 'ADMIN'
-                ? 'Campus Admin override & final approval authority'
-                : currentClub?.name}
-            </small>
-          </div>
-        </div>
-        <p className="text-xs text-[var(--muted-foreground)]">
-          {canSubmit
-            ? 'Upload posters here. President reviews next.'
-            : queueCount
-              ? `${queueCount} poster${queueCount === 1 ? '' : 's'} waiting in your queue.`
-              : 'No items currently awaiting your approval.'}
-        </p>
-      </section>
-
-      <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="cc-segmented" role="group" aria-label="Poster filter">
+      {/* Filter Tabs & Search */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-1.5 bg-slate-900/80 p-1.5 rounded-xl border border-slate-800 w-full sm:w-auto">
           {[
             ['all', 'All Posters'],
-            ['queue', currentRole === 'DESIGN_LEAD' ? 'My Submissions' : 'My Queue'],
-            ['escalated', 'Escalated to Admin'],
+            ['queue', `Action Required (${queueCount})`],
             ['approved', 'Approved'],
+            ['escalated', `Admin Escalated (${escalatedCount})`],
           ].map(([id, label]) => (
             <button
               key={id}
-              type="button"
               onClick={() => setFilter(id as Filter)}
-              className={filter === id ? 'active' : ''}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                filter === id
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
             >
               {label}
-              {id === 'queue' && queueCount > 0 && <span>{queueCount}</span>}
-              {id === 'escalated' && escalatedCount > 0 && (
-                <span className="bg-amber-500 text-black font-bold px-1.5 rounded-full">{escalatedCount}</span>
-              )}
             </button>
           ))}
         </div>
-        <label className="cc-search-field">
-          <Search className="h-4 w-4" />
-          <span className="sr-only">Search posters</span>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
+            type="text"
+            placeholder="Search poster title..."
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search poster or club"
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
-        </label>
-      </section>
+        </div>
+      </div>
 
-      {visible.length ? (
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {visible.map((content) => {
-            const actionable = canApprove(
-              content,
-              currentRole,
-              currentClubId,
-            );
-            const approved = content.status === 'approved' || content.status === 'live';
-            const isEscalated = content.status === 'escalated_admin';
-            const isRecheck = content.isPostApprovalRecheck;
+      {/* Content List Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {visible.map((asset) => {
+          const eligibleToApprove = canApprove(asset, currentRole, currentClubId);
+          const currentStageIdx = stageIndex(asset);
 
-            return (
-              <article key={content.id} className={`cc-content-card relative ${isEscalated ? 'border-amber-500/50 bg-amber-950/10' : ''}`}>
-                <button
-                  type="button"
-                  onClick={() => setReviewing(content)}
-                  className="relative block aspect-[16/9] w-full overflow-hidden bg-[var(--surface-raised)]"
-                >
-                  <img
-                    src={content.mediaUrl}
-                    alt={`Preview of ${content.title}`}
-                    onError={(event) => {
-                      event.currentTarget.src = fallbackImage;
-                    }}
-                    className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]"
-                  />
+          return (
+            <div
+              key={asset.id}
+              className={`bg-slate-900/90 border rounded-2xl overflow-hidden flex flex-col transition hover:border-slate-700 ${
+                asset.status === 'escalated_admin'
+                  ? 'border-amber-500/40 shadow-lg shadow-amber-500/5'
+                  : 'border-slate-800'
+              }`}
+            >
+              {/* Image Header */}
+              <div className="relative aspect-video bg-slate-950 overflow-hidden">
+                <img
+                  src={asset.mediaUrl}
+                  alt={asset.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/30" />
 
-                  {/* Status Badge */}
-                  <span
-                    className={`cc-status absolute left-3 top-3 ${
-                      approved
-                        ? 'cc-status-success'
-                        : isEscalated
-                          ? 'bg-amber-500 text-slate-950 font-bold'
-                          : content.status === 'rejected'
-                            ? 'cc-status-danger'
-                            : 'cc-status-warning'
-                    }`}
-                  >
-                    {isEscalated
-                      ? '⚡ Escalated to Admin (Rejection Ceiling)'
-                      : isRecheck
-                        ? '🔄 Post-Approval Edit Re-Check'
-                        : statusLabels[content.status] || content.status}
+                {/* Status Badges */}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                  <span className="px-2.5 py-1 rounded-md bg-slate-900/90 border border-slate-700 text-indigo-300 text-[11px] font-bold">
+                    {asset.clubName}
                   </span>
-
-                  {content.rejectionCount > 0 && (
-                    <span className="absolute right-3 top-3 px-2 py-0.5 rounded bg-rose-500/90 text-white font-mono text-[10px] font-bold">
-                      Rejections: {content.rejectionCount}/2
+                  {asset.rejectionCount >= 2 && (
+                    <span className="px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> Escalated (Rejection Ceiling)
                     </span>
                   )}
-                </button>
+                </div>
 
-                <div className="p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--accent)]">
-                    {content.clubName ?? 'Campus Office'}
-                  </p>
-                  <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-5 text-white">
-                    {content.title}
-                  </h2>
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
+                  <span className="font-mono text-[11px] text-slate-300">Venue: {asset.venue}</span>
+                  <span className="font-mono text-[11px] text-indigo-300">Event: {asset.eventDate}</span>
+                </div>
+              </div>
 
-                  {content.eventDate && (
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                      <span className="rounded-lg bg-[var(--surface-raised)] p-2">
-                        <small className="block text-[var(--muted-foreground)]">
-                          Event Date
-                        </small>
-                        <strong className="text-white">{formatDate(content.eventDate)}</strong>
-                      </span>
-                      <span className="rounded-lg bg-[var(--surface-raised)] p-2">
-                        <small className="block text-[var(--muted-foreground)]">
-                          Design Due Date
-                        </small>
-                        <strong className="text-white">{formatDate(content.posterDueAt)}</strong>
-                      </span>
-                    </div>
-                  )}
+              {/* Body Info */}
+              <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-white leading-snug">{asset.title}</h3>
+                  <p className="text-xs text-slate-400 mt-1 line-clamp-2">{asset.description || 'No description provided.'}</p>
+                </div>
 
-                  <div className="mt-4 flex gap-2 border-t border-[var(--border)] pt-3">
-                    {actionable && (
-                      <button
-                        type="button"
-                        onClick={() => onAdvanceApproval(content.id)}
-                        className="cc-button-primary flex-1"
-                      >
-                        <Check className="h-4 w-4" />
-                        Approve
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setReviewing(content)}
-                      className="cc-button-secondary flex-1"
-                    >
-                      {actionable ? 'Review & Decision' : 'View History'}
-                    </button>
+                {/* Workflow Stepper Progress */}
+                <div className="space-y-2 pt-2 border-t border-slate-800">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-slate-400">Current Stage</span>
+                    <strong className="text-indigo-400 font-semibold">{statusLabels[asset.status] || asset.status}</strong>
+                  </div>
+
+                  <div className="grid grid-cols-4 gap-1">
+                    {workflowSteps.map(([roleKey, stepLabel], idx) => {
+                      const isComplete = currentStageIdx > idx + 1;
+                      const isCurrent = currentStageIdx === idx + 1;
+                      return (
+                        <div
+                          key={roleKey}
+                          className={`h-1.5 rounded-full ${
+                            isComplete
+                              ? 'bg-emerald-500'
+                              : isCurrent
+                              ? 'bg-indigo-500 animate-pulse'
+                              : 'bg-slate-800'
+                          }`}
+                          title={`${stepLabel}`}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
-              </article>
-            );
-          })}
-        </section>
-      ) : (
-        <section className="cc-empty-state">
-          <ImagePlus className="h-7 w-7" />
-          <h2>No posters in this view</h2>
-          <p>Switch filters or submit a new event poster.</p>
-        </section>
-      )}
 
-      {/* Upload Poster Modal */}
-      {creating && canSubmit && currentClub && (
-        <div
-          className="cc-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Submit event poster"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) resetComposer();
-          }}
-        >
-          <form onSubmit={submitPoster} className="cc-dialog max-w-3xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="cc-eyebrow">{currentClub.name}</p>
-                <h2 className="text-xl font-semibold">Submit Event Poster</h2>
-                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                  Will enter Stage 1 review with {currentClub.president}.
-                </p>
+                {/* Action Buttons */}
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReviewing(asset)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-semibold"
+                  >
+                    View Details
+                  </button>
+
+                  {eligibleToApprove ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReviewing(asset);
+                          setShowRejectModal(true);
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold flex items-center gap-1"
+                      >
+                        <XCircle className="w-3.5 h-3.5" /> Reject
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onAdvanceApproval(asset.id)}
+                        className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-slate-500 italic">
+                      {asset.status === 'approved' || asset.status === 'live'
+                        ? 'Fully Approved'
+                        : 'Awaiting Next Stage Review'}
+                    </span>
+                  )}
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={resetComposer}
-                className="cc-icon-button"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
+            </div>
+          );
+        })}
+      </div>
+
+      {/* President-First Event Creation Modal */}
+      {creatingEvent && (
+        <div className="cc-overlay" onMouseDown={(e) => e.target === e.currentTarget && setCreatingEvent(false)}>
+          <form onSubmit={handleCreateEventSubmit} className="cc-dialog max-w-lg space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <p className="cc-eyebrow">President-First Event Registration</p>
+                <h2 className="text-lg font-bold text-white">Create New Event</h2>
+              </div>
+              <button type="button" onClick={() => setCreatingEvent(false)} className="cc-icon-button">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="mt-5 grid gap-5 md:grid-cols-[0.9fr_1.1fr]">
-              <div>
-                <label className="cc-upload-zone aspect-video">
-                  <Upload className="h-6 w-6 text-[var(--accent)]" />
-                  <strong>Choose Poster File</strong>
-                  <span>PNG or JPG · 1080p 16:9</span>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg"
-                    className="sr-only"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (!file) return;
-                      if (!['image/png', 'image/jpeg'].includes(file.type)) {
-                        setValidationError('Choose a PNG or JPG image.');
-                        return;
-                      }
-                      if (file.size > 10 * 1024 * 1024) {
-                        setValidationError('Poster files must be 10 MB or smaller.');
-                        return;
-                      }
-                      if (mediaUrl.startsWith('blob:')) {
-                        URL.revokeObjectURL(mediaUrl);
-                      }
-                      setMediaUrl(URL.createObjectURL(file));
-                      setValidationError(null);
-                    }}
-                  />
-                </label>
-                <img
-                  src={mediaUrl}
-                  alt="Poster preview"
-                  className="mt-3 aspect-video w-full rounded-xl border border-[var(--border)] bg-black object-contain"
+            <label className="cc-field">
+              <span>Event Title</span>
+              <input
+                type="text"
+                required
+                placeholder="e.g. HackMIT 2026 AI Innovation Sprint"
+                value={evtTitle}
+                onChange={(e) => setEvtTitle(e.target.value)}
+              />
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="cc-field">
+                <span>Event Date</span>
+                <input
+                  type="date"
+                  required
+                  value={evtDate}
+                  onChange={(e) => setEvtDate(e.target.value)}
                 />
-              </div>
+              </label>
 
-              <div className="space-y-4">
-                <label className="cc-field">
-                  <span>Poster Title</span>
-                  <input
-                    required
-                    maxLength={120}
-                    value={title}
-                    onChange={(event) => {
-                      setTitle(event.target.value);
-                      setValidationError(null);
-                    }}
-                    placeholder="e.g. HackMIT 2026 AI Innovation Sprint"
-                  />
-                </label>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="cc-field">
-                    <span>Event Date</span>
-                    <input
-                      type="date"
-                      required
-                      min={tomorrow}
-                      value={eventDate}
-                      onInput={(event) => {
-                        setEventDate(event.currentTarget.value);
-                        setValidationError(null);
-                      }}
-                    />
-                  </label>
-                  <label className="cc-field">
-                    <span>Venue</span>
-                    <input
-                      required
-                      value={venue}
-                      onChange={(e) => setVenue(e.target.value)}
-                      placeholder="e.g. Tech Block A Foyer"
-                    />
-                  </label>
-                </div>
-
-                {eventDate && (
-                  <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300">
-                    Proposed poster design due date:{' '}
-                    <strong>{calculateProposedPosterDueDate(eventDate)}</strong> (28 days before event).
-                  </div>
-                )}
-
-                {/* Self-Certification Checkbox */}
-                <label className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-700 bg-slate-800/60 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selfCertified}
-                    onChange={(e) => setSelfCertified(e.target.checked)}
-                    className="mt-1 rounded text-indigo-500 focus:ring-indigo-400"
-                  />
-                  <span className="text-xs text-slate-300 leading-relaxed">
-                    <strong>Brand Asset Kit Self-Certification:</strong> I confirm this poster uses approved logos, minimum clear padding (60px), and official university branding.
-                  </span>
-                </label>
-
-                {validationError && (
-                  <p role="alert" className="cc-form-error">
-                    {validationError}
-                  </p>
-                )}
-              </div>
+              <label className="cc-field">
+                <span>Target Club</span>
+                <select value={evtClubId} onChange={(e) => setEvtClubId(e.target.value)}>
+                  {clubs.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
-            <div className="mt-6 flex justify-end gap-2 border-t border-[var(--border)] pt-4">
-              <button
-                type="button"
-                onClick={resetComposer}
-                className="cc-button-secondary"
-              >
+            <label className="cc-field">
+              <span>Venue</span>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Tech Block A Auditorium"
+                value={evtVenue}
+                onChange={(e) => setEvtVenue(e.target.value)}
+              />
+            </label>
+
+            <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300">
+              <strong>Calculated Poster Target Due Date:</strong>{' '}
+              <span className="font-mono">{calculateProposedPosterDueDate(evtDate)}</span> (28 days prior to event date)
+            </div>
+
+            {evtError && <p className="text-xs text-rose-400 font-semibold">{evtError}</p>}
+
+            <div className="flex justify-end gap-2 border-t border-slate-800 pt-3">
+              <button type="button" onClick={() => setCreatingEvent(false)} className="cc-button-secondary">
                 Cancel
               </button>
               <button type="submit" className="cc-button-primary">
-                <Clock3 className="h-4 w-4" />
-                Submit to President
+                Save & Register Event
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Review & Workflow Modal */}
-      {reviewing && (
-        <div
-          className="cc-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Poster approval workflow"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setReviewing(null);
-          }}
-        >
-          <div className="cc-dialog max-w-2xl">
-            <div className="flex items-start justify-between gap-4">
+      {/* Poster Submission Modal */}
+      {creating && (
+        <div className="cc-overlay" onMouseDown={(e) => e.target === e.currentTarget && setCreating(false)}>
+          <form onSubmit={handlePosterSubmit} className="cc-dialog max-w-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
-                <span
-                  className={`cc-status ${
-                    reviewing.status === 'approved'
-                      ? 'cc-status-success'
-                      : reviewing.status === 'escalated_admin'
-                        ? 'bg-amber-500 text-slate-950 font-bold'
-                        : reviewing.status === 'rejected'
-                          ? 'cc-status-danger'
-                          : 'cc-status-warning'
-                  }`}
-                >
-                  {statusLabels[reviewing.status] || reviewing.status}
-                </span>
-                <h2 className="mt-3 text-xl font-semibold text-white">{reviewing.title}</h2>
-                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                  {reviewing.clubName ?? 'Campus Office'} · Event Date:{' '}
-                  {formatDate(reviewing.eventDate)} · Venue: {reviewing.venue}
-                </p>
+                <p className="cc-eyebrow">Design Lead Upload</p>
+                <h2 className="text-lg font-bold text-white">Submit Poster for Approval</h2>
               </div>
-              <button
-                type="button"
-                onClick={() => setReviewing(null)}
-                className="cc-icon-button"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
+              <button type="button" onClick={() => setCreating(false)} className="cc-icon-button">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <img
-              src={reviewing.mediaUrl}
-              alt={`Preview of ${reviewing.title}`}
-              onError={(event) => {
-                event.currentTarget.src = fallbackImage;
-              }}
-              className="mt-5 aspect-video w-full rounded-xl bg-black object-contain"
-            />
+            <label className="cc-field">
+              <span>Link to Registered Event</span>
+              <select value={selectedEventId} onChange={(e) => setSelectedEventId(e.target.value)}>
+                {events.map((evt) => (
+                  <option key={evt.id} value={evt.id}>
+                    {evt.title} ({evt.eventDate})
+                  </option>
+                ))}
+              </select>
+            </label>
 
-            {/* Approval Stepper */}
-            <div className="mt-5">
-              <h3 className="text-sm font-semibold text-white">Multi-Tier Approval Chain</h3>
-              <div className="mt-3 grid gap-2 sm:grid-cols-4">
-                {workflowSteps.map(([id, label], index) => {
-                  const complete = stageIndex(reviewing) > index;
-                  const current = stageIndex(reviewing) === index;
-                  return (
-                    <div
-                      key={id}
-                      className={`rounded-xl border p-3 ${
-                        complete
-                          ? 'border-emerald-500/50 bg-emerald-500/10'
-                          : current
-                            ? 'border-amber-500/50 bg-amber-500/10'
-                            : 'border-[var(--border)] bg-[var(--surface-raised)]'
-                      }`}
-                    >
-                      {complete ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                      ) : (
-                        <Clock3 className="h-4 w-4 text-slate-400" />
-                      )}
-                      <strong className="mt-2 block text-xs text-white">{label}</strong>
-                    </div>
-                  );
-                })}
-              </div>
+            <label className="cc-field">
+              <span>Poster Title</span>
+              <input
+                type="text"
+                required
+                placeholder="Poster Artwork Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="cc-field">
+                <span>Event Date</span>
+                <input type="date" required value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
+              </label>
+
+              <label className="cc-field">
+                <span>Venue</span>
+                <input type="text" required value={venue} onChange={(e) => setVenue(e.target.value)} />
+              </label>
             </div>
 
-            {/* History Steps */}
-            {reviewing.approvalHistory?.length ? (
-              <div className="mt-5 rounded-xl bg-slate-900 border border-slate-800 p-3 space-y-2 max-h-40 overflow-y-auto">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Audit Trail Steps</h4>
-                {reviewing.approvalHistory.map((step) => (
-                  <div
-                    key={step.id}
-                    className="flex items-start gap-3 text-xs border-b border-slate-800 pb-2 last:border-0"
-                  >
-                    <span className="font-semibold text-indigo-300">{step.approverName} ({step.approverRole}):</span>
-                    <span className="text-slate-300 flex-1">{step.decision} — {step.comment || 'No comment'}</span>
-                    <span className="text-[10px] text-slate-500">{new Date(step.timestamp).toLocaleDateString()}</span>
+            <label className="cc-field">
+              <span>Poster Image URL (1920x1080)</span>
+              <input type="url" required value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} />
+            </label>
+
+            <div className="p-3 rounded-lg bg-slate-800/80 border border-slate-700 space-y-2">
+              <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={selfCertified}
+                  onChange={(e) => setSelfCertified(e.target.checked)}
+                  className="mt-0.5 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span>
+                  <strong>Brand Asset Kit Self-Certification:</strong> I certify that this poster strictly follows all font sizes, high-contrast sponsor logomarks, and official color standards.
+                </span>
+              </label>
+            </div>
+
+            {validationError && <p className="text-xs text-rose-400 font-semibold">{validationError}</p>}
+
+            <div className="flex justify-end gap-2 border-t border-slate-800 pt-3">
+              <button type="button" onClick={() => setCreating(false)} className="cc-button-secondary">
+                Cancel
+              </button>
+              <button type="submit" className="cc-button-primary">
+                Submit for President Review
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Review Modal & History */}
+      {reviewing && (
+        <div className="cc-overlay" onMouseDown={(e) => e.target === e.currentTarget && setReviewing(null)}>
+          <div className="cc-dialog max-w-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <span className="text-xs font-bold text-indigo-400">{reviewing.clubName}</span>
+                <h2 className="text-xl font-bold text-white mt-0.5">{reviewing.title}</h2>
+              </div>
+              <button type="button" onClick={() => setReviewing(null)} className="cc-icon-button">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="aspect-video bg-black rounded-xl overflow-hidden border border-slate-800">
+              <img src={reviewing.mediaUrl} alt="" className="w-full h-full object-cover" />
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Approval History</h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                {reviewing.approvalHistory?.map((step) => (
+                  <div key={step.id} className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 text-xs">
+                    <div className="flex items-center justify-between">
+                      <strong className="text-white">{step.approverName} ({step.approverRole})</strong>
+                      <span className="text-slate-400 text-[10px]">{formatDate(step.timestamp)}</span>
+                    </div>
+                    {step.comment && <p className="text-slate-300 mt-1 italic">"{step.comment}"</p>}
                   </div>
                 ))}
               </div>
-            ) : null}
+            </div>
 
-            {/* Rejection Input Section */}
-            {showRejectModal ? (
-              <div className="mt-5 p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 space-y-3">
-                <h4 className="text-sm font-bold text-rose-300">Request Changes / Reject Poster</h4>
-                <p className="text-xs text-slate-300">
-                  Note: If this is the 2nd rejection, it will auto-escalate straight to Campus Admin.
-                </p>
+            {showRejectModal && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-2">
+                <label className="block text-xs font-bold text-rose-300">
+                  Reason for Rejection / Changes Requested:
+                </label>
                 <textarea
                   rows={3}
                   required
+                  placeholder="Specify required changes..."
                   value={rejectionReasonInput}
                   onChange={(e) => setRejectionReasonInput(e.target.value)}
-                  placeholder="Provide specific required changes (e.g., logo clear space violation, incorrect venue date)..."
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-rose-500"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-white"
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowRejectModal(false)}
-                    className="cc-button-secondary"
+                    className="px-3 py-1 text-xs text-slate-400"
                   >
                     Cancel
                   </button>
@@ -751,122 +662,17 @@ export function ContentApprovalView({
                     type="button"
                     onClick={() => {
                       if (!rejectionReasonInput.trim()) return;
-                      onRejectContent(reviewing.id, rejectionReasonInput.trim());
+                      onRejectContent(reviewing.id, rejectionReasonInput);
                       setShowRejectModal(false);
                       setReviewing(null);
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-xs hover:bg-rose-500"
+                    className="px-3 py-1 rounded bg-rose-600 text-white text-xs font-bold"
                   >
                     Confirm Rejection
                   </button>
                 </div>
               </div>
-            ) : canApprove(reviewing, currentRole, currentClubId) ? (
-              <div className="mt-5 flex flex-col-reverse gap-2 border-t border-[var(--border)] pt-4 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowRejectModal(true)}
-                  className="cc-button-secondary text-rose-400 border-rose-500/30 hover:bg-rose-950/30"
-                >
-                  <XCircle className="h-4 w-4" />
-                  Reject / Request Changes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onAdvanceApproval(reviewing.id);
-                    setReviewing(null);
-                  }}
-                  className="cc-button-primary"
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  Approve as {roleLabels[currentRole]}
-                </button>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      )}
-
-      {/* Brand Asset Kit Modal */}
-      {showBrandKit && (
-        <div
-          className="cc-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Brand Asset Kit & Guidelines"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setShowBrandKit(false);
-          }}
-        >
-          <div className="cc-dialog w-full max-w-2xl p-0">
-            <header className="flex items-center justify-between border-b border-[var(--border)] p-4 sm:p-5">
-              <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-500/20 text-indigo-400">
-                  <FileCheck className="h-5 w-5" />
-                </span>
-                <div>
-                  <h2 className="text-base font-bold sm:text-lg text-white">Official Brand Asset Kit</h2>
-                  <p className="text-xs text-[var(--muted-foreground)]">
-                    MIT ADT University logo assets, placement rules & safe padding guidelines
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowBrandKit(false)}
-                className="cc-icon-button"
-                aria-label="Close brand kit modal"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </header>
-
-            <div className="space-y-4 p-4 text-xs sm:p-5 text-slate-300">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
-                  <strong className="block text-sm font-semibold text-white">16:9 Aspect Ratio</strong>
-                  <p className="mt-1 leading-relaxed text-slate-400">
-                    Full HD 1920x1080 resolution. PNG or high-quality JPG under 5 MB.
-                  </p>
-                </div>
-                <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
-                  <strong className="block text-sm font-semibold text-white">60px Safe Margin</strong>
-                  <p className="mt-1 leading-relaxed text-slate-400">
-                    Keep logos, date, venue, and QR code 60px away from display screen edges.
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/30 p-4 space-y-3">
-                <strong className="block text-sm font-semibold text-indigo-300">
-                  Download Official Logo Files
-                </strong>
-                <p className="text-slate-400">
-                  Use pre-approved SVG/PNG vectors to ensure instant approval during Admin review.
-                </p>
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <a
-                    download="MIT_ADT_University_Logo.svg"
-                    href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='60' viewBox='0 0 200 60'%3E%3Crect width='200' height='60' rx='8' fill='%230f172a'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2338bdf8' font-family='sans-serif' font-weight='bold' font-size='16'%3EMIT ADT LOGO%3C/text%3E%3C/svg%3E"
-                    className="cc-button-secondary text-xs"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    Download SVG Logo
-                  </a>
-                  <a
-                    download="1080p_Poster_Canvas_Guide.png"
-                    href={fallbackImage}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="cc-button-secondary text-xs"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    1080p Canvas Guidelines
-                  </a>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       )}

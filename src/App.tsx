@@ -220,12 +220,14 @@ export function App() {
       setCreateRequest((value) => value + 1);
     }
   };
-
   const syncToServer = (path: string, method: 'POST' | 'PATCH' | 'PUT', body?: unknown) => {
     if (!serverConnected) return;
     void fetch(path, {
       method,
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'content-type': 'application/json',
+        'x-user-role': currentRole,
+      },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     }).catch(() => setServerConnected(false));
   };
@@ -244,6 +246,30 @@ export function App() {
     setContentList((items) =>
       items.map((content) => (content.id === id ? updated : content)),
     );
+
+    // If poster reached final approval, auto-create active broadcast schedule
+    if (updated.status === 'approved' || updated.status === 'live') {
+      const window = updated.eventDate ? eventDisplayWindow(updated.eventDate) : undefined;
+      const newSchedule: ScheduleRule = {
+        id: `sch_auto_${updated.id}`,
+        organizationId: 'org_mit_adt',
+        title: `${updated.title} (21-Day Broadcast Rotation)`,
+        contentId: updated.id,
+        targetType: 'CAMPUS',
+        targetId: 'mit_adt_main',
+        targetName: 'All Campus Screens',
+        startTime: window ? `${window.plannedStart}T00:00:00Z` : new Date().toISOString(),
+        endTime: window ? window.endTime : new Date(Date.now() + 21 * 86400000).toISOString(),
+        priority: 10,
+        createdBy: currentUserName,
+        status: 'ACTIVE',
+      };
+      setSchedules((scheds) => [newSchedule, ...scheds.filter((s) => s.contentId !== updated.id)]);
+      setEvents((evts) =>
+        evts.map((e) => (e.id === updated.eventId ? { ...e, status: 'approved' } : e)),
+      );
+    }
+
     syncToServer(`/v1/content/${encodeURIComponent(id)}/approve`, 'POST', {
       role: currentRole,
       actorName: currentUserName,
@@ -377,10 +403,21 @@ export function App() {
             {activeTab === 'content' && (
               <ContentApprovalView
                 contentList={contentList}
+                events={events}
                 clubs={CLUBS}
                 currentRole={currentRole}
                 currentClubId={currentClubId}
                 currentUserName={currentUserName}
+                onAddEvent={(newEvt) => {
+                  setEvents((evts) => [newEvt, ...evts]);
+                  logAuditEvent(
+                    'CREATE_EVENT',
+                    'EVENT_ITEM',
+                    newEvt.id,
+                    `Created event "${newEvt.title}" for ${newEvt.clubName}.`,
+                  );
+                  syncToServer('/v1/events', 'POST', newEvt);
+                }}
                 onAddContent={(asset) => {
                   setContentList((items) => [asset, ...items]);
                   logAuditEvent(

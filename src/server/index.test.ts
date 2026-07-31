@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import type { AddressInfo } from 'node:net';
 import test from 'node:test';
 
-import type { ContentAsset, Device, ScheduleRule } from '../types';
+import type { ContentAsset, Device, ScheduleRule, SynchronizedMasterManifest } from '../types';
 import { createCampusCastServer, resetLocalState } from './index';
 
 test('local full-stack API supports the dashboard lifecycle from a clean state', async () => {
@@ -66,25 +66,54 @@ test('local full-stack API supports the dashboard lifecycle from a clean state',
     assert.equal(contentRes.status, 201);
     const createdContent = (await contentRes.json()) as ContentAsset;
 
-    // 3. President approval
-    const presidentApproval = await fetch(
+    // 3. RBAC validation: Unauthorized role cannot approve
+    const unauthorizedApproval = await fetch(
       `${baseUrl}/v1/content/${createdContent.id}/approve`,
       {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: {
+          'content-type': 'application/json',
+          'x-user-role': 'DESIGN_LEAD',
+        },
         body: JSON.stringify({
-          role: 'PRESIDENT',
-          actorName: 'Aditya Patil',
+          role: 'DESIGN_LEAD',
+          actorName: 'Design Lead',
         }),
       },
     );
-    assert.equal(presidentApproval.status, 200);
-    assert.equal(
-      ((await presidentApproval.json()) as ContentAsset).status,
-      'pending_hod_approval',
-    );
+    assert.equal(unauthorizedApproval.status, 403);
 
-    // 4. QR Short-link redirect test (stateless HTTP 302)
+    // 4. Sequential approvals: President -> HOD -> Admin
+    const presRes = await fetch(`${baseUrl}/v1/content/${createdContent.id}/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-user-role': 'PRESIDENT' },
+      body: JSON.stringify({ role: 'PRESIDENT', actorName: 'President' }),
+    });
+    assert.equal(presRes.status, 200);
+
+    const hodRes = await fetch(`${baseUrl}/v1/content/${createdContent.id}/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-user-role': 'CLUB_HOD' },
+      body: JSON.stringify({ role: 'CLUB_HOD', actorName: 'HOD' }),
+    });
+    assert.equal(hodRes.status, 200);
+
+    const adminRes = await fetch(`${baseUrl}/v1/content/${createdContent.id}/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-user-role': 'ADMIN' },
+      body: JSON.stringify({ role: 'ADMIN', actorName: 'Campus Admin' }),
+    });
+    assert.equal(adminRes.status, 200);
+    const approvedContent = (await adminRes.json()) as ContentAsset;
+    assert.equal(approvedContent.status, 'approved');
+
+    // 5. Verify approved poster is automatically in dynamic Master Manifest
+    const manifestRes = await fetch(`${baseUrl}/v1/manifest/master`);
+    assert.equal(manifestRes.status, 200);
+    const manifest = (await manifestRes.json()) as SynchronizedMasterManifest;
+    assert.ok(manifest.playlist.some((p) => p.contentId === createdContent.id));
+
+    // 6. QR Short-link redirect test (stateless HTTP 302)
     const qrRedirect = await fetch(`${baseUrl}/r/r_HACK26`, { redirect: 'manual' });
     assert.equal(qrRedirect.status, 302);
     assert.ok(qrRedirect.headers.get('location'));

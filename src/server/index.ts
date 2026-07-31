@@ -19,7 +19,6 @@ import {
   INITIAL_SCHEDULES,
   MOCK_AUDIT_LOGS,
   MOCK_TELEMETRY,
-  SYNCHRONIZED_MASTER_MANIFEST,
 } from '../mockData';
 import type {
   ApprovalStep,
@@ -39,6 +38,7 @@ import {
   calculateProposedPosterDueDate,
   canApprove,
   evaluateWorkflowDeadlineStatus,
+  eventDisplayWindow,
   generateShortRedirectCode,
   handlePostApprovalEdit,
   rejectApproval,
@@ -61,14 +61,6 @@ const allowedScheduleStatuses = new Set<ScheduleRule['status']>([
   'CANCELLED',
   'EXPIRED',
   'OVERRIDDEN',
-]);
-const allowedRoles = new Set<UserRole>([
-  'DESIGN_LEAD',
-  'PRESIDENT',
-  'CLUB_HOD',
-  'ADMIN',
-  'COLLEGE_REP',
-  'VIEWER',
 ]);
 
 interface PersistentState {
@@ -128,6 +120,116 @@ export function resetLocalState(): void {
   persistState();
 }
 
+/**
+ * Synchronize event status with content asset status.
+ */
+function syncEventAndPosterStatuses(): void {
+  contentList = contentList.map((item) => evaluateWorkflowDeadlineStatus(item));
+  for (const event of events) {
+    const poster = contentList.find((c) => c.eventId === event.id);
+    if (poster) {
+      event.status = poster.status;
+    }
+  }
+}
+
+/**
+ * Dynamically compiles the Synchronized Master Manifest from approved & active content.
+ */
+function compileMasterManifest(targetDeviceId?: string): SynchronizedMasterManifest {
+  syncEventAndPosterStatuses();
+
+  const approvedAssets = contentList.filter(
+    (c) => c.status === 'approved' || c.status === 'live',
+  );
+
+  const playlist = approvedAssets.map((c) => {
+    const reg = registrations.find((r) => r.eventId === c.eventId);
+    const window = c.eventDate ? eventDisplayWindow(c.eventDate) : undefined;
+    return {
+      contentId: c.id,
+      eventId: c.eventId,
+      version: c.version || 1,
+      title: c.title,
+      mediaUrl: c.mediaUrl,
+      mimeType: c.mimeType || 'image/png',
+      sha256: c.sha256 || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      durationSeconds: c.durationSeconds || 15,
+      priority: c.category === 'EMERGENCY' ? 100 : 10,
+      registrationShortCode: reg ? reg.shortCode : undefined,
+      displaySchedule: {
+        startTime: window ? `${window.plannedStart}T00:00:00Z` : `${c.eventDate || '2026-08-25'}T00:00:00Z`,
+        endTime: window ? window.endTime : `${c.eventDate || '2026-08-25'}T23:59:59.999Z`,
+      },
+    };
+  });
+
+  // If no approved assets exist, fallback slate is provided
+  const fallbackSlate = {
+    mediaUrl: 'https://images.unsplash.com/photo-1562774053-701939374585?w=1200&auto=format&fit=crop&q=80',
+    sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    durationSeconds: 10,
+  };
+
+  const generatedAt = new Date().toISOString();
+  const activateAt = new Date(Math.floor(Date.now() / 60000) * 60000).toISOString();
+  const manifestVersion = `v2.4.${playlist.length}.${Date.now().toString(36)}`;
+  const payloadHash = `${playlist.length}-${Date.now()}`;
+
+  return {
+    manifestVersion,
+    organizationId: 'org_mit_adt',
+    generatedAt,
+    activateAt,
+    validUntil: new Date(Date.now() + 86400000).toISOString(),
+    payloadHash,
+    fallbackSlate,
+    playlist,
+  };
+}
+
+/**
+ * Automatically creates a 21-day ScheduleRule when a poster is approved.
+ */
+function ensureApprovedPosterScheduled(asset: ContentAsset, actorName: string): void {
+  if (asset.status !== 'approved' && asset.status !== 'live') return;
+
+  const existingSchedule = schedules.find((s) => s.contentId === asset.id);
+  if (!existingSchedule) {
+    const window = asset.eventDate ? eventDisplayWindow(asset.eventDate) : undefined;
+    const newSchedule: ScheduleRule = {
+      id: `sch_auto_${asset.id}`,
+      organizationId: 'org_mit_adt',
+      title: `${asset.title} (Auto 21-Day Synchronized Broadcast)`,
+      contentId: asset.id,
+      targetType: 'CAMPUS',
+      targetId: 'mit_adt_main',
+      targetName: 'All Campus Displays',
+      startTime: window ? `${window.plannedStart}T00:00:00Z` : new Date().toISOString(),
+      endTime: window ? window.endTime : new Date(Date.now() + 21 * 86400000).toISOString(),
+      priority: 10,
+      createdBy: actorName,
+      status: 'ACTIVE',
+    };
+    schedules = [newSchedule, ...schedules];
+  } else {
+    existingSchedule.status = 'ACTIVE';
+  }
+
+  // Set associated device active content if online
+  for (const device of devices) {
+    if (device.status === 'ONLINE' && !device.activeContentId) {
+      device.activeContentId = asset.id;
+    }
+  }
+
+  // Update associated event status
+  const event = events.find((e) => e.id === asset.eventId);
+  if (event) {
+    event.status = 'approved';
+  }
+}
+
 function sendJson(
   response: ServerResponse,
   status: number,
@@ -166,7 +268,6 @@ async function handleApi(
       return true;
     }
 
-    // Log scan event
     const device = devices.find((d) => d.id === deviceId);
     const newScan: ScanEvent = {
       id: `scan_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -182,7 +283,6 @@ async function handleApi(
     reg.totalScans = (reg.totalScans || 0) + 1;
     persistState();
 
-    // Perform HTTP 302 Redirect to destination
     response.writeHead(302, { Location: reg.externalUrl });
     response.end();
     return true;
@@ -205,8 +305,7 @@ async function handleApi(
 
   // Bootstrap data for dashboard client
   if (request.method === 'GET' && url.pathname === '/v1/bootstrap') {
-    // Refresh deadline status of all assets
-    contentList = contentList.map((item) => evaluateWorkflowDeadlineStatus(item));
+    syncEventAndPosterStatuses();
     sendJson(response, 200, {
       events,
       contentList,
@@ -216,12 +315,19 @@ async function handleApi(
       schedules,
       telemetry,
       auditLogs,
-      masterManifestVersion: SYNCHRONIZED_MASTER_MANIFEST.manifestVersion,
+      masterManifestVersion: compileMasterManifest().manifestVersion,
     });
     return true;
   }
 
-  // Events API
+  // Reset workspace state
+  if (request.method === 'POST' && url.pathname === '/v1/reset') {
+    resetLocalState();
+    sendJson(response, 200, { message: 'Workspace state reset to defaults.' });
+    return true;
+  }
+
+  // Events API (President-First Event Creation)
   if (request.method === 'GET' && url.pathname === '/v1/events') {
     sendJson(response, 200, { items: events });
     return true;
@@ -261,7 +367,7 @@ async function handleApi(
 
   // Content Assets API
   if (request.method === 'GET' && url.pathname === '/v1/content') {
-    contentList = contentList.map((item) => evaluateWorkflowDeadlineStatus(item));
+    syncEventAndPosterStatuses();
     sendJson(response, 200, { items: contentList });
     return true;
   }
@@ -320,7 +426,7 @@ async function handleApi(
     contentList = [newAsset, ...contentList];
 
     // Generate short link QR registration automatically
-    if (input.mediaUrl && !registrations.some((r) => r.eventId === input.eventId)) {
+    if (!registrations.some((r) => r.eventId === input.eventId)) {
       const shortCode = generateShortRedirectCode(input.eventId);
       const newReg: Registration = {
         id: `reg_${Date.now()}`,
@@ -335,12 +441,13 @@ async function handleApi(
       registrations = [newReg, ...registrations];
     }
 
+    syncEventAndPosterStatuses();
     persistState();
     sendJson(response, 201, newAsset);
     return true;
   }
 
-  // Approval endpoint with rejection ceiling & post-approval re-check logic
+  // Approval endpoint with RBAC, rejection ceiling & post-approval re-check logic
   const approvalMatch = url.pathname.match(
     /^\/v1\/content\/([^/]+)\/(approve|reject)$/,
   );
@@ -352,7 +459,12 @@ async function handleApi(
       actorName?: string;
       reason?: string;
       comment?: string;
+      clubId?: string;
     };
+
+    const headerRole = request.headers['x-user-role'] as UserRole | undefined;
+    const role = headerRole || input.role || 'ADMIN';
+    const actorName = input.actorName || 'Authorized Approver';
 
     const index = contentList.findIndex((item) => item.id === id);
     if (index < 0) {
@@ -361,11 +473,19 @@ async function handleApi(
     }
 
     const asset = contentList[index]!;
-    const role = input.role || 'ADMIN';
-    const actorName = input.actorName || 'Gaurav Khandelwal';
+
+    // Server-Side RBAC Verification
+    if (!canApprove(asset, role, input.clubId)) {
+      sendJson(response, 403, {
+        error: `Role ${role} is not authorized to ${action} poster "${asset.title}" at status ${asset.status}.`,
+      });
+      return true;
+    }
 
     if (action === 'approve') {
-      contentList[index] = advanceApproval(asset, role, actorName, input.comment);
+      const updated = advanceApproval(asset, role, actorName, input.comment);
+      contentList[index] = updated;
+      ensureApprovedPosterScheduled(updated, actorName);
     } else {
       contentList[index] = rejectApproval(
         asset,
@@ -375,6 +495,7 @@ async function handleApi(
       );
     }
 
+    syncEventAndPosterStatuses();
     persistState();
     sendJson(response, 200, contentList[index]);
     return true;
@@ -406,7 +527,6 @@ async function handleApi(
       updatedAt: new Date().toISOString(),
     };
 
-    // Recheck associated content asset
     const contentIndex = contentList.findIndex((c) => c.eventId === eventId);
     if (contentIndex >= 0) {
       contentList[contentIndex] = handlePostApprovalEdit(
@@ -417,8 +537,136 @@ async function handleApi(
       );
     }
 
+    syncEventAndPosterStatuses();
     persistState();
     sendJson(response, 200, events[eventIndex]);
+    return true;
+  }
+
+  // Device Management API
+  if (request.method === 'GET' && url.pathname === '/v1/devices') {
+    sendJson(response, 200, { items: devices });
+    return true;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/v1/devices') {
+    const device = (await readJson(request)) as Device;
+    if (!device.id || !device.displayName) {
+      sendJson(response, 422, { error: 'Device ID and display name are required.' });
+      return true;
+    }
+    devices = [device, ...devices.filter((d) => d.id !== device.id)];
+    persistState();
+    sendJson(response, 201, device);
+    return true;
+  }
+
+  const deviceActionMatch = url.pathname.match(
+    /^\/v1\/devices\/([^/]+)\/(restart|update|heartbeat|playback)$/,
+  );
+  if (request.method === 'POST' && deviceActionMatch) {
+    const deviceId = decodeURIComponent(deviceActionMatch[1]!);
+    const action = deviceActionMatch[2]!;
+    const device = devices.find((d) => d.id === deviceId);
+
+    if (!device) {
+      sendJson(response, 404, { error: 'Device not found.' });
+      return true;
+    }
+
+    if (action === 'restart') {
+      device.status = 'ONLINE';
+      device.lastHeartbeatAt = new Date().toISOString();
+      persistState();
+      sendJson(response, 200, { message: 'Device restarted successfully.', device });
+      return true;
+    }
+
+    if (action === 'update') {
+      device.status = 'ONLINE';
+      device.appVersion = 'v2.4.1-kiosk';
+      device.lastHeartbeatAt = new Date().toISOString();
+      persistState();
+      sendJson(response, 200, { message: 'Device software updated.', device });
+      return true;
+    }
+
+    if (action === 'heartbeat') {
+      const input = (await readJson(request)) as Partial<Device>;
+      device.lastHeartbeatAt = new Date().toISOString();
+      device.status = 'ONLINE';
+      if (input.storageUsagePct !== undefined) device.storageUsagePct = input.storageUsagePct;
+      if (input.temperatureC !== undefined) device.temperatureC = input.temperatureC;
+      persistState();
+      sendJson(response, 202, { status: 'acknowledged', device });
+      return true;
+    }
+
+    if (action === 'playback') {
+      const input = (await readJson(request)) as {
+        contentId: string;
+        result: string;
+        latencyMs: number;
+      };
+      const asset = contentList.find((c) => c.id === input.contentId);
+      const telemetryRecord: TelemetryEvent = {
+        id: `tel_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        deviceId,
+        deviceName: device.displayName,
+        contentId: input.contentId,
+        contentTitle: asset ? asset.title : 'Campus Digital Billboard Content',
+        result: input.result as TelemetryEvent['result'],
+        timestamp: new Date().toISOString(),
+        latencyMs: input.latencyMs || 25,
+      };
+      telemetry = [telemetryRecord, ...telemetry.slice(0, 49)];
+      persistState();
+      sendJson(response, 200, { status: 'recorded' });
+      return true;
+    }
+  }
+
+  // Manifest Compilation API
+  if (request.method === 'GET' && (url.pathname === '/v1/manifest/master' || url.pathname.startsWith('/v1/manifests/'))) {
+    const deviceId = url.pathname.startsWith('/v1/manifests/')
+      ? decodeURIComponent(url.pathname.slice('/v1/manifests/'.length))
+      : undefined;
+    const manifest = compileMasterManifest(deviceId);
+    sendJson(response, 200, manifest);
+    return true;
+  }
+
+  // Schedules API
+  if (request.method === 'GET' && url.pathname === '/v1/schedules') {
+    sendJson(response, 200, { items: schedules });
+    return true;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/v1/schedules') {
+    const input = (await readJson(request)) as ScheduleRule;
+    if (!input.title || !input.contentId) {
+      sendJson(response, 422, { error: 'Schedule title and contentId are required.' });
+      return true;
+    }
+    schedules = [input, ...schedules.filter((s) => s.id !== input.id)];
+    persistState();
+    sendJson(response, 201, input);
+    return true;
+  }
+
+  if (request.method === 'PATCH' && url.pathname.startsWith('/v1/schedules/')) {
+    const scheduleId = decodeURIComponent(url.pathname.slice('/v1/schedules/'.length));
+    const input = (await readJson(request)) as { status: ScheduleRule['status'] };
+    const schedule = schedules.find((s) => s.id === scheduleId);
+    if (!schedule) {
+      sendJson(response, 404, { error: 'Schedule rule not found.' });
+      return true;
+    }
+    if (input.status && allowedScheduleStatuses.has(input.status)) {
+      schedule.status = input.status;
+    }
+    persistState();
+    sendJson(response, 200, schedule);
     return true;
   }
 
@@ -429,12 +677,6 @@ async function handleApi(
       registrations,
       scanEvents,
     });
-    return true;
-  }
-
-  // Synchronized Master Playlist Manifest API
-  if (request.method === 'GET' && url.pathname === '/v1/manifest/master') {
-    sendJson(response, 200, SYNCHRONIZED_MASTER_MANIFEST);
     return true;
   }
 
