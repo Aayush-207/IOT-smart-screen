@@ -4,14 +4,16 @@ import test from 'node:test';
 import type { ContentAsset } from '../types';
 import {
   advanceApproval,
-  evaluateCutoffStatus,
+  evaluateWorkflowDeadlineStatus,
   eventDisplayWindow,
-  isCutoffPassed,
+  handlePostApprovalEdit,
+  rejectApproval,
 } from '../workflow';
 
 const poster: ContentAsset = {
   id: 'cnt_workflow',
   organizationId: 'org_mit_adt',
+  eventId: 'evt_001',
   title: 'Workflow poster',
   description: '',
   category: 'EVENT',
@@ -23,78 +25,64 @@ const poster: ContentAsset = {
   dimensions: '1920x1080',
   sha256: 'a'.repeat(64),
   durationSeconds: 15,
-  status: 'PENDING_APPROVAL',
+  status: 'pending_president_approval',
   createdAt: '2026-07-30T00:00:00.000Z',
   clubId: 'club_acm',
   clubName: 'ACM Student Chapter',
   eventDate: '2026-09-01',
-  displayStartDate: '2026-08-11T00:00:00.000Z',
+  venue: 'Tech Block A Auditorium',
   approvalStage: 'PRESIDENT',
+  rejectionCount: 0,
+  selfCertified: true,
+  posterDueAt: '2026-08-04',
+  designProgress: 100,
+  version: 1,
   approvalHistory: [],
 };
 
 test('club poster follows president, HOD, and admin approval in order', () => {
-  const presidentApproved = advanceApproval(
-    poster,
-    'PRESIDENT',
-    'club_acm',
-    'President',
-  );
-  assert.equal(presidentApproved.approvalStage, 'CLUB_HOD');
+  const presidentApproved = advanceApproval(poster, 'PRESIDENT', 'President');
+  assert.equal(presidentApproved.status, 'pending_hod_approval');
 
-  const hodApproved = advanceApproval(
-    presidentApproved,
-    'CLUB_HOD',
-    'club_acm',
-    'HOD',
-  );
-  assert.equal(hodApproved.approvalStage, 'ADMIN');
+  const hodApproved = advanceApproval(presidentApproved, 'CLUB_HOD', 'HOD');
+  assert.equal(hodApproved.status, 'pending_admin_approval');
 
-  const adminApproved = advanceApproval(
-    hodApproved,
-    'ADMIN',
-    'another_club',
-    'Admin',
-  );
-  assert.equal(adminApproved.status, 'APPROVED');
-  assert.equal(adminApproved.approvalStage, 'APPROVED');
+  const adminApproved = advanceApproval(hodApproved, 'ADMIN', 'Admin');
+  assert.equal(adminApproved.status, 'approved');
   assert.equal(adminApproved.approvalHistory?.length, 3);
 });
 
-test('event poster display begins exactly 21 days before the event', () => {
-  const window = eventDisplayWindow(
-    '2026-09-01',
-    new Date('2026-07-30T00:00:00.000Z'),
-  );
-  assert.equal(window.plannedStart, '2026-08-11T00:00:00.000Z');
-  assert.equal(window.effectiveStart, window.plannedStart);
-  assert.equal(window.endTime, '2026-09-01T23:59:59.999Z');
-});
+test('rejection loop ceiling auto-escalates to Admin on 2nd rejection', () => {
+  const rej1 = rejectApproval(poster, 'PRESIDENT', 'President', 'Rejection #1');
+  assert.equal(rej1.status, 'rejected');
+  assert.equal(rej1.rejectionCount, 1);
 
-test('a club cannot approve another club poster', () => {
-  assert.throws(
-    () => advanceApproval(poster, 'PRESIDENT', 'club_robotics', 'Wrong user'),
-    /cannot approve/,
-  );
-});
-
-test('7-day cutoff marks unapproved posters as ineligible', () => {
-  // Event on Aug 10, Cutoff on Aug 3.
-  const nowPassed = new Date('2026-08-05T00:00:00.000Z');
-  const nowSafe = new Date('2026-08-01T00:00:00.000Z');
-
-  assert.equal(isCutoffPassed('2026-08-10', nowPassed), true);
-  assert.equal(isCutoffPassed('2026-08-10', nowSafe), false);
-
-  const pendingPoster: ContentAsset = {
-    ...poster,
-    eventDate: '2026-08-10',
-    status: 'PENDING_APPROVAL',
+  // Submit again after fixing
+  const resubmitted: ContentAsset = {
+    ...rej1,
+    status: 'pending_president_approval',
   };
 
-  const evaluated = evaluateCutoffStatus(pendingPoster, nowPassed);
-  assert.equal(evaluated.status, 'INELIGIBLE');
+  const rej2 = rejectApproval(resubmitted, 'CLUB_HOD', 'HOD', 'Rejection #2');
+  assert.equal(rej2.status, 'escalated_admin');
+  assert.equal(rej2.rejectionCount, 2);
+});
 
-  const safeEvaluated = evaluateCutoffStatus(pendingPoster, nowSafe);
-  assert.equal(safeEvaluated.status, 'PENDING_APPROVAL');
+test('event poster display begins exactly 21 days before the event', () => {
+  const window = eventDisplayWindow('2026-09-01');
+  assert.equal(window.plannedStart, '2026-08-11');
+  assert.equal(window.hardCutoffDate, '2026-08-25');
+});
+
+test('post-approval date edit triggers fast admin re-check', () => {
+  const approvedPoster: ContentAsset = { ...poster, status: 'approved' };
+  const rechecked = handlePostApprovalEdit(
+    approvedPoster,
+    '2026-09-05',
+    'Grand Dome Auditorium',
+    'Club President',
+  );
+  assert.equal(rechecked.status, 'pending_admin_approval');
+  assert.equal(rechecked.isPostApprovalRecheck, true);
+  assert.equal(rechecked.eventDate, '2026-09-05');
 });

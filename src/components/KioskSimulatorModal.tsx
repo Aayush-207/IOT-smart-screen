@@ -35,13 +35,13 @@ export function KioskSimulatorModal({
       contentList.find((content) => content.id === device.activeContentId) ??
       contentList.find(
         (content) =>
-          content.status === 'APPROVED' && content.category !== 'EMERGENCY',
+          (content.status === 'approved' || content.status === 'live') && content.category !== 'EMERGENCY',
       ),
     [contentList, device.activeContentId],
   );
   const emergencyContent = contentList.find(
     (content) =>
-      content.status === 'APPROVED' && content.category === 'EMERGENCY',
+      (content.status === 'approved' || content.status === 'live') && content.category === 'EMERGENCY',
   );
   const [isOnline, setIsOnline] = useState(device.status === 'ONLINE');
   const [isEmergencyActive, setIsEmergencyActive] = useState(
@@ -93,7 +93,7 @@ export function KioskSimulatorModal({
               <Tv className="h-5 w-5" />
             </span>
             <span className="min-w-0">
-              <strong className="block truncate text-sm font-semibold">
+              <strong className="block truncate text-sm font-semibold text-white">
                 {device.displayName}
               </strong>
               <small className="block truncate text-xs text-[var(--muted-foreground)]">
@@ -110,12 +110,12 @@ export function KioskSimulatorModal({
               {isOnline ? (
                 <>
                   <WifiOff className="h-4 w-4" />
-                  Go offline
+                  Go Offline
                 </>
               ) : (
                 <>
                   <Wifi className="h-4 w-4" />
-                  Restore network
+                  Restore Network
                 </>
               )}
             </button>
@@ -143,7 +143,7 @@ export function KioskSimulatorModal({
                     isOnline ? 'bg-emerald-400' : 'bg-amber-400'
                   }`}
                 />
-                {isOnline ? 'Connected' : 'Offline cache active'}
+                {isOnline ? 'Connected (Synchronized)' : 'Offline Cache Active'}
               </span>
               <span className="flex flex-wrap items-center gap-3 text-white/70">
                 <span className="flex items-center gap-1">
@@ -197,47 +197,6 @@ export function KioskSimulatorModal({
               </span>
             </div>
           </div>
-
-          <section className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="flex items-center gap-2 text-sm font-semibold">
-                  <Radio className="h-4 w-4 text-[var(--accent)]" />
-                  Resilience controls
-                </h2>
-                <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                  Test cached playback, heartbeat recovery, and emergency priority.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEmergencyActive((active) => !active)}
-                  className="cc-button-secondary"
-                >
-                  <Zap className="h-4 w-4 text-[var(--danger)]" />
-                  {isEmergencyActive ? 'End emergency' : 'Test emergency'}
-                </button>
-                <button
-                  type="button"
-                  onClick={sendHeartbeat}
-                  className="cc-button-secondary"
-                >
-                  {telemetryMessage ? (
-                    <CheckCircle2 className="h-4 w-4 text-[var(--success)]" />
-                  ) : (
-                    <RotateCcw className="h-4 w-4" />
-                  )}
-                  Send heartbeat
-                </button>
-              </div>
-            </div>
-            <p className="mt-3 flex items-start gap-2 text-xs text-[var(--muted-foreground)]">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[var(--success)]" />
-              Going offline keeps the current poster visible and queues the next
-              heartbeat until connectivity returns.
-            </p>
-          </section>
         </div>
       </div>
     </div>

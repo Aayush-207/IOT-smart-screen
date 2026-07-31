@@ -1,22 +1,28 @@
 import { useState } from 'react';
 import {
+  AlertTriangle,
   CalendarDays,
+  CheckCircle2,
   ChevronRight,
+  Clock,
   Clock3,
   Pause,
   Play,
   Plus,
   Repeat2,
   Send,
+  Sparkles,
   Trash2,
   X,
 } from 'lucide-react';
 
-import type { ContentAsset, ScheduleRule, UserRole } from '../types';
+import type { ContentAsset, EventItem, ScheduleRule, UserRole } from '../types';
+import { calculateProposedPosterDueDate, eventDisplayWindow } from '../workflow';
 
 interface ScheduleCalendarViewProps {
   schedules: ScheduleRule[];
   contentList: ContentAsset[];
+  events?: EventItem[];
   onAddSchedule: (schedule: ScheduleRule) => void;
   onUpdateSchedule: (id: string, status: ScheduleRule['status']) => void;
   currentRole: UserRole;
@@ -36,7 +42,7 @@ function scheduleStatus(schedule: ScheduleRule): {
   className: string;
 } {
   if (schedule.status === 'ACTIVE') {
-    return { label: 'Live now', className: 'cc-status-success' };
+    return { label: 'Live Now', className: 'cc-status-success' };
   }
   if (schedule.status === 'PAUSED') {
     return { label: 'Paused', className: 'cc-status-warning' };
@@ -53,12 +59,13 @@ function scheduleStatus(schedule: ScheduleRule): {
 export function ScheduleCalendarView({
   schedules,
   contentList,
+  events = [],
   onAddSchedule,
   onUpdateSchedule,
   currentRole,
   currentUserName,
 }: ScheduleCalendarViewProps) {
-  const approved = contentList.filter((content) => content.status === 'APPROVED');
+  const approved = contentList.filter((content) => content.status === 'approved' || content.status === 'live');
   const [creating, setCreating] = useState(false);
   const [selected, setSelected] = useState<ScheduleRule | null>(null);
   const [mode, setMode] = useState<Mode>('later');
@@ -70,7 +77,12 @@ export function ScheduleCalendarView({
   const [endsAt, setEndsAt] = useState(() =>
     toLocalDateTime(new Date(Date.now() + 5 * 60 * 60_000)),
   );
+  const [calcEventDate, setCalcEventDate] = useState('2026-08-25');
   const [error, setError] = useState<string | null>(null);
+
+  // Computed dates for deadline calculator
+  const computedDueDate = calculateProposedPosterDueDate(calcEventDate);
+  const computedWindow = eventDisplayWindow(calcEventDate);
 
   const openComposer = () => {
     const start = new Date(Date.now() + 60 * 60_000);
@@ -103,10 +115,6 @@ export function ScheduleCalendarView({
       setError('The end time must be after the start time.');
       return;
     }
-    if (mode !== 'now' && start.getTime() <= Date.now()) {
-      setError('Choose a future start time.');
-      return;
-    }
 
     onAddSchedule({
       id: `sch_${Date.now()}`,
@@ -130,46 +138,157 @@ export function ScheduleCalendarView({
   };
 
   return (
-    <div className="cc-page">
+    <div className="cc-page space-y-6">
+      {/* Header */}
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="cc-eyebrow">Schedule</p>
-          <h1 className="cc-page-title">What plays, and when</h1>
+          <p className="cc-eyebrow">Synchronized Broadcast & Deadline Engine</p>
+          <h1 className="cc-page-title">Display Schedules & Poster Cutoffs</h1>
           <p className="cc-page-description">
-            Approved event posters are scheduled automatically from 21 days
-            before the event.
+            Event-relative poster deadlines (28-day target), 21-day synchronized display windows, and 7-day hard cutoff rules.
           </p>
         </div>
         <button
           type="button"
           onClick={openComposer}
           disabled={approved.length === 0 || currentRole !== 'ADMIN'}
-          title={
-            currentRole === 'ADMIN'
-              ? 'Create a manual campus broadcast'
-              : 'Only the Campus Admin can create manual broadcasts'
-          }
           className="cc-button-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus className="h-4 w-4" />
-          Add broadcast
+          Add Broadcast
         </button>
       </section>
 
-      {approved.length === 0 && (
-        <p role="status" className="cc-form-error">
-          Approve a content item before creating a broadcast.
-        </p>
-      )}
+      {/* Deadline Visibility Dashboard & Interactive Calculator */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Event Design Deadline Visibility List */}
+        <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-xl p-6 backdrop-blur-sm">
+          <h2 className="text-lg font-bold text-white mb-4 flex items-center justify-between">
+            <span>Event Design Deadline Tracking ({events.length})</span>
+            <span className="text-xs text-indigo-400 font-normal">Section 3 Step 2a</span>
+          </h2>
 
+          <div className="space-y-3">
+            {events.map((evt) => {
+              const eventDateObj = new Date(evt.eventDate);
+              const todayObj = new Date();
+              const daysUntilEvent = Math.ceil((eventDateObj.getTime() - todayObj.getTime()) / 86400000);
+              const daysUntilDue = Math.ceil((new Date(evt.posterDueAt).getTime() - todayObj.getTime()) / 86400000);
+
+              let statusBadge = (
+                <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                  On Track
+                </span>
+              );
+
+              if (evt.status === 'poster_delayed') {
+                statusBadge = (
+                  <span className="px-2.5 py-1 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> Delayed
+                  </span>
+                );
+              } else if (daysUntilEvent <= 7 && evt.status !== 'approved') {
+                statusBadge = (
+                  <span className="px-2.5 py-1 rounded-md bg-rose-600 text-white text-xs font-bold">
+                    Ineligible (Cutoff Passed)
+                  </span>
+                );
+              }
+
+              return (
+                <div key={evt.id} className="bg-slate-800/50 border border-slate-700/60 rounded-xl p-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-indigo-400">{evt.clubName}</span>
+                        {statusBadge}
+                      </div>
+                      <h3 className="font-bold text-white text-base mt-0.5">{evt.title}</h3>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Venue: <span className="text-slate-200">{evt.venue}</span>
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs sm:text-right shrink-0">
+                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 block text-[10px]">Event Date</span>
+                        <strong className="text-white font-mono">{evt.eventDate}</strong>
+                      </div>
+                      <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 block text-[10px]">Poster Due Date</span>
+                        <strong className="text-indigo-300 font-mono">{evt.posterDueAt}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {evt.dueDateReason && (
+                    <div className="mt-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300">
+                      <strong>Delay Reason Logged:</strong> {evt.dueDateReason}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: Event-Relative Deadline Calculator */}
+        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-6 backdrop-blur-sm space-y-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-indigo-400" />
+            <span>Deadline Calculator</span>
+          </h2>
+          <p className="text-xs text-slate-400">
+            Compute event-relative dates dynamically based on section rules.
+          </p>
+
+          <label className="cc-field">
+            <span>Select Event Date</span>
+            <input
+              type="date"
+              value={calcEventDate}
+              onChange={(e) => setCalcEventDate(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white"
+            />
+          </label>
+
+          <div className="space-y-3 pt-2">
+            <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Poster Due Date (E - 28d)</span>
+                <strong className="text-indigo-400 font-mono text-sm">{computedDueDate}</strong>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1">Recommended target for first submission</p>
+            </div>
+
+            <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Broadcast Start (E - 21d)</span>
+                <strong className="text-emerald-400 font-mono text-sm">{computedWindow.plannedStart}</strong>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1">21-day campus-wide synchronized rotation</p>
+            </div>
+
+            <div className="p-3 rounded-lg bg-slate-800/60 border border-slate-700">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Hard Cutoff (E - 7d)</span>
+                <strong className="text-rose-400 font-mono text-sm">{computedWindow.hardCutoffDate}</strong>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1">Submissions after this are marked INELIGIBLE</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Broadcast List */}
       <section className="cc-panel">
         <div className="cc-panel-header">
           <div>
-            <h2>Upcoming and live</h2>
-            <p>All times use your browser timezone.</p>
+            <h2>Upcoming and Live Broadcasts</h2>
+            <p>Synchronized playlist schedules across campus displays.</p>
           </div>
           <span className="cc-status cc-status-success">
-            {schedules.filter((schedule) => schedule.status === 'ACTIVE').length} live
+            {schedules.filter((schedule) => schedule.status === 'ACTIVE').length} Live
           </span>
         </div>
         {schedules.length ? (
@@ -201,7 +320,7 @@ export function ScheduleCalendarView({
                       className="h-11 w-16 rounded-lg bg-[var(--surface-raised)] object-cover"
                     />
                     <span className="min-w-0">
-                      <strong className="block truncate text-sm font-semibold">
+                      <strong className="block truncate text-sm font-semibold text-white">
                         {content?.title ?? schedule.title}
                       </strong>
                       <small className="mt-1 block truncate text-xs text-[var(--muted-foreground)]">
@@ -210,7 +329,7 @@ export function ScheduleCalendarView({
                       </small>
                     </span>
                     <span className="text-xs">
-                      <strong className="block font-medium">
+                      <strong className="block font-medium text-white">
                         {starts.toLocaleDateString([], {
                           day: 'numeric',
                           month: 'short',
@@ -240,8 +359,8 @@ export function ScheduleCalendarView({
         ) : (
           <div className="cc-empty-state m-4 min-h-48">
             <CalendarDays className="h-7 w-7" />
-            <h2>No broadcasts yet</h2>
-            <p>Publish approved content now or schedule it for later.</p>
+            <h2>No broadcasts scheduled</h2>
+            <p>Approved posters automatically populate the 21-day manifest.</p>
           </div>
         )}
       </section>
@@ -259,8 +378,8 @@ export function ScheduleCalendarView({
           <form onSubmit={createSchedule} className="cc-dialog max-w-xl">
             <div className="flex items-start justify-between">
               <div>
-                <p className="cc-eyebrow">New broadcast</p>
-                <h2 className="text-xl font-semibold">Choose when it should play</h2>
+                <p className="cc-eyebrow">New Broadcast</p>
+                <h2 className="text-xl font-semibold">Choose Play Window</h2>
               </div>
               <button
                 type="button"
@@ -295,7 +414,7 @@ export function ScheduleCalendarView({
 
             <div className="mt-5 space-y-4">
               <label className="cc-field">
-                <span>Content</span>
+                <span>Content Poster</span>
                 <select
                   required
                   value={contentId}
@@ -311,20 +430,11 @@ export function ScheduleCalendarView({
                   ))}
                 </select>
               </label>
-              <label className="cc-field">
-                <span>Screens</span>
-                <select
-                  value={target}
-                  onChange={(event) => setTarget(event.target.value)}
-                >
-                  <option value="All campus screens">All campus screens</option>
-                  <option value="Specific Screen">Specific Screen / Group</option>
-                </select>
-              </label>
+
               {mode !== 'now' && (
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="cc-field">
-                    <span>{mode === 'repeat' ? 'First run' : 'Starts'}</span>
+                    <span>{mode === 'repeat' ? 'First Run' : 'Starts'}</span>
                     <input
                       type="datetime-local"
                       required
@@ -351,17 +461,7 @@ export function ScheduleCalendarView({
                   </label>
                 </div>
               )}
-              {mode === 'repeat' && (
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3 text-sm">
-                  <div className="flex items-center gap-2 font-medium">
-                    <CalendarDays className="h-4 w-4 text-[var(--accent)]" />
-                    Repeats every day
-                  </div>
-                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                    This broadcast repeats daily during the selected time window.
-                  </p>
-                </div>
-              )}
+
               {error && (
                 <p role="alert" className="cc-form-error">
                   {error}
@@ -378,98 +478,10 @@ export function ScheduleCalendarView({
                 Cancel
               </button>
               <button type="submit" className="cc-button-primary">
-                {mode === 'now' ? 'Publish now' : 'Save broadcast'}
+                {mode === 'now' ? 'Publish Now' : 'Save Broadcast'}
               </button>
             </div>
           </form>
-        </div>
-      )}
-
-      {selected && (
-        <div
-          className="cc-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Broadcast details"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setSelected(null);
-          }}
-        >
-          <div className="cc-dialog max-w-lg">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <span
-                  className={`cc-status ${scheduleStatus(selected).className}`}
-                >
-                  {scheduleStatus(selected).label}
-                </span>
-                <h2 className="mt-3 text-xl font-semibold">{selected.title}</h2>
-                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                  {selected.targetName}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelected(null)}
-                className="cc-icon-button"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <dl className="mt-5 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl bg-[var(--surface-raised)] p-3">
-                <dt className="text-xs text-[var(--muted-foreground)]">Starts</dt>
-                <dd className="mt-1 text-sm font-medium">
-                  {new Date(selected.startTime).toLocaleString()}
-                </dd>
-              </div>
-              <div className="rounded-xl bg-[var(--surface-raised)] p-3">
-                <dt className="text-xs text-[var(--muted-foreground)]">Ends</dt>
-                <dd className="mt-1 text-sm font-medium">
-                  {new Date(selected.endTime).toLocaleString()}
-                </dd>
-              </div>
-            </dl>
-            {currentRole === 'ADMIN' &&
-              !['CANCELLED', 'EXPIRED'].includes(selected.status) && (
-              <div className="mt-5 flex flex-wrap justify-end gap-2 border-t border-[var(--border)] pt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const status =
-                      selected.status === 'PAUSED'
-                        ? new Date(selected.startTime) <= new Date() &&
-                          new Date(selected.endTime) > new Date()
-                          ? 'ACTIVE'
-                          : 'SCHEDULED'
-                        : 'PAUSED';
-                    onUpdateSchedule(selected.id, status);
-                    setSelected({ ...selected, status });
-                  }}
-                  className="cc-button-secondary"
-                >
-                  {selected.status === 'PAUSED' ? (
-                    <Play className="h-4 w-4" />
-                  ) : (
-                    <Pause className="h-4 w-4" />
-                  )}
-                  {selected.status === 'PAUSED' ? 'Resume' : 'Pause'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onUpdateSchedule(selected.id, 'CANCELLED');
-                    setSelected(null);
-                  }}
-                  className="cc-button-secondary text-[var(--danger)]"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Cancel broadcast
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>

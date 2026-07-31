@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  AlertTriangle,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -7,7 +8,9 @@ import {
   Download,
   FileCheck,
   ImagePlus,
+  QrCode,
   Search,
+  ShieldAlert,
   ShieldCheck,
   Upload,
   UserRoundCheck,
@@ -17,10 +20,10 @@ import {
 
 import type { Club, ContentAsset, UserRole } from '../types';
 import {
-  approvalStageLabels,
   canApprove,
-  eventDisplayWindow,
+  calculateProposedPosterDueDate,
   roleLabels,
+  statusLabels,
 } from '../workflow';
 
 interface ContentApprovalViewProps {
@@ -35,16 +38,16 @@ interface ContentApprovalViewProps {
   createRequest: number;
 }
 
-type Filter = 'all' | 'queue' | 'approved';
+type Filter = 'all' | 'queue' | 'approved' | 'escalated';
 
 const fallbackImage =
   'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=85';
 
 const workflowSteps = [
-  ['DESIGN_LEAD', 'Design Lead', 'Submits poster'],
-  ['PRESIDENT', 'President', 'Checks club details'],
-  ['CLUB_HOD', 'Club HOD', 'Verifies the event'],
-  ['ADMIN', 'Campus Admin', 'Final approval'],
+  ['DESIGN_LEAD', 'Design Lead', 'Uploads poster'],
+  ['PRESIDENT', 'President', 'Stage 1 Review'],
+  ['CLUB_HOD', 'Club HOD', 'Stage 2 Review'],
+  ['ADMIN', 'Campus Admin', 'Stage 3 Final Review'],
 ] as const;
 
 function formatDate(value?: string): string {
@@ -60,10 +63,10 @@ function formatDate(value?: string): string {
 }
 
 function stageIndex(asset: ContentAsset): number {
-  if (asset.approvalStage === 'PRESIDENT') return 1;
-  if (asset.approvalStage === 'CLUB_HOD') return 2;
-  if (asset.approvalStage === 'ADMIN') return 3;
-  if (asset.approvalStage === 'APPROVED') return 4;
+  if (asset.status === 'pending_president_approval') return 1;
+  if (asset.status === 'pending_hod_approval') return 2;
+  if (asset.status === 'pending_admin_approval' || asset.status === 'escalated_admin') return 3;
+  if (asset.status === 'approved' || asset.status === 'live') return 4;
   return 0;
 }
 
@@ -83,10 +86,14 @@ export function ContentApprovalView({
   const [creating, setCreating] = useState(false);
   const [showBrandKit, setShowBrandKit] = useState(false);
   const [reviewing, setReviewing] = useState<ContentAsset | null>(null);
+  const [rejectionReasonInput, setRejectionReasonInput] = useState('');
+  const [showRejectModal, setShowRejectModal] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eventDate, setEventDate] = useState('');
+  const [venue, setVenue] = useState('');
   const [mediaUrl, setMediaUrl] = useState(fallbackImage);
+  const [selfCertified, setSelfCertified] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const currentClub = clubs.find((club) => club.id === currentClubId) ?? clubs[0];
@@ -115,7 +122,8 @@ export function ContentApprovalView({
         const matchesFilter =
           filter === 'all' ||
           (filter === 'queue' && inQueue) ||
-          (filter === 'approved' && content.status === 'APPROVED');
+          (filter === 'approved' && (content.status === 'approved' || content.status === 'live')) ||
+          (filter === 'escalated' && content.status === 'escalated_admin');
         return matchesSearch && matchesFilter;
       }),
     [
@@ -135,13 +143,19 @@ export function ContentApprovalView({
       : canApprove(content, currentRole, currentClubId),
   ).length;
 
+  const escalatedCount = contentList.filter(
+    (c) => c.status === 'escalated_admin',
+  ).length;
+
   const resetComposer = () => {
     if (mediaUrl.startsWith('blob:')) URL.revokeObjectURL(mediaUrl);
     setCreating(false);
     setTitle('');
     setDescription('');
     setEventDate('');
+    setVenue('');
     setMediaUrl(fallbackImage);
+    setSelfCertified(false);
     setValidationError(null);
   };
 
@@ -153,35 +167,49 @@ export function ContentApprovalView({
       return;
     }
 
+    if (!selfCertified) {
+      setValidationError('You must confirm self-certification against the Brand Asset Kit.');
+      return;
+    }
+
     try {
-      const window = eventDisplayWindow(eventDate);
+      const posterDueAt = calculateProposedPosterDueDate(eventDate);
       const createdAt = new Date().toISOString();
       const asset: ContentAsset = {
         id: `cnt_${Date.now()}`,
         organizationId: 'org_mit_adt',
+        eventId: `evt_${Date.now()}`,
         title: cleanTitle,
         description: description.trim(),
         category: 'EVENT',
         submitterName: currentUserName,
         submitterRole: roleLabels.DESIGN_LEAD,
         mediaUrl,
-        mimeType: 'image/jpeg',
+        mimeType: 'image/png',
         fileSizeBytes: 2_400_000,
         dimensions: '1920x1080',
         sha256: crypto.randomUUID().replace(/-/g, '').padEnd(64, '0'),
         durationSeconds: 15,
-        status: 'PENDING_APPROVAL',
+        status: 'pending_president_approval',
         createdAt,
         clubId: currentClub.id,
         clubName: currentClub.name,
         eventDate,
-        displayStartDate: window.plannedStart,
+        venue: venue || 'Campus Main Foyer',
         approvalStage: 'PRESIDENT',
+        rejectionCount: 0,
+        selfCertified: true,
+        posterDueAt,
+        designProgress: 100,
+        version: 1,
         approvalHistory: [
           {
-            stage: 'DESIGN_LEAD',
-            actorName: currentUserName,
-            action: 'SUBMITTED',
+            id: `step_${Date.now()}`,
+            contentId: `cnt_${Date.now()}`,
+            approverRole: 'DESIGN_LEAD',
+            approverName: currentUserName,
+            decision: 'SUBMITTED',
+            comment: 'Uploaded event poster with Brand Asset Kit self-certification.',
             timestamp: createdAt,
           },
         ],
@@ -200,10 +228,10 @@ export function ContentApprovalView({
     <div className="cc-page">
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="cc-eyebrow">Poster workflow</p>
-          <h1 className="cc-page-title">Club event posters</h1>
+          <p className="cc-eyebrow">Multi-Tier Approval Engine</p>
+          <h1 className="cc-page-title">Poster Governance & Escalation Queue</h1>
           <p className="cc-page-description">
-            Every poster follows the same verified path before reaching a screen.
+            Sequential approvals (President → HOD → Admin), 2nd rejection ceiling escalation, and Brand Asset Kit controls.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -211,7 +239,7 @@ export function ContentApprovalView({
             type="button"
             onClick={() => setShowBrandKit(true)}
             className="cc-button-secondary"
-            title="Download brand logos and sizing rules"
+            title="Download brand logos and placement guidelines"
           >
             <Download className="h-4 w-4" />
             Brand Asset Kit
@@ -228,10 +256,34 @@ export function ContentApprovalView({
             className="cc-button-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Upload className="h-4 w-4" />
-            Submit poster
+            Submit Poster
           </button>
         </div>
       </section>
+
+      {/* Escalation Alert Notice if items hit rejection ceiling */}
+      {escalatedCount > 0 && (
+        <section className="bg-amber-950/40 border border-amber-500/30 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="h-5 w-5 text-amber-400 shrink-0" />
+            <div>
+              <strong className="text-sm font-semibold text-amber-300">
+                {escalatedCount} Poster{escalatedCount > 1 ? 's' : ''} Escalated to Admin (Rejection Ceiling Reached)
+              </strong>
+              <p className="text-xs text-amber-200/80">
+                Posters rejected twice at any stage are auto-escalated straight to Campus Admin to break infinite rejection loops.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFilter('escalated')}
+            className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition"
+          >
+            View Escalated Queue
+          </button>
+        </section>
+      )}
 
       <section
         aria-label="Poster approval hierarchy"
@@ -264,25 +316,26 @@ export function ContentApprovalView({
             </strong>
             <small className="text-[var(--muted-foreground)]">
               {currentRole === 'ADMIN'
-                ? 'Final approval queue across all clubs'
+                ? 'Campus Admin override & final approval authority'
                 : currentClub?.name}
             </small>
           </div>
         </div>
         <p className="text-xs text-[var(--muted-foreground)]">
           {canSubmit
-            ? 'Submit posters here. Your President reviews them next.'
+            ? 'Upload posters here. President reviews next.'
             : queueCount
-              ? `${queueCount} poster${queueCount === 1 ? '' : 's'} waiting for you.`
-              : 'Nothing is waiting for your approval.'}
+              ? `${queueCount} poster${queueCount === 1 ? '' : 's'} waiting in your queue.`
+              : 'No items currently awaiting your approval.'}
         </p>
       </section>
 
       <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="cc-segmented" role="group" aria-label="Poster filter">
           {[
-            ['all', 'All posters'],
-            ['queue', currentRole === 'DESIGN_LEAD' ? 'My submissions' : 'My queue'],
+            ['all', 'All Posters'],
+            ['queue', currentRole === 'DESIGN_LEAD' ? 'My Submissions' : 'My Queue'],
+            ['escalated', 'Escalated to Admin'],
             ['approved', 'Approved'],
           ].map(([id, label]) => (
             <button
@@ -293,6 +346,9 @@ export function ContentApprovalView({
             >
               {label}
               {id === 'queue' && queueCount > 0 && <span>{queueCount}</span>}
+              {id === 'escalated' && escalatedCount > 0 && (
+                <span className="bg-amber-500 text-black font-bold px-1.5 rounded-full">{escalatedCount}</span>
+              )}
             </button>
           ))}
         </div>
@@ -315,9 +371,12 @@ export function ContentApprovalView({
               currentRole,
               currentClubId,
             );
-            const approved = content.status === 'APPROVED';
+            const approved = content.status === 'approved' || content.status === 'live';
+            const isEscalated = content.status === 'escalated_admin';
+            const isRecheck = content.isPostApprovalRecheck;
+
             return (
-              <article key={content.id} className="cc-content-card">
+              <article key={content.id} className={`cc-content-card relative ${isEscalated ? 'border-amber-500/50 bg-amber-950/10' : ''}`}>
                 <button
                   type="button"
                   onClick={() => setReviewing(content)}
@@ -331,45 +390,58 @@ export function ContentApprovalView({
                     }}
                     className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]"
                   />
+
+                  {/* Status Badge */}
                   <span
                     className={`cc-status absolute left-3 top-3 ${
                       approved
                         ? 'cc-status-success'
-                        : content.status === 'REJECTED'
-                          ? 'cc-status-danger'
-                          : 'cc-status-warning'
+                        : isEscalated
+                          ? 'bg-amber-500 text-slate-950 font-bold'
+                          : content.status === 'rejected'
+                            ? 'cc-status-danger'
+                            : 'cc-status-warning'
                     }`}
                   >
-                    {content.approvalStage
-                      ? approvalStageLabels[content.approvalStage]
-                      : approved
-                        ? 'Approved'
-                        : 'Review required'}
+                    {isEscalated
+                      ? '⚡ Escalated to Admin (Rejection Ceiling)'
+                      : isRecheck
+                        ? '🔄 Post-Approval Edit Re-Check'
+                        : statusLabels[content.status] || content.status}
                   </span>
+
+                  {content.rejectionCount > 0 && (
+                    <span className="absolute right-3 top-3 px-2 py-0.5 rounded bg-rose-500/90 text-white font-mono text-[10px] font-bold">
+                      Rejections: {content.rejectionCount}/2
+                    </span>
+                  )}
                 </button>
+
                 <div className="p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--accent)]">
-                    {content.clubName ?? 'Campus office'}
+                    {content.clubName ?? 'Campus Office'}
                   </p>
-                  <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-5">
+                  <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-5 text-white">
                     {content.title}
                   </h2>
+
                   {content.eventDate && (
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <span className="rounded-lg bg-[var(--surface-raised)] p-2">
                         <small className="block text-[var(--muted-foreground)]">
-                          Event
+                          Event Date
                         </small>
-                        <strong>{formatDate(content.eventDate)}</strong>
+                        <strong className="text-white">{formatDate(content.eventDate)}</strong>
                       </span>
                       <span className="rounded-lg bg-[var(--surface-raised)] p-2">
                         <small className="block text-[var(--muted-foreground)]">
-                          Display starts
+                          Design Due Date
                         </small>
-                        <strong>{formatDate(content.displayStartDate)}</strong>
+                        <strong className="text-white">{formatDate(content.posterDueAt)}</strong>
                       </span>
                     </div>
                   )}
+
                   <div className="mt-4 flex gap-2 border-t border-[var(--border)] pt-3">
                     {actionable && (
                       <button
@@ -386,7 +458,7 @@ export function ContentApprovalView({
                       onClick={() => setReviewing(content)}
                       className="cc-button-secondary flex-1"
                     >
-                      {actionable ? 'Review' : 'View workflow'}
+                      {actionable ? 'Review & Decision' : 'View History'}
                     </button>
                   </div>
                 </div>
@@ -402,6 +474,7 @@ export function ContentApprovalView({
         </section>
       )}
 
+      {/* Upload Poster Modal */}
       {creating && canSubmit && currentClub && (
         <div
           className="cc-overlay"
@@ -416,9 +489,9 @@ export function ContentApprovalView({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="cc-eyebrow">{currentClub.name}</p>
-                <h2 className="text-xl font-semibold">Submit event poster</h2>
+                <h2 className="text-xl font-semibold">Submit Event Poster</h2>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                  It will go to {currentClub.president} for the first review.
+                  Will enter Stage 1 review with {currentClub.president}.
                 </p>
               </div>
               <button
@@ -435,8 +508,8 @@ export function ContentApprovalView({
               <div>
                 <label className="cc-upload-zone aspect-video">
                   <Upload className="h-6 w-6 text-[var(--accent)]" />
-                  <strong>Choose poster</strong>
-                  <span>PNG or JPG · maximum 10 MB</span>
+                  <strong>Choose Poster File</strong>
+                  <span>PNG or JPG · 1080p 16:9</span>
                   <input
                     type="file"
                     accept="image/png,image/jpeg"
@@ -469,7 +542,7 @@ export function ContentApprovalView({
 
               <div className="space-y-4">
                 <label className="cc-field">
-                  <span>Poster title</span>
+                  <span>Poster Title</span>
                   <input
                     required
                     maxLength={120}
@@ -478,50 +551,60 @@ export function ContentApprovalView({
                       setTitle(event.target.value);
                       setValidationError(null);
                     }}
-                    placeholder="e.g. Robotics Expo 2026"
+                    placeholder="e.g. HackMIT 2026 AI Innovation Sprint"
                   />
                 </label>
-                <label className="cc-field">
-                  <span>Event date</span>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="cc-field">
+                    <span>Event Date</span>
+                    <input
+                      type="date"
+                      required
+                      min={tomorrow}
+                      value={eventDate}
+                      onInput={(event) => {
+                        setEventDate(event.currentTarget.value);
+                        setValidationError(null);
+                      }}
+                    />
+                  </label>
+                  <label className="cc-field">
+                    <span>Venue</span>
+                    <input
+                      required
+                      value={venue}
+                      onChange={(e) => setVenue(e.target.value)}
+                      placeholder="e.g. Tech Block A Foyer"
+                    />
+                  </label>
+                </div>
+
+                {eventDate && (
+                  <div className="p-2.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300">
+                    Proposed poster design due date:{' '}
+                    <strong>{calculateProposedPosterDueDate(eventDate)}</strong> (28 days before event).
+                  </div>
+                )}
+
+                {/* Self-Certification Checkbox */}
+                <label className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-700 bg-slate-800/60 cursor-pointer">
                   <input
-                    type="date"
-                    required
-                    min={tomorrow}
-                    value={eventDate}
-                    onInput={(event) => {
-                      setEventDate(event.currentTarget.value);
-                      setValidationError(null);
-                    }}
+                    type="checkbox"
+                    checked={selfCertified}
+                    onChange={(e) => setSelfCertified(e.target.checked)}
+                    className="mt-1 rounded text-indigo-500 focus:ring-indigo-400"
                   />
-                  {eventDate && (
-                    <small>
-                      Screen campaign starts{' '}
-                      {formatDate(eventDisplayWindow(eventDate).plannedStart)} —
-                      exactly 21 days before the event.
-                    </small>
-                  )}
-                </label>
-                <label className="cc-field">
-                  <span>
-                    Event details <small>Optional</small>
+                  <span className="text-xs text-slate-300 leading-relaxed">
+                    <strong>Brand Asset Kit Self-Certification:</strong> I confirm this poster uses approved logos, minimum clear padding (60px), and official university branding.
                   </span>
-                  <textarea
-                    rows={4}
-                    maxLength={500}
-                    value={description}
-                    onChange={(event) => setDescription(event.target.value)}
-                    placeholder="Venue, registration details, or important instructions"
-                  />
                 </label>
+
                 {validationError && (
                   <p role="alert" className="cc-form-error">
                     {validationError}
                   </p>
                 )}
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3 text-xs text-[var(--muted-foreground)]">
-                  <ShieldCheck className="mr-2 inline h-4 w-4 text-[var(--accent)]" />
-                  President → Club HOD → Campus Admin. No stage can be skipped.
-                </div>
               </div>
             </div>
 
@@ -535,13 +618,14 @@ export function ContentApprovalView({
               </button>
               <button type="submit" className="cc-button-primary">
                 <Clock3 className="h-4 w-4" />
-                Send to President
+                Submit to President
               </button>
             </div>
           </form>
         </div>
       )}
 
+      {/* Review & Workflow Modal */}
       {reviewing && (
         <div
           className="cc-overlay"
@@ -557,21 +641,21 @@ export function ContentApprovalView({
               <div>
                 <span
                   className={`cc-status ${
-                    reviewing.status === 'APPROVED'
+                    reviewing.status === 'approved'
                       ? 'cc-status-success'
-                      : reviewing.status === 'REJECTED'
-                        ? 'cc-status-danger'
-                        : 'cc-status-warning'
+                      : reviewing.status === 'escalated_admin'
+                        ? 'bg-amber-500 text-slate-950 font-bold'
+                        : reviewing.status === 'rejected'
+                          ? 'cc-status-danger'
+                          : 'cc-status-warning'
                   }`}
                 >
-                  {reviewing.approvalStage
-                    ? approvalStageLabels[reviewing.approvalStage]
-                    : reviewing.status}
+                  {statusLabels[reviewing.status] || reviewing.status}
                 </span>
-                <h2 className="mt-3 text-xl font-semibold">{reviewing.title}</h2>
+                <h2 className="mt-3 text-xl font-semibold text-white">{reviewing.title}</h2>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                  {reviewing.clubName ?? 'Campus office'} · Event{' '}
-                  {formatDate(reviewing.eventDate)}
+                  {reviewing.clubName ?? 'Campus Office'} · Event Date:{' '}
+                  {formatDate(reviewing.eventDate)} · Venue: {reviewing.venue}
                 </p>
               </div>
               <button
@@ -593,8 +677,9 @@ export function ContentApprovalView({
               className="mt-5 aspect-video w-full rounded-xl bg-black object-contain"
             />
 
+            {/* Approval Stepper */}
             <div className="mt-5">
-              <h3 className="text-sm font-semibold">Approval progress</h3>
+              <h3 className="text-sm font-semibold text-white">Multi-Tier Approval Chain</h3>
               <div className="mt-3 grid gap-2 sm:grid-cols-4">
                 {workflowSteps.map(([id, label], index) => {
                   const complete = stageIndex(reviewing) > index;
@@ -604,68 +689,87 @@ export function ContentApprovalView({
                       key={id}
                       className={`rounded-xl border p-3 ${
                         complete
-                          ? 'border-[var(--success)] bg-[var(--success-soft)]'
+                          ? 'border-emerald-500/50 bg-emerald-500/10'
                           : current
-                            ? 'border-[var(--warning)] bg-[var(--warning-soft)]'
+                            ? 'border-amber-500/50 bg-amber-500/10'
                             : 'border-[var(--border)] bg-[var(--surface-raised)]'
                       }`}
                     >
                       {complete ? (
-                        <CheckCircle2 className="h-4 w-4 text-[var(--success)]" />
+                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                       ) : (
-                        <Clock3 className="h-4 w-4 text-[var(--muted-foreground)]" />
+                        <Clock3 className="h-4 w-4 text-slate-400" />
                       )}
-                      <strong className="mt-2 block text-xs">{label}</strong>
+                      <strong className="mt-2 block text-xs text-white">{label}</strong>
                     </div>
                   );
                 })}
               </div>
             </div>
 
+            {/* History Steps */}
             {reviewing.approvalHistory?.length ? (
-              <div className="mt-5 rounded-xl bg-[var(--surface-raised)] p-3">
-                {reviewing.approvalHistory.map((record) => (
+              <div className="mt-5 rounded-xl bg-slate-900 border border-slate-800 p-3 space-y-2 max-h-40 overflow-y-auto">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Audit Trail Steps</h4>
+                {reviewing.approvalHistory.map((step) => (
                   <div
-                    key={`${record.stage}-${record.timestamp}`}
-                    className="flex items-center gap-3 border-b border-[var(--border)] py-2 last:border-0"
+                    key={step.id}
+                    className="flex items-start gap-3 text-xs border-b border-slate-800 pb-2 last:border-0"
                   >
-                    <CheckCircle2 className="h-4 w-4 text-[var(--success)]" />
-                    <span className="min-w-0 flex-1 text-xs">
-                      <strong className="block">{record.actorName}</strong>
-                      <small className="text-[var(--muted-foreground)]">
-                        {record.action.toLowerCase()} as{' '}
-                        {roleLabels[record.stage]}
-                      </small>
-                    </span>
-                    <small className="text-[var(--muted-foreground)]">
-                      {new Date(record.timestamp).toLocaleDateString()}
-                    </small>
+                    <span className="font-semibold text-indigo-300">{step.approverName} ({step.approverRole}):</span>
+                    <span className="text-slate-300 flex-1">{step.decision} — {step.comment || 'No comment'}</span>
+                    <span className="text-[10px] text-slate-500">{new Date(step.timestamp).toLocaleDateString()}</span>
                   </div>
                 ))}
               </div>
             ) : null}
 
-            {reviewing.description && (
-              <p className="mt-4 text-sm leading-6 text-[var(--muted-foreground)]">
-                {reviewing.description}
-              </p>
-            )}
-
-            {canApprove(reviewing, currentRole, currentClubId) && (
+            {/* Rejection Input Section */}
+            {showRejectModal ? (
+              <div className="mt-5 p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 space-y-3">
+                <h4 className="text-sm font-bold text-rose-300">Request Changes / Reject Poster</h4>
+                <p className="text-xs text-slate-300">
+                  Note: If this is the 2nd rejection, it will auto-escalate straight to Campus Admin.
+                </p>
+                <textarea
+                  rows={3}
+                  required
+                  value={rejectionReasonInput}
+                  onChange={(e) => setRejectionReasonInput(e.target.value)}
+                  placeholder="Provide specific required changes (e.g., logo clear space violation, incorrect venue date)..."
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-rose-500"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowRejectModal(false)}
+                    className="cc-button-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!rejectionReasonInput.trim()) return;
+                      onRejectContent(reviewing.id, rejectionReasonInput.trim());
+                      setShowRejectModal(false);
+                      setReviewing(null);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-xs hover:bg-rose-500"
+                  >
+                    Confirm Rejection
+                  </button>
+                </div>
+              </div>
+            ) : canApprove(reviewing, currentRole, currentClubId) ? (
               <div className="mt-5 flex flex-col-reverse gap-2 border-t border-[var(--border)] pt-4 sm:flex-row sm:justify-end">
                 <button
                   type="button"
-                  onClick={() => {
-                    onRejectContent(
-                      reviewing.id,
-                      `Changes requested by ${currentUserName}.`,
-                    );
-                    setReviewing(null);
-                  }}
-                  className="cc-button-secondary text-[var(--danger)]"
+                  onClick={() => setShowRejectModal(true)}
+                  className="cc-button-secondary text-rose-400 border-rose-500/30 hover:bg-rose-950/30"
                 >
                   <XCircle className="h-4 w-4" />
-                  Request changes
+                  Reject / Request Changes
                 </button>
                 <button
                   type="button"
@@ -679,11 +783,12 @@ export function ContentApprovalView({
                   Approve as {roleLabels[currentRole]}
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       )}
 
+      {/* Brand Asset Kit Modal */}
       {showBrandKit && (
         <div
           className="cc-overlay"
@@ -697,13 +802,13 @@ export function ContentApprovalView({
           <div className="cc-dialog w-full max-w-2xl p-0">
             <header className="flex items-center justify-between border-b border-[var(--border)] p-4 sm:p-5">
               <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-indigo-500/20 text-indigo-400">
                   <FileCheck className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="text-base font-bold sm:text-lg">Brand Asset Kit & Guidelines</h2>
+                  <h2 className="text-base font-bold sm:text-lg text-white">Official Brand Asset Kit</h2>
                   <p className="text-xs text-[var(--muted-foreground)]">
-                    Official MIT ADT University logo specifications & kiosk display rules
+                    MIT ADT University logo assets, placement rules & safe padding guidelines
                   </p>
                 </div>
               </div>
@@ -717,28 +822,28 @@ export function ContentApprovalView({
               </button>
             </header>
 
-            <div className="space-y-4 p-4 text-xs sm:p-5">
+            <div className="space-y-4 p-4 text-xs sm:p-5 text-slate-300">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3">
-                  <strong className="block text-sm font-semibold">16:9 Landscape & 9:16 Portrait</strong>
-                  <p className="mt-1 leading-relaxed text-[var(--muted-foreground)]">
-                    Target 1920x1080 resolution. Keep poster file size under 5 MB (JPEG/PNG).
+                <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                  <strong className="block text-sm font-semibold text-white">16:9 Aspect Ratio</strong>
+                  <p className="mt-1 leading-relaxed text-slate-400">
+                    Full HD 1920x1080 resolution. PNG or high-quality JPG under 5 MB.
                   </p>
                 </div>
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3">
-                  <strong className="block text-sm font-semibold">Safe Padding (60px)</strong>
-                  <p className="mt-1 leading-relaxed text-[var(--muted-foreground)]">
-                    Keep primary event details and QR codes 60px away from display edges.
+                <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                  <strong className="block text-sm font-semibold text-white">60px Safe Margin</strong>
+                  <p className="mt-1 leading-relaxed text-slate-400">
+                    Keep logos, date, venue, and QR code 60px away from display screen edges.
                   </p>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-4 space-y-3">
-                <strong className="block text-sm font-semibold text-[var(--foreground)]">
-                  Official Brand Assets
+              <div className="rounded-xl border border-indigo-500/30 bg-indigo-950/30 p-4 space-y-3">
+                <strong className="block text-sm font-semibold text-indigo-300">
+                  Download Official Logo Files
                 </strong>
-                <p className="text-[var(--muted-foreground)]">
-                  Use authorized university and club logos to guarantee first-pass approval.
+                <p className="text-slate-400">
+                  Use pre-approved SVG/PNG vectors to ensure instant approval during Admin review.
                 </p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   <a
@@ -757,7 +862,7 @@ export function ContentApprovalView({
                     className="cc-button-secondary text-xs"
                   >
                     <Download className="h-3.5 w-3.5" />
-                    1080p Canvas Template
+                    1080p Canvas Guidelines
                   </a>
                 </div>
               </div>

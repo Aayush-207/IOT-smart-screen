@@ -5,6 +5,7 @@ import {
   Home,
   Images,
   Monitor,
+  QrCode,
   Radio,
   Shield,
 } from 'lucide-react';
@@ -14,6 +15,7 @@ export type ViewTab =
   | 'content'
   | 'schedules'
   | 'devices'
+  | 'qr_analytics'
   | 'insights'
   | 'security'
   | 'architecture';
@@ -30,6 +32,7 @@ const items = [
   { id: 'content', label: 'Posters', mobileLabel: 'Posters', icon: Images },
   { id: 'schedules', label: 'Schedule', mobileLabel: 'Plan', icon: CalendarDays },
   { id: 'devices', label: 'Screens', mobileLabel: 'Screens', icon: Monitor },
+  { id: 'qr_analytics', label: 'QR Analytics', mobileLabel: 'QRs', icon: QrCode },
   { id: 'insights', label: 'Health', mobileLabel: 'Health', icon: Activity },
   { id: 'security', label: 'Audit Log', mobileLabel: 'Audit', icon: Shield },
   { id: 'architecture', label: 'Blueprint', mobileLabel: 'Docs', icon: FileText },
@@ -52,7 +55,7 @@ export function Sidebar({
               <button
                 key={id}
                 type="button"
-                onClick={() => setActiveTab(id)}
+                onClick={() => setActiveTab(id as ViewTab)}
                 aria-current={active ? 'page' : undefined}
                 className={`cc-nav-item ${active ? 'cc-nav-item-active' : ''}`}
               >
@@ -71,7 +74,7 @@ export function Sidebar({
         <div className="mt-auto rounded-xl border border-[var(--border)] bg-[var(--surface-raised)] p-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Radio className="h-4 w-4 text-[var(--success)]" />
-            Screen network
+            Screen Network
           </div>
           <p className="mt-1.5 text-xs leading-5 text-[var(--muted-foreground)]">
             {deviceAttentionCount === 0
@@ -83,14 +86,14 @@ export function Sidebar({
             onClick={() => setActiveTab('devices')}
             className="mt-3 text-xs font-semibold text-[var(--accent)] hover:underline"
           >
-            View screen health
+            View Screen Health
           </button>
         </div>
       </aside>
 
       <nav
         aria-label="Mobile navigation"
-        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/95 p-1.5 shadow-xl backdrop-blur md:hidden"
+        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/95 p-1.5 shadow-xl backdrop-blur md:hidden"
       >
         {items.map(({ id, mobileLabel, icon: Icon }) => {
           const active = activeTab === id;
@@ -98,7 +101,7 @@ export function Sidebar({
             <button
               key={id}
               type="button"
-              onClick={() => setActiveTab(id)}
+              onClick={() => setActiveTab(id as ViewTab)}
               aria-current={active ? 'page' : undefined}
               className={`flex min-h-12 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-xl text-[9px] font-medium tracking-[-0.02em] ${
                 active

@@ -5,63 +5,63 @@ skinparam fontColor #f5f5f5
 skinparam fontSize 12
 skinparam fontName Inter
 
-title CampusCast IoT Smart Screen Architecture & Fleet Flow
+title CampusCast IoT Smart Screen Architecture & Fleet Flow (5-Layer Master Design)
 
-package "University Campus Edge Locations" {
+package "Layer 1: Event & Content Authoring" {
+  mxgraph.aws4.ecr "Dashboard Client\n(Next.js / TypeScript)" as web_ui
+  rectangle "Brand Asset Kit\nPortal & Self-Cert" as asset_kit
+}
+
+package "Layer 2 & 3: Cloud Platform & Workflow Engine" {
+  mxgraph.aws4.ec2 "Express REST API\n(Port 8080)" as api
+  mxgraph.aws4.ec2 "Approval Engine &\nRedirect Service" as engine
+  mxgraph.aws4.generic_database "PostgreSQL DB\n(org_mit_adt Scoped)" as postgres
+  mxgraph.aws4.ec2 "BullMQ Scheduler\n(21-Day Window & Cutoff)" as worker
+  mxgraph.aws4.s3 "S3 Media Bucket\n(CDN Posters & Assets)" as cdn_s3
+}
+
+package "Layer 4: AWS IoT Device Messaging" {
+  mxgraph.aws4.iot_device_gateway "X.509 Mutual TLS\nGateway" as gateway
+  mxgraph.aws4.iot_core "AWS IoT Core\n(MQTT Broker)" as iot_core
+  mxgraph.aws4.iot_device_management "IoT Named Shadow\nReconciliation" as shadow
+}
+
+package "Layer 5: Campus Synchronized Display Nodes" {
   rectangle "Tech Block A (Central Foyer)" {
-    mxgraph.aws4.iot_thing_industrial_pc "Kiosk Display 01\n(Android 14 DPC)" as kiosk1
-    mxgraph.aws4.sensor "Temp/Thermal\nSensor" as sensor1
+    mxgraph.aws4.iot_thing_industrial_pc "Kiosk Display 01\n(Screen-01 QR Overlay)" as kiosk1
   }
 
   rectangle "Central Library (Study Atrium)" {
-    mxgraph.aws4.iot_thing_industrial_pc "Kiosk Display 02\n(ExoPlayer / Room DB)" as kiosk2
+    mxgraph.aws4.iot_thing_industrial_pc "Kiosk Display 02\n(Screen-02 QR Overlay)" as kiosk2
   }
 
   rectangle "Grand Dome Auditorium" {
-    mxgraph.aws4.iot_thing_industrial_pc "Kiosk Display 03\n(Emergency Receiver)" as kiosk3
+    mxgraph.aws4.iot_thing_industrial_pc "Kiosk Display 03\n(Screen-03 QR Overlay)" as kiosk3
   }
 }
 
-package "AWS Cloud Infrastructure (ap-south-1 Mumbai)" {
-  rectangle "AWS IoT Ecosystem" {
-    mxgraph.aws4.iot_core "AWS IoT Core\n(MQTT Broker)" as iot_core
-    mxgraph.aws4.iot_device_gateway "X.509 Mutual TLS\nGateway" as gateway
-    mxgraph.aws4.iot_device_management "IoT Named Shadow\nReconciliation" as shadow
-    mxgraph.aws4.iot_over_the_air_update "AWS OTA Jobs\n(Firmware / DPC)" as ota
-  }
+' Authoring & Approval Flow
+web_ui --> asset_kit : 1. Download Brand Assets
+web_ui --> api : 2. Create Event & Upload Poster
+api --> engine : 3. Stage 1->2->3 Approvals & Rejection Ceiling
+engine --> postgres : 4. Update Status & Audit Log
+worker --> postgres : 5. Time-Gated 21-Day Evaluation
+worker --> shadow : 6. Publish Master Manifest Version
 
-  rectangle "Ingest & Content Pipeline" {
-    mxgraph.aws4.s3 "S3 Quarantine\nBucket" as quarantine_s3
-    mxgraph.aws4.s3 "S3 Approved CDN\nBucket" as cdn_s3
-  }
+' IoT Core & Device Synchronization
+shadow ..> gateway : 7. Desired Shadow Sync
+gateway ..> iot_core
+iot_core ..> kiosk1 : MQTT Manifest Push (Synchronized)
+iot_core ..> kiosk2 : MQTT Manifest Push (Synchronized)
+iot_core ..> kiosk3 : MQTT Manifest Push (Synchronized)
 
-  rectangle "Control Plane (Modular Monolith)" {
-    mxgraph.aws4.generic_database "PostgreSQL DB\n(org_id Scoped)" as postgres
-    mxgraph.aws4.ec2 "Express API\n(Port 8080)" as api
-    mxgraph.aws4.ec2 "BullMQ Worker\n(Media & Manifest)" as worker
-    mxgraph.aws4.ecr "Dashboard Client\n(Next.js / Vite)" as web_ui
-  }
-}
-
-' Connectivity & Flows
-sensor1 --> kiosk1 : Local Sensor Data
-kiosk1 ..> gateway : MQTT / TLS v1.3\n(Heartbeat & Telemetry)
-kiosk2 ..> gateway : MQTT / TLS v1.3
-kiosk3 ..> gateway : MQTT / TLS v1.3
-
-gateway --> iot_core
-iot_core --> shadow : Sync State
-shadow ..> kiosk1 : Manifest Push\n($aws/things/id/shadow)
-
-web_ui --> api : HTTPS / Cognito JWT
-api --> postgres : Multi-Tenant Queries
-api --> quarantine_s3 : S3 Presigned URL
-
-quarantine_s3 ..> worker : S3 Object Created Event
-worker --> cdn_s3 : Promote Clean Asset
-worker --> shadow : Re-compile Manifest
-
-cdn_s3 ..> kiosk1 : HTTPS CDN Media Download\n(Offline Room DB Cache)
+cdn_s3 ..> kiosk1 : HTTPS CDN Media Download
 cdn_s3 ..> kiosk2 : HTTPS CDN Media Download
-ota ..> kiosk1 : Remote App Update
+
+' QR Scan Tracking Flow
+rectangle "Mobile Student Device" as mobile
+mobile ..> engine : 8. Scan QR overlay (/r/:code?device_id=kiosk1)
+engine --> postgres : 9. Log scan_event row
+engine ..> mobile : 10. HTTP 302 Redirect to External Registration URL
+
 @enduml

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 import type { ContentAsset, Device, ScheduleRule, TelemetryEvent } from '../types';
-import { approvalStageLabels } from '../workflow';
+import { roleLabels, statusLabels } from '../workflow';
 import type { ViewTab } from './Sidebar';
 
 interface OverviewViewProps {
@@ -48,7 +48,7 @@ export function OverviewView({
   const online = devices.filter((device) => device.status === 'ONLINE');
   const attention = devices.filter((device) => device.status !== 'ONLINE');
   const pending = contentList.filter(
-    (content) => content.status === 'PENDING_APPROVAL',
+    (content) => content.status.startsWith('pending_') || content.status === 'escalated_admin',
   );
   const activeSchedules = schedules.filter(
     (schedule) => schedule.status === 'ACTIVE',
@@ -67,7 +67,7 @@ export function OverviewView({
       : `${attention.length} screen${attention.length === 1 ? '' : 's'} and ${pending.length} approval${pending.length === 1 ? '' : 's'} need attention.`;
 
   return (
-    <div className="cc-page">
+    <div className="cc-page space-y-6">
       <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="cc-eyebrow">
@@ -77,7 +77,7 @@ export function OverviewView({
               month: 'long',
             })}
           </p>
-          <h1 className="cc-page-title">
+          <h1 className="cc-page-title text-white">
             {greeting}, {currentUserName.split(' ')[0]}
           </h1>
           <p className="cc-page-description">
@@ -88,15 +88,10 @@ export function OverviewView({
           type="button"
           onClick={onCreateContent}
           disabled={!canCreateContent}
-          title={
-            canCreateContent
-              ? 'Submit an event poster'
-              : 'Switch to Design Lead to submit a poster'
-          }
           className="cc-button-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus className="h-4 w-4" />
-          Submit poster
+          Submit Poster
         </button>
       </section>
 
@@ -106,51 +101,54 @@ export function OverviewView({
           onClick={() => onNavigateTab('devices')}
           className="cc-summary-item text-left"
         >
-          <span className="cc-summary-icon bg-[var(--success-soft)] text-[var(--success)]">
+          <span className="cc-summary-icon bg-emerald-500/20 text-emerald-400">
             <Monitor className="h-5 w-5" />
           </span>
           <span>
-            <strong>{online.length} of {devices.length}</strong>
-            <small>Screens online</small>
+            <strong className="text-white">{online.length} of {devices.length}</strong>
+            <small>Screens Online</small>
           </span>
         </button>
+
         <button
           type="button"
           onClick={() => onNavigateTab('content')}
           className="cc-summary-item text-left"
         >
-          <span className="cc-summary-icon bg-[var(--warning-soft)] text-[var(--warning)]">
+          <span className="cc-summary-icon bg-amber-500/20 text-amber-400">
             <Clock3 className="h-5 w-5" />
           </span>
           <span>
-            <strong>{pending.length}</strong>
-            <small>Waiting for approval</small>
+            <strong className="text-white">{pending.length}</strong>
+            <small>Waiting for Approval</small>
           </span>
         </button>
+
         <button
           type="button"
           onClick={() => onNavigateTab('schedules')}
           className="cc-summary-item text-left"
         >
-          <span className="cc-summary-icon bg-[var(--accent-soft)] text-[var(--accent)]">
+          <span className="cc-summary-icon bg-indigo-500/20 text-indigo-400">
             <CalendarClock className="h-5 w-5" />
           </span>
           <span>
-            <strong>{activeSchedules.length}</strong>
-            <small>Broadcasts running</small>
+            <strong className="text-white">{activeSchedules.length}</strong>
+            <small>Broadcasts Running</small>
           </span>
         </button>
+
         <button
           type="button"
           onClick={() => onNavigateTab('insights')}
           className="cc-summary-item text-left"
         >
-          <span className="cc-summary-icon bg-[var(--surface-raised)] text-[var(--foreground)]">
+          <span className="cc-summary-icon bg-slate-800 text-slate-300">
             <Play className="h-5 w-5" />
           </span>
           <span>
-            <strong>{recentPlays.length}</strong>
-            <small>Recent successful plays</small>
+            <strong className="text-white">{recentPlays.length}</strong>
+            <small>Recent Successful Plays</small>
           </span>
         </button>
       </section>
@@ -159,15 +157,15 @@ export function OverviewView({
         <section className="cc-panel">
           <div className="cc-panel-header">
             <div>
-              <h2>Playing now</h2>
-              <p>What visitors currently see across campus.</p>
+              <h2 className="text-white">Playing Now Across Campus</h2>
+              <p>Active content rendering on smart screen kiosks.</p>
             </div>
             <button
               type="button"
               onClick={() => onNavigateTab('devices')}
               className="cc-text-button"
             >
-              All screens <ArrowRight className="h-3.5 w-3.5" />
+              All Screens <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
           <div className="divide-y divide-[var(--border)]">
@@ -192,8 +190,8 @@ export function OverviewView({
                       className="h-10 w-14 rounded-md bg-[var(--surface-raised)] object-cover sm:h-12 sm:w-[72px]"
                     />
                     <span className="min-w-0">
-                      <strong className="block truncate text-sm font-medium">
-                        {content?.title ?? 'Active Screen Slate'}
+                      <strong className="block truncate text-sm font-medium text-white">
+                        {content?.title ?? 'HackMIT 2026 AI Innovation Sprint'}
                       </strong>
                       <small className="mt-0.5 block truncate text-xs text-[var(--muted-foreground)]">
                         {device.displayName}
@@ -214,43 +212,18 @@ export function OverviewView({
                   </button>
                 );
               })
-            ) : (
-              <div className="grid min-h-36 place-items-center p-6 text-center text-xs text-[var(--muted-foreground)]">
-                <div>
-                  <Monitor className="mx-auto h-6 w-6 opacity-40" />
-                  <p className="mt-2 font-medium">No enrolled screens online</p>
-                  <p className="mt-1 text-[11px]">Go to Screens tab to register your first smart display.</p>
-                </div>
-              </div>
-            )}
+            ) : null}
           </div>
         </section>
 
         <section className="cc-panel">
           <div className="cc-panel-header">
             <div>
-              <h2>Needs attention</h2>
-              <p>Only items that require an action.</p>
+              <h2 className="text-white">Needs Attention</h2>
+              <p>Actionable approvals and device alerts.</p>
             </div>
           </div>
           <div className="space-y-2 p-3">
-            {attention.map((device) => (
-              <button
-                type="button"
-                key={device.id}
-                onClick={() => onNavigateTab('devices')}
-                className="cc-attention-row"
-              >
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--danger-soft)] text-[var(--danger)]">
-                  <AlertCircle className="h-4 w-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <strong>{device.displayName} missed a check-in</strong>
-                  <small>Last seen {timeAgo(device.lastHeartbeatAt)}</small>
-                </span>
-                <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)]" />
-              </button>
-            ))}
             {pending.map((content) => (
               <button
                 type="button"
@@ -258,15 +231,13 @@ export function OverviewView({
                 onClick={() => onNavigateTab('content')}
                 className="cc-attention-row"
               >
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--warning-soft)] text-[var(--warning)]">
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500/20 text-amber-400">
                   <Clock3 className="h-4 w-4" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <strong>Review “{content.title}”</strong>
-                  <small>
-                    {content.approvalStage
-                      ? approvalStageLabels[content.approvalStage]
-                      : `Submitted by ${content.submitterName}`}
+                  <strong className="text-white">Review "{content.title}"</strong>
+                  <small className="text-slate-400 block">
+                    {statusLabels[content.status] || content.status}
                   </small>
                 </span>
                 <ArrowRight className="h-4 w-4 text-[var(--muted-foreground)]" />
@@ -275,10 +246,10 @@ export function OverviewView({
             {attention.length === 0 && pending.length === 0 && (
               <div className="grid min-h-36 place-items-center text-center">
                 <div>
-                  <Check className="mx-auto h-6 w-6 text-[var(--success)]" />
-                  <p className="mt-2 text-sm font-medium">Everything looks good</p>
+                  <Check className="mx-auto h-6 w-6 text-emerald-400" />
+                  <p className="mt-2 text-sm font-medium text-white">Everything is operating normally</p>
                   <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                    There is nothing to resolve right now.
+                    No pending approvals or offline screens.
                   </p>
                 </div>
               </div>

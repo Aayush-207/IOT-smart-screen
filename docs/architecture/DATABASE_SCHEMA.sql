@@ -1,4 +1,4 @@
--- CampusCast Production PostgreSQL DDL Schema
+-- CampusCast Production PostgreSQL DDL Schema (Updated Master Plan)
 -- Multi-tenant digital signage database schema with organization_id boundaries
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -35,17 +35,126 @@ CREATE TABLE users (
   email VARCHAR(255) NOT NULL,
   full_name VARCHAR(255) NOT NULL,
   role VARCHAR(64) NOT NULL CHECK (role IN (
-    'PLATFORM_ADMIN', 'ORG_ADMIN', 'CONTENT_APPROVER', 
-    'COLLEGE_REP', 'CLUB_REP', 'FACILITIES_OPERATOR', 'ANALYST'
+    'DESIGN_LEAD', 'PRESIDENT', 'CLUB_HOD', 'ADMIN', 'COLLEGE_REP', 'VIEWER'
   )),
-  department VARCHAR(128),
+  department_id VARCHAR(128),
+  club_id VARCHAR(128),
   status VARCHAR(32) DEFAULT 'ACTIVE',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_users_org_sub ON users(organization_id, cognito_sub);
 
--- 4. Device Inventory & IoT Credentials
+-- 4. Clubs & Departments
+CREATE TABLE clubs (
+  id VARCHAR(64) PRIMARY KEY,
+  organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  design_lead_user_id UUID REFERENCES users(id),
+  president_user_id UUID REFERENCES users(id),
+  hod_user_id UUID REFERENCES users(id),
+  is_hod_required BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 5. Events Calendar (With Event-Relative Poster Deadline & Progress Tracking)
+CREATE TABLE events (
+  id VARCHAR(64) PRIMARY KEY,
+  organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  club_id VARCHAR(64) NOT NULL REFERENCES clubs(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  event_date DATE NOT NULL,
+  venue VARCHAR(255) NOT NULL,
+  status VARCHAR(64) NOT NULL DEFAULT 'design_in_progress' CHECK (status IN (
+    'design_in_progress', 'poster_delayed', 'pending_president_approval',
+    'pending_hod_approval', 'pending_admin_approval', 'escalated_admin',
+    'approved', 'rejected', 'ineligible', 'live', 'archived'
+  )),
+  poster_due_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  expected_upload_at TIMESTAMP WITH TIME ZONE,
+  design_progress INT DEFAULT 0 CHECK (design_progress BETWEEN 0 AND 100),
+  due_date_reason TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_events_club_date ON events(club_id, event_date);
+
+-- 6. Content Items / Assets (With Rejection-Loop Ceiling Counter)
+CREATE TABLE content_items (
+  id VARCHAR(64) PRIMARY KEY,
+  organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  event_id VARCHAR(64) NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  media_url TEXT NOT NULL,
+  mime_type VARCHAR(64) NOT NULL DEFAULT 'image/png',
+  file_size_bytes BIGINT NOT NULL,
+  dimensions VARCHAR(32) NOT NULL,
+  sha256 VARCHAR(64) NOT NULL,
+  duration_seconds INT DEFAULT 15,
+  status VARCHAR(64) NOT NULL DEFAULT 'design_in_progress' CHECK (status IN (
+    'design_in_progress', 'poster_delayed', 'pending_president_approval',
+    'pending_hod_approval', 'pending_admin_approval', 'escalated_admin',
+    'approved', 'rejected', 'ineligible', 'live', 'archived'
+  )),
+  submitted_by UUID REFERENCES users(id),
+  approved_by UUID REFERENCES users(id),
+  approved_at TIMESTAMP WITH TIME ZONE,
+  rejection_count INT DEFAULT 0,
+  rejection_reason TEXT,
+  self_certified BOOLEAN DEFAULT false,
+  version INT DEFAULT 1,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_content_event_status ON content_items(event_id, status);
+
+-- 7. Approval Steps Audit Trail
+CREATE TABLE approval_steps (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  content_id VARCHAR(64) NOT NULL REFERENCES content_items(id) ON DELETE CASCADE,
+  approver_role VARCHAR(64) NOT NULL,
+  approver_user_id UUID REFERENCES users(id),
+  approver_name VARCHAR(255) NOT NULL,
+  decision VARCHAR(64) NOT NULL CHECK (decision IN (
+    'SUBMITTED', 'APPROVED', 'REJECTED', 'AUTO_ESCALATED', 'EDITED_POST_APPROVAL', 'OVERRIDDEN'
+  )),
+  comment TEXT,
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_approval_steps_content ON approval_steps(content_id);
+
+-- 8. QR Registrations (Short Link Redirects)
+CREATE TABLE registrations (
+  id VARCHAR(64) PRIMARY KEY,
+  organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  event_id VARCHAR(64) NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  external_url TEXT NOT NULL,
+  short_code VARCHAR(32) NOT NULL UNIQUE,
+  qr_asset_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_registrations_event ON registrations(event_id);
+CREATE INDEX idx_registrations_code ON registrations(short_code);
+
+-- 9. QR Scan Events Analytics (Per-Device Attribution)
+CREATE TABLE scan_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  registration_id VARCHAR(64) NOT NULL REFERENCES registrations(id) ON DELETE CASCADE,
+  device_id VARCHAR(64) REFERENCES devices(id) ON DELETE SET NULL,
+  scanned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  user_agent TEXT,
+  referrer TEXT
+);
+
+CREATE INDEX idx_scan_events_reg_device ON scan_events(registration_id, device_id);
+
+-- 10. Device Inventory & IoT Credentials
 CREATE TABLE devices (
   id VARCHAR(64) PRIMARY KEY,
   organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
@@ -65,90 +174,24 @@ CREATE TABLE devices (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_devices_org_status ON devices(organization_id, status);
-
--- 5. Content Assets & Quarantine Lifecycle
-CREATE TABLE content_assets (
-  id VARCHAR(64) PRIMARY KEY,
+-- 11. Synchronized Playback Manifest History
+CREATE TABLE playlist_manifests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  submitter_id UUID REFERENCES users(id),
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  category VARCHAR(32) NOT NULL CHECK (category IN ('EVENT', 'ANNOUNCEMENT', 'EMERGENCY', 'ACADEMIC')),
-  media_url TEXT NOT NULL,
-  mime_type VARCHAR(64) NOT NULL,
-  file_size_bytes BIGINT NOT NULL,
-  dimensions VARCHAR(32) NOT NULL,
-  sha256 VARCHAR(64) NOT NULL,
-  duration_seconds INT DEFAULT 15,
-  status VARCHAR(32) DEFAULT 'QUARANTINED' CHECK (status IN ('QUARANTINED', 'SUBMITTED', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'EXPIRED')),
-  approved_by VARCHAR(255),
-  approved_at TIMESTAMP WITH TIME ZONE,
-  rejection_reason TEXT,
+  manifest_version VARCHAR(32) NOT NULL UNIQUE,
+  activate_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  payload_hash VARCHAR(64) NOT NULL,
+  playlist_json JSONB NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_content_org_status ON content_assets(organization_id, status);
-
--- 6. Schedule Rules
-CREATE TABLE schedule_rules (
-  id VARCHAR(64) PRIMARY KEY,
-  organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
-  content_id VARCHAR(64) NOT NULL REFERENCES content_assets(id) ON DELETE CASCADE,
-  title VARCHAR(255) NOT NULL,
-  target_type VARCHAR(32) NOT NULL CHECK (target_type IN ('DEVICE', 'ZONE', 'BUILDING', 'CAMPUS')),
-  target_id VARCHAR(128) NOT NULL,
-  target_name VARCHAR(255) NOT NULL,
-  start_time TIMESTAMP WITH TIME ZONE NOT NULL,
-  end_time TIMESTAMP WITH TIME ZONE NOT NULL,
-  priority INT DEFAULT 10,
-  recurrence_rrul VARCHAR(255),
-  status VARCHAR(32) DEFAULT 'ACTIVE',
-  created_by VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_schedules_org_dates ON schedule_rules(organization_id, start_time, end_time);
-
--- 7. Compiled Playback Manifest History
-CREATE TABLE compiled_manifests (
+-- 12. Device Logs & Synchronized Manifest Acknowledgements
+CREATE TABLE device_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   organization_id VARCHAR(64) NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   device_id VARCHAR(64) NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
   manifest_version VARCHAR(32) NOT NULL,
-  payload_hash VARCHAR(64) NOT NULL,
-  valid_from TIMESTAMP WITH TIME ZONE NOT NULL,
-  valid_until TIMESTAMP WITH TIME ZONE NOT NULL,
-  items_json JSONB NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+  status VARCHAR(32) NOT NULL CHECK (status IN ('ACKNOWLEDGED', 'OUT_OF_SYNC', 'DOWNLOAD_FAILED')),
+  clock_skew_ms INT DEFAULT 0,
+  logged_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX idx_manifests_device_ver ON compiled_manifests(device_id, manifest_version);
-
--- 8. Raw Ingested Telemetry Events (Partitioned by Month)
-CREATE TABLE telemetry_events (
-  id UUID DEFAULT uuid_generate_v4(),
-  organization_id VARCHAR(64) NOT NULL,
-  device_id VARCHAR(64) NOT NULL,
-  content_id VARCHAR(64) NOT NULL,
-  timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-  result VARCHAR(32) NOT NULL,
-  latency_ms INT DEFAULT 0,
-  payload JSONB DEFAULT '{}'::jsonb,
-  PRIMARY KEY (id, timestamp)
-) PARTITION BY RANGE (timestamp);
-
--- 9. Append-Only Security Audit Logs
-CREATE TABLE audit_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  organization_id VARCHAR(64) NOT NULL,
-  actor VARCHAR(255) NOT NULL,
-  action VARCHAR(128) NOT NULL,
-  resource VARCHAR(128) NOT NULL,
-  resource_id VARCHAR(128) NOT NULL,
-  ip_address VARCHAR(45) NOT NULL,
-  details TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_audit_org_actor ON audit_logs(organization_id, actor);

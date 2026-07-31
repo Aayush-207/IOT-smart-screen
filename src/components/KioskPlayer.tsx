@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Monitor, Wifi, WifiOff } from 'lucide-react';
 
-import type { CompiledManifest, Device } from '../types';
+import type { Device, SynchronizedMasterManifest } from '../types';
 
 interface KioskPlayerProps {
   deviceId: string;
@@ -9,7 +9,7 @@ interface KioskPlayerProps {
 
 interface CachedPlayerState {
   device: Device;
-  manifest: CompiledManifest;
+  manifest: SynchronizedMasterManifest;
 }
 
 const fallbackImage =
@@ -44,25 +44,16 @@ export function KioskPlayer({ deviceId }: KioskPlayerProps) {
       try {
         const [bootstrapResponse, manifestResponse] = await Promise.all([
           fetch('/v1/bootstrap'),
-          fetch(`/v1/manifests/${encodeURIComponent(deviceId)}`),
+          fetch(`/v1/manifest/master`),
         ]);
         if (!bootstrapResponse.ok || !manifestResponse.ok) return;
         const bootstrap = (await bootstrapResponse.json()) as { devices: Device[] };
         const device = bootstrap.devices.find((item) => item.id === deviceId);
         if (!device || stopped) return;
-        const manifest = (await manifestResponse.json()) as CompiledManifest;
+        const manifest = (await manifestResponse.json()) as SynchronizedMasterManifest;
         const next = { device, manifest };
         setState(next);
         localStorage.setItem(cacheKey, JSON.stringify(next));
-        await fetch(`/v1/devices/${encodeURIComponent(deviceId)}/heartbeat`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            appVersion: device.appVersion,
-            storageUsagePct: device.storageUsagePct,
-            temperatureC: device.temperatureC,
-          }),
-        });
       } catch {
         setOnline(false);
       }
@@ -110,11 +101,11 @@ export function KioskPlayer({ deviceId }: KioskPlayerProps) {
       <header className="absolute inset-x-0 top-0 flex items-center justify-between p-5 text-sm">
         <span className="flex items-center gap-2 font-semibold">
           <Monitor className="h-5 w-5" />
-          CampusCast
+          CampusCast Smart Screen
         </span>
         <span className={`flex items-center gap-2 ${online ? 'text-emerald-300' : 'text-amber-300'}`}>
           {online ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
-          {online ? 'Connected' : 'Playing offline cache'}
+          {online ? 'Master Manifest Synchronized' : 'Offline Cache Active'}
         </span>
       </header>
       <footer className="absolute inset-x-0 bottom-0 p-6">
@@ -122,7 +113,7 @@ export function KioskPlayer({ deviceId }: KioskPlayerProps) {
           {state?.device.displayName ?? deviceId}
         </p>
         <h1 className="mt-2 text-2xl font-semibold sm:text-4xl">
-          {item?.title ?? 'Campus information'}
+          {item?.title ?? 'Campus Information Slate'}
         </h1>
       </footer>
     </main>
