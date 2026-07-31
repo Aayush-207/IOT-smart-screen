@@ -69,10 +69,10 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center pt-20 p-4">
-      <div className="nova-modal w-full max-w-xl overflow-hidden elevation-5 border border-[var(--border)] bg-[var(--card)] animate-fade-in">
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-2xl animate-fade-in">
         {/* Search Header */}
         <div className="relative p-4 border-b border-[var(--border)] flex items-center gap-3">
-          <Search className="h-5 w-5 text-[var(--primary)] shrink-0" />
+          <Search className="h-5 w-5 text-[var(--accent)] shrink-0" />
           <input
             type="text"
             autoFocus
@@ -81,7 +81,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             className="w-full bg-transparent text-[var(--foreground)] text-sm font-sans focus:outline-none placeholder:text-[var(--muted-foreground)]"
           />
-          <kbd className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono text-[var(--muted-foreground)] bg-[var(--muted)] rounded border border-[var(--border)]">
+          <kbd className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono text-[var(--muted-foreground)] bg-[var(--surface-raised)] rounded border border-[var(--border)]">
             ESC
           </kbd>
         </div>
@@ -98,13 +98,13 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                 onOpenKioskSim();
                 onClose();
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-[var(--muted)] text-[var(--foreground)] transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-[var(--surface-raised)] text-[var(--foreground)] transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <Radio className="h-4 w-4 text-[var(--primary)]" />
+                <Radio className="h-4 w-4 text-[var(--accent)]" />
                 <span className="font-medium">Launch Interactive Screen Simulator</span>
               </div>
-              <span className="nova-badge nova-badge-primary text-[10px]">Action</span>
+              <span className="cc-status cc-status-neutral text-[10px]">Action</span>
             </button>
           </div>
 
@@ -121,7 +121,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                     onNavigateTab(item.tab);
                     onClose();
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-[var(--muted)] text-[var(--foreground)] transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-[var(--surface-raised)] text-[var(--foreground)] transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
                     <item.icon className="h-4 w-4 text-[var(--muted-foreground)]" />
@@ -146,16 +146,16 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
                     onOpenKioskSim(dev.id);
                     onClose();
                   }}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-[var(--muted)] text-[var(--foreground)] transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-md hover:bg-[var(--surface-raised)] text-[var(--foreground)] transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Tv className="h-4 w-4 text-[var(--primary)]" />
+                    <Tv className="h-4 w-4 text-[var(--accent)]" />
                     <div>
                       <span className="font-semibold">{dev.displayName}</span>
                       <span className="text-[11px] text-[var(--muted-foreground)] ml-2">({dev.location.building})</span>
                     </div>
                   </div>
-                  <span className="nova-badge nova-badge-success text-[10px]">{dev.status}</span>
+                  <span className="cc-status cc-status-success text-[10px]">{dev.status}</span>
                 </button>
               ))}
             </div>

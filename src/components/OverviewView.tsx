@@ -171,62 +171,56 @@ export function OverviewView({
             </button>
           </div>
           <div className="divide-y divide-[var(--border)]">
-            {devices.map((device) => {
-              const content = contentList.find(
-                (item) => item.id === device.activeContentId,
-              );
-              return (
-                <button
-                  type="button"
-                  key={device.id}
-                  onClick={() => onOpenKioskSim(device.id)}
-                  className="group grid w-full grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left transition hover:bg-[var(--surface-raised)] sm:grid-cols-[72px_minmax(0,1fr)_140px_auto]"
-                >
-                  <img
-                    src={
-                      content?.mediaUrl ??
-                      'https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80'
-                    }
-                    alt=""
-                    className="h-10 w-14 rounded-md bg-[var(--surface-raised)] object-cover sm:h-12 sm:w-[72px]"
-                  />
-                  <span className="min-w-0">
-                    <strong className="block truncate text-sm font-medium">
-                      {content?.title ?? 'Campus welcome screen'}
-                    </strong>
-                    <small className="mt-0.5 block truncate text-xs text-[var(--muted-foreground)]">
-                      {device.displayName}
-                    </small>
-                  </span>
-                  <span className="hidden text-xs text-[var(--muted-foreground)] sm:block">
-                    {device.location.building}
-                  </span>
-                  <span
-                    className={`cc-status ${
-                      device.status === 'ONLINE'
-                        ? 'cc-status-success'
-                        : 'cc-status-warning'
-                    }`}
+            {devices.length ? (
+              devices.map((device) => {
+                const content = contentList.find(
+                  (item) => item.id === device.activeContentId,
+                );
+                return (
+                  <button
+                    type="button"
+                    key={device.id}
+                    onClick={() => onOpenKioskSim(device.id)}
+                    className="group grid w-full grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left transition hover:bg-[var(--surface-raised)] sm:grid-cols-[72px_minmax(0,1fr)_140px_auto]"
                   >
-                    {device.status === 'ONLINE' ? 'Live' : 'Check'}
-                  </span>
-                </button>
-              );
-            })}
-            {devices.length === 0 && (
-              <div className="p-8 text-center">
-                <Monitor className="mx-auto h-8 w-8 text-[var(--muted-foreground)] opacity-60" />
-                <p className="mt-2 text-sm font-semibold">No screens registered yet</p>
-                <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                  Go to Screens management to pair your campus smart displays.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => onNavigateTab('devices')}
-                  className="cc-button-secondary mx-auto mt-4"
-                >
-                  Go to screens
-                </button>
+                    <img
+                      src={
+                        content?.mediaUrl ??
+                        'https://images.unsplash.com/photo-1562774053-701939374585?w=800&auto=format&fit=crop&q=80'
+                      }
+                      alt=""
+                      className="h-10 w-14 rounded-md bg-[var(--surface-raised)] object-cover sm:h-12 sm:w-[72px]"
+                    />
+                    <span className="min-w-0">
+                      <strong className="block truncate text-sm font-medium">
+                        {content?.title ?? 'Active Screen Slate'}
+                      </strong>
+                      <small className="mt-0.5 block truncate text-xs text-[var(--muted-foreground)]">
+                        {device.displayName}
+                      </small>
+                    </span>
+                    <span className="hidden text-xs text-[var(--muted-foreground)] sm:block">
+                      {device.location.building}
+                    </span>
+                    <span
+                      className={`cc-status ${
+                        device.status === 'ONLINE'
+                          ? 'cc-status-success'
+                          : 'cc-status-warning'
+                      }`}
+                    >
+                      {device.status === 'ONLINE' ? 'Live' : 'Check'}
+                    </span>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="grid min-h-36 place-items-center p-6 text-center text-xs text-[var(--muted-foreground)]">
+                <div>
+                  <Monitor className="mx-auto h-6 w-6 opacity-40" />
+                  <p className="mt-2 font-medium">No enrolled screens online</p>
+                  <p className="mt-1 text-[11px]">Go to Screens tab to register your first smart display.</p>
+                </div>
               </div>
             )}
           </div>

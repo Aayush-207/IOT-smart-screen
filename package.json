@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "start": "tsx src/server/index.ts",
+    "dev:server": "tsx src/server/index.ts",
+    "dev:all": "node scripts/dev-all.js",
     "build": "tsc && vite build",
     "build:platform": "turbo run build",
     "dev:api": "pnpm --filter @campuscast/api dev",

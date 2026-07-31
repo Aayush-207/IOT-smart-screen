@@ -12,12 +12,11 @@ import {
   X,
 } from 'lucide-react';
 
-import type { ContentAsset, Device, ScheduleRule, UserRole } from '../types';
+import type { ContentAsset, ScheduleRule, UserRole } from '../types';
 
 interface ScheduleCalendarViewProps {
   schedules: ScheduleRule[];
   contentList: ContentAsset[];
-  devices?: Device[];
   onAddSchedule: (schedule: ScheduleRule) => void;
   onUpdateSchedule: (id: string, status: ScheduleRule['status']) => void;
   currentRole: UserRole;
@@ -54,7 +53,6 @@ function scheduleStatus(schedule: ScheduleRule): {
 export function ScheduleCalendarView({
   schedules,
   contentList,
-  devices = [],
   onAddSchedule,
   onUpdateSchedule,
   currentRole,
@@ -319,18 +317,8 @@ export function ScheduleCalendarView({
                   value={target}
                   onChange={(event) => setTarget(event.target.value)}
                 >
-                  <option>All campus screens</option>
-                  {devices.map((device) => (
-                    <option key={device.id} value={device.displayName}>
-                      {device.displayName} ({device.location.building})
-                    </option>
-                  ))}
-                  {devices.length === 0 && (
-                    <>
-                      <option>Tech Block A</option>
-                      <option>Central Library</option>
-                    </>
-                  )}
+                  <option value="All campus screens">All campus screens</option>
+                  <option value="Specific Screen">Specific Screen / Group</option>
                 </select>
               </label>
               {mode !== 'now' && (

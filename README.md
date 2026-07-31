@@ -38,6 +38,30 @@ Open `http://localhost:8080`. The local server runs the dashboard and demo API
 together. Use the account menu to switch between Design Lead, President, Club
 HOD, and Campus Admin, and walk one poster through the complete hierarchy.
 
+Application data is saved in `.data/campuscast.json`, so submissions, approvals,
+schedules, device health, updates, and playback events survive a restart. Use
+**Reset demo workspace** in the account menu when you need a clean demonstration.
+
+## Run a campus screen
+
+Open a screen from **Screens → Open screen player**, or use:
+
+```text
+http://localhost:8080/?kiosk=dev_tech_f1_01
+```
+
+The player is installable as a fullscreen web app on an Android box, Raspberry
+Pi, or smart display browser. It downloads the active manifest, caches the app
+and last valid playlist, keeps playing when offline, sends a heartbeat every
+minute, and reports playback results when connected.
+
+To demonstrate device operations:
+
+1. Open **Screens** and select the hostel screen.
+2. Choose **Install update** to move it to the current kiosk version.
+3. Choose **Restart app** to test remote recovery.
+4. Open **Health** to review uptime, incidents, and playback proof.
+
 ## Verify it
 
 ```bash
@@ -56,7 +80,12 @@ pnpm build
 | Screen messaging | AWS IoT Core + device gateway |
 | Display | Android kiosk with local cache |
 
-The API, worker, gateway, shared contracts, and database packages are production-shaped foundations. AWS provisioning and the Android kiosk application remain deployment work, not requirements for running the complete local demo.
+The local prototype is complete and can be demonstrated without cloud accounts
+or physical hardware. The API, worker, gateway, shared contracts, PostgreSQL
+schema, Cognito validation, S3 upload flow, SQS heartbeat ingestion, and IoT
+message contracts provide the production path. Connecting real AWS resources
+and enrolling a physical screen still require the institution's AWS
+credentials, domain/certificates, and selected Android or Raspberry Pi device.
 
 ## Technical reference
 

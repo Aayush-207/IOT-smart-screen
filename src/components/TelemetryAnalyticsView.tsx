@@ -70,50 +70,50 @@ export function TelemetryAnalyticsView({
             </div>
           </div>
           <div className="divide-y divide-[var(--border)]">
-            {telemetry.map((event) => (
-              <article
-                key={event.id}
-                className="grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_120px_90px] sm:items-center"
-              >
-                <div className="min-w-0">
-                  <h3 className="truncate text-sm font-medium">{event.contentTitle}</h3>
-                  <p className="mt-0.5 truncate text-xs text-[var(--muted-foreground)]">
-                    {event.deviceName}
-                  </p>
-                </div>
-                <p className="text-xs text-[var(--muted-foreground)]">
-                  {new Date(event.timestamp).toLocaleString([], {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
-                <span
-                  className={`cc-status w-fit ${
-                    event.result === 'PLAY_SUCCESS' || event.result === 'CACHE_HIT'
-                      ? 'cc-status-success'
-                      : 'cc-status-danger'
-                  }`}
+            {telemetry.length ? (
+              telemetry.map((event) => (
+                <article
+                  key={event.id}
+                  className="grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_120px_90px] sm:items-center"
                 >
-                  {event.result === 'CACHE_HIT'
-                    ? 'Played offline'
-                    : event.result === 'PLAY_SUCCESS'
-                      ? 'Played'
-                      : 'Failed'}
-                </span>
-                <p className="text-xs text-[var(--muted-foreground)] sm:text-right">
-                  {event.latencyMs} ms
-                </p>
-              </article>
-            ))}
-            {telemetry.length === 0 && (
-              <div className="p-8 text-center space-y-2">
-                <Activity className="h-8 w-8 text-[var(--muted-foreground)] mx-auto opacity-50" />
-                <p className="text-sm font-semibold text-[var(--foreground)]">No Playback Telemetry Recorded</p>
-                <p className="text-xs text-[var(--muted-foreground)]">
-                  Telemetry events will populate automatically as registered screens report playback status.
-                </p>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-medium">{event.contentTitle}</h3>
+                    <p className="mt-0.5 truncate text-xs text-[var(--muted-foreground)]">
+                      {event.deviceName}
+                    </p>
+                  </div>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {new Date(event.timestamp).toLocaleString([], {
+                      day: 'numeric',
+                      month: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                  <span
+                    className={`cc-status w-fit ${event.result === 'PLAY_SUCCESS' || event.result === 'CACHE_HIT'
+                        ? 'cc-status-success'
+                        : 'cc-status-danger'
+                      }`}
+                  >
+                    {event.result === 'CACHE_HIT'
+                      ? 'Played offline'
+                      : event.result === 'PLAY_SUCCESS'
+                        ? 'Played'
+                        : 'Failed'}
+                  </span>
+                  <p className="text-xs text-[var(--muted-foreground)] sm:text-right">
+                    {event.latencyMs} ms
+                  </p>
+                </article>
+              ))
+            ) : (
+              <div className="grid min-h-36 place-items-center p-6 text-center text-xs text-[var(--muted-foreground)]">
+                <div>
+                  <Activity className="mx-auto h-6 w-6 opacity-40" />
+                  <p className="mt-2 font-medium">No playback telemetry recorded yet</p>
+                  <p className="mt-1 text-[11px]">Telemetry logs will appear as connected IoT screens complete playback cycles.</p>
+                </div>
               </div>
             )}
           </div>

@@ -1,13 +1,23 @@
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import {
+  createReadStream,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import http, { type IncomingMessage, type ServerResponse } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  INITIAL_CONTENT,
+  INITIAL_DEVICES,
+  INITIAL_SCHEDULES,
+  MOCK_TELEMETRY,
   SAMPLE_COMPILED_MANIFEST,
 } from '../mockData';
 import type {
-  AuditLogRecord,
   ContentAsset,
   Device,
   ScheduleRule,
@@ -27,6 +37,9 @@ if (!Number.isInteger(requestedPort) || requestedPort < 1 || requestedPort > 65_
 const port = requestedPort;
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const distDirectory = path.join(projectRoot, 'dist');
+const dataFile = path.resolve(
+  process.env.CAMPUSCAST_DATA_FILE ?? path.join(projectRoot, '.data', 'campuscast.json'),
+);
 const allowedScheduleStatuses = new Set<ScheduleRule['status']>([
   'ACTIVE',
   'SCHEDULED',
@@ -42,18 +55,51 @@ const allowedRoles = new Set<UserRole>([
   'ADMIN',
 ]);
 
-let devices: Device[] = [];
-let contentList: ContentAsset[] = [];
-let schedules: ScheduleRule[] = [];
-let telemetry: TelemetryEvent[] = [];
-let auditLogs: AuditLogRecord[] = [];
+interface PersistentState {
+  devices: Device[];
+  contentList: ContentAsset[];
+  schedules: ScheduleRule[];
+  telemetry: TelemetryEvent[];
+}
+
+function initialState(): PersistentState {
+  return {
+    devices: [],
+    contentList: [],
+    schedules: [],
+    telemetry: [],
+  };
+}
+
+function loadState(): PersistentState {
+  try {
+    const value = JSON.parse(readFileSync(dataFile, 'utf8')) as Partial<PersistentState>;
+    if (
+      Array.isArray(value.devices) &&
+      Array.isArray(value.contentList) &&
+      Array.isArray(value.schedules) &&
+      Array.isArray(value.telemetry)
+    ) {
+      return value as PersistentState;
+    }
+  } catch {
+    // First run or invalid local data: start from the verified demo workspace.
+  }
+  return initialState();
+}
+
+let state = loadState();
+let { devices, contentList, schedules, telemetry } = state;
+
+function persistState(): void {
+  state = { devices, contentList, schedules, telemetry };
+  mkdirSync(path.dirname(dataFile), { recursive: true });
+  writeFileSync(dataFile, JSON.stringify(state, null, 2), 'utf8');
+}
 
 export function resetLocalState(): void {
-  devices = [];
-  contentList = [];
-  schedules = [];
-  telemetry = [];
-  auditLogs = [];
+  ({ devices, contentList, schedules, telemetry } = initialState());
+  persistState();
 }
 
 function sendJson(
@@ -144,7 +190,6 @@ async function handleApi(
       contentList,
       schedules,
       telemetry,
-      auditLogs,
     });
     return true;
   }
@@ -154,29 +199,9 @@ async function handleApi(
     ['/v1/content', contentList],
     ['/v1/schedules', schedules],
     ['/v1/telemetry', telemetry],
-    ['/v1/audit-logs', auditLogs],
   ]);
   if (request.method === 'GET' && collections.has(url.pathname)) {
     sendJson(response, 200, { items: collections.get(url.pathname) });
-    return true;
-  }
-
-  if (request.method === 'POST' && url.pathname === '/v1/devices') {
-    const input = (await readJson(request)) as Device;
-    if (!input || typeof input !== 'object' || !input.id || !input.displayName) {
-      sendJson(response, 422, { error: 'A valid device configuration is required.' });
-      return true;
-    }
-    devices = [input, ...devices.filter((dev) => dev.id !== input.id)];
-    sendJson(response, 201, input);
-    return true;
-  }
-
-  const deleteDeviceMatch = url.pathname.match(/^\/v1\/devices\/([^/]+)$/);
-  if (request.method === 'DELETE' && deleteDeviceMatch) {
-    const id = decodeURIComponent(deleteDeviceMatch[1]!);
-    devices = devices.filter((dev) => dev.id !== id);
-    sendJson(response, 200, { status: 'deleted', id });
     return true;
   }
 
@@ -187,6 +212,7 @@ async function handleApi(
       return true;
     }
     contentList = [input, ...contentList.filter((item) => item.id !== input.id)];
+    persistState();
     sendJson(response, 201, input);
     return true;
   }
@@ -234,6 +260,25 @@ async function handleApi(
         input.clubId,
         input.actorName,
       );
+      const approved = contentList[index]!;
+      if (approved.status === 'APPROVED' && approved.eventDate) {
+        const window = eventDisplayWindow(approved.eventDate);
+        const schedule: ScheduleRule = {
+          id: `sch_event_${approved.id}`,
+          organizationId: approved.organizationId,
+          title: `${approved.title} · 21-day event campaign`,
+          contentId: approved.id,
+          targetType: 'CAMPUS',
+          targetId: 'mit_adt_main',
+          targetName: 'All campus screens',
+          startTime: window.effectiveStart,
+          endTime: window.endTime,
+          priority: 10,
+          createdBy: input.actorName,
+          status: new Date(window.effectiveStart) <= new Date() ? 'ACTIVE' : 'SCHEDULED',
+        };
+        schedules = [schedule, ...schedules.filter((item) => item.id !== schedule.id)];
+      }
     } else {
       const reason =
         typeof input.reason === 'string' && input.reason.trim()
@@ -256,6 +301,7 @@ async function handleApi(
         ],
       };
     }
+    persistState();
     sendJson(response, 200, contentList[index]);
     return true;
   }
@@ -283,6 +329,7 @@ async function handleApi(
       return true;
     }
     contentList[index] = { ...contentList[index]!, ...input, id };
+    persistState();
     sendJson(response, 200, contentList[index]);
     return true;
   }
@@ -294,6 +341,7 @@ async function handleApi(
       return true;
     }
     schedules = [input, ...schedules.filter((item) => item.id !== input.id)];
+    persistState();
     sendJson(response, 201, input);
     return true;
   }
@@ -311,7 +359,20 @@ async function handleApi(
       return true;
     }
     schedules[index] = { ...schedules[index]!, status: input.status };
+    persistState();
     sendJson(response, 200, schedules[index]);
+    return true;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/v1/devices') {
+    const input = (await readJson(request)) as Device;
+    if (!input || typeof input.id !== 'string' || typeof input.displayName !== 'string') {
+      sendJson(response, 422, { error: 'A valid device configuration is required.' });
+      return true;
+    }
+    devices = [input, ...devices.filter((item) => item.id !== input.id)];
+    persistState();
+    sendJson(response, 201, input);
     return true;
   }
 
@@ -324,6 +385,7 @@ async function handleApi(
       return true;
     }
     devices[index] = { ...devices[index]!, status: 'MAINTENANCE' };
+    persistState();
     setTimeout(() => {
       const current = devices.findIndex((item) => item.id === id);
       if (current >= 0) {
@@ -332,9 +394,109 @@ async function handleApi(
           status: 'ONLINE',
           lastHeartbeatAt: new Date().toISOString(),
         };
+        persistState();
       }
     }, 1_500);
     sendJson(response, 202, { status: 'restart_requested', deviceId: id });
+    return true;
+  }
+
+  const heartbeatMatch = url.pathname.match(/^\/v1\/devices\/([^/]+)\/heartbeat$/);
+  if (request.method === 'POST' && heartbeatMatch) {
+    const id = decodeURIComponent(heartbeatMatch[1]!);
+    const index = devices.findIndex((item) => item.id === id);
+    if (index < 0) {
+      sendJson(response, 404, { error: 'Screen not found.' });
+      return true;
+    }
+    const input = (await readJson(request)) as {
+      appVersion?: string;
+      storageUsagePct?: number;
+      temperatureC?: number;
+    };
+    devices[index] = {
+      ...devices[index]!,
+      status: 'ONLINE',
+      lastHeartbeatAt: new Date().toISOString(),
+      ...(typeof input.appVersion === 'string' ? { appVersion: input.appVersion } : {}),
+      ...(typeof input.storageUsagePct === 'number'
+        ? { storageUsagePct: Math.min(100, Math.max(0, input.storageUsagePct)) }
+        : {}),
+      ...(typeof input.temperatureC === 'number'
+        ? { temperatureC: input.temperatureC }
+        : {}),
+    };
+    persistState();
+    sendJson(response, 202, { status: 'heartbeat_accepted', device: devices[index] });
+    return true;
+  }
+
+  const playbackMatch = url.pathname.match(/^\/v1\/devices\/([^/]+)\/playback$/);
+  if (request.method === 'POST' && playbackMatch) {
+    const id = decodeURIComponent(playbackMatch[1]!);
+    const device = devices.find((item) => item.id === id);
+    const input = (await readJson(request)) as {
+      contentId?: string;
+      result?: TelemetryEvent['result'];
+      latencyMs?: number;
+    };
+    const content = contentList.find((item) => item.id === input.contentId);
+    const allowedResults = new Set<TelemetryEvent['result']>([
+      'PLAY_SUCCESS',
+      'DOWNLOAD_FAILED',
+      'CHECKSUM_MISMATCH',
+      'CACHE_HIT',
+    ]);
+    if (!device || !content || !input.result || !allowedResults.has(input.result)) {
+      sendJson(response, 422, { error: 'A valid device playback event is required.' });
+      return true;
+    }
+    const event: TelemetryEvent = {
+      id: `tel_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      deviceId: device.id,
+      deviceName: device.displayName,
+      contentId: content.id,
+      contentTitle: content.title,
+      timestamp: new Date().toISOString(),
+      result: input.result,
+      latencyMs:
+        typeof input.latencyMs === 'number' && input.latencyMs >= 0
+          ? Math.round(input.latencyMs)
+          : 0,
+    };
+    telemetry = [event, ...telemetry].slice(0, 500);
+    persistState();
+    sendJson(response, 202, event);
+    return true;
+  }
+
+  const updateMatch = url.pathname.match(/^\/v1\/devices\/([^/]+)\/update$/);
+  if (request.method === 'POST' && updateMatch) {
+    const id = decodeURIComponent(updateMatch[1]!);
+    const index = devices.findIndex((item) => item.id === id);
+    if (index < 0) {
+      sendJson(response, 404, { error: 'Screen not found.' });
+      return true;
+    }
+    devices[index] = { ...devices[index]!, status: 'MAINTENANCE' };
+    persistState();
+    setTimeout(() => {
+      const current = devices.findIndex((item) => item.id === id);
+      if (current >= 0) {
+        devices[current] = {
+          ...devices[current]!,
+          appVersion: 'v2.1.0-kiosk',
+          status: 'ONLINE',
+          lastHeartbeatAt: new Date().toISOString(),
+        };
+        persistState();
+      }
+    }, 1_500);
+    sendJson(response, 202, {
+      status: 'update_requested',
+      deviceId: id,
+      targetVersion: 'v2.1.0-kiosk',
+    });
     return true;
   }
 
@@ -349,7 +511,44 @@ async function handleApi(
     url.pathname.startsWith('/v1/manifests/')
   ) {
     const deviceId = url.pathname.split('/')[3] || devices[0]?.id;
-    sendJson(response, 200, { ...SAMPLE_COMPILED_MANIFEST, deviceId });
+    const now = Date.now();
+    const playlist = schedules
+      .filter(
+        (schedule) =>
+          schedule.status !== 'CANCELLED' &&
+          schedule.status !== 'PAUSED' &&
+          new Date(schedule.startTime).getTime() <= now &&
+          new Date(schedule.endTime).getTime() >= now,
+      )
+      .sort((left, right) => right.priority - left.priority)
+      .flatMap((schedule) => {
+        const content = contentList.find(
+          (item) => item.id === schedule.contentId && item.status === 'APPROVED',
+        );
+        return content
+          ? [{
+              contentId: content.id,
+              version: 1,
+              title: content.title,
+              mediaUrl: content.mediaUrl,
+              mimeType: content.mimeType,
+              sha256: content.sha256,
+              durationSeconds: content.durationSeconds,
+              priority: schedule.priority,
+              displaySchedule: {
+                startTime: schedule.startTime,
+                endTime: schedule.endTime,
+              },
+            }]
+          : [];
+      });
+    sendJson(response, 200, {
+      ...SAMPLE_COMPILED_MANIFEST,
+      manifestVersion: `local-${Date.now()}`,
+      deviceId,
+      generatedAt: new Date().toISOString(),
+      playlist,
+    });
     return true;
   }
 
