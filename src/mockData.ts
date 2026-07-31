@@ -32,30 +32,6 @@ export const CLUBS: Club[] = [
   },
 ];
 
-export const CLUBS: Club[] = [
-  {
-    id: 'club_acm',
-    name: 'ACM Student Chapter',
-    designLead: 'Aditi Deshmukh',
-    president: 'Aditya Patil',
-    hod: 'Dr. Neha Kulkarni',
-  },
-  {
-    id: 'club_robotics',
-    name: 'Robotics & AI Club',
-    designLead: 'Meera Joshi',
-    president: 'Rohan Sharma',
-    hod: 'Dr. Sameer Shah',
-  },
-  {
-    id: 'club_cultural',
-    name: 'Cultural Club',
-    designLead: 'Isha Rao',
-    president: 'Kabir Mehta',
-    hod: 'Prof. Ananya Verma',
-  },
-];
-
 export const INITIAL_DEVICES: Device[] = [];
 
 export const INITIAL_CONTENT: ContentAsset[] = [];
@@ -80,4 +56,3 @@ export const SAMPLE_COMPILED_MANIFEST: CompiledManifest = {
   },
   playlist: []
 };
-

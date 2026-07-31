@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 
+import { AuditLogView } from './components/AuditLogView';
 import { ContentApprovalView } from './components/ContentApprovalView';
 import { DeviceManagementView } from './components/DeviceManagementView';
 import { KioskSimulatorModal } from './components/KioskSimulatorModal';
@@ -9,17 +10,13 @@ import { OverviewView } from './components/OverviewView';
 import { ScheduleCalendarView } from './components/ScheduleCalendarView';
 import { Sidebar, type ViewTab } from './components/Sidebar';
 import { TelemetryAnalyticsView } from './components/TelemetryAnalyticsView';
-import {
-  CLUBS,
-  INITIAL_CONTENT,
-  INITIAL_DEVICES,
-  INITIAL_SCHEDULES,
-  MOCK_TELEMETRY,
-} from './mockData';
+import { CLUBS } from './mockData';
 import type {
+  AuditLogRecord,
   ContentAsset,
   Device,
   ScheduleRule,
+  TelemetryEvent,
   UserRole,
 } from './types';
 import {
@@ -29,7 +26,7 @@ import {
   eventDisplayWindow,
 } from './workflow';
 
-const workspaceKey = 'campuscast-workspace-v2';
+const workspaceKey = 'campuscast-workspace-v3';
 const persistedPosterFallback =
   'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=85';
 
@@ -37,6 +34,8 @@ interface WorkspaceState {
   devices: Device[];
   contentList: ContentAsset[];
   schedules: ScheduleRule[];
+  telemetry: TelemetryEvent[];
+  auditLogs: AuditLogRecord[];
 }
 
 function loadWorkspace(): WorkspaceState {
@@ -54,6 +53,8 @@ function loadWorkspace(): WorkspaceState {
         devices: stored.devices,
         contentList: stored.contentList,
         schedules: stored.schedules,
+        telemetry: Array.isArray(stored.telemetry) ? stored.telemetry : [],
+        auditLogs: Array.isArray(stored.auditLogs) ? stored.auditLogs : [],
       };
     }
   } catch {
@@ -64,9 +65,11 @@ function loadWorkspace(): WorkspaceState {
     }
   }
   return {
-    devices: INITIAL_DEVICES,
-    contentList: INITIAL_CONTENT,
-    schedules: INITIAL_SCHEDULES,
+    devices: [],
+    contentList: [],
+    schedules: [],
+    telemetry: [],
+    auditLogs: [],
   };
 }
 
@@ -87,6 +90,12 @@ export function App() {
   );
   const [schedules, setSchedules] = useState<ScheduleRule[]>(
     initialWorkspace.schedules,
+  );
+  const [telemetry, setTelemetry] = useState<TelemetryEvent[]>(
+    initialWorkspace.telemetry,
+  );
+  const [auditLogs, setAuditLogs] = useState<AuditLogRecord[]>(
+    initialWorkspace.auditLogs,
   );
   const [theme, setTheme] = useState<ThemeOption>(initialTheme);
   const [simulatingDeviceId, setSimulatingDeviceId] = useState<string | null>(
@@ -135,6 +144,8 @@ export function App() {
           setDevices(data.devices);
           setContentList(data.contentList);
           setSchedules(data.schedules);
+          if (Array.isArray(data.telemetry)) setTelemetry(data.telemetry);
+          if (Array.isArray(data.auditLogs)) setAuditLogs(data.auditLogs);
           setServerConnected(true);
         }
       })
@@ -162,12 +173,18 @@ export function App() {
     try {
       localStorage.setItem(
         workspaceKey,
-        JSON.stringify({ devices, contentList: safeContent, schedules }),
+        JSON.stringify({
+          devices,
+          contentList: safeContent,
+          schedules,
+          telemetry,
+          auditLogs,
+        }),
       );
     } catch {
       // The active session remains usable if storage is full or blocked.
     }
-  }, [contentList, devices, schedules]);
+  }, [contentList, devices, schedules, telemetry, auditLogs]);
 
   useEffect(
     () => () => {
@@ -231,13 +248,92 @@ export function App() {
     }
   };
 
-  const syncToServer = (path: string, method: 'POST' | 'PATCH', body?: unknown) => {
+  const syncToServer = (
+    path: string,
+    method: 'POST' | 'PATCH' | 'DELETE',
+    body?: unknown,
+  ) => {
     if (!serverConnected) return;
     void fetch(path, {
       method,
       headers: { 'content-type': 'application/json' },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     }).catch(() => setServerConnected(false));
+  };
+
+  const addDevice = (newDevice: Device) => {
+    setDevices((items) => [newDevice, ...items]);
+
+    const newAudit: AuditLogRecord = {
+      id: `aud_${Date.now()}`,
+      organizationId: 'org_mit_adt',
+      actor: currentUserName,
+      action: 'REGISTER_DEVICE',
+      resource: 'Device',
+      resourceId: newDevice.id,
+      timestamp: new Date().toISOString(),
+      ipAddress: newDevice.ipAddress,
+      details: `Registered screen "${newDevice.displayName}" at ${newDevice.location.building} (${newDevice.orientation}).`,
+    };
+    setAuditLogs((items) => [newAudit, ...items]);
+
+    const newTelemetry: TelemetryEvent = {
+      id: `tel_${Date.now()}`,
+      deviceId: newDevice.id,
+      deviceName: newDevice.displayName,
+      contentId: 'default_welcome',
+      contentTitle: 'Campus welcome screen',
+      timestamp: new Date().toISOString(),
+      result: 'PLAY_SUCCESS',
+      latencyMs: 85,
+    };
+    setTelemetry((items) => [newTelemetry, ...items]);
+
+    syncToServer('/v1/devices', 'POST', newDevice);
+  };
+
+  const deleteDevice = (id: string) => {
+    const dev = devices.find((d) => d.id === id);
+    setDevices((items) => items.filter((device) => device.id !== id));
+    if (dev) {
+      const newAudit: AuditLogRecord = {
+        id: `aud_${Date.now()}`,
+        organizationId: 'org_mit_adt',
+        actor: currentUserName,
+        action: 'DEREGISTER_DEVICE',
+        resource: 'Device',
+        resourceId: id,
+        timestamp: new Date().toISOString(),
+        ipAddress: dev.ipAddress,
+        details: `Deregistered screen "${dev.displayName}".`,
+      };
+      setAuditLogs((items) => [newAudit, ...items]);
+    }
+    syncToServer(`/v1/devices/${encodeURIComponent(id)}`, 'DELETE');
+  };
+
+  const addContent = (asset: ContentAsset) => {
+    setContentList((items) => [asset, ...items]);
+
+    const newAudit: AuditLogRecord = {
+      id: `aud_${Date.now()}`,
+      organizationId: 'org_mit_adt',
+      actor: currentUserName,
+      action: 'SUBMIT_CONTENT',
+      resource: 'ContentAsset',
+      resourceId: asset.id,
+      timestamp: new Date().toISOString(),
+      ipAddress: '10.20.1.50',
+      details: `Submitted poster "${asset.title}" for ${asset.clubName}.`,
+    };
+    setAuditLogs((items) => [newAudit, ...items]);
+
+    syncToServer('/v1/content', 'POST', {
+      ...asset,
+      mediaUrl: asset.mediaUrl.startsWith('blob:')
+        ? persistedPosterFallback
+        : asset.mediaUrl,
+    });
   };
 
   const advanceContentApproval = (id: string) => {
@@ -259,6 +355,20 @@ export function App() {
     setContentList((items) =>
       items.map((content) => (content.id === id ? approved : content)),
     );
+
+    const newAudit: AuditLogRecord = {
+      id: `aud_${Date.now()}`,
+      organizationId: 'org_mit_adt',
+      actor: `${currentUserName} (${currentRole})`,
+      action: 'APPROVE_CONTENT',
+      resource: 'ContentAsset',
+      resourceId: approved.id,
+      timestamp: new Date().toISOString(),
+      ipAddress: '10.20.1.15',
+      details: `Advanced content approval to ${approved.approvalStage}. Title: "${approved.title}".`,
+    };
+    setAuditLogs((items) => [newAudit, ...items]);
+
     syncToServer(`/v1/content/${encodeURIComponent(id)}/approve`, 'POST', {
       role: currentRole,
       clubId: currentClubId,
@@ -266,6 +376,7 @@ export function App() {
     });
 
     if (approved.status !== 'APPROVED' || !approved.eventDate) return;
+
     const window = eventDisplayWindow(approved.eventDate);
     const active = new Date(window.effectiveStart) <= new Date();
     const schedule: ScheduleRule = {
@@ -287,7 +398,8 @@ export function App() {
       ...items.filter((item) => item.id !== schedule.id),
     ]);
     syncToServer('/v1/schedules', 'POST', schedule);
-    if (active) {
+
+    if (active && devices.length > 0) {
       setDevices((items) =>
         items.map((device) =>
           device.status === 'ONLINE'
@@ -295,6 +407,22 @@ export function App() {
             : device,
         ),
       );
+
+      devices.forEach((dev) => {
+        if (dev.status === 'ONLINE') {
+          const telem: TelemetryEvent = {
+            id: `tel_${Date.now()}_${dev.id}`,
+            deviceId: dev.id,
+            deviceName: dev.displayName,
+            contentId: approved.id,
+            contentTitle: approved.title,
+            timestamp: new Date().toISOString(),
+            result: 'PLAY_SUCCESS',
+            latencyMs: Math.floor(Math.random() * 60 + 60),
+          };
+          setTelemetry((items) => [telem, ...items]);
+        }
+      });
     }
   };
 
@@ -320,6 +448,20 @@ export function App() {
     setContentList((items) =>
       items.map((content) => (content.id === id ? rejected : content)),
     );
+
+    const newAudit: AuditLogRecord = {
+      id: `aud_${Date.now()}`,
+      organizationId: 'org_mit_adt',
+      actor: `${currentUserName} (${currentRole})`,
+      action: 'REJECT_CONTENT',
+      resource: 'ContentAsset',
+      resourceId: id,
+      timestamp: new Date().toISOString(),
+      ipAddress: '10.20.1.15',
+      details: `Rejected poster "${asset.title}". Reason: ${reason}`,
+    };
+    setAuditLogs((items) => [newAudit, ...items]);
+
     syncToServer(`/v1/content/${encodeURIComponent(id)}/reject`, 'POST', {
       role: currentRole,
       clubId: currentClubId,
@@ -328,12 +470,46 @@ export function App() {
     });
   };
 
+  const addSchedule = (schedule: ScheduleRule) => {
+    setSchedules((items) => [schedule, ...items]);
+    const newAudit: AuditLogRecord = {
+      id: `aud_${Date.now()}`,
+      organizationId: 'org_mit_adt',
+      actor: currentUserName,
+      action: 'CREATE_SCHEDULE',
+      resource: 'ScheduleRule',
+      resourceId: schedule.id,
+      timestamp: new Date().toISOString(),
+      ipAddress: '10.20.0.5',
+      details: `Created schedule "${schedule.title}" targeting ${schedule.targetName}.`,
+    };
+    setAuditLogs((items) => [newAudit, ...items]);
+    syncToServer('/v1/schedules', 'POST', schedule);
+  };
+
   const restartDevice = (id: string) => {
+    const dev = devices.find((d) => d.id === id);
     setDevices((items) =>
       items.map((device) =>
         device.id === id ? { ...device, status: 'MAINTENANCE' } : device,
       ),
     );
+
+    if (dev) {
+      const newAudit: AuditLogRecord = {
+        id: `aud_${Date.now()}`,
+        organizationId: 'org_mit_adt',
+        actor: currentUserName,
+        action: 'RESTART_DEVICE',
+        resource: 'Device',
+        resourceId: id,
+        timestamp: new Date().toISOString(),
+        ipAddress: dev.ipAddress,
+        details: `Requested soft restart for screen "${dev.displayName}".`,
+      };
+      setAuditLogs((items) => [newAudit, ...items]);
+    }
+
     syncToServer(`/v1/devices/${encodeURIComponent(id)}/restart`, 'POST');
     const timer = window.setTimeout(() => {
       setDevices((items) =>
@@ -355,12 +531,14 @@ export function App() {
     try {
       localStorage.removeItem(workspaceKey);
     } catch {
-      // Resetting the active session does not depend on browser storage.
+      // Resetting active session does not depend on browser storage.
     }
     syncToServer('/v1/reset', 'POST');
-    setDevices(INITIAL_DEVICES);
-    setContentList(INITIAL_CONTENT);
-    setSchedules(INITIAL_SCHEDULES);
+    setDevices([]);
+    setContentList([]);
+    setSchedules([]);
+    setTelemetry([]);
+    setAuditLogs([]);
     setActiveTab('overview');
     setSimulatingDeviceId(null);
     setCurrentRole('DESIGN_LEAD');
@@ -394,14 +572,14 @@ export function App() {
           pendingApprovalCount={pendingApprovals}
           deviceAttentionCount={deviceAttentionCount}
         />
-        <main className="min-w-0 flex-1 overflow-y-auto px-4 pb-24 pt-6 sm:px-6 lg:px-8 md:pb-8">
+        <main className="min-w-0 flex-1 overflow-y-auto px-4 pb-24 pt-6 sm:px-6 md:pb-8 lg:px-8">
           <div className="mx-auto max-w-[1240px]">
             {activeTab === 'overview' && (
               <OverviewView
                 devices={devices}
                 contentList={contentList}
                 schedules={schedules}
-                telemetry={MOCK_TELEMETRY}
+                telemetry={telemetry}
                 onOpenKioskSim={(id) =>
                   setSimulatingDeviceId(id ?? devices[0]?.id ?? null)
                 }
@@ -418,15 +596,7 @@ export function App() {
                 currentRole={currentRole}
                 currentClubId={currentClubId}
                 currentUserName={currentUserName}
-                onAddContent={(asset) => {
-                  setContentList((items) => [asset, ...items]);
-                  syncToServer('/v1/content', 'POST', {
-                    ...asset,
-                    mediaUrl: asset.mediaUrl.startsWith('blob:')
-                      ? persistedPosterFallback
-                      : asset.mediaUrl,
-                  });
-                }}
+                onAddContent={addContent}
                 onAdvanceApproval={advanceContentApproval}
                 onRejectContent={rejectContent}
                 createRequest={createRequest}
@@ -436,12 +606,10 @@ export function App() {
               <ScheduleCalendarView
                 schedules={schedules}
                 contentList={contentList}
+                devices={devices}
                 currentRole={currentRole}
                 currentUserName={currentUserName}
-                onAddSchedule={(schedule) => {
-                  setSchedules((items) => [schedule, ...items]);
-                  syncToServer('/v1/schedules', 'POST', schedule);
-                }}
+                onAddSchedule={addSchedule}
                 onUpdateSchedule={(id, status) => {
                   setSchedules((items) =>
                     items.map((schedule) =>
@@ -462,13 +630,18 @@ export function App() {
                 contentList={contentList}
                 onOpenKioskSim={setSimulatingDeviceId}
                 onRestartDevice={restartDevice}
+                onAddDevice={addDevice}
+                onDeleteDevice={deleteDevice}
               />
             )}
             {activeTab === 'insights' && (
               <TelemetryAnalyticsView
-                telemetry={MOCK_TELEMETRY}
+                telemetry={telemetry}
                 devices={devices}
               />
+            )}
+            {activeTab === 'audit' && (
+              <AuditLogView logs={auditLogs} />
             )}
           </div>
         </main>

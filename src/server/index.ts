@@ -4,16 +4,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
-  INITIAL_CONTENT,
-  INITIAL_DEVICES,
-  INITIAL_SCHEDULES,
-  MOCK_TELEMETRY,
   SAMPLE_COMPILED_MANIFEST,
 } from '../mockData';
 import type {
+  AuditLogRecord,
   ContentAsset,
   Device,
   ScheduleRule,
+  TelemetryEvent,
   UserRole,
 } from '../types';
 import {
@@ -44,14 +42,18 @@ const allowedRoles = new Set<UserRole>([
   'ADMIN',
 ]);
 
-let devices: Device[] = structuredClone(INITIAL_DEVICES);
-let contentList: ContentAsset[] = structuredClone(INITIAL_CONTENT);
-let schedules: ScheduleRule[] = structuredClone(INITIAL_SCHEDULES);
+let devices: Device[] = [];
+let contentList: ContentAsset[] = [];
+let schedules: ScheduleRule[] = [];
+let telemetry: TelemetryEvent[] = [];
+let auditLogs: AuditLogRecord[] = [];
 
 export function resetLocalState(): void {
-  devices = structuredClone(INITIAL_DEVICES);
-  contentList = structuredClone(INITIAL_CONTENT);
-  schedules = structuredClone(INITIAL_SCHEDULES);
+  devices = [];
+  contentList = [];
+  schedules = [];
+  telemetry = [];
+  auditLogs = [];
 }
 
 function sendJson(
@@ -141,7 +143,8 @@ async function handleApi(
       devices,
       contentList,
       schedules,
-      telemetry: MOCK_TELEMETRY,
+      telemetry,
+      auditLogs,
     });
     return true;
   }
@@ -150,10 +153,30 @@ async function handleApi(
     ['/v1/devices', devices],
     ['/v1/content', contentList],
     ['/v1/schedules', schedules],
-    ['/v1/telemetry', MOCK_TELEMETRY],
+    ['/v1/telemetry', telemetry],
+    ['/v1/audit-logs', auditLogs],
   ]);
   if (request.method === 'GET' && collections.has(url.pathname)) {
     sendJson(response, 200, { items: collections.get(url.pathname) });
+    return true;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/v1/devices') {
+    const input = (await readJson(request)) as Device;
+    if (!input || typeof input !== 'object' || !input.id || !input.displayName) {
+      sendJson(response, 422, { error: 'A valid device configuration is required.' });
+      return true;
+    }
+    devices = [input, ...devices.filter((dev) => dev.id !== input.id)];
+    sendJson(response, 201, input);
+    return true;
+  }
+
+  const deleteDeviceMatch = url.pathname.match(/^\/v1\/devices\/([^/]+)$/);
+  if (request.method === 'DELETE' && deleteDeviceMatch) {
+    const id = decodeURIComponent(deleteDeviceMatch[1]!);
+    devices = devices.filter((dev) => dev.id !== id);
+    sendJson(response, 200, { status: 'deleted', id });
     return true;
   }
 

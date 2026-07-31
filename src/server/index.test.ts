@@ -23,15 +23,42 @@ test('local full-stack API supports the dashboard lifecycle', async () => {
       schedules: ScheduleRule[];
     };
     assert.equal(bootstrap.status, 200);
-    assert.ok(workspace.contentList.length > 0);
-    assert.ok(workspace.schedules.length > 0);
+    assert.equal(workspace.contentList.length, 0);
+    assert.equal(workspace.schedules.length, 0);
 
-    const pending = workspace.contentList.find(
-      (content) => content.approvalStage === 'PRESIDENT',
-    );
-    assert.ok(pending);
+    const newPoster: ContentAsset = {
+      id: 'cnt_test_lifecycle',
+      organizationId: 'org_mit_adt',
+      title: 'Lifecycle test poster',
+      description: 'Test poster details',
+      category: 'EVENT',
+      submitterName: 'Aditi Deshmukh',
+      submitterRole: 'Design Lead',
+      mediaUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop&q=80',
+      mimeType: 'image/jpeg',
+      fileSizeBytes: 2400000,
+      dimensions: '1920x1080',
+      sha256: 'a'.repeat(64),
+      durationSeconds: 15,
+      status: 'PENDING_APPROVAL',
+      createdAt: new Date().toISOString(),
+      clubId: 'club_acm',
+      clubName: 'ACM Student Chapter',
+      eventDate: '2026-09-01',
+      displayStartDate: '2026-08-11T00:00:00.000Z',
+      approvalStage: 'PRESIDENT',
+      approvalHistory: [],
+    };
+
+    const createdContent = await fetch(`${baseUrl}/v1/content`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(newPoster),
+    });
+    assert.equal(createdContent.status, 201);
+
     const wrongClubApproval = await fetch(
-      `${baseUrl}/v1/content/${pending.id}/approve`,
+      `${baseUrl}/v1/content/${newPoster.id}/approve`,
       {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -45,13 +72,13 @@ test('local full-stack API supports the dashboard lifecycle', async () => {
     assert.equal(wrongClubApproval.status, 403);
 
     const presidentApproval = await fetch(
-      `${baseUrl}/v1/content/${pending.id}/approve`,
+      `${baseUrl}/v1/content/${newPoster.id}/approve`,
       {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           role: 'PRESIDENT',
-          clubId: pending.clubId,
+          clubId: newPoster.clubId,
           actorName: 'Aditya Patil',
         }),
       },
@@ -61,8 +88,9 @@ test('local full-stack API supports the dashboard lifecycle', async () => {
       ((await presidentApproval.json()) as ContentAsset).approvalStage,
       'CLUB_HOD',
     );
+
     const skippedApproval = await fetch(
-      `${baseUrl}/v1/content/${pending.id}`,
+      `${baseUrl}/v1/content/${newPoster.id}`,
       {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
@@ -71,23 +99,19 @@ test('local full-stack API supports the dashboard lifecycle', async () => {
     );
     assert.equal(skippedApproval.status, 403);
 
-    const asset: ContentAsset = {
-      ...workspace.contentList[0]!,
-      id: 'cnt_test_lifecycle',
-      title: 'Lifecycle test poster',
-    };
-    const createdContent = await fetch(`${baseUrl}/v1/content`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(asset),
-    });
-    assert.equal(createdContent.status, 201);
-
     const schedule: ScheduleRule = {
-      ...workspace.schedules[0]!,
       id: 'sch_test_lifecycle',
-      contentId: asset.id,
-      title: asset.title,
+      organizationId: 'org_mit_adt',
+      title: newPoster.title,
+      contentId: newPoster.id,
+      targetType: 'CAMPUS',
+      targetId: 'mit_adt_main',
+      targetName: 'All Campus Screens',
+      startTime: '2026-08-11T00:00:00Z',
+      endTime: '2026-09-01T23:59:59Z',
+      priority: 10,
+      createdBy: 'Aditya Patil',
+      status: 'ACTIVE',
     };
     const createdSchedule = await fetch(`${baseUrl}/v1/schedules`, {
       method: 'POST',

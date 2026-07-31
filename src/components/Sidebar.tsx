@@ -5,9 +5,10 @@ import {
   Images,
   Monitor,
   Radio,
+  Shield,
 } from 'lucide-react';
 
-export type ViewTab = 'overview' | 'content' | 'schedules' | 'devices' | 'insights';
+export type ViewTab = 'overview' | 'content' | 'schedules' | 'devices' | 'insights' | 'audit';
 
 interface SidebarProps {
   activeTab: ViewTab;
@@ -22,6 +23,7 @@ const items = [
   { id: 'schedules', label: 'Schedule', mobileLabel: 'Plan', icon: CalendarDays },
   { id: 'devices', label: 'Screens', mobileLabel: 'Screens', icon: Monitor },
   { id: 'insights', label: 'Health', mobileLabel: 'Health', icon: Activity },
+  { id: 'audit', label: 'Audit Logs', mobileLabel: 'Audit', icon: Shield },
 ] as const;
 
 export function Sidebar({
