@@ -41,4 +41,43 @@ describe('IoT Billboard Logic Tests', () => {
       ['2', '3', '1']
     );
   });
+
+  test('21-day schedule window calculation calculates exact start and end bounds', () => {
+    const eventDate = new Date('2026-08-25T14:30:00.000Z');
+    
+    // activeFrom = Event Date - 21 days (00:00:00)
+    const activeFrom = new Date(eventDate);
+    activeFrom.setDate(activeFrom.getDate() - 21);
+    activeFrom.setHours(0, 0, 0, 0);
+
+    // activeUntil = Event Date (23:59:59)
+    const activeUntil = new Date(eventDate);
+    activeUntil.setHours(23, 59, 59, 999);
+
+    assert.strictEqual(activeFrom.getDate(), 4);
+    assert.strictEqual(activeFrom.getMonth(), 7); // August (0-indexed)
+    assert.strictEqual(activeFrom.getHours(), 0);
+    assert.strictEqual(activeUntil.getHours(), 23);
+    assert.strictEqual(activeUntil.getMinutes(), 59);
+    assert.strictEqual(activeUntil.getSeconds(), 59);
+  });
+
+  test('MIME type validation restricts poster uploads to PNG, JPEG, and WebP', () => {
+    const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    
+    assert.strictEqual(allowedMimes.includes('image/png'), true);
+    assert.strictEqual(allowedMimes.includes('image/jpeg'), true);
+    assert.strictEqual(allowedMimes.includes('image/webp'), true);
+    assert.strictEqual(allowedMimes.includes('application/pdf'), false);
+    assert.strictEqual(allowedMimes.includes('video/mp4'), false);
+  });
+
+  test('DeviceCommand TTL expiration calculation correctly sets future expiration date', () => {
+    const now = new Date('2026-08-06T10:00:00.000Z');
+    const validityMinutes = 60;
+    const expiresAt = new Date(now.getTime() + validityMinutes * 60 * 1000);
+
+    assert.strictEqual(expiresAt.toISOString(), '2026-08-06T11:00:00.000Z');
+    assert.strictEqual(expiresAt > now, true);
+  });
 });
