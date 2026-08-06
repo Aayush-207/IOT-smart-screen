@@ -4,52 +4,66 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16.3.0-f54e00?style=flat-square)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?style=flat-square)](https://www.typescriptlang.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-ORM-2d3748?style=flat-square)](https://www.prisma.io/)
-[![License](https://img.shields.io/badge/License-MIT-blue.style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-**CampusCast** is a production-grade, offline-resilient IoT digital signage platform engineered for university campuses and enterprise networks. It manages the complete event lifecycle—from initial SSO authentication, event creation, and multi-stage institutional approval chains to cryptographic asset checksum verification, automatic 21-day schedule windows, and offline kiosk display rotation.
+**CampusCast** is an enterprise-grade, offline-resilient IoT digital signage and campus billboard management platform engineered for university campuses, corporate headquarters, and high-density display networks. It governs the end-to-end event broadcast lifecycle—from institutional Single Sign-On (SSO) authentication and event submission to multi-stage departmental approval chains, SHA-256 cryptographic asset checksum verification, automatic 21-day scheduling, and autonomous offline kiosk playback.
+
+---
+
+## 📋 Table of Contents
+- [🏛️ System Architecture](#-system-architecture)
+- [⭐ Core Platform Features](#-core-platform-features)
+- [🔄 Complete 27-Step End-to-End Workflow](#-complete-27-step-end-to-end-workflow)
+- [🗄️ Database Schema & Data Models](#-database-schema--data-models)
+- [🔌 Detailed RESTful API Specification](#-detailed-restful-api-specification)
+- [📴 Offline Resilience & Kiosk Storage Engine](#-offline-resilience--kiosk-storage-engine)
+- [🛡️ Immutable Append-Only Audit Logging](#️-immutable-append-only-audit-logging)
+- [🛠️ Local Installation & Setup](#️-local-installation--setup)
+- [💻 Test Roles & Authentication Matrix](#-test-roles--authentication-matrix)
+- [📺 Physical Kiosk Deployment Guide](#-physical-kiosk-deployment-guide)
 
 ---
 
 ## 🏛️ System Architecture
 
-CampusCast uses a containerized modular architecture designed for high availability and zero downtime. Kiosks poll the backend via an optimized HTTPS telemetry synchronization protocol, caching manifests and optimized media locally for autonomous operation during network outages.
+CampusCast employs a containerized modular architecture designed for zero-downtime content deployment and high availability. Physical display hardware nodes communicate with the backend via an HTTPS polling synchronization protocol.
 
 ```
-                  ┌──────────────────────────────────────────────┐
-                  │    Institutional Single Sign-On (SSO)        │
-                  └──────────────────────┬───────────────────────┘
-                                         │
-                                         ▼
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                         CampusCast Operations Portal                             │
-│       (Role-Scoped Auth: Design Lead | Club President | HOD | Campus Admin)      │
-└────────┬───────────────────────────────┬───────────────────────────────┬─────────┘
-         │                               │                               │
-         ▼                               ▼                               ▼
-┌──────────────────┐           ┌──────────────────┐           ┌──────────────────┐
-│ Event Lifecycle  │           │ Approval Chain   │           │ Audit & Control  │
-│ - Creation       │           │ - President      │           │ - Append-Only Log│
-│ - 21-Day Schedule│           │ - HOD            │           │ - Remote Commands│
-│ - Versioning     │           │ - Campus Admin   │           │ - Media Purging  │
-└────────┬─────────┘           └────────┬─────────┘           └────────┬─────────┘
-         │                              │                              │
-         └──────────────────────────────┼──────────────────────────────┘
-                                        │
-                                        ▼
-                  ┌──────────────────────────────────────────────┐
-                  │           PostgreSQL / Prisma ORM            │
-                  └─────────────────────┬────────────────────────┘
-                                        │
-                         HTTPS Telemetry & Manifest Sync
-                                        │
-       ┌────────────────────────────────┼────────────────────────────────┐
-       ▼                                ▼                                ▼
-┌───────────────┐              ┌───────────────┐                ┌───────────────┐
-│ Kiosk Node 1  │              │ Kiosk Node 2  │                │ Kiosk Node N  │
-│ (Main Gate)   │              │ (Library)     │                │ (Cafeteria)   │
-│ - IndexedDB   │              │ - IndexedDB   │                │ - IndexedDB   │
-│ - 15s Cycle   │              │ - 15s Cycle   │                │ - 15s Cycle   │
-└───────────────┘              └───────────────┘                └───────────────┘
+                      ┌──────────────────────────────────────────────┐
+                      │    Institutional Single Sign-On (SSO)        │
+                      └──────────────────────┬───────────────────────┘
+                                             │
+                                             ▼
+  ┌──────────────────────────────────────────────────────────────────────────────────┐
+  │                         CampusCast Operations Portal                             │
+  │       (Role-Scoped Auth: Design Lead | Club President | HOD | Campus Admin)      │
+  └────────┬───────────────────────────────┬───────────────────────────────┬─────────┘
+           │                               │                               │
+           ▼                               ▼                               ▼
+  ┌──────────────────┐           ┌──────────────────┐           ┌──────────────────┐
+  │ Event Lifecycle  │           │ Approval Chain   │           │ Audit & Control  │
+  │ - Creation       │           │ - President      │           │ - Append-Only Log│
+  │ - 21-Day Schedule│           │ - HOD            │           │ - Remote Commands│
+  │ - Versioning     │           │ - Campus Admin   │           │ - Media Purging  │
+  └────────┬─────────┘           └────────┬─────────┘           └────────┬─────────┘
+           │                              │                              │
+           └──────────────────────────────┼──────────────────────────────┘
+                                          │
+                                          ▼
+                    ┌──────────────────────────────────────────────┐
+                    │           PostgreSQL / Prisma ORM            │
+                    └─────────────────────┬────────────────────────┘
+                                          │
+                           HTTPS Telemetry & Manifest Sync
+                                          │
+         ┌────────────────────────────────┼────────────────────────────────┐
+         ▼                                ▼                                ▼
+  ┌───────────────┐              ┌───────────────┐                ┌───────────────┐
+  │ Kiosk Node 1  │              │ Kiosk Node 2  │                │ Kiosk Node N  │
+  │ (Main Gate)   │              │ (Library)     │                │ (Cafeteria)   │
+  │ - IndexedDB   │              │ - IndexedDB   │                │ - IndexedDB   │
+  │ - 15s Cycle   │              │ - 15s Cycle   │                │ - 15s Cycle   │
+  └───────────────┘              └───────────────┘                └───────────────┘
 ```
 
 ---
@@ -57,39 +71,39 @@ CampusCast uses a containerized modular architecture designed for high availabil
 ## ⭐ Core Platform Features
 
 ### 1. 🔐 Institutional Single Sign-On & Scoped Authorization (Step 1)
-* Integrates with institutional LDAP/OAuth SSO systems.
-* Grants role-based permissions scoped to specific clubs or departments (e.g., *Technology Club President* has review rights strictly for Technology Club submissions).
+* Integrates with campus OAuth2/SAML SSO identity providers.
+* Grants role-based permissions scoped to specific clubs or departments. For example, a *Technology Club President* has review authority strictly for Technology Club event submissions.
 
 ### 2. 📅 Event Creation & Automated 21-Day Schedule Window (Steps 2–4, 9)
-* Design Leads create events with metadata (Name, Description, Club, Venue, Date, Time, Registration Link, Target Screens).
-* Calculates exact active availability windows automatically:
+* Design Leads enter event metadata: Name, Description, Club ID, Venue, Event Date, Start/End Time, Contact Info, Registration Link, Target Screen Nodes, and Poster Artwork.
+* Calculates active visibility windows automatically:
   * **`activeFrom`**: Event Date − 21 calendar days (00:00:00).
   * **`activeUntil`**: Event Date (23:59:59).
 
-### 3. 🛡️ Multi-Stage Institutional Approval Engine (Steps 5–8)
-* Poster submissions traverse a strict 3-tier approval hierarchy:
+### 3. 🛡️ Multi-Stage Institutional Approval Hierarchy (Steps 5–8)
+* Submissions traverse a 3-tier approval process:
   1. **Club President** (`DRAFT` → `PENDING_HOD`)
   2. **Head of Department (HOD)** (`PENDING_HOD` → `PENDING_ADMIN`)
   3. **Campus Admin** (`PENDING_ADMIN` → `APPROVED`)
-* Every approval, rejection, or request for revision executes inside an atomic Prisma transaction.
+* Every approval, rejection, or revision request executes inside an atomic Prisma database transaction.
 
-### 4. 📴 Offline Resilience & Kiosk Display Engine (Steps 14–17)
-* Displays operate autonomously on 15-second rotation cycles.
-* Manifests are stored locally in browser `IndexedDB` and media assets in `Cache Storage`.
-* During network disconnection, displays continue rotating cached media seamlessly without showing blank screens or error prompts.
-* Playback telemetry reports (`eventId`, `startedAt`, `completedAt`, `status`) are queued locally and uploaded automatically upon reconnection.
+### 4. 📴 Offline Resilience & Kiosk Rotation Engine (Steps 14–17, 22–23)
+* Kiosks run fullscreen 15-second poster rotation cycles.
+* Active manifests are saved in browser `IndexedDB` and WebP media assets in `Cache Storage`.
+* During network outages, displays continue rotating cached media seamlessly without showing blank screens.
+* Playback events (`eventId`, `startedAt`, `completedAt`, `status`) are queued locally in `IndexedDB` and synced automatically upon network reconnection.
 
 ### 5. 📜 Immutable Append-Only Audit Logging (Step 24)
-* Standardized audit service (`src/lib/audit.ts`) records every system state mutation in the `AuditLog` table.
-* Tracks action type, actor ID, resource ID, state transition (`previousState` → `newState`), and HTTP request ID.
+* Standardized audit module (`src/lib/audit.ts`) logs every state mutation into the `AuditLog` table.
+* Records actor ID, action type, resource ID, state transitions (`previousState` → `newState`), and HTTP request ID.
 * Excludes passwords, tokens, and PII to comply with security standards.
 
-### 6. 🎮 Remote IoT Command Dispatcher (Step 18)
-* Admins can dispatch real-time commands (`REFRESH_PLAYLIST`, `RELOAD_APP`, `CLEAR_UNUSED_CACHE`, `UPDATE_CONFIGURATION`) to remote display hardware.
-* Tracked via `DeviceCommand` models with expiration TTLs and execution status reporting.
+### 6. 🎮 Remote IoT Command Dispatcher (Step 18, 25)
+* Admins can dispatch low-level commands (`REFRESH_PLAYLIST`, `RELOAD_APP`, `CLEAR_UNUSED_CACHE`, `UPDATE_CONFIGURATION`) to remote display hardware.
+* Tracked via `DeviceCommand` records with expiration TTLs and execution status reporting.
 
 ### 7. 🔄 Poster Versioning & Atomic Cancellation (Steps 19–20)
-* **Versioning**: Uploading a new poster for an approved event creates a new `DRAFT` version while keeping the existing approved poster active on screens until the new version passes the full approval chain.
+* **Versioning**: Uploading a new poster for an approved event creates a new `DRAFT` version while keeping the current approved poster active on screens until the new version passes the full approval chain.
 * **Cancellation**: Immediate cancellation (`POST /api/v1/events/:id/cancel`) marks display schedules inactive, increments screen `playlistVersion` counters, and invalidates kiosk manifests instantly.
 
 ### 8. 🧹 Background Media Purge Worker (Step 21)
@@ -97,10 +111,10 @@ CampusCast uses a containerized modular architecture designed for high availabil
 
 ---
 
-## 🔄 The Complete 27-Step End-to-End Workflow
+## 🔄 Complete 27-Step End-to-End Workflow
 
-| Step # | Stage | Action Description | Core API / Module |
-| :--- | :--- | :--- | :--- |
+| Step # | Stage | Action Description | Module / API Endpoint |
+| :---: | :--- | :--- | :--- |
 | **1** | Auth | User logs in via Campus SSO and receives role-scoped authorization claims | `/api/auth/login` |
 | **2** | Event | Design Lead selects "Create Event" and inputs details, target screens, and poster image | `POST /api/v1/events` |
 | **3** | Upload | System validates MIME type (PNG/JPEG/WebP), size (<10MB), and generates SHA-256 checksum | `src/app/api/v1/events/route.ts` |
@@ -133,7 +147,7 @@ CampusCast uses a containerized modular architecture designed for high availabil
 
 ## 🗄️ Database Schema & Data Models
 
-CampusCast uses **Prisma ORM** with SQLite for local development and PostgreSQL for production deployments.
+CampusCast uses **Prisma ORM** with SQLite for development and PostgreSQL for production.
 
 ```prisma
 model Screen {
@@ -188,6 +202,17 @@ model Poster {
   event            Event?             @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
+model Approval {
+  id           String   @id @default(uuid())
+  posterId     String
+  stage        String   // PRESIDENT, HOD, ADMIN
+  reviewerId   String
+  reviewerName String
+  action       String   // APPROVE, REQUEST_CHANGES, REJECT
+  comment      String?
+  poster       Poster   @relation(fields: [posterId], references: [id], onDelete: Cascade)
+}
+
 model AuditLog {
   id            String   @id @default(uuid())
   actorId       String
@@ -202,99 +227,125 @@ model AuditLog {
 
 ---
 
-## 🔌 API Endpoint Reference
+## 🔌 Detailed RESTful API Specification
 
-### 🔐 Authentication & Session
-- `POST /api/auth/login` — Authenticate user and issue session cookie.
-- `POST /api/auth/logout` — Revoke active session.
-- `GET /api/auth/me` — Retrieve current authenticated user profile and roles.
+### 1. Create Event & Upload Poster
+* **`POST /api/v1/events`**
+* **Request (`multipart/form-data`)**:
+  ```json
+  {
+    "name": "Annual Hackathon 2026",
+    "description": "24-Hour AI & IoT Hackathon",
+    "clubId": "technology-club",
+    "venue": "Auditorium Block A",
+    "eventDate": "2026-08-25",
+    "startTime": "09:00",
+    "endTime": "18:00",
+    "contactInfo": "tech@college.edu",
+    "targetScreens": ["screen-1", "screen-2"],
+    "poster": "(File: poster.png)"
+  }
+  ```
+* **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "message": "Event created successfully with DRAFT poster status.",
+    "event": { "id": "evt_101", "name": "Annual Hackathon 2026" },
+    "poster": {
+      "id": "poster_101",
+      "status": "DRAFT",
+      "checksum": "a1b2c3d4e5f678901234",
+      "activeFrom": "2026-08-04T00:00:00.000Z",
+      "activeUntil": "2026-08-25T23:59:59.999Z"
+    }
+  }
+  ```
 
-### 📅 Events & Poster Management
-- `POST /api/v1/events` — Create new event and upload poster image (`DRAFT`).
-- `GET /api/v1/events` — List all campus events and poster versions.
-- `POST /api/v1/posters/:id/submit` — Submit poster for institutional review.
-- `POST /api/v1/events/:id/version` — Create new poster draft version for an event.
-- `POST /api/v1/events/:id/cancel` — Cancel event and invalidate active screen manifests.
-
-### 🛡️ Institutional Approval Chain
-- `GET /api/v1/approvals/inbox` — Fetch pending approval items for current user's role.
-- `POST /api/v1/approvals/:posterId/action` — Process approval action (`APPROVE`, `REQUEST_CHANGES`, `REJECT`).
-
-### 🖥️ Kiosk Sync & Telemetry
-- `POST /api/v1/screens/:slug/sync` — Kiosk heartbeat, manifest fetch, telemetry upload, and command polling.
-- `POST /api/v1/screens/enroll` — Enroll new physical display node and generate hardware credentials.
-- `POST /api/v1/telemetry/playback` — Bulk upload playback telemetry logs.
-
-### 🎮 Administrative Control & Audit
-- `GET /api/v1/audit` — Query append-only audit trail logs.
-- `POST /api/v1/commands` — Dispatch remote command to target kiosk node.
-- `POST /api/v1/admin/cleanup` — Run background media expiration and cache purge worker.
+### 2. Kiosk Synchronization & Heartbeat
+* **`POST /api/v1/screens/:slug/sync`**
+* **Request**:
+  ```json
+  {
+    "playlistVersion": 1,
+    "freeStorageMb": 4096,
+    "playbackLogs": [
+      {
+        "eventId": "play_99812",
+        "posterId": "poster_101",
+        "playlistVersion": 1,
+        "startedAt": "2026-08-06T10:00:00.000Z",
+        "completedAt": "2026-08-06T10:00:15.000Z",
+        "status": "SUCCESS"
+      }
+    ]
+  }
+  ```
+* **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "playlistVersion": 2,
+    "hasUpdates": true,
+    "manifest": [
+      {
+        "posterId": "poster_101",
+        "title": "Annual Hackathon 2026 Poster",
+        "url": "/media/a1b2c3d4e5f678901234.webp",
+        "sha256": "a1b2c3d4e5f678901234",
+        "durationSeconds": 15
+      }
+    ],
+    "commands": []
+  }
+  ```
 
 ---
 
 ## 🛠️ Local Installation & Setup
 
-### Prerequisites
-- **Node.js**: v20.x or v22.x LTS
-- **Package Manager**: `npm` or `pnpm`
-- **Git**
+```bash
+# 1. Clone Repository
+git clone https://github.com/Gaurav-205/AI-IoT-Based-Smart-Screen.git
+cd AI-IoT-Based-Smart-Screen
 
-### Installation Steps
+# 2. Install Dependencies
+npm install
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/Gaurav-205/AI-IoT-Based-Smart-Screen.git
-   cd AI-IoT-Based-Smart-Screen
-   ```
+# 3. Database Migration & Seeding
+npx prisma db push
+npx prisma db seed
 
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
+# 4. Start Development Server
+npm run dev
 
-3. **Initialize Database**:
-   ```bash
-   npx prisma db push
-   npx prisma db seed
-   ```
-
-4. **Run Development Server**:
-   ```bash
-   npm run dev
-   ```
-   Open `http://localhost:3000` in your browser.
-
-5. **Run Suite Verification**:
-   ```bash
-   npm test        # Run unit tests
-   npm run lint    # Run TypeScript compiler check
-   npm run build   # Run Next.js production build
-   ```
+# 5. Run Complete Verification Suite
+npm test        # 8/8 Unit Tests
+npm run lint    # TypeScript Check
+npm run build   # Next.js Production Build
+```
 
 ---
 
-## 💻 Roles & Quick Testing Credentials
+## 💻 Test Roles & Authentication Matrix
 
-The system includes built-in role switching on the `/login` page for easy testing:
-
-| Role Name | User ID | Description |
+| Role Name | User ID | Scoped Permissions |
 | :--- | :--- | :--- |
-| **Design Lead** | `usr_101` | Creates events and uploads poster artwork |
-| **Technology Club President** | `usr_102` | Tier-1 reviewer for Technology Club submissions |
+| **Design Lead** | `usr_101` | Submits events and artwork drafts |
+| **Technology Club President** | `usr_102` | Tier-1 reviewer for Technology Club items |
 | **Head of Department (HOD)** | `usr_103` | Tier-2 reviewer for department events |
 | **Campus Admin** | `usr_100` | Tier-3 final approver, hardware manager & command dispatcher |
 
 ---
 
-## 📺 Kiosk Display Setup
+## 📺 Physical Kiosk Deployment Guide
 
-To run a screen kiosk on physical hardware (e.g. Raspberry Pi, Android Smart TV, or PC display):
+To deploy a screen kiosk on hardware (Raspberry Pi, Smart TV, PC display):
 
-1. Launch a browser in fullscreen kiosk mode pointing to:
-   ```
-   http://<server-ip>:3000/display/screen-1
-   ```
-2. The kiosk automatically registers with the backend server, downloads the latest playlist manifest, caches media locally in IndexedDB, and begins 15-second rotation playback.
+```bash
+# Chromium Kiosk Autostart Command
+chromium-browser --kiosk --noerrdialogs --disable-infobars http://<server-ip>:3000/display/screen-1
+```
 
 ---
 
