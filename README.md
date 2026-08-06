@@ -1,6 +1,6 @@
 # CampusCast IoT Digital Signage Network & Approval Pipeline
 
-CampusCast is an enterprise-grade IoT digital signage management platform built with Next.js, React 19, Prisma ORM, and SQLite. It provides a transactional multi-stage approval workflow (Design Lead → President → HOD → Campus Admin), 21-day automatic event scheduling, SHA-256 media integrity verification, screen enrollment with hashed device secrets, and jitter-stabilized kiosk telemetry synchronization.
+CampusCast is an enterprise-grade IoT digital signage management platform built with Next.js, React 19, Prisma ORM, and SQLite. It provides a transactional multi-stage approval workflow (Design Lead → President → HOD → Campus Admin), 21-day automatic event scheduling, SHA-256 media integrity verification, screen enrollment with hashed device secrets, offline kiosk resilience, and jitter-stabilized telemetry synchronization.
 
 ---
 
@@ -28,7 +28,7 @@ CampusCast is an enterprise-grade IoT digital signage management platform built 
                                         ▼
  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
  │                                  SQLite Database (Prisma ORM)                                       │
- │              Event | Poster (DRAFT → APPROVED) | Approval Audit | Screen | Assignments             │
+ │     Event | Poster (DRAFT → APPROVED) | AuditLog | Incident | DeviceCommand | PlaybackLog          │
  └──────────────────────────────────────┬──────────────────────────────────────────────────────────────┘
                                         │ Jitter Sync Protocol (50-70s) & Heartbeat (5s)
                                         ▼
@@ -40,14 +40,35 @@ CampusCast is an enterprise-grade IoT digital signage management platform built 
 
 ---
 
-## 🚀 Key Features
+## 📋 The Complete 27-Step Business Flow
+
+```
+Campus user logs in (SSO)
+ └─► 1. Design Lead creates event & uploads poster
+      └─► 2. Poster saved as DRAFT & SHA-256 checksum generated
+           └─► 3. Design Lead submits poster for President review
+                └─► 4. President approves (Status: PENDING_HOD)
+                     └─► 5. HOD approves (Status: PENDING_ADMIN)
+                          └─► 6. Campus Admin approves (Status: APPROVED)
+                               └─► 7. 21-day schedule & public media URL generated (/media/{checksum}.webp)
+                                    └─► 8. Kiosk receives & caches manifest in IndexedDB
+                                         └─► 9. Poster plays in 15-second rotation
+                                              └─► 10. Kiosk reports playback telemetry & hardware health
+                                                   └─► 11. Poster automatically expires when active_until < current_time
+```
+
+---
+
+## 🚀 Key System Features
 
 * **Cursor Editorial Design System**: Warm cream canvas (`#f7f7f4`), warm ink text (`#26251e`), single Cursor Orange (`#f54e00`) CTA voltage, 1px hairline depth, and 5 AI action timeline pastel tokens.
-* **Transactional Multi-Stage Approvals**: Enforces stage sequence (`DRAFT` → `PENDING_PRESIDENT` → `PENDING_HOD` → `PENDING_ADMIN` → `APPROVED`) inside atomic Prisma database transactions with immutable audit logs.
+* **Transactional Multi-Stage Approvals**: Enforces stage sequence (`DRAFT` → `PENDING_PRESIDENT` → `PENDING_HOD` → `PENDING_ADMIN` → `APPROVED`) inside atomic Prisma database transactions with append-only audit logs.
 * **Automatic 21-Day Scheduling**: Automatically calculates display start (`Event Date - 21 days`) and display end (`Event Date 23:59:59`).
 * **Media Integrity & Serving**: Computes SHA-256 checksums for uploaded poster images and serves approved media via `/media/{checksum}.webp`.
 * **Kiosk Screen Enrollment**: Enrolls physical screen nodes generating secure credentials; stores only SHA-256 hashes (`deviceSecretHash`) in PostgreSQL/SQLite.
-* **Jitter Telemetry Synchronization Protocol**: Kiosks report storage capacity, software version, and playback events via `/api/v1/screens/{slug}/sync` with randomized next sync intervals (50–70s) to prevent thundering herd load.
+* **15-Second Playback & Telemetry Reporting**: Kiosks rotate posters every 15 seconds, log deduplicated playback events (`eventId`), and send reports on every sync.
+* **Offline Kiosk Resilience**: If network access is lost, kiosks continue rendering from the last verified playlist manifest stored in browser cache/IndexedDB without showing a blank screen.
+* **Remote Commands & Audit Trail**: Admins can dispatch low-level commands (`REFRESH_PLAYLIST`, `RELOAD_APP`, `CLEAR_UNUSED_CACHE`, `UPDATE_CONFIGURATION`) and view immutable audit entries for all system actions.
 
 ---
 
@@ -95,17 +116,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📖 API Reference (v1)
 
-### 1. Event Creation & Poster Submission
+### 1. Event Creation & Poster Versioning
 * **`POST /api/v1/events`**: Creates an event, uploads poster, computes SHA-256 checksum, sets 21-day schedule, and initializes `DRAFT` poster record.
-* **`POST /api/v1/posters/:posterId/submit`**: Transitions poster from `DRAFT` to `PENDING_PRESIDENT`.
+* **`POST /api/v1/events/:id/version`**: Creates a new draft poster version for an event without taking live approved posters offline.
+* **`POST /api/v1/events/:id/cancel`**: Cancels an event, marks poster status `CANCELLED`, and forces immediate screen manifest invalidation.
 
 ### 2. Approval Workflow
 * **`GET /api/v1/approvals/inbox`**: Retrieves pending approval submissions scoped to current reviewer role.
 * **`POST /api/v1/approvals/:posterId/action`**: Executes `APPROVE`, `REQUEST_CHANGES`, or `REJECT` inside an atomic transaction.
 
-### 3. Screen Enrollment & Telemetry Sync
+### 3. Screen Enrollment, Telemetry Sync & Commands
 * **`POST /api/v1/screens/enroll`**: Enrolls a physical kiosk display node and returns device credentials.
-* **`POST /api/v1/screens/:slug/sync`**: Hardware heartbeat telemetry and active playlist manifest generator with jitter recommendation.
+* **`POST /api/v1/screens/:slug/sync`**: Hardware heartbeat telemetry, playback report ingestion, pending remote command delivery, and active manifest generator.
+* **`POST /api/v1/commands`**: Dispatches remote execution commands to target kiosk screens.
+* **`GET /api/v1/audit`**: Retrieves append-only audit trail logs.
 
 ---
 

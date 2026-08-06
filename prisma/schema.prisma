@@ -144,3 +144,14 @@ model DeviceCommand {
 
   screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
 }
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  actorId       String
+  action        String
+  resourceId    String
+  previousState String?
+  newState      String?
+  requestId     String   @default("req_auto")
+  timestamp     DateTime @default(now())
+}

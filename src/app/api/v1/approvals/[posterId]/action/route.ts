@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { createAuditLog } from '@/lib/audit';
 
 export async function POST(
   request: Request,
@@ -109,6 +110,15 @@ export async function POST(
           status: newStatus,
           isPublic,
         },
+      });
+
+      // Step 24: Record Audit Entry
+      await createAuditLog({
+        actorId: user.id,
+        action: `POSTER_${action}_${stage}`,
+        resourceId: poster.id,
+        previousState: poster.status,
+        newState: newStatus,
       });
 
       // Step 11: Increment screen playlist versions if poster is APPROVED
