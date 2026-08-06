@@ -8,24 +8,57 @@ generator client {
 }
 
 model Screen {
-  id          String             @id @default(uuid())
-  slug        String             @unique
-  name        String
-  location    String
-  lastSeenAt  DateTime?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  assignments ScreenAssignment[]
+  id               String             @id @default(uuid())
+  slug             String             @unique // deviceId
+  name             String
+  location         String
+  building         String             @default("Main Academic Block")
+  floor            String             @default("1st Floor")
+  deviceSecretHash String             @default("hash_demo_secret")
+  status           String             @default("ACTIVE")
+  playlistVersion  Int                @default(1)
+  freeStorageMb    Int                @default(2048)
+  lastSyncAt       DateTime?
+  lastSeenAt       DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  assignments      ScreenAssignment[]
+}
+
+model Event {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  clubId          String
+  venue           String
+  eventDate       DateTime
+  startTime       String
+  endTime         String
+  contactInfo     String
+  registrationUrl String?
+  targetScreens   String   @default("[]") // JSON stringified array of screen slugs/ids
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  posters         Poster[]
 }
 
 model Poster {
   id               String             @id @default(uuid())
+  eventId          String?
   title            String
   imagePath        String
   originalFileName String
   mimeType         String
+  checksum         String             @default("af1d9038c2")
+  status           String             @default("DRAFT") // DRAFT, PENDING_PRESIDENT, PENDING_HOD, PENDING_ADMIN, APPROVED, CHANGES_REQUESTED, REJECTED
+  activeFrom       DateTime?
+  activeUntil      DateTime?
+  isPublic         Boolean            @default(false)
   createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
   assignments      ScreenAssignment[]
+  approvals        Approval[]
+  event            Event?             @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 model ScreenAssignment {
@@ -39,6 +72,19 @@ model ScreenAssignment {
   poster Poster @relation(fields: [posterId], references: [id], onDelete: Cascade)
 
   @@unique([screenId, posterId])
+}
+
+model Approval {
+  id           String   @id @default(uuid())
+  posterId     String
+  stage        String   // PRESIDENT, HOD, ADMIN
+  reviewerId   String
+  reviewerName String
+  action       String   // APPROVE, REQUEST_CHANGES, REJECT
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  poster Poster @relation(fields: [posterId], references: [id], onDelete: Cascade)
 }
 
 model User {

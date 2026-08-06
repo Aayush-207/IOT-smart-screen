@@ -19,6 +19,14 @@ import {
   ChevronDown,
   LogOut,
   UserCheck,
+  Calendar,
+  Inbox,
+  ShieldCheck,
+  Check,
+  X,
+  MessageSquare,
+  Building,
+  Tv,
 } from 'lucide-react';
 
 interface Poster {
@@ -28,11 +36,17 @@ interface Poster {
   originalFileName: string;
   mimeType: string;
   createdAt: string;
-  assignedScreens?: { id: string; slug: string; name: string }[];
+  status?: string;
+  checksum?: string;
+  activeFrom?: string | null;
+  activeUntil?: string | null;
+  assignedScreens?: { id: string; name: string }[];
 }
 
-interface ScreenPoster extends Poster {
-  assignmentId: string;
+interface ScreenPoster {
+  id: string;
+  title: string;
+  imagePath: string;
   displayOrder: number;
 }
 
@@ -41,6 +55,11 @@ interface ScreenData {
   slug: string;
   name: string;
   location: string;
+  building?: string;
+  floor?: string;
+  status?: string;
+  playlistVersion?: number;
+  freeStorageMb?: number;
   lastSeenAt: string | null;
   isOnline: boolean;
   posters: ScreenPoster[];
@@ -54,24 +73,73 @@ interface UserProfile {
   clubId: string | null;
 }
 
+interface InboxItem {
+  id: string;
+  title: string;
+  imagePath: string;
+  status: string;
+  checksum: string;
+  activeFrom: string | null;
+  activeUntil: string | null;
+  event?: {
+    name: string;
+    description: string;
+    clubId: string;
+    venue: string;
+    eventDate: string;
+    startTime: string;
+    endTime: string;
+    contactInfo: string;
+    registrationUrl: string | null;
+  };
+  approvals: {
+    id: string;
+    stage: string;
+    reviewerName: string;
+    action: string;
+    comment: string | null;
+    createdAt: string;
+  }[];
+}
+
 export default function AdminDashboardPage() {
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'inbox' | 'enrollment'>('overview');
   const [screens, setScreens] = useState<ScreenData[]>([]);
   const [posters, setPosters] = useState<Poster[]>([]);
+  const [inboxItems, setInboxItems] = useState<InboxItem[]>([]);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Form states
-  const [title, setTitle] = useState<string>('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [targetScreenIds, setTargetScreenIds] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState<boolean>(false);
+  // Event Creation Form State
+  const [eventName, setEventName] = useState('');
+  const [eventDesc, setEventDesc] = useState('');
+  const [eventClubId, setEventClubId] = useState('technology-club');
+  const [eventVenue, setEventVenue] = useState('Main Auditorium');
+  const [eventDate, setEventDate] = useState('2026-08-30');
+  const [eventStartTime, setEventStartTime] = useState('09:00 AM');
+  const [eventEndTime, setEventEndTime] = useState('05:00 PM');
+  const [eventContact, setEventContact] = useState('tech@college.edu');
+  const [eventRegUrl, setEventRegUrl] = useState('');
+  const [eventTargetScreens, setEventTargetScreens] = useState<string[]>([]);
+  const [eventPosterFile, setEventPosterFile] = useState<File | null>(null);
+  const [eventPosterPreview, setEventPosterPreview] = useState<string | null>(null);
 
-  // Quick Assign Modal
+  // Approval Inbox Action Modal
+  const [selectedInboxItem, setSelectedInboxItem] = useState<InboxItem | null>(null);
+  const [approvalActionType, setApprovalActionType] = useState<'APPROVE' | 'REQUEST_CHANGES' | 'REJECT'>('APPROVE');
+  const [approvalComment, setApprovalComment] = useState('');
+  const [isSubmittingApproval, setIsSubmittingApproval] = useState(false);
+
+  // Screen Enrollment Form State
+  const [enrollName, setEnrollName] = useState('');
+  const [enrollLocation, setEnrollLocation] = useState('');
+  const [enrollBuilding, setEnrollBuilding] = useState('Main Academic Block');
+  const [enrollFloor, setEnrollFloor] = useState('1st Floor');
+  const [enrolledSecret, setEnrolledSecret] = useState<{ deviceId: string; secret: string } | null>(null);
+
+  // Quick Assign Modal & Content Management
   const [assigningPoster, setAssigningPoster] = useState<Poster | null>(null);
   const [assignTargetScreenIds, setAssignTargetScreenIds] = useState<string[]>([]);
-
-  // Screen Content Management Modal
   const [managingScreen, setManagingScreen] = useState<ScreenData | null>(null);
 
   // Notifications
@@ -79,7 +147,6 @@ export default function AdminDashboardPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-dismiss alert messages after 5 seconds
   const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
     setMessage({ text, type });
     setTimeout(() => {
@@ -87,18 +154,20 @@ export default function AdminDashboardPage() {
     }, 5000);
   };
 
-  // Fetch user profile, screens, and posters data
+  // Fetch all admin data & approval inbox
   const fetchData = async () => {
     try {
-      const [screensRes, postersRes, authRes] = await Promise.all([
+      const [screensRes, postersRes, authRes, inboxRes] = await Promise.all([
         fetch('/api/screens'),
         fetch('/api/posters'),
         fetch('/api/auth/me'),
+        fetch('/api/v1/approvals/inbox'),
       ]);
 
       const screensJson = await screensRes.json();
       const postersJson = await postersRes.json();
       const authJson = await authRes.json();
+      const inboxJson = await inboxRes.json();
 
       if (authJson.success && authJson.user) {
         setUser(authJson.user);
@@ -113,6 +182,9 @@ export default function AdminDashboardPage() {
       if (postersJson.success) {
         setPosters(postersJson.posters);
       }
+      if (inboxJson.success) {
+        setInboxItems(inboxJson.inbox);
+      }
     } catch (err) {
       console.error('Failed to fetch admin data:', err);
     } finally {
@@ -125,196 +197,155 @@ export default function AdminDashboardPage() {
     window.location.href = '/login';
   };
 
-  // Initial load & 5s status refresh interval
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Handle File Select
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Handle Event Poster Select
+  const handleEventPosterChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validate size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      showNotification('File exceeds maximum size limit of 10 MB.', 'error');
+      showNotification('File exceeds max size limit of 10 MB.', 'error');
       return;
     }
-
-    // Validate type
-    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-    if (!validTypes.includes(file.type.toLowerCase())) {
-      showNotification('Unsupported file type. Please upload PNG, JPEG, or WebP.', 'error');
-      return;
-    }
-
-    setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    setEventPosterFile(file);
+    setEventPosterPreview(URL.createObjectURL(file));
   };
 
-  // Toggle Target Screen for upload form
-  const toggleUploadTargetScreen = (screenId: string) => {
-    setTargetScreenIds((prev) =>
-      prev.includes(screenId) ? prev.filter((id) => id !== screenId) : [...prev, screenId]
-    );
-  };
-
-  const selectAllUploadScreens = () => {
-    if (targetScreenIds.length === screens.length) {
-      setTargetScreenIds([]);
-    } else {
-      setTargetScreenIds(screens.map((s) => s.id));
-    }
-  };
-
-  // Upload and Publish Poster
-  const handleUploadSubmit = async (e: FormEvent) => {
+  // Submit New Event & Draft Poster
+  const handleCreateEvent = async (e: FormEvent) => {
     e.preventDefault();
-    if (!selectedFile) {
-      showNotification('Please select an image file to upload.', 'error');
+    if (!eventName || !eventDesc || !eventDate) {
+      showNotification('Please fill in required event fields.', 'error');
       return;
     }
-    if (!title.trim()) {
-      showNotification('Please enter a poster title.', 'error');
-      return;
-    }
-
-    setIsUploading(true);
 
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('title', title.trim());
-      targetScreenIds.forEach((id) => formData.append('screenIds', id));
+      formData.append('name', eventName);
+      formData.append('description', eventDesc);
+      formData.append('clubId', eventClubId);
+      formData.append('venue', eventVenue);
+      formData.append('eventDate', eventDate);
+      formData.append('startTime', eventStartTime);
+      formData.append('endTime', eventEndTime);
+      formData.append('contactInfo', eventContact);
+      if (eventRegUrl) formData.append('registrationUrl', eventRegUrl);
+      eventTargetScreens.forEach((slug) => formData.append('targetScreens', slug));
+      if (eventPosterFile) formData.append('poster', eventPosterFile);
 
-      const res = await fetch('/api/posters/upload', {
+      const res = await fetch('/api/v1/events', {
         method: 'POST',
         body: formData,
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
-        showNotification(data.message || 'Poster uploaded and published!');
-        setTitle('');
-        setSelectedFile(null);
-        setPreviewUrl(null);
-        setTargetScreenIds([]);
-        if (fileInputRef.current) fileInputRef.current.value = '';
+        showNotification('Event created! Poster saved in DRAFT mode.');
+        setEventName('');
+        setEventDesc('');
+        setEventPosterFile(null);
+        setEventPosterPreview(null);
+        setEventTargetScreens([]);
         await fetchData();
+        setActiveTab('inbox');
       } else {
-        showNotification(data.error || 'Upload failed.', 'error');
+        showNotification(data.error || 'Failed to create event.', 'error');
       }
-    } catch (err: any) {
-      showNotification('Network error uploading poster.', 'error');
-    } finally {
-      setIsUploading(false);
+    } catch (err) {
+      showNotification('Error creating event.', 'error');
     }
   };
 
-  // Open Assign Existing Poster Modal
-  const openAssignModal = (poster: Poster) => {
-    setAssigningPoster(poster);
-    const currentAssigned = poster.assignedScreens?.map((s) => s.id) || [];
-    setAssignTargetScreenIds(currentAssigned);
+  // Submit Poster for Approval Workflow (DRAFT -> PENDING_PRESIDENT)
+  const handleSubmitPosterForApproval = async (posterId: string) => {
+    try {
+      const res = await fetch(`/api/v1/posters/${posterId}/submit`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('Poster submitted for President approval!');
+        await fetchData();
+      } else {
+        showNotification(data.error || 'Submission failed.', 'error');
+      }
+    } catch {
+      showNotification('Error submitting poster.', 'error');
+    }
   };
 
-  const handleAssignSubmit = async () => {
-    if (!assigningPoster) return;
+  // Submit Approval Action (Approve / Request Changes / Reject)
+  const handleApprovalActionSubmit = async () => {
+    if (!selectedInboxItem) return;
+    if ((approvalActionType === 'REQUEST_CHANGES' || approvalActionType === 'REJECT') && !approvalComment.trim()) {
+      showNotification('A comment is required for rejection or change requests.', 'error');
+      return;
+    }
+
+    setIsSubmittingApproval(true);
     try {
-      const res = await fetch('/api/assignments', {
+      const res = await fetch(`/api/v1/approvals/${selectedInboxItem.id}/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          posterId: assigningPoster.id,
-          screenIds: assignTargetScreenIds,
+          action: approvalActionType,
+          comment: approvalComment.trim(),
         }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
-        showNotification(`Poster successfully assigned to screen(s)!`);
-        setAssigningPoster(null);
+        showNotification(`Approval action "${approvalActionType}" executed successfully!`);
+        setSelectedInboxItem(null);
+        setApprovalComment('');
         await fetchData();
       } else {
-        showNotification(data.error || 'Failed to assign poster.', 'error');
+        showNotification(data.error || 'Approval action failed.', 'error');
       }
-    } catch (err) {
-      showNotification('Error performing assignment.', 'error');
+    } catch {
+      showNotification('Network error processing approval action.', 'error');
+    } finally {
+      setIsSubmittingApproval(false);
     }
   };
 
-  // Delete Poster
-  const handleDeletePoster = async (posterId: string, posterTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${posterTitle}"? This will unassign it from all screens.`)) {
+  // Screen Enrollment Submit
+  const handleEnrollScreen = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!enrollName || !enrollLocation) {
+      showNotification('Please enter screen name and location.', 'error');
       return;
     }
 
     try {
-      const res = await fetch(`/api/posters/${posterId}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showNotification(`Deleted poster "${posterTitle}".`);
-        await fetchData();
-      } else {
-        showNotification(data.error || 'Failed to delete poster.', 'error');
-      }
-    } catch (err) {
-      showNotification('Error deleting poster.', 'error');
-    }
-  };
-
-  // Unassign poster from screen
-  const handleRemoveAssignment = async (screenId: string, posterId: string) => {
-    try {
-      const res = await fetch(`/api/assignments?screenId=${screenId}&posterId=${posterId}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        showNotification('Poster removed from screen.');
-        await fetchData();
-      } else {
-        showNotification(data.error || 'Failed to remove poster.', 'error');
-      }
-    } catch (err) {
-      showNotification('Error removing assignment.', 'error');
-    }
-  };
-
-  // Reorder playlist poster items
-  const handleMovePosterOrder = async (screenId: string, posterId: string, direction: 'up' | 'down') => {
-    if (!managingScreen) return;
-    const currentPosters = [...managingScreen.posters];
-    const index = currentPosters.findIndex((p) => p.id === posterId);
-    if (index === -1) return;
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= currentPosters.length) return;
-
-    const temp = currentPosters[index];
-    currentPosters[index] = currentPosters[targetIndex];
-    currentPosters[targetIndex] = temp;
-
-    const orderedPosterIds = currentPosters.map((p) => p.id);
-
-    try {
-      const res = await fetch('/api/assignments/reorder', {
-        method: 'PUT',
+      const res = await fetch('/api/v1/screens/enroll', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ screenId, orderedPosterIds }),
+        body: JSON.stringify({
+          name: enrollName,
+          location: enrollLocation,
+          building: enrollBuilding,
+          floor: enrollFloor,
+        }),
       });
+
       const data = await res.json();
       if (res.ok && data.success) {
-        showNotification('Playlist order updated.');
+        showNotification('Screen kiosk enrolled successfully!');
+        setEnrolledSecret({
+          deviceId: data.device.deviceId,
+          secret: data.device.deviceSecret,
+        });
+        setEnrollName('');
+        setEnrollLocation('');
         await fetchData();
       } else {
-        showNotification(data.error || 'Failed to reorder playlist.', 'error');
+        showNotification(data.error || 'Enrollment failed.', 'error');
       }
-    } catch (err) {
-      showNotification('Error reordering playlist.', 'error');
+    } catch {
+      showNotification('Error enrolling screen.', 'error');
     }
   };
 
@@ -322,22 +353,27 @@ export default function AdminDashboardPage() {
   const totalScreens = screens.length;
   const onlineScreens = screens.filter((s) => s.isOnline).length;
   const totalPosters = posters.length;
-  const totalAssignments = screens.reduce((acc, s) => acc + s.posters.length, 0);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-800">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
       {/* Top Header Bar */}
-      <header className="bg-slate-900 text-white shadow-md border-b border-slate-800 sticky top-0 z-40">
+      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center text-slate-950 font-bold shadow-lg">
-              <Monitor className="w-6 h-6 text-slate-950" />
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+              <Monitor className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white">Smart Billboard Control</h1>
-              <p className="text-xs text-cyan-400 font-medium">IoT Digital Signage Dashboard</p>
+              <h1 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                CampusCast Admin Operations
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  SSO Protected
+                </span>
+              </h1>
+              <p className="text-xs text-slate-400">IoT Digital Signage & Scoped Approvals</p>
             </div>
           </div>
+
           <div className="flex items-center gap-4">
             {user && (
               <div className="flex items-center gap-2.5 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-xl text-xs">
@@ -362,561 +398,610 @@ export default function AdminDashboardPage() {
               className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition flex items-center gap-2"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh Data
+              Refresh
             </button>
-            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400 border-l border-slate-800 pl-4">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Server Time: {new Date().toLocaleTimeString()}
-            </div>
           </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex border-t border-slate-800 text-xs">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'overview'
+                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Monitor className="w-4 h-4" />
+            Billboard Fleet & Overview
+          </button>
+          <button
+            onClick={() => setActiveTab('events')}
+            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'events'
+                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            Create Event & Poster
+          </button>
+          <button
+            onClick={() => setActiveTab('inbox')}
+            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'inbox'
+                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Inbox className="w-4 h-4" />
+            Approval Inbox
+            {inboxItems.length > 0 && (
+              <span className="px-2 py-0.5 rounded-full bg-cyan-500 text-slate-950 font-bold text-[10px]">
+                {inboxItems.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('enrollment')}
+            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'enrollment'
+                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Tv className="w-4 h-4" />
+            Screen Kiosk Enrollment
+          </button>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
-        {/* Toast Notification Banner */}
-        {message && (
+      {/* Notification Toast */}
+      {message && (
+        <div className="max-w-7xl mx-auto px-4 mt-4 w-full">
           <div
-            className={`p-4 rounded-xl border flex items-center justify-between shadow-lg transition-all ${
+            className={`p-4 rounded-xl border text-xs font-medium flex items-center justify-between shadow-lg ${
               message.type === 'success'
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                : 'bg-red-50 border-red-200 text-red-900'
+                ? 'bg-emerald-950/80 border-emerald-800 text-emerald-300'
+                : 'bg-red-950/80 border-red-800 text-red-300'
             }`}
           >
-            <div className="flex items-center gap-3">
-              {message.type === 'success' ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-              ) : (
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-              )}
-              <span className="text-sm font-medium">{message.text}</span>
+            <div className="flex items-center gap-2">
+              {message.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+              <span>{message.text}</span>
             </div>
-            <button
-              onClick={() => setMessage(null)}
-              className="text-xs font-semibold underline hover:no-underline ml-4"
-            >
-              Dismiss
+            <button onClick={() => setMessage(null)} className="text-slate-400 hover:text-white">
+              <X className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+        {/* TAB 1: OVERVIEW */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            {/* Metric Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-400">Total Kiosk Screens</p>
+                  <h3 className="text-2xl font-bold text-white mt-1">{totalScreens}</h3>
+                  <p className="text-[11px] text-emerald-400 mt-1 font-mono">{onlineScreens} Online & Syncing</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                  <Monitor className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-400">Media Poster Library</p>
+                  <h3 className="text-2xl font-bold text-white mt-1">{totalPosters}</h3>
+                  <p className="text-[11px] text-cyan-400 mt-1 font-mono">Approved & Scoped Posters</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-400">Pending Approvals</p>
+                  <h3 className="text-2xl font-bold text-white mt-1">{inboxItems.length}</h3>
+                  <p className="text-[11px] text-amber-400 mt-1 font-mono">Multi-Stage Review Inbox</p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <Inbox className="w-6 h-6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Active Screens Fleet */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Tv className="w-5 h-5 text-cyan-400" />
+                Live Kiosk Billboard Fleet
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {screens.map((screen) => (
+                  <div key={screen.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-bold text-white text-base">{screen.name}</h3>
+                        <p className="text-xs text-slate-400">{screen.location}</p>
+                      </div>
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono border flex items-center gap-1.5 ${
+                        screen.isOnline
+                          ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800'
+                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${screen.isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}></span>
+                        {screen.isOnline ? 'ONLINE' : 'OFFLINE'}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-slate-400 space-y-1 bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
+                      <p>Building: <span className="text-slate-200">{screen.building}</span></p>
+                      <p>Floor: <span className="text-slate-200">{screen.floor}</span></p>
+                      <p>Playlist Manifest Version: <span className="text-cyan-400 font-mono">v{screen.playlistVersion || 1}</span></p>
+                    </div>
+
+                    <a
+                      href={`/display/${screen.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-2 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 hover:border-cyan-400 transition flex items-center justify-center gap-2"
+                    >
+                      <span>Open Kiosk Display</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Summary Metric Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Monitor className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Screens</span>
-              <p className="text-2xl font-bold text-slate-900">{totalScreens}</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Online Screens</span>
-              <p className="text-2xl font-bold text-emerald-600">
-                {onlineScreens} <span className="text-xs font-normal text-slate-400">/ {totalScreens}</span>
+        {/* TAB 2: CREATE EVENT */}
+        {activeTab === 'events' && (
+          <div className="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+            <div className="space-y-2 border-b border-slate-800 pb-4">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-cyan-400" />
+                Step 2: Create Event & Submit Poster
+              </h2>
+              <p className="text-xs text-slate-400">
+                Design Lead fills basic event details & uploads poster image. Creates an event & DRAFT poster record.
               </p>
             </div>
-          </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <ImageIcon className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Uploaded Posters</span>
-              <p className="text-2xl font-bold text-slate-900">{totalPosters}</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
-              <Layers className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Assignments</span>
-              <p className="text-2xl font-bold text-slate-900">{totalAssignments}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 1: Registered Display Screens */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Monitor className="w-5 h-5 text-blue-600" />
-              Registered Display Screens
-            </h2>
-            <span className="text-xs text-slate-500">Auto-refreshes every 5s</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {screens.map((screen) => (
-              <div
-                key={screen.id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between overflow-hidden"
-              >
-                <div className="p-5 space-y-4">
-                  {/* Card Header & Online Status */}
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-base leading-tight">{screen.name}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">{screen.location}</p>
-                    </div>
-                    {screen.isOnline ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Online
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-                        <span className="w-2 h-2 rounded-full bg-slate-400"></span>
-                        Offline
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Heartbeat Status */}
-                  <div className="text-xs text-slate-500 flex items-center gap-1.5 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>
-                      {screen.lastSeenAt
-                        ? `Last heartbeat: ${new Date(screen.lastSeenAt).toLocaleTimeString()}`
-                        : 'No heartbeat recorded yet'}
-                    </span>
-                  </div>
-
-                  {/* Currently Assigned Posters */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
-                      <span>Assigned Content ({screen.posters.length})</span>
-                      {screen.posters.length > 1 && (
-                        <span className="text-[11px] text-cyan-600 font-medium">Rotating Slideshow (8s)</span>
-                      )}
-                    </div>
-
-                    {screen.posters.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {screen.posters.map((poster) => (
-                          <div
-                            key={poster.assignmentId}
-                            className="relative group rounded-lg overflow-hidden border border-slate-200 aspect-video bg-slate-900"
-                          >
-                            <img
-                              src={poster.imagePath}
-                              alt={poster.title}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center p-1">
-                              <button
-                                onClick={() => handleRemoveAssignment(screen.id, poster.id)}
-                                title="Remove from screen"
-                                className="p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-dashed border-slate-200 text-center">
-                        No poster assigned. Display showing default fallback.
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card Footer Actions */}
-                <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
-                  <a
-                    href={`/display/${screen.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-cyan-700 hover:text-cyan-900 font-semibold flex items-center gap-1 hover:underline"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    Open Display Page
-                  </a>
-
-                  <button
-                    onClick={() => setManagingScreen(screen)}
-                    className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg transition flex items-center gap-1.5 shadow-sm"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    Manage Content
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Section 2: Upload and Publish Poster Form */}
-        <section className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
-          <div className="border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <UploadCloud className="w-5 h-5 text-cyan-600" />
-              Upload & Remote Publish Poster
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Select an image, enter a title, and instantly publish it to one, multiple, or all screens.
-            </p>
-          </div>
-
-          <form onSubmit={handleUploadSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Inputs */}
-            <div className="space-y-5">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Poster Title *
-                </label>
+            <form onSubmit={handleCreateEvent} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-300">Event Title *</label>
                 <input
                   type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Annual Campus Tech Innovation Summit 2026"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 outline-none transition"
                   required
+                  value={eventName}
+                  onChange={(e) => setEventName(e.target.value)}
+                  placeholder="e.g. Annual AI & Robotics Hackathon 2026"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                  Select Image File (PNG, JPEG, WebP, max 10MB) *
-                </label>
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-300">Description *</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={eventDesc}
+                  onChange={(e) => setEventDesc(e.target.value)}
+                  placeholder="Event agenda, eligibility, and rules..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                ></textarea>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Club Scope *</label>
+                  <select
+                    value={eventClubId}
+                    onChange={(e) => setEventClubId(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  >
+                    <option value="technology-club">Technology Club</option>
+                    <option value="robotics-club">Robotics Club</option>
+                    <option value="cultural-society">Cultural Society</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Venue *</label>
+                  <input
+                    type="text"
+                    required
+                    value={eventVenue}
+                    onChange={(e) => setEventVenue(e.target.value)}
+                    placeholder="e.g. Main Auditorium"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Event Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Start Time *</label>
+                  <input
+                    type="text"
+                    required
+                    value={eventStartTime}
+                    onChange={(e) => setEventStartTime(e.target.value)}
+                    placeholder="09:00 AM"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">End Time *</label>
+                  <input
+                    type="text"
+                    required
+                    value={eventEndTime}
+                    onChange={(e) => setEventEndTime(e.target.value)}
+                    placeholder="05:00 PM"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Contact Email/Phone *</label>
+                  <input
+                    type="text"
+                    required
+                    value={eventContact}
+                    onChange={(e) => setEventContact(e.target.value)}
+                    placeholder="tech@college.edu"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Registration URL</label>
+                  <input
+                    type="url"
+                    value={eventRegUrl}
+                    onChange={(e) => setEventRegUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+              </div>
+
+              {/* Target Screens Selection */}
+              <div className="space-y-2 pt-2">
+                <label className="font-semibold text-slate-300 block">Target Kiosk Screens:</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {screens.map((screen) => (
+                    <label
+                      key={screen.slug}
+                      className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between ${
+                        eventTargetScreens.includes(screen.slug)
+                          ? 'bg-cyan-950/60 border-cyan-500 text-cyan-300'
+                          : 'bg-slate-950 border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      <span className="font-medium text-[11px] truncate">{screen.name}</span>
+                      <input
+                        type="checkbox"
+                        checked={eventTargetScreens.includes(screen.slug)}
+                        onChange={() => {
+                          setEventTargetScreens((prev) =>
+                            prev.includes(screen.slug)
+                              ? prev.filter((s) => s !== screen.slug)
+                              : [...prev, screen.slug]
+                          );
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Poster Upload File */}
+              <div className="space-y-2 pt-2">
+                <label className="font-semibold text-slate-300 block">Poster Image (PNG, JPEG, WebP) *</label>
                 <input
                   type="file"
-                  ref={fileInputRef}
-                  accept="image/png, image/jpeg, image/jpg, image/webp"
-                  onChange={handleFileChange}
-                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 border border-slate-300 rounded-xl cursor-pointer"
-                  required
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={handleEventPosterChange}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-slate-300 text-xs"
                 />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                    Target Display Screens
-                  </label>
-                  <button
-                    type="button"
-                    onClick={selectAllUploadScreens}
-                    className="text-xs text-cyan-600 font-semibold hover:underline"
-                  >
-                    {targetScreenIds.length === screens.length ? 'Deselect All' : 'Select All Screens'}
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {screens.map((s) => {
-                    const isChecked = targetScreenIds.includes(s.id);
-                    return (
-                      <label
-                        key={s.id}
-                        className={`p-3 rounded-xl border cursor-pointer text-xs flex items-center justify-between transition ${
-                          isChecked
-                            ? 'bg-cyan-50 border-cyan-400 text-cyan-950 font-semibold'
-                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span className="truncate">{s.name}</span>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleUploadTargetScreen(s.id)}
-                          className="rounded text-cyan-600 focus:ring-cyan-500"
-                        />
-                      </label>
-                    );
-                  })}
-                </div>
+                {eventPosterPreview && (
+                  <div className="mt-3 relative w-full h-44 rounded-xl overflow-hidden border border-slate-800 bg-black flex items-center justify-center">
+                    <img src={eventPosterPreview} alt="Preview" className="max-h-full object-contain" />
+                  </div>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={isUploading}
-                className="w-full py-3 px-6 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2 mt-4"
               >
-                <UploadCloud className="w-5 h-5" />
-                {isUploading ? 'Publishing to Network...' : 'Upload & Publish to Selected Screens'}
+                <PlusCircle className="w-4 h-4" />
+                Create Event & Save DRAFT Poster
               </button>
-            </div>
-
-            {/* Right Live Image Preview */}
-            <div className="flex flex-col">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                Live Poster Preview
-              </label>
-              <div className="flex-1 bg-slate-900 rounded-xl border border-slate-300 overflow-hidden flex items-center justify-center p-4 min-h-[220px] relative">
-                {previewUrl ? (
-                  <img
-                    src={previewUrl}
-                    alt="Poster Preview"
-                    className="w-full h-full max-h-[300px] object-contain rounded-lg"
-                  />
-                ) : (
-                  <div className="text-center text-slate-500 space-y-2">
-                    <ImageIcon className="w-12 h-12 mx-auto text-slate-600 stroke-[1.5]" />
-                    <p className="text-xs">No image selected for preview</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </form>
-        </section>
-
-        {/* Section 3: Media Library */}
-        <section className="space-y-4">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <ImageIcon className="w-5 h-5 text-purple-600" />
-            Media Library ({posters.length})
-          </h2>
-
-          {posters.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {posters.map((poster) => (
-                <div
-                  key={poster.id}
-                  className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition"
-                >
-                  <div className="aspect-video bg-slate-900 relative">
-                    <img
-                      src={poster.imagePath}
-                      alt={poster.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-sm line-clamp-1">{poster.title}</h3>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Uploaded: {new Date(poster.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-
-                    <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-slate-500 block">Assigned Screens:</span>
-                      {poster.assignedScreens && poster.assignedScreens.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {poster.assignedScreens.map((sc) => (
-                            <span
-                              key={sc.id}
-                              className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-medium rounded-full border border-blue-200"
-                            >
-                              {sc.name.split('—')[0]}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-[11px] text-slate-400 italic">Unassigned</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
-                    <button
-                      onClick={() => openAssignModal(poster)}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1"
-                    >
-                      <PlusCircle className="w-3.5 h-3.5" />
-                      Assign
-                    </button>
-                    <button
-                      onClick={() => handleDeletePoster(poster.id, poster.title)}
-                      className="px-2.5 py-1.5 bg-slate-200 hover:bg-red-50 text-slate-700 hover:text-red-700 text-xs font-medium rounded-lg transition flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500">
-              No posters uploaded yet. Use the upload form above to add your first digital poster.
-            </div>
-          )}
-        </section>
-
-        {/* Quick Assign Modal */}
-        {assigningPoster && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-200">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="font-bold text-slate-900 text-base">Assign Poster to Screens</h3>
-                <button
-                  onClick={() => setAssigningPoster(null)}
-                  className="text-slate-400 hover:text-slate-600"
-                >
-                  <XCircle className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <img
-                  src={assigningPoster.imagePath}
-                  alt={assigningPoster.title}
-                  className="w-16 h-10 object-cover rounded-lg bg-slate-900"
-                />
-                <span className="font-bold text-sm text-slate-800 line-clamp-1">
-                  {assigningPoster.title}
-                </span>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block">
-                  Select Target Screens
-                </label>
-                <div className="space-y-2">
-                  {screens.map((sc) => {
-                    const isChecked = assignTargetScreenIds.includes(sc.id);
-                    return (
-                      <label
-                        key={sc.id}
-                        className={`p-3 rounded-xl border cursor-pointer text-xs flex items-center justify-between transition ${
-                          isChecked
-                            ? 'bg-blue-50 border-blue-400 text-blue-950 font-semibold'
-                            : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                        }`}
-                      >
-                        <span>{sc.name}</span>
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => {
-                            setAssignTargetScreenIds((prev) =>
-                              prev.includes(sc.id)
-                                ? prev.filter((id) => id !== sc.id)
-                                : [...prev, sc.id]
-                            );
-                          }}
-                          className="rounded text-blue-600"
-                        />
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  onClick={() => setAssigningPoster(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAssignSubmit}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition"
-                >
-                  Save Assignments
-                </button>
-              </div>
-            </div>
+            </form>
           </div>
         )}
 
-        {/* Screen Playlist Management Modal */}
-        {managingScreen && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-200">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="font-bold text-slate-900 text-base">{managingScreen.name}</h3>
-                  <p className="text-xs text-slate-500">Manage assigned poster rotation & order</p>
-                </div>
-                <button
-                  onClick={() => setManagingScreen(null)}
-                  className="text-slate-400 hover:text-slate-600"
-                >
-                  <XCircle className="w-5 h-5" />
-                </button>
+        {/* TAB 3: APPROVAL INBOX */}
+        {activeTab === 'inbox' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <ShieldCheck className="w-6 h-6 text-cyan-400" />
+                  Multi-Stage Transactional Approval Inbox
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Workflow: <code className="text-cyan-300">DRAFT</code> → <code className="text-purple-300">PENDING_PRESIDENT</code> → <code className="text-amber-300">PENDING_HOD</code> → <code className="text-emerald-300">PENDING_ADMIN</code> → <code className="text-emerald-400">APPROVED</code>
+                </p>
               </div>
-
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                  Current Playlist ({managingScreen.posters.length})
-                </h4>
-
-                {managingScreen.posters.length > 0 ? (
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                    {managingScreen.posters.map((p, idx) => (
-                      <div
-                        key={p.assignmentId}
-                        className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 gap-2"
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
-                            {idx + 1}
-                          </span>
-                          <img
-                            src={p.imagePath}
-                            alt={p.title}
-                            className="w-12 h-8 object-cover rounded bg-slate-900 flex-shrink-0"
-                          />
-                          <span className="text-xs font-semibold text-slate-800 truncate">{p.title}</span>
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          {/* Reorder Buttons */}
-                          <button
-                            disabled={idx === 0}
-                            onClick={() => handleMovePosterOrder(managingScreen.id, p.id, 'up')}
-                            title="Move Up"
-                            className="p-1 text-slate-600 hover:text-cyan-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:hover:bg-transparent"
-                          >
-                            <ChevronUp className="w-4 h-4" />
-                          </button>
-                          <button
-                            disabled={idx === managingScreen.posters.length - 1}
-                            onClick={() => handleMovePosterOrder(managingScreen.id, p.id, 'down')}
-                            title="Move Down"
-                            className="p-1 text-slate-600 hover:text-cyan-700 hover:bg-slate-200 rounded disabled:opacity-30 disabled:hover:bg-transparent"
-                          >
-                            <ChevronDown className="w-4 h-4" />
-                          </button>
-
-                          <button
-                            onClick={async () => {
-                              await handleRemoveAssignment(managingScreen.id, p.id);
-                            }}
-                            className="text-red-600 hover:text-red-800 text-xs font-medium px-2 py-1 rounded bg-red-50 hover:bg-red-100 transition ml-1"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-slate-400 italic">No posters currently assigned.</p>
-                )}
-              </div>
-
-              <div className="flex items-center justify-end pt-2 border-t border-slate-100">
-                <button
-                  onClick={() => setManagingScreen(null)}
-                  className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition"
-                >
-                  Done
-                </button>
-              </div>
+              <span className="text-xs text-slate-400 font-mono bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+                Current Role: <strong className="text-white">{user?.role || 'DESIGN_LEAD'}</strong>
+              </span>
             </div>
+
+            {inboxItems.length === 0 ? (
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
+                <h3 className="font-bold text-white text-base">Approval Inbox Clean</h3>
+                <p className="text-xs text-slate-400">No posters are currently pending review for your role stage.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {inboxItems.map((item) => (
+                  <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          {item.status}
+                        </span>
+                        <h3 className="font-bold text-white text-base mt-1">{item.title}</h3>
+                        {item.event && <p className="text-xs text-cyan-400 font-medium">{item.event.name}</p>}
+                      </div>
+                      <div className="w-20 h-20 rounded-xl bg-black overflow-hidden border border-slate-800 flex items-center justify-center">
+                        <img src={item.imagePath} alt={item.title} className="max-h-full object-contain" />
+                      </div>
+                    </div>
+
+                    {item.event && (
+                      <div className="text-xs text-slate-400 space-y-1 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+                        <p>Venue: <span className="text-slate-200">{item.event.venue}</span></p>
+                        <p>Event Date: <span className="text-slate-200">{new Date(item.event.eventDate).toLocaleDateString()}</span></p>
+                        <p>Calculated 21-Day Display: <span className="text-cyan-400 font-mono">{item.activeFrom ? new Date(item.activeFrom).toLocaleDateString() : 'Auto-Calculated'}</span></p>
+                      </div>
+                    )}
+
+                    <div className="pt-2 flex items-center gap-3">
+                      {item.status === 'DRAFT' ? (
+                        <button
+                          onClick={() => handleSubmitPosterForApproval(item.id)}
+                          className="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition"
+                        >
+                          Submit for President Approval
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedInboxItem(item)}
+                          className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                          Review & Execute Approval Action
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Approval Action Modal */}
+            {selectedInboxItem && (
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-lg w-full space-y-6 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 className="font-bold text-white text-base flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-cyan-400" />
+                      Review Poster Submission
+                    </h3>
+                    <button onClick={() => setSelectedInboxItem(null)} className="text-slate-400 hover:text-white">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                      <p className="text-slate-400">Target Item: <strong className="text-white">{selectedInboxItem.title}</strong></p>
+                      <p className="text-slate-400 mt-0.5">Current Stage: <strong className="text-cyan-400 font-mono">{selectedInboxItem.status}</strong></p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="font-semibold text-slate-300 block">Select Action:</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setApprovalActionType('APPROVE')}
+                          className={`py-2 rounded-xl font-bold text-xs border ${
+                            approvalActionType === 'APPROVE'
+                              ? 'bg-emerald-950 border-emerald-500 text-emerald-300'
+                              : 'bg-slate-950 border-slate-800 text-slate-400'
+                          }`}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setApprovalActionType('REQUEST_CHANGES')}
+                          className={`py-2 rounded-xl font-bold text-xs border ${
+                            approvalActionType === 'REQUEST_CHANGES'
+                              ? 'bg-amber-950 border-amber-500 text-amber-300'
+                              : 'bg-slate-950 border-slate-800 text-slate-400'
+                          }`}
+                        >
+                          Request Changes
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setApprovalActionType('REJECT')}
+                          className={`py-2 rounded-xl font-bold text-xs border ${
+                            approvalActionType === 'REJECT'
+                              ? 'bg-red-950 border-red-500 text-red-300'
+                              : 'bg-slate-950 border-slate-800 text-slate-400'
+                          }`}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-300 block">Reviewer Comment:</label>
+                      <textarea
+                        rows={3}
+                        value={approvalComment}
+                        onChange={(e) => setApprovalComment(e.target.value)}
+                        placeholder="Add required comment or feedback for Design Lead..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      onClick={() => setSelectedInboxItem(null)}
+                      className="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-xl font-semibold hover:bg-slate-700"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleApprovalActionSubmit}
+                      disabled={isSubmittingApproval}
+                      className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg transition"
+                    >
+                      {isSubmittingApproval ? 'Processing...' : 'Execute Transaction'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: SCREEN ENROLLMENT */}
+        {activeTab === 'enrollment' && (
+          <div className="max-w-2xl mx-auto space-y-8">
+            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+              <div className="space-y-2 border-b border-slate-800 pb-4">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <Tv className="w-6 h-6 text-cyan-400" />
+                  Step 12: Physical Display Screen Enrollment
+                </h2>
+                <p className="text-xs text-slate-400">
+                  Enrolls new kiosk screen node and generates hashed device credentials secret.
+                </p>
+              </div>
+
+              <form onSubmit={handleEnrollScreen} className="space-y-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Screen Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={enrollName}
+                    onChange={(e) => setEnrollName(e.target.value)}
+                    placeholder="e.g. Science Block Ground Floor Kiosk"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-300">Location Description *</label>
+                  <input
+                    type="text"
+                    required
+                    value={enrollLocation}
+                    onChange={(e) => setEnrollLocation(e.target.value)}
+                    placeholder="e.g. Near Physics Lab Room 102"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-300">Building</label>
+                    <input
+                      type="text"
+                      value={enrollBuilding}
+                      onChange={(e) => setEnrollBuilding(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-semibold text-slate-300">Floor</label>
+                    <input
+                      type="text"
+                      value={enrollFloor}
+                      onChange={(e) => setEnrollFloor(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  Enroll Physical Screen Node
+                </button>
+              </form>
+            </div>
+
+            {enrolledSecret && (
+              <div className="bg-emerald-950/60 border border-emerald-800 rounded-2xl p-6 space-y-3 text-xs">
+                <h4 className="font-bold text-emerald-300 text-sm flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  Screen Credentials Generated Successfully
+                </h4>
+                <p className="text-slate-300">
+                  Save these credentials for screen kiosk authentication. Only the SHA-256 hash is stored in PostgreSQL.
+                </p>
+                <div className="p-3 bg-slate-950 rounded-xl font-mono text-[11px] space-y-1 text-slate-200 border border-emerald-900">
+                  <p>Device ID: <span className="text-cyan-400">{enrolledSecret.deviceId}</span></p>
+                  <p>Device Secret: <span className="text-emerald-400">{enrolledSecret.secret}</span></p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        Smart Digital Billboard Network • Academic Proof-of-Concept System
+      <footer className="border-t border-slate-900 py-6 text-center text-xs text-slate-600 bg-slate-950">
+        CampusCast IoT Network Operations • Multi-Stage Approval System
       </footer>
     </div>
   );
