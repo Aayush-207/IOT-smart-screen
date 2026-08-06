@@ -14,9 +14,15 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Redirect authenticated users away from /login to /admin
+  if (pathname === '/login' && session && session.value) {
+    const adminUrl = new URL('/admin', request.url);
+    return NextResponse.redirect(adminUrl);
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/login'],
 };

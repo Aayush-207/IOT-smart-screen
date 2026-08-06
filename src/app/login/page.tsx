@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ShieldCheck, Lock, Building2, UserCheck, ArrowRight } from 'lucide-react';
 
@@ -14,6 +14,18 @@ function LoginForm() {
   const [selectedUserId, setSelectedUserId] = useState<string>('usr_101');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.authenticated) {
+          router.push(redirectPath);
+        }
+      })
+      .catch(() => {});
+  }, [router, redirectPath]);
 
   const demoAccounts = [
     {
