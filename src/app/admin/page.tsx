@@ -26,6 +26,7 @@ import {
 
 interface Poster {
   id: string;
+  eventId?: string;
   title: string;
   imagePath: string;
   originalFileName: string;
@@ -285,6 +286,27 @@ export default function AdminDashboardPage() {
       }
     } catch {
       showNotification('Error running background cleanup worker.', 'error');
+    }
+  };
+
+  // Cancel Event Handler (Step 20)
+  const handleCancelEvent = async (eventId: string) => {
+    if (!confirm('Are you sure you want to cancel this event? This will mark display schedules inactive and invalidate active playlists immediately.')) return;
+    try {
+      const res = await fetch(`/api/v1/events/${eventId}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actorId: user?.userId || 'usr_admin' }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(data.message || 'Event cancelled successfully.');
+        await fetchData();
+      } else {
+        showNotification(data.error || 'Failed to cancel event.', 'error');
+      }
+    } catch {
+      showNotification('Error cancelling event.', 'error');
     }
   };
 
@@ -927,6 +949,15 @@ export default function AdminDashboardPage() {
                             className="px-3 py-1.5 bg-[#f54e00] hover:bg-[#d04200] text-white text-xs font-medium rounded-md transition"
                           >
                             Submit
+                          </button>
+                        )}
+                        {poster.status !== 'CANCELLED' && poster.status !== 'EXPIRED' && (
+                          <button
+                            onClick={() => handleCancelEvent(poster.eventId || poster.id)}
+                            className="px-2.5 py-1.5 bg-[#fafaf7] hover:bg-[#cf2d56] hover:text-white text-[#cf2d56] border border-[#e6e5e0] text-xs font-medium rounded-md transition"
+                            title="Cancel Event (Step 20)"
+                          >
+                            Cancel
                           </button>
                         )}
                         <button
