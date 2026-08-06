@@ -28,7 +28,7 @@ export async function GET(
     const playlist = screen.assignments.map((assignment) => ({
       id: assignment.poster.id,
       title: assignment.poster.title,
-      imagePath: assignment.poster.imagePath,
+      imagePath: assignment.poster.isPublic ? `/media/${assignment.poster.checksum}.webp` : assignment.poster.imagePath,
       displayOrder: assignment.displayOrder,
     }));
 
