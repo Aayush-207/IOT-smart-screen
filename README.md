@@ -1,192 +1,130 @@
-# IoT Smart Digital Billboard Network — Proof of Concept
+# CampusCast IoT Digital Signage Network & Approval Pipeline
 
-A simple, reliable, visually polished proof-of-concept digital signage network. This system allows a central administrator to remotely control and broadcast dynamic posters across multiple connected IoT billboard display screens.
-
-Designed specifically for local academic demonstrations, local network (LAN) presentations, and multi-screen kiosk setups.
+CampusCast is an enterprise-grade IoT digital signage management platform built with Next.js, React 19, Prisma ORM, and SQLite. It provides a transactional multi-stage approval workflow (Design Lead → President → HOD → Campus Admin), 21-day automatic event scheduling, SHA-256 media integrity verification, screen enrollment with hashed device secrets, and jitter-stabilized kiosk telemetry synchronization.
 
 ---
 
-## 🏛️ System Architecture Overview
+## 🏛️ Architectural Overview & IoT Telemetry Flow
 
 ```
- ┌─────────────────────────────────────────────────────────────┐
- │                    Central Admin Dashboard                  │
- │                            (/admin)                         │
- └──────┬────────────────────────┬─────────────────────┬───────┘
-        │ Upload Poster          │ Remote Assign       │ Live Status (5s)
-        ▼                        ▼                     ▼
- ┌─────────────────────────────────────────────────────────────┐
- │                   Next.js App Router API                    │
- │               (REST API / Local Image Storage)              │
- └──────┬────────────────────────┬─────────────────────┬───────┘
-        │                        │                     │
-        │ SQLite (dev.db)        │ Heartbeat (5s)      │ Playlist Poll (5s)
-        ▼                        ▼                     ▼
- ┌──────────────┐         ┌──────────────┐      ┌──────────────┐
- │   Screen 1   │         │   Screen 2   │      │   Screen 3   │
- │ Main Entrance│         │   Library    │      │  Cafeteria   │
- └──────────────┘         └──────────────┘      └──────────────┘
+                               ┌─────────────────────────────────────────┐
+                               │       Campus SSO / Login System        │
+                               └────────────────────┬────────────────────┘
+                                                    │
+                                                    ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │                                   CampusCast Operations Portal                                     │
+ │                                           (/admin)                                                  │
+ └──────────────┬───────────────────────────┬───────────────────────────┬──────────────────────────────┘
+                │                           │                           │
+                ▼                           ▼                           ▼
+ ┌─────────────────────────────┐ ┌─────────────────────────────┐ ┌─────────────────────────────┐
+ │     1. Create Event         │ │    2. Multi-Stage Approval  │ │     3. Kiosk Enrollment     │
+ │ POST /api/v1/events         │ │ POST /api/v1/approvals/...  │ │ POST /api/v1/screens/enroll │
+ └──────────────┬──────────────┘ └──────────────┬──────────────┘ └──────────────┬──────────────┘
+                │                               │                               │
+                └───────────────────────┬───────┴───────────────────────────────┘
+                                        │
+                                        ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │                                  SQLite Database (Prisma ORM)                                       │
+ │              Event | Poster (DRAFT → APPROVED) | Approval Audit | Screen | Assignments             │
+ └──────────────────────────────────────┬──────────────────────────────────────────────────────────────┘
+                                        │ Jitter Sync Protocol (50-70s) & Heartbeat (5s)
+                                        ▼
+ ┌─────────────────────────────┐ ┌─────────────────────────────┐ ┌─────────────────────────────┐
+ │       Kiosk Node 01         │ │       Kiosk Node 02         │ │       Kiosk Node 03         │
+ │   /display/screen-1         │ │   /display/screen-2         │ │   /display/screen-3         │
+ └─────────────────────────────┘ └─────────────────────────────┘ └─────────────────────────────┘
 ```
 
-The system consists of two primary interfaces:
-1. **Central Admin Dashboard (`/admin`)**: Upload poster images, enter titles, preview designs, remotely assign posters to screens, monitor online/offline telemetry, and manage screen playlists.
-2. **Public Display Screens (`/display/[slug]`)**: Fullscreen, borderless display kiosks with automated background heartbeats, 5-second playlist polling, 8-second continuous slideshow transitions, fallback states, and offline resilience.
+---
+
+## 🚀 Key Features
+
+* **Cursor Editorial Design System**: Warm cream canvas (`#f7f7f4`), warm ink text (`#26251e`), single Cursor Orange (`#f54e00`) CTA voltage, 1px hairline depth, and 5 AI action timeline pastel tokens.
+* **Transactional Multi-Stage Approvals**: Enforces stage sequence (`DRAFT` → `PENDING_PRESIDENT` → `PENDING_HOD` → `PENDING_ADMIN` → `APPROVED`) inside atomic Prisma database transactions with immutable audit logs.
+* **Automatic 21-Day Scheduling**: Automatically calculates display start (`Event Date - 21 days`) and display end (`Event Date 23:59:59`).
+* **Media Integrity & Serving**: Computes SHA-256 checksums for uploaded poster images and serves approved media via `/media/{checksum}.webp`.
+* **Kiosk Screen Enrollment**: Enrolls physical screen nodes generating secure credentials; stores only SHA-256 hashes (`deviceSecretHash`) in PostgreSQL/SQLite.
+* **Jitter Telemetry Synchronization Protocol**: Kiosks report storage capacity, software version, and playback events via `/api/v1/screens/{slug}/sync` with randomized next sync intervals (50–70s) to prevent thundering herd load.
 
 ---
 
-## 🚀 Technology Stack
-
-- **Framework**: Next.js (App Router)
-- **UI & Logic**: React 18, TypeScript, Tailwind CSS
-- **Icons**: Lucide React
-- **Database & ORM**: SQLite (`prisma/dev.db`), Prisma ORM v5
-- **Media Storage**: Local Filesystem (`public/uploads`)
-- **Telemetry & Updates**: HTTP Polling (5s status & heartbeat)
-- **Slideshow Engine**: Client-side timed fade slideshow (8s rotation)
-
----
-
-## ⚙️ Installation & Setup
+## ⚙️ Quickstart & Local Setup
 
 ### Prerequisites
-- **Node.js**: v18.x or higher
-- **pnpm** (or `npm` / `npx`)
+* **Node.js**: v18.x or higher
+* **pnpm** (or `npm`)
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone <repository-url>
+git clone https://github.com/Gaurav-205/AI-IoT-Based-Smart-Screen.git
 cd "AI - IoT Based Smart Screen"
 pnpm install
 ```
 
-### 2. Environment Configuration
-Create a `.env` file (or copy `.env.example`):
-```bash
+### 2. Environment Setup
+Create a `.env` file (or use default SQLite):
+```env
 DATABASE_URL="file:./dev.db"
 PORT=3000
 ```
 
-### 3. Initialize & Seed Database
-Sync the SQLite database schema and seed initial screens:
+### 3. Database Migration & Seeding
+Sync the database schema and populate initial screens and test accounts:
 ```bash
-# Push database schema to SQLite
+# Push Prisma schema to SQLite
 npx prisma db push
 
-# Seed initial 3 screens (Screen 1 - Main Entrance, Screen 2 - Library, Screen 3 - Cafeteria)
+# Seed initial screens & user accounts
 pnpm seed
 ```
 
-### 4. Run Automated Tests
+### 4. Run Tests & Start Dev Server
 ```bash
+# Run unit tests
 pnpm test
-```
 
-### 5. Start Development Server
-```bash
+# Run Next.js dev server
 pnpm dev
 ```
-The server will start listening on all network interfaces (`http://0.0.0.0:3000`).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🌐 URLs & Access
+## 📖 API Reference (v1)
 
-| Component | URL Path | Description |
+### 1. Event Creation & Poster Submission
+* **`POST /api/v1/events`**: Creates an event, uploads poster, computes SHA-256 checksum, sets 21-day schedule, and initializes `DRAFT` poster record.
+* **`POST /api/v1/posters/:posterId/submit`**: Transitions poster from `DRAFT` to `PENDING_PRESIDENT`.
+
+### 2. Approval Workflow
+* **`GET /api/v1/approvals/inbox`**: Retrieves pending approval submissions scoped to current reviewer role.
+* **`POST /api/v1/approvals/:posterId/action`**: Executes `APPROVE`, `REQUEST_CHANGES`, or `REJECT` inside an atomic transaction.
+
+### 3. Screen Enrollment & Telemetry Sync
+* **`POST /api/v1/screens/enroll`**: Enrolls a physical kiosk display node and returns device credentials.
+* **`POST /api/v1/screens/:slug/sync`**: Hardware heartbeat telemetry and active playlist manifest generator with jitter recommendation.
+
+---
+
+## 🎨 Design Tokens
+
+| Token Name | Hex Value | Application |
 | :--- | :--- | :--- |
-| **Admin Dashboard** | `http://localhost:3000/admin` | Management portal for posters & screens |
-| **Screen 1 — Main Entrance** | `http://localhost:3000/display/screen-1` | Display Kiosk for Main Entrance |
-| **Screen 2 — Library** | `http://localhost:3000/display/screen-2` | Display Kiosk for Central Library |
-| **Screen 3 — Cafeteria** | `http://localhost:3000/display/screen-3` | Display Kiosk for Student Cafeteria |
-
-### 📶 Accessing from Other Devices on the Same Wi-Fi Network
-
-Because `pnpm dev` binds to `0.0.0.0`, any mobile phone, tablet, laptop, or physical smart TV on the same local network can access the system!
-
-1. Find your computer's local IP address:
-   - **Windows**: Run `ipconfig` in Command Prompt (look for `IPv4 Address`, e.g., `192.168.1.150`).
-   - **macOS/Linux**: Run `ifconfig` or `ip a`.
-2. On secondary devices (e.g. tablet or phone), open:
-   - Admin: `http://<YOUR_LAN_IP>:3000/admin`
-   - Display: `http://<YOUR_LAN_IP>:3000/display/screen-1`
+| `Canvas Floor` | `#f7f7f4` | Page background floor |
+| `Ink Text` | `#26251e` | Warm near-black display & body text |
+| `Primary Voltage` | `#f54e00` | Signature Cursor Orange CTAs |
+| `Surface Card` | `#ffffff` | Pure white cards over cream canvas |
+| `Hairline Border` | `#e6e5e0` | 1px card borders & section dividers |
+| `Timeline - Thinking` | `#dfa88f` | Peach pill (`DRAFT` stage) |
+| `Timeline - Grep` | `#9fc9a2` | Mint pill (`PENDING_PRESIDENT` stage) |
+| `Timeline - Read` | `#9fbbe0` | Pastel Blue pill (`PENDING_HOD` stage) |
+| `Timeline - Edit` | `#c0a8dd` | Lavender pill (`PENDING_ADMIN` stage) |
+| `Timeline - Done` | `#c08532` | Warm Gold pill (`APPROVED` stage) |
 
 ---
 
-## 🎭 Step-by-Step Live Demonstration Script
-
-Follow this step-by-step workflow during an academic or technical presentation:
-
-1. **Open Admin Dashboard**:
-   - Open `http://localhost:3000/admin` on the presenter's laptop.
-   - Point out the 3 initial screens registered in the database.
-
-2. **Open Displays in Separate Tabs or Devices**:
-   - Open `http://localhost:3000/display/screen-1` in Tab 1 (Main Entrance).
-   - Open `http://localhost:3000/display/screen-2` in Tab 2 (Library).
-   - Open `http://localhost:3000/display/screen-3` in Tab 3 (Cafeteria).
-   - Notice that each screen displays a polished fallback card: *"Screen Ready • Waiting for Content"*.
-   - Return to `/admin` and point out that all 3 screens now show **Online (Green Indicator)** with live heartbeat timestamps.
-
-3. **Upload Poster A & Assign to Screens 1 & 3**:
-   - On `/admin`, fill out title *"Spring Tech Expo 2026"*.
-   - Select an image file (PNG/JPEG/WebP) and view the live image preview.
-   - Check boxes for **Screen 1 — Main Entrance** and **Screen 3 — Cafeteria**.
-   - Click **Upload & Publish**.
-   - Observe: **Screen 1** and **Screen 3** automatically display Poster A within 5 seconds without refreshing the page! **Screen 2 (Library)** remains unchanged.
-
-4. **Upload Poster B & Assign to All Screens**:
-   - Fill out title *"Library Quiet Hours Notice"*.
-   - Select another image file.
-   - Click **Select All Screens** and click **Upload & Publish**.
-   - Observe: All screens automatically receive the update.
-
-5. **Demonstrate Slideshow Rotation (Multiple Posters)**:
-   - Observe **Screen 1** (which now has 2 assigned posters).
-   - Watch the screen automatically switch between Poster A and Poster B every **8 seconds** with a subtle fade transition.
-
-6. **Demonstrate Offline Telemetry Detection**:
-   - Close the browser tab for **Screen 2** (`/display/screen-2`).
-   - Wait 15 seconds.
-   - Look at the Admin Dashboard: **Screen 2** status indicator turns **Offline (Gray)** automatically.
-
----
-
-## ☁️ Deploying to Free Cloud Services for Remote Testing
-
-This application includes multi-tier fallback logic for zero-cost remote testing on cloud services (Netlify, Vercel, Render):
-
-### 1. Host Application (Vercel or Netlify)
-- **Netlify**: Includes a pre-configured `netlify.toml`. Connect your GitHub repo to Netlify, set build command to `npm run build` and publish directory to `.next`.
-- **Vercel**: Import the GitHub repo on Vercel. Native Next.js App Router support is enabled automatically.
-
-### 2. Cloud Media Storage (Cloudinary / Fallback)
-To store uploaded posters in the cloud when running on read-only serverless hosts:
-- **Cloudinary (Free Tier)**:
-  1. Create a free account at [cloudinary.com](https://cloudinary.com).
-  2. Create an unsigned Upload Preset in settings.
-  3. Add environment variables to Netlify/Vercel:
-     ```env
-     CLOUDINARY_CLOUD_NAME="your_cloud_name"
-     CLOUDINARY_UPLOAD_PRESET="your_upload_preset"
-     ```
-- **Automatic Fallback**: If Cloudinary variables are omitted on serverless hosts, uploads automatically fall back to Base64 data URLs, guaranteeing zero upload failures!
-
-### 3. Remote Physical TV Testing (ngrok)
-To test physical Smart TVs or tablets using your local dev server without cloud deployment:
-```bash
-npx ngrok http 3001
-```
-Open the generated HTTPS URL on any smart display around the world!
-
----
-
-## 📝 Storage Note & Future Production Improvements
-
-### Known Limitations
-- Heartbeat and status polling rely on client HTTP requests (5s polling interval).
-
-### Suggested Future Enhancements
-- WebSockets / Server-Sent Events (SSE) for sub-second push notifications.
-- Granular scheduling calendar (set posters to display only between specific start/end dates).
-- User authentication and role-based permissions (Admin vs Content Editor).
-- Display hardware telemetry (CPU temp, storage capacity, display resolution reporting).
-
+## 📄 License & Credits
+Built for academic and enterprise digital signage research. Designed with editorial developer aesthetics and robust IoT telemetry standards.
