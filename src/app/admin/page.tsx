@@ -272,6 +272,22 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Run Background Media Cleanup Worker (Step 21)
+  const handleRunCleanupWorker = async () => {
+    try {
+      const res = await fetch('/api/v1/admin/cleanup', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(data.message || 'Cleanup worker executed successfully.');
+        await fetchData();
+      } else {
+        showNotification(data.error || 'Cleanup worker failed.', 'error');
+      }
+    } catch {
+      showNotification('Error running background cleanup worker.', 'error');
+    }
+  };
+
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     window.location.href = '/login';
@@ -1325,6 +1341,17 @@ export default function AdminDashboardPage() {
                     Dispatch Remote Command
                   </button>
                 </div>
+              </div>
+
+              <div className="border-t border-[#e6e5e0] pt-3 flex justify-between items-center text-xs">
+                <span className="text-[#5a5852]">Step 21 Worker Operations: Expiration & Cache Purge</span>
+                <button
+                  onClick={handleRunCleanupWorker}
+                  className="px-3 py-1.5 bg-[#fafaf7] hover:bg-[#e6e5e0] text-[#26251e] font-mono text-[11px] rounded border border-[#e6e5e0] transition flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-[#cf2d56]" />
+                  Run Background Media Cleanup Worker
+                </button>
               </div>
             </div>
 
