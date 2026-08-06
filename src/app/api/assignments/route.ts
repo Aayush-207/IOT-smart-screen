@@ -56,6 +56,13 @@ export async function POST(request: Request) {
       results.push(assignment);
     }
 
+    if (uniqueScreenIds.length > 0) {
+      await prisma.screen.updateMany({
+        where: { id: { in: uniqueScreenIds } },
+        data: { playlistVersion: { increment: 1 } },
+      });
+    }
+
     return NextResponse.json({
       success: true,
       message: `Assigned poster to ${results.length} screen(s).`,
@@ -78,15 +85,21 @@ export async function DELETE(request: Request) {
     const assignmentId = searchParams.get('assignmentId');
 
     if (assignmentId) {
-      await prisma.screenAssignment.delete({
-        where: { id: assignmentId },
-      });
+      const assignment = await prisma.screenAssignment.findUnique({ where: { id: assignmentId } });
+      if (assignment) {
+        await prisma.screenAssignment.delete({ where: { id: assignmentId } });
+        await prisma.screen.update({
+          where: { id: assignment.screenId },
+          data: { playlistVersion: { increment: 1 } },
+        });
+      }
     } else if (screenId && posterId) {
       await prisma.screenAssignment.deleteMany({
-        where: {
-          screenId,
-          posterId,
-        },
+        where: { screenId, posterId },
+      });
+      await prisma.screen.update({
+        where: { id: screenId },
+        data: { playlistVersion: { increment: 1 } },
       });
     } else {
       return NextResponse.json(

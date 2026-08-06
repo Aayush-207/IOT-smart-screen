@@ -21,7 +21,11 @@ export async function GET() {
         id: screen.id,
         slug: screen.slug,
         name: screen.name,
-        location: screen.location,
+        building: screen.building,
+        floor: screen.floor,
+        status: screen.status,
+        playlistVersion: screen.playlistVersion,
+        freeStorageMb: screen.freeStorageMb,
         lastSeenAt: screen.lastSeenAt,
         isOnline,
         posters: screen.assignments.map((a) => ({

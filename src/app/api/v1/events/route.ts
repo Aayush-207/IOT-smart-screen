@@ -128,7 +128,7 @@ export async function POST(request: Request) {
       // Assign to target screens
       if (targetScreens.length > 0) {
         const screens = await tx.screen.findMany({
-          where: { slug: { in: targetScreens } },
+          where: { OR: [{ slug: { in: targetScreens } }, { id: { in: targetScreens } }] },
         });
 
         for (const screen of screens) {

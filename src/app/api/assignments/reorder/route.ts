@@ -24,7 +24,13 @@ export async function PUT(request: Request) {
       })
     );
 
-    await prisma.$transaction(updates);
+    await prisma.$transaction([
+      ...updates,
+      prisma.screen.update({
+        where: { id: screenId },
+        data: { playlistVersion: { increment: 1 } },
+      }),
+    ]);
 
     return NextResponse.json({
       success: true,

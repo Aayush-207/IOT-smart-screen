@@ -22,7 +22,11 @@ export async function GET() {
       imagePath: poster.imagePath,
       originalFileName: poster.originalFileName,
       mimeType: poster.mimeType,
-      createdAt: poster.createdAt,
+      status: poster.status,
+      checksum: poster.checksum,
+      activeFrom: poster.activeFrom,
+      activeUntil: poster.activeUntil,
+      isPublic: poster.isPublic,
       assignedScreens: poster.assignments.map((a) => a.screen),
     }));
 
