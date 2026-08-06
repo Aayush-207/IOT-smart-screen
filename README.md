@@ -150,18 +150,43 @@ Follow this step-by-step workflow during an academic or technical presentation:
 
 ---
 
-## 📝 Storage Note & Future Production Improvements
+## ☁️ Deploying to Free Cloud Services for Remote Testing
 
-> [!NOTE]
-> **Local Uploads vs. Cloud Storage Note**:
-> For this local proof-of-concept, uploaded poster images are stored directly on the local filesystem inside `public/uploads`. Before deploying to production or cloud environments (e.g. AWS Vercel/AWS S3), local file uploads should be replaced with object storage (such as AWS S3 or Supabase Storage) and database URLs configured with PostgreSQL.
+This application includes multi-tier fallback logic for zero-cost remote testing on cloud services (Netlify, Vercel, Render):
+
+### 1. Host Application (Vercel or Netlify)
+- **Netlify**: Includes a pre-configured `netlify.toml`. Connect your GitHub repo to Netlify, set build command to `npm run build` and publish directory to `.next`.
+- **Vercel**: Import the GitHub repo on Vercel. Native Next.js App Router support is enabled automatically.
+
+### 2. Cloud Media Storage (Cloudinary / Fallback)
+To store uploaded posters in the cloud when running on read-only serverless hosts:
+- **Cloudinary (Free Tier)**:
+  1. Create a free account at [cloudinary.com](https://cloudinary.com).
+  2. Create an unsigned Upload Preset in settings.
+  3. Add environment variables to Netlify/Vercel:
+     ```env
+     CLOUDINARY_CLOUD_NAME="your_cloud_name"
+     CLOUDINARY_UPLOAD_PRESET="your_upload_preset"
+     ```
+- **Automatic Fallback**: If Cloudinary variables are omitted on serverless hosts, uploads automatically fall back to Base64 data URLs, guaranteeing zero upload failures!
+
+### 3. Remote Physical TV Testing (ngrok)
+To test physical Smart TVs or tablets using your local dev server without cloud deployment:
+```bash
+npx ngrok http 3001
+```
+Open the generated HTTPS URL on any smart display around the world!
+
+---
+
+## 📝 Storage Note & Future Production Improvements
 
 ### Known Limitations
 - Heartbeat and status polling rely on client HTTP requests (5s polling interval).
-- File storage is local to the server node (`public/uploads`).
 
 ### Suggested Future Enhancements
 - WebSockets / Server-Sent Events (SSE) for sub-second push notifications.
 - Granular scheduling calendar (set posters to display only between specific start/end dates).
 - User authentication and role-based permissions (Admin vs Content Editor).
 - Display hardware telemetry (CPU temp, storage capacity, display resolution reporting).
+

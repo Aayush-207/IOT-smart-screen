@@ -51,18 +51,50 @@ export async function POST(request: Request) {
     const ext = path.extname(file.name) || (file.type === 'image/png' ? '.png' : file.type === 'image/webp' ? '.webp' : '.jpg');
     const safeUniqueName = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
 
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    const filePath = path.join(uploadsDir, safeUniqueName);
+    let publicPath = '';
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    await fs.promises.writeFile(filePath, buffer);
+    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_UPLOAD_PRESET) {
+      try {
+        const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
+        const cloudinaryFormData = new FormData();
+        const blob = new Blob([buffer], { type: file.type });
+        cloudinaryFormData.append('file', blob, file.name);
+        cloudinaryFormData.append('upload_preset', uploadPreset);
 
-    const publicPath = `/uploads/${safeUniqueName}`;
+        const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+          method: 'POST',
+          body: cloudinaryFormData,
+        });
+
+        if (cloudRes.ok) {
+          const cloudData = await cloudRes.json();
+          publicPath = cloudData.secure_url;
+        } else {
+          throw new Error('Cloudinary API upload error');
+        }
+      } catch (cloudErr) {
+        console.warn('Cloudinary upload failed, using local/base64 fallback:', cloudErr);
+        const base64 = buffer.toString('base64');
+        publicPath = `data:${file.type};base64,${base64}`;
+      }
+    } else {
+      try {
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        const filePath = path.join(uploadsDir, safeUniqueName);
+        await fs.promises.writeFile(filePath, buffer);
+        publicPath = `/uploads/${safeUniqueName}`;
+      } catch (fsErr) {
+        console.warn('Local filesystem write unallowed, using base64 data URL:', fsErr);
+        const base64 = buffer.toString('base64');
+        publicPath = `data:${file.type};base64,${base64}`;
+      }
+    }
 
     // Create poster record in database
     const poster = await prisma.poster.create({
