@@ -1,0 +1,42 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Screen {
+  id          String             @id @default(uuid())
+  slug        String             @unique
+  name        String
+  location    String
+  lastSeenAt  DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  assignments ScreenAssignment[]
+}
+
+model Poster {
+  id               String             @id @default(uuid())
+  title            String
+  imagePath        String
+  originalFileName String
+  mimeType         String
+  createdAt        DateTime           @default(now())
+  assignments      ScreenAssignment[]
+}
+
+model ScreenAssignment {
+  id           String   @id @default(uuid())
+  screenId     String
+  posterId     String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  poster Poster @relation(fields: [posterId], references: [id], onDelete: Cascade)
+
+  @@unique([screenId, posterId])
+}

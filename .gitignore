@@ -1,12 +1,26 @@
-node_modules/
-dist/
-.turbo/
-coverage/
-*.tsbuildinfo
-.data/
+# Dependencies
+node_modules
+/.pnpm-store
 
+# Next.js build output
+/.next/
+/out/
+
+# SQLite Database
+/prisma/*.db
+/prisma/*.db-journal
+dev.db
+dev.db-journal
+
+# Local image uploads (preserve .gitkeep)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Environment variables
 .env
-.env.*
-!.env.example
+.env.local
+.env.production
 
-packages/database/generated/
+# System files
+.DS_Store
+Thumbs.db
