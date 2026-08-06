@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
@@ -66,6 +67,24 @@ export async function POST(request: Request) {
     let mimeType = 'image/jpeg';
 
     if (file && file.size > 0) {
+      // Step 3: Strict file type validation (PNG, JPEG, WebP)
+      const allowedMimes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+      if (!allowedMimes.includes(file.type)) {
+        return NextResponse.json(
+          { success: false, error: 'Validation failed: Only PNG, JPEG, and WebP image formats are supported.' },
+          { status: 400 }
+        );
+      }
+
+      // Step 3: Strict file size validation (Max 10MB)
+      const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+      if (file.size > MAX_SIZE) {
+        return NextResponse.json(
+          { success: false, error: 'Validation failed: Poster image file size exceeds the 10MB limit.' },
+          { status: 400 }
+        );
+      }
+
       originalFileName = file.name;
       mimeType = file.type;
 
@@ -149,7 +168,7 @@ export async function POST(request: Request) {
         }
       }
 
-      // Initial Audit Entry
+      // Initial Approval Entry
       const audit = await tx.approval.create({
         data: {
           posterId: poster.id,
@@ -159,6 +178,14 @@ export async function POST(request: Request) {
           action: 'CREATE_EVENT',
           comment: 'Event created and poster saved as DRAFT.',
         },
+      });
+
+      // Step 24: Record Audit Entry
+      await createAuditLog({
+        actorId: 'usr_101',
+        action: 'EVENT_CREATED',
+        resourceId: event.id,
+        newState: 'DRAFT',
       });
 
       return { event, poster, audit };

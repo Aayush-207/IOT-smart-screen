@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { createAuditLog } from '@/lib/audit';
 import crypto from 'crypto';
 
 export async function POST(request: Request) {
@@ -32,6 +33,14 @@ export async function POST(request: Request) {
         playlistVersion: 1,
         freeStorageMb: 4096,
       },
+    });
+
+    // Step 24: Record Audit Entry (Never log raw secrets)
+    await createAuditLog({
+      actorId: 'usr_admin',
+      action: 'SCREEN_ENROLLED',
+      resourceId: screen.id,
+      newState: screen.slug,
     });
 
     return NextResponse.json({
