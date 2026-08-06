@@ -23,6 +23,9 @@ model Screen {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   assignments      ScreenAssignment[]
+  playbackLogs     PlaybackLog[]
+  incidents        Incident[]
+  deviceCommands   DeviceCommand[]
 }
 
 model Event {
@@ -58,6 +61,7 @@ model Poster {
   updatedAt        DateTime           @updatedAt
   assignments      ScreenAssignment[]
   approvals        Approval[]
+  playbackLogs     PlaybackLog[]
   event            Event?             @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
@@ -95,4 +99,48 @@ model User {
   clubId    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PlaybackLog {
+  id              String   @id @default(uuid())
+  eventId         String   @unique
+  screenId        String
+  posterId        String
+  playlistVersion Int      @default(1)
+  startedAt       DateTime
+  completedAt     DateTime
+  status          String   @default("SUCCESS")
+  failureReason   String?
+  createdAt       DateTime @default(now())
+
+  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  poster Poster @relation(fields: [posterId], references: [id], onDelete: Cascade)
+}
+
+model Incident {
+  id          String    @id @default(uuid())
+  screenId    String
+  title       String
+  description String
+  severity    String    @default("WARNING")
+  status      String    @default("OPEN")
+  openedAt    DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
+}
+
+model DeviceCommand {
+  id           String    @id @default(uuid())
+  screenId     String
+  command      String
+  params       String?
+  status       String    @default("QUEUED")
+  expiresAt    DateTime
+  deliveredAt  DateTime?
+  completedAt  DateTime?
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+
+  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
 }

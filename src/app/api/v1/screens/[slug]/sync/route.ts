@@ -9,7 +9,13 @@ export async function POST(
     const { slug } = await params;
     const body = await request.json().catch(() => ({}));
 
-    const { playlistVersion: clientPlaylistVersion = 0, kioskVersion, freeStorageMb = 2048 } = body;
+    const {
+      playlistVersion: clientPlaylistVersion = 0,
+      kioskVersion,
+      freeStorageMb = 2048,
+      playbackEvents = [],
+      commandResults = [],
+    } = body;
 
     const screen = await prisma.screen.findUnique({
       where: { slug },
@@ -24,7 +30,7 @@ export async function POST(
 
     const now = new Date();
 
-    // Update screen telemetry heartbeat and storage info
+    // Step 17: Screen-health updates & status calculation
     await prisma.screen.update({
       where: { id: screen.id },
       data: {
@@ -34,28 +40,83 @@ export async function POST(
       },
     });
 
-    // Step 11: Playlist Generation
-    // Select posters where:
-    // 1. status = 'APPROVED' (or assigned for active display)
-    // 2. activeFrom <= now AND activeUntil >= now
-    // 3. screen assignment matches screen
-    const assignments = await prisma.screenAssignment.findMany({
+    // Step 16: Playback Telemetry Ingestion (Deduplicated using eventId)
+    if (Array.isArray(playbackEvents) && playbackEvents.length > 0) {
+      for (const event of playbackEvents) {
+        if (!event.eventId || !event.posterId) continue;
+        try {
+          const startedAt = event.startedAt ? new Date(event.startedAt) : now;
+          const completedAt = event.completedAt ? new Date(event.completedAt) : now;
+          await prisma.playbackLog.upsert({
+            where: { eventId: event.eventId },
+            create: {
+              eventId: event.eventId,
+              screenId: screen.id,
+              posterId: event.posterId,
+              playlistVersion: event.playlistVersion || screen.playlistVersion,
+              startedAt,
+              completedAt,
+              status: event.status || 'SUCCESS',
+              failureReason: event.failureReason || null,
+            },
+            update: {}, // ignore duplicate report
+          });
+        } catch (err) {
+          console.warn('Error ingesting playback event:', err);
+        }
+      }
+    }
+
+    // Step 18: Acknowledge Completed Remote Commands
+    if (Array.isArray(commandResults) && commandResults.length > 0) {
+      for (const res of commandResults) {
+        if (!res.commandId) continue;
+        try {
+          await prisma.deviceCommand.update({
+            where: { id: res.commandId },
+            data: {
+              status: res.status || 'COMPLETED',
+              completedAt: now,
+              errorMessage: res.errorMessage || null,
+            },
+          });
+        } catch (err) {
+          console.warn('Error updating command result:', err);
+        }
+      }
+    }
+
+    // Step 18: Deliver Pending Non-Expired Remote Commands
+    const pendingCommands = await prisma.deviceCommand.findMany({
       where: {
         screenId: screen.id,
-      },
-      include: {
-        poster: true,
-      },
-      orderBy: {
-        displayOrder: 'asc',
+        status: 'QUEUED',
+        expiresAt: { gt: now },
       },
     });
 
-    // Filter by active schedule boundaries & status
+    if (pendingCommands.length > 0) {
+      await prisma.deviceCommand.updateMany({
+        where: {
+          id: { in: pendingCommands.map((c) => c.id) },
+        },
+        data: {
+          status: 'DELIVERED',
+          deliveredAt: now,
+        },
+      });
+    }
+
+    // Step 11: Playlist Generation
+    const assignments = await prisma.screenAssignment.findMany({
+      where: { screenId: screen.id },
+      include: { poster: true },
+      orderBy: { displayOrder: 'asc' },
+    });
+
     const activeItems = assignments
       .map((a) => a.poster)
       .filter((poster) => {
-        // Allow APPROVED posters (or legacy assigned posters in POC mode)
         const isApprovedOrActive = poster.status === 'APPROVED' || poster.isPublic;
         if (!isApprovedOrActive) return false;
 
@@ -79,8 +140,6 @@ export async function POST(
     }));
 
     const playlistChanged = clientPlaylistVersion !== screen.playlistVersion;
-
-    // Step 13: Jitter recommendation calculation (e.g. 50s + random 0-20s)
     const nextSyncIntervalSeconds = Math.floor(50 + Math.random() * 20);
 
     return NextResponse.json({
@@ -96,7 +155,12 @@ export async function POST(
         generatedAt: now.toISOString(),
         items: manifestItems,
       },
-      commands: [],
+      commands: pendingCommands.map((c) => ({
+        commandId: c.id,
+        command: c.command,
+        params: c.params ? JSON.parse(c.params) : null,
+        expiresAt: c.expiresAt.toISOString(),
+      })),
     });
   } catch (error: any) {
     console.error('Screen sync error:', error);

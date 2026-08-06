@@ -97,13 +97,39 @@ interface InboxItem {
   }[];
 }
 
+interface PlaybackLogItem {
+  id: string;
+  eventId: string;
+  playlistVersion: number;
+  startedAt: string;
+  completedAt: string;
+  status: string;
+  failureReason: string | null;
+  screen: { name: string; slug: string };
+  poster: { title: string; checksum: string };
+}
+
+interface DeviceCommandItem {
+  id: string;
+  command: string;
+  status: string;
+  createdAt: string;
+  screen: { name: string; slug: string };
+}
+
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'inbox' | 'enrollment'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'inbox' | 'enrollment' | 'telemetry'>('overview');
   const [screens, setScreens] = useState<ScreenData[]>([]);
   const [posters, setPosters] = useState<Poster[]>([]);
   const [inboxItems, setInboxItems] = useState<InboxItem[]>([]);
+  const [playbackLogs, setPlaybackLogs] = useState<PlaybackLogItem[]>([]);
+  const [deviceCommands, setDeviceCommands] = useState<DeviceCommandItem[]>([]);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Command Execution State
+  const [cmdTargetScreen, setCmdTargetScreen] = useState<string>('');
+  const [cmdType, setCmdType] = useState<string>('REFRESH_PLAYLIST');
 
   // Quick Role Switcher State
   const [isSwitchingRole, setIsSwitchingRole] = useState(false);
@@ -155,26 +181,33 @@ export default function AdminDashboardPage() {
     }, 5000);
   };
 
-  // Fetch all admin data & approval inbox
+  // Fetch all admin data & approval inbox & telemetry logs
   const fetchData = async () => {
     try {
-      const [screensRes, postersRes, authRes, inboxRes] = await Promise.all([
+      const [screensRes, postersRes, authRes, inboxRes, logsRes, cmdsRes] = await Promise.all([
         fetch('/api/screens'),
         fetch('/api/posters'),
         fetch('/api/auth/me'),
         fetch('/api/v1/approvals/inbox'),
+        fetch('/api/v1/telemetry/playback'),
+        fetch('/api/v1/commands'),
       ]);
 
       const screensJson = await screensRes.json();
       const postersJson = await postersRes.json();
       const authJson = await authRes.json();
       const inboxJson = await inboxRes.json();
+      const logsJson = await logsRes.json();
+      const cmdsJson = await cmdsRes.json();
 
       if (authJson.success && authJson.user) {
         setUser(authJson.user);
       }
       if (screensJson.success) {
         setScreens(screensJson.screens);
+        if (!cmdTargetScreen && screensJson.screens.length > 0) {
+          setCmdTargetScreen(screensJson.screens[0].id);
+        }
       }
       if (postersJson.success) {
         setPosters(postersJson.posters);
@@ -182,10 +215,42 @@ export default function AdminDashboardPage() {
       if (inboxJson.success) {
         setInboxItems(inboxJson.inbox);
       }
+      if (logsJson.success) {
+        setPlaybackLogs(logsJson.logs);
+      }
+      if (cmdsJson.success) {
+        setDeviceCommands(cmdsJson.commands);
+      }
     } catch (err) {
       console.error('Failed to fetch admin data:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Queue Remote Command Handler (Step 18)
+  const handleQueueRemoteCommand = async () => {
+    if (!cmdTargetScreen || !cmdType) return;
+    try {
+      const res = await fetch('/api/v1/commands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          screenId: cmdTargetScreen,
+          command: cmdType,
+          validityMinutes: 60,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(`Remote command "${cmdType}" queued!`);
+        await fetchData();
+      } else {
+        showNotification(data.error || 'Failed to queue command.', 'error');
+      }
+    } catch {
+      showNotification('Error queuing remote command.', 'error');
     }
   };
 
@@ -583,6 +648,17 @@ export default function AdminDashboardPage() {
           >
             <Tv className="w-4 h-4" />
             Screen Enrollment
+          </button>
+          <button
+            onClick={() => setActiveTab('telemetry')}
+            className={`px-5 py-3 border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'telemetry'
+                ? 'border-[#f54e00] text-[#f54e00] bg-[#ffffff]'
+                : 'border-transparent text-[#5a5852] hover:text-[#26251e]'
+            }`}
+          >
+            <RefreshCw className="w-4 h-4" />
+            Telemetry & Commands
           </button>
         </div>
       </header>
@@ -1163,6 +1239,119 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 5: TELEMETRY & REMOTE COMMANDS */}
+        {activeTab === 'telemetry' && (
+          <div className="space-y-8">
+            {/* Remote Command Dispatcher */}
+            <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 shadow-sm space-y-4">
+              <div className="border-b border-[#e6e5e0] pb-3">
+                <h3 className="text-base font-semibold text-[#26251e] flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-[#f54e00]" />
+                  Remote Kiosk Command Execution
+                </h3>
+                <p className="text-xs text-[#5a5852]">
+                  Dispatch low-level commands (`REFRESH_PLAYLIST`, `RELOAD_APP`, `CLEAR_UNUSED_CACHE`, `UPDATE_CONFIGURATION`) to kiosk display nodes.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div className="space-y-1">
+                  <label className="font-semibold text-[#26251e]">Target Display Node *</label>
+                  <select
+                    value={cmdTargetScreen}
+                    onChange={(e) => setCmdTargetScreen(e.target.value)}
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-3 py-2 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
+                  >
+                    {screens.map((sc) => (
+                      <option key={sc.id} value={sc.id}>
+                        {sc.name} ({sc.slug})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-[#26251e]">Command Operation *</label>
+                  <select
+                    value={cmdType}
+                    onChange={(e) => setCmdType(e.target.value)}
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-3 py-2 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
+                  >
+                    <option value="REFRESH_PLAYLIST">REFRESH_PLAYLIST</option>
+                    <option value="RELOAD_APP">RELOAD_APP</option>
+                    <option value="CLEAR_UNUSED_CACHE">CLEAR_UNUSED_CACHE</option>
+                    <option value="UPDATE_CONFIGURATION">UPDATE_CONFIGURATION</option>
+                  </select>
+                </div>
+
+                <div className="flex items-end">
+                  <button
+                    onClick={handleQueueRemoteCommand}
+                    className="w-full py-2 bg-[#f54e00] hover:bg-[#d04200] text-white font-medium text-xs rounded-md shadow-sm transition flex items-center justify-center gap-2"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    Dispatch Remote Command
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Playback Audit Log Feed */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-2">
+                <h3 className="text-base font-normal text-[#26251e] flex items-center gap-2">
+                  <Monitor className="w-4 h-4 text-[#f54e00]" />
+                  Deduplicated Playback Telemetry Log (PostgreSQL Audit)
+                </h3>
+                <span className="text-xs font-mono text-[#807d72]">{playbackLogs.length} Verified Playback Records</span>
+              </div>
+
+              {playbackLogs.length === 0 ? (
+                <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-8 text-center text-xs text-[#807d72]">
+                  No playback telemetry events received yet. Open a kiosk display page (`/display/screen-1`) to view live playback reporting!
+                </div>
+              ) : (
+                <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl overflow-hidden shadow-sm">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#fafaf7] border-b border-[#e6e5e0] text-[#5a5852] font-mono text-[11px]">
+                      <tr>
+                        <th className="p-3">Unique Event ID</th>
+                        <th className="p-3">Screen Node</th>
+                        <th className="p-3">Poster Title</th>
+                        <th className="p-3">Manifest Version</th>
+                        <th className="p-3">Completed At</th>
+                        <th className="p-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#e6e5e0]">
+                      {playbackLogs.map((log) => (
+                        <tr key={log.id} className="hover:bg-[#fafaf7] transition">
+                          <td className="p-3 font-mono text-[11px] text-[#5a5852] truncate max-w-[140px]">{log.eventId}</td>
+                          <td className="p-3 font-medium text-[#26251e]">{log.screen?.name || log.screen?.slug}</td>
+                          <td className="p-3 text-[#26251e] font-semibold">{log.poster?.title || 'Unknown Poster'}</td>
+                          <td className="p-3 font-mono text-[#f54e00]">v{log.playlistVersion}</td>
+                          <td className="p-3 font-mono text-[11px] text-[#5a5852]">
+                            {new Date(log.completedAt).toLocaleTimeString()}
+                          </td>
+                          <td className="p-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+                              log.status === 'SUCCESS'
+                                ? 'bg-[#fafaf7] text-[#1f8a65] border-[#e6e5e0]'
+                                : 'bg-[#fafaf7] text-[#cf2d56] border-[#e6e5e0]'
+                            }`}>
+                              {log.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </main>
