@@ -34,7 +34,44 @@ async function main() {
     });
   }
 
-  console.log('Seeding complete! 3 screens initialized.');
+  const initialUsers = [
+    {
+      id: 'usr_101',
+      email: 'gaurav@college.edu',
+      name: 'Gaurav',
+      role: 'DESIGN_LEAD',
+      clubId: 'technology-club',
+    },
+    {
+      id: 'usr_102',
+      email: 'alex@college.edu',
+      name: 'Alex Rivera',
+      role: 'PRESIDENT',
+      clubId: 'robotics-club',
+    },
+    {
+      id: 'usr_100',
+      email: 'admin@college.edu',
+      name: 'Campus Admin',
+      role: 'SYSTEM_ADMIN',
+      clubId: 'campus-wide',
+    },
+  ];
+
+  for (const user of initialUsers) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        clubId: user.clubId,
+      },
+      create: user,
+    });
+  }
+
+  console.log('Seeding complete! 3 screens and 3 users initialized.');
 }
 
 main()

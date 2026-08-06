@@ -40,3 +40,13 @@ model ScreenAssignment {
 
   @@unique([screenId, posterId])
 }
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      String   @default("DESIGN_LEAD")
+  clubId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

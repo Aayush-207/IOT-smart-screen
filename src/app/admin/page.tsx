@@ -17,6 +17,8 @@ import {
   AlertCircle,
   ChevronUp,
   ChevronDown,
+  LogOut,
+  UserCheck,
 } from 'lucide-react';
 
 interface Poster {
@@ -44,9 +46,18 @@ interface ScreenData {
   posters: ScreenPoster[];
 }
 
+interface UserProfile {
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+  clubId: string | null;
+}
+
 export default function AdminDashboardPage() {
   const [screens, setScreens] = useState<ScreenData[]>([]);
   const [posters, setPosters] = useState<Poster[]>([]);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Form states
@@ -76,20 +87,24 @@ export default function AdminDashboardPage() {
     }, 5000);
   };
 
-  // Fetch screens and posters data
+  // Fetch user profile, screens, and posters data
   const fetchData = async () => {
     try {
-      const [screensRes, postersRes] = await Promise.all([
+      const [screensRes, postersRes, authRes] = await Promise.all([
         fetch('/api/screens'),
         fetch('/api/posters'),
+        fetch('/api/auth/me'),
       ]);
 
       const screensJson = await screensRes.json();
       const postersJson = await postersRes.json();
+      const authJson = await authRes.json();
 
+      if (authJson.success && authJson.user) {
+        setUser(authJson.user);
+      }
       if (screensJson.success) {
         setScreens(screensJson.screens);
-        // Also update managingScreen if currently open
         if (managingScreen) {
           const updated = screensJson.screens.find((s: ScreenData) => s.id === managingScreen.id);
           if (updated) setManagingScreen(updated);
@@ -103,6 +118,11 @@ export default function AdminDashboardPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
   };
 
   // Initial load & 5s status refresh interval
@@ -319,6 +339,24 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            {user && (
+              <div className="flex items-center gap-2.5 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-xl text-xs">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                <div>
+                  <span className="font-bold text-white">{user.name}</span>
+                  <span className="text-[10px] text-cyan-300 font-mono ml-2 px-2 py-0.5 bg-slate-900 border border-slate-700 rounded-md">
+                    {user.role} ({user.clubId || 'global'})
+                  </span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="SSO Logout"
+                  className="ml-2 p-1 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg transition"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
             <button
               onClick={fetchData}
               className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition flex items-center gap-2"
