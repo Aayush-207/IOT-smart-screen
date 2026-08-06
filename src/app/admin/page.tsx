@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, ChangeEvent, FormEvent } from 'react';
+import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import {
   Monitor,
   Image as ImageIcon,
@@ -15,6 +15,12 @@ import {
   ShieldCheck,
   X,
   Tv,
+  ArrowUp,
+  ArrowDown,
+  Trash2,
+  UserCheck,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 interface Poster {
@@ -28,6 +34,7 @@ interface Poster {
   checksum?: string;
   activeFrom?: string | null;
   activeUntil?: string | null;
+  isPublic?: boolean;
   assignedScreens?: { id: string; name: string }[];
 }
 
@@ -97,6 +104,19 @@ export default function AdminDashboardPage() {
   const [inboxItems, setInboxItems] = useState<InboxItem[]>([]);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Quick Role Switcher State
+  const [isSwitchingRole, setIsSwitchingRole] = useState(false);
+
+  // Assign Poster Modal State
+  const [assignModalPoster, setAssignModalPoster] = useState<Poster | null>(null);
+  const [assignSelectedScreens, setAssignSelectedScreens] = useState<string[]>([]);
+
+  // Expanded Playlist State per Screen ID
+  const [expandedPlaylists, setExpandedPlaylists] = useState<Record<string, boolean>>({});
+
+  // Image Preview Lightbox State
+  const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string } | null>(null);
 
   // Event Creation Form State
   const [eventName, setEventName] = useState('');
@@ -174,18 +194,39 @@ export default function AdminDashboardPage() {
     window.location.href = '/login';
   };
 
+  // Quick Role Switcher Handler
+  const handleQuickSwitchRole = async (targetUserId: string) => {
+    setIsSwitchingRole(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: targetUserId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(`Switched role to ${data.user.name} (${data.user.role})`);
+        await fetchData();
+      }
+    } catch {
+      showNotification('Failed to switch role.', 'error');
+    } finally {
+      setIsSwitchingRole(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // Handle Event Poster Select
+  // Handle Event Poster File Selection
   const handleEventPosterChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
-      showNotification('File exceeds max size limit of 10 MB.', 'error');
+      showNotification('File exceeds maximum size limit of 10 MB.', 'error');
       return;
     }
     setEventPosterFile(file);
@@ -253,11 +294,11 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Submit Approval Action (Approve / Request Changes / Reject)
+  // Execute Approval Action (Approve / Request Changes / Reject)
   const handleApprovalActionSubmit = async () => {
     if (!selectedInboxItem) return;
     if ((approvalActionType === 'REQUEST_CHANGES' || approvalActionType === 'REJECT') && !approvalComment.trim()) {
-      showNotification('A comment is required for rejection or change requests.', 'error');
+      showNotification('A reviewer comment is required for rejection or change requests.', 'error');
       return;
     }
 
@@ -285,6 +326,97 @@ export default function AdminDashboardPage() {
       showNotification('Network error processing approval action.', 'error');
     } finally {
       setIsSubmittingApproval(false);
+    }
+  };
+
+  // Assign Poster to Screens Handler
+  const handleSavePosterAssignments = async () => {
+    if (!assignModalPoster) return;
+    try {
+      const res = await fetch('/api/assignments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          posterId: assignModalPoster.id,
+          screenIds: assignSelectedScreens,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('Screen assignments updated successfully!');
+        setAssignModalPoster(null);
+        await fetchData();
+      } else {
+        showNotification(data.error || 'Assignment update failed.', 'error');
+      }
+    } catch {
+      showNotification('Error updating assignments.', 'error');
+    }
+  };
+
+  // Delete Poster Handler
+  const handleDeletePoster = async (posterId: string) => {
+    if (!confirm('Are you sure you want to delete this poster?')) return;
+    try {
+      const res = await fetch(`/api/posters/${posterId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('Poster deleted.');
+        await fetchData();
+      } else {
+        showNotification(data.error || 'Failed to delete poster.', 'error');
+      }
+    } catch {
+      showNotification('Error deleting poster.', 'error');
+    }
+  };
+
+  // Reorder Screen Playlist Items
+  const handleReorderPlaylist = async (screenId: string, posterIndex: number, direction: 'UP' | 'DOWN') => {
+    const screen = screens.find((s) => s.id === screenId);
+    if (!screen || !screen.posters) return;
+
+    const currentPosters = [...screen.posters];
+    const targetIndex = direction === 'UP' ? posterIndex - 1 : posterIndex + 1;
+    if (targetIndex < 0 || targetIndex >= currentPosters.length) return;
+
+    // Swap items
+    const temp = currentPosters[posterIndex];
+    currentPosters[posterIndex] = currentPosters[targetIndex];
+    currentPosters[targetIndex] = temp;
+
+    const orderedPosterIds = currentPosters.map((p) => p.id);
+
+    try {
+      const res = await fetch('/api/assignments/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ screenId, orderedPosterIds }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('Playlist order updated.');
+        await fetchData();
+      }
+    } catch {
+      showNotification('Error reordering playlist.', 'error');
+    }
+  };
+
+  // Unassign Poster from Screen
+  const handleUnassignPoster = async (screenId: string, posterId: string) => {
+    try {
+      const res = await fetch(`/api/assignments?screenId=${screenId}&posterId=${posterId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('Poster removed from screen.');
+        await fetchData();
+      }
+    } catch {
+      showNotification('Error removing poster from screen.', 'error');
     }
   };
 
@@ -326,7 +458,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Timeline stage pill helper
+  // Stage timeline pill helper
   const renderStagePill = (status: string) => {
     switch (status) {
       case 'DRAFT':
@@ -361,37 +493,42 @@ export default function AdminDashboardPage() {
               <h1 className="text-base font-semibold tracking-tight text-[#26251e] flex items-center gap-2">
                 CampusCast Operations
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#e6e5e0] text-[#5a5852]">
-                  SSO Authenticated
+                  v1.0 IoT
                 </span>
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {user && (
-              <div className="flex items-center gap-2 bg-[#ffffff] border border-[#e6e5e0] px-3 py-1.5 rounded-md text-xs">
-                <span className="w-2 h-2 rounded-full bg-[#1f8a65]"></span>
-                <div>
-                  <span className="font-semibold text-[#26251e]">{user.name}</span>
-                  <span className="text-[10px] font-mono text-[#807d72] ml-2">
-                    {user.role} ({user.clubId || 'global'})
-                  </span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  title="Logout"
-                  className="ml-2 p-1 text-[#807d72] hover:text-[#cf2d56] transition"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            {/* Quick Role Switcher Dropdown */}
+            <div className="relative flex items-center gap-2 bg-[#ffffff] border border-[#e6e5e0] px-3 py-1 rounded-md text-xs">
+              <UserCheck className="w-3.5 h-3.5 text-[#f54e00]" />
+              <select
+                value={user?.userId || 'usr_101'}
+                disabled={isSwitchingRole}
+                onChange={(e) => handleQuickSwitchRole(e.target.value)}
+                className="bg-transparent text-[#26251e] font-semibold text-xs focus:outline-none cursor-pointer"
+              >
+                <option value="usr_101">Gaurav (Design Lead)</option>
+                <option value="usr_102">Alex Rivera (President)</option>
+                <option value="usr_103">Dr. Smith (HOD)</option>
+                <option value="usr_100">Campus Admin (System Admin)</option>
+              </select>
+            </div>
+
             <button
               onClick={fetchData}
-              className="px-3 py-1.5 bg-[#ffffff] hover:bg-[#fafaf7] text-[#26251e] text-xs font-medium rounded-md border border-[#cfcdc4] transition flex items-center gap-2"
+              className="px-3 py-1.5 bg-[#ffffff] hover:bg-[#fafaf7] text-[#26251e] text-xs font-medium rounded-md border border-[#cfcdc4] transition flex items-center gap-1.5"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
+            </button>
+            <button
+              onClick={handleLogout}
+              title="Logout"
+              className="p-1.5 bg-[#ffffff] hover:bg-[#fafaf7] text-[#5a5852] hover:text-[#cf2d56] rounded-md border border-[#cfcdc4] transition"
+            >
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -511,11 +648,15 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
+            {/* Section 1: Live Kiosk Displays with Interactive Playlist Controls */}
             <div className="space-y-4">
-              <h2 className="text-lg font-normal text-[#26251e] flex items-center gap-2">
-                <Tv className="w-5 h-5 text-[#f54e00]" />
-                Live Kiosk Display Fleet
-              </h2>
+              <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-2">
+                <h2 className="text-lg font-normal text-[#26251e] flex items-center gap-2">
+                  <Tv className="w-5 h-5 text-[#f54e00]" />
+                  Live Kiosk Display Fleet
+                </h2>
+                <span className="text-xs font-mono text-[#807d72]">5s Polling Interval</span>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {screens.map((screen) => (
@@ -540,15 +681,142 @@ export default function AdminDashboardPage() {
                       <p>Manifest Version: <span className="text-[#f54e00]">v{screen.playlistVersion || 1}</span></p>
                     </div>
 
+                    {/* Expandable Screen Playlist Section */}
+                    <div className="border-t border-[#e6e5e0] pt-3">
+                      <button
+                        onClick={() =>
+                          setExpandedPlaylists((prev) => ({
+                            ...prev,
+                            [screen.id]: !prev[screen.id],
+                          }))
+                        }
+                        className="w-full text-xs text-[#5a5852] hover:text-[#26251e] flex items-center justify-between font-medium py-1"
+                      >
+                        <span>Playlist Items ({screen.posters?.length || 0})</span>
+                        {expandedPlaylists[screen.id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+
+                      {expandedPlaylists[screen.id] && (
+                        <div className="mt-2 space-y-2">
+                          {(!screen.posters || screen.posters.length === 0) ? (
+                            <p className="text-[11px] text-[#807d72] italic py-1">No posters assigned to this screen.</p>
+                          ) : (
+                            screen.posters.map((p, idx) => (
+                              <div
+                                key={p.id}
+                                className="flex items-center justify-between p-2 bg-[#fafaf7] border border-[#e6e5e0] rounded-md text-xs"
+                              >
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                  <span className="font-mono text-[10px] text-[#807d72] w-4">#{idx + 1}</span>
+                                  <span className="font-medium text-[#26251e] truncate max-w-[120px]">{p.title}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleReorderPlaylist(screen.id, idx, 'UP')}
+                                    disabled={idx === 0}
+                                    className="p-1 text-[#807d72] hover:text-[#26251e] disabled:opacity-30"
+                                    title="Move Up"
+                                  >
+                                    <ArrowUp className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleReorderPlaylist(screen.id, idx, 'DOWN')}
+                                    disabled={idx === screen.posters.length - 1}
+                                    className="p-1 text-[#807d72] hover:text-[#26251e] disabled:opacity-30"
+                                    title="Move Down"
+                                  >
+                                    <ArrowDown className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleUnassignPoster(screen.id, p.id)}
+                                    className="p-1 text-[#807d72] hover:text-[#cf2d56]"
+                                    title="Unassign"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <a
                       href={`/display/${screen.slug}`}
                       target="_blank"
                       rel="noreferrer"
                       className="w-full py-2 bg-[#fafaf7] hover:bg-[#26251e] hover:text-white text-[#26251e] text-xs font-medium rounded-md border border-[#e6e5e0] transition flex items-center justify-center gap-2"
                     >
-                      <span>Open Display</span>
+                      <span>Open Kiosk Display</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Section 2: Full Media Poster Library with Quick Management Actions */}
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-2">
+                <h2 className="text-lg font-normal text-[#26251e] flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-[#f54e00]" />
+                  Media Poster Library
+                </h2>
+                <span className="text-xs font-mono text-[#807d72]">{posters.length} Registered Media Assets</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {posters.map((poster) => (
+                  <div key={poster.id} className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-5 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          {renderStagePill(poster.status || 'DRAFT')}
+                          <h3 className="font-semibold text-[#26251e] text-sm mt-1">{poster.title}</h3>
+                        </div>
+                        <button
+                          onClick={() => setLightboxImage({ src: poster.imagePath, title: poster.title })}
+                          className="w-16 h-16 rounded-md bg-[#fafaf7] overflow-hidden border border-[#e6e5e0] hover:border-[#f54e00] transition flex items-center justify-center shrink-0 cursor-pointer"
+                        >
+                          <img src={poster.imagePath} alt={poster.title} className="max-h-full object-contain" />
+                        </button>
+                      </div>
+
+                      <div className="text-[11px] text-[#5a5852] font-mono space-y-0.5 bg-[#fafaf7] p-2.5 rounded-md border border-[#e6e5e0]">
+                        <p className="truncate">Checksum: <span className="text-[#26251e]">{poster.checksum?.substring(0, 14)}...</span></p>
+                        <p>Assigned Screens: <span className="text-[#f54e00] font-bold">{poster.assignedScreens?.length || 0} Nodes</span></p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-[#e6e5e0]">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setAssignModalPoster(poster);
+                            setAssignSelectedScreens(poster.assignedScreens?.map((s) => s.id) || []);
+                          }}
+                          className="flex-1 py-1.5 bg-[#ffffff] hover:bg-[#fafaf7] text-[#26251e] border border-[#cfcdc4] text-xs font-medium rounded-md transition"
+                        >
+                          Assign Screens
+                        </button>
+                        {poster.status === 'DRAFT' && (
+                          <button
+                            onClick={() => handleSubmitPosterForApproval(poster.id)}
+                            className="px-3 py-1.5 bg-[#f54e00] hover:bg-[#d04200] text-white text-xs font-medium rounded-md transition"
+                          >
+                            Submit
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeletePoster(poster.id)}
+                          className="p-1.5 text-[#807d72] hover:text-[#cf2d56] transition"
+                          title="Delete Poster"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -769,9 +1037,12 @@ export default function AdminDashboardPage() {
                         <h3 className="font-semibold text-[#26251e] text-base mt-2">{item.title}</h3>
                         {item.event && <p className="text-xs text-[#f54e00] font-medium">{item.event.name}</p>}
                       </div>
-                      <div className="w-20 h-20 rounded-md bg-[#fafaf7] overflow-hidden border border-[#e6e5e0] flex items-center justify-center">
+                      <button
+                        onClick={() => setLightboxImage({ src: item.imagePath, title: item.title })}
+                        className="w-20 h-20 rounded-md bg-[#fafaf7] overflow-hidden border border-[#e6e5e0] flex items-center justify-center shrink-0 cursor-pointer"
+                      >
                         <img src={item.imagePath} alt={item.title} className="max-h-full object-contain" />
-                      </div>
+                      </button>
                     </div>
 
                     {item.event && (
@@ -802,98 +1073,6 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-
-            {/* Approval Action Modal */}
-            {selectedInboxItem && (
-              <div className="fixed inset-0 bg-[#26251e]/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-                <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 max-w-lg w-full space-y-6 shadow-lg">
-                  <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-3">
-                    <h3 className="font-semibold text-[#26251e] text-base flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-[#f54e00]" />
-                      Review Poster Submission
-                    </h3>
-                    <button onClick={() => setSelectedInboxItem(null)} className="text-[#807d72] hover:text-[#26251e]">
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-3 text-xs">
-                    <div className="p-3 bg-[#fafaf7] rounded-md border border-[#e6e5e0]">
-                      <p className="text-[#5a5852]">Target Poster: <strong className="text-[#26251e]">{selectedInboxItem.title}</strong></p>
-                      <p className="text-[#5a5852] mt-1 flex items-center gap-2">
-                        Current Stage: {renderStagePill(selectedInboxItem.status)}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="font-semibold text-[#26251e] block">Select Action:</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setApprovalActionType('APPROVE')}
-                          className={`py-2 rounded-md font-medium text-xs border ${
-                            approvalActionType === 'APPROVE'
-                              ? 'bg-[#fafaf7] border-[#1f8a65] text-[#1f8a65]'
-                              : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
-                          }`}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setApprovalActionType('REQUEST_CHANGES')}
-                          className={`py-2 rounded-md font-medium text-xs border ${
-                            approvalActionType === 'REQUEST_CHANGES'
-                              ? 'bg-[#fafaf7] border-[#f54e00] text-[#f54e00]'
-                              : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
-                          }`}
-                        >
-                          Request Changes
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setApprovalActionType('REJECT')}
-                          className={`py-2 rounded-md font-medium text-xs border ${
-                            approvalActionType === 'REJECT'
-                              ? 'bg-[#fafaf7] border-[#cf2d56] text-[#cf2d56]'
-                              : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
-                          }`}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="font-semibold text-[#26251e] block">Reviewer Comment:</label>
-                      <textarea
-                        rows={3}
-                        value={approvalComment}
-                        onChange={(e) => setApprovalComment(e.target.value)}
-                        placeholder="Add required comment or feedback for Design Lead..."
-                        className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-3 py-2 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
-                      ></textarea>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-2">
-                    <button
-                      onClick={() => setSelectedInboxItem(null)}
-                      className="px-4 py-2 bg-[#fafaf7] text-[#5a5852] text-xs rounded-md font-medium hover:bg-[#e6e5e0]"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleApprovalActionSubmit}
-                      disabled={isSubmittingApproval}
-                      className="px-5 py-2 bg-[#f54e00] hover:bg-[#d04200] text-white text-xs font-medium rounded-md shadow-sm transition"
-                    >
-                      {isSubmittingApproval ? 'Processing...' : 'Execute Action'}
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
           </div>
@@ -988,8 +1167,86 @@ export default function AdminDashboardPage() {
         )}
       </main>
 
+      {/* Assign Poster Modal */}
+      {assignModalPoster && (
+        <div className="fixed inset-0 bg-[#26251e]/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 max-w-md w-full space-y-5 shadow-lg">
+            <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-3">
+              <h3 className="font-semibold text-[#26251e] text-base">Assign Poster to Screens</h3>
+              <button onClick={() => setAssignModalPoster(null)} className="text-[#807d72] hover:text-[#26251e]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#5a5852]">
+              Select which kiosk display screens will broadcast <strong className="text-[#26251e]">{assignModalPoster.title}</strong>:
+            </p>
+
+            <div className="space-y-2">
+              {screens.map((sc) => (
+                <label
+                  key={sc.id}
+                  className={`p-3 rounded-md border cursor-pointer flex items-center justify-between text-xs transition ${
+                    assignSelectedScreens.includes(sc.id)
+                      ? 'bg-[#fafaf7] border-[#f54e00] text-[#26251e] font-semibold'
+                      : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
+                  }`}
+                >
+                  <div>
+                    <p>{sc.name}</p>
+                    <p className="text-[10px] text-[#807d72] font-mono">{sc.location}</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={assignSelectedScreens.includes(sc.id)}
+                    onChange={() => {
+                      setAssignSelectedScreens((prev) =>
+                        prev.includes(sc.id) ? prev.filter((id) => id !== sc.id) : [...prev, sc.id]
+                      );
+                    }}
+                    className="accent-[#f54e00]"
+                  />
+                </label>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setAssignModalPoster(null)}
+                className="px-4 py-2 bg-[#fafaf7] text-[#5a5852] text-xs font-medium rounded-md hover:bg-[#e6e5e0]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSavePosterAssignments}
+                className="px-5 py-2 bg-[#f54e00] hover:bg-[#d04200] text-white text-xs font-medium rounded-md shadow-sm transition"
+              >
+                Save Assignments
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox Image Preview Modal */}
+      {lightboxImage && (
+        <div className="fixed inset-0 bg-[#26251e]/80 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setLightboxImage(null)}>
+          <div className="relative max-w-3xl w-full bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-2">
+              <h3 className="font-semibold text-[#26251e] text-sm">{lightboxImage.title}</h3>
+              <button onClick={() => setLightboxImage(null)} className="text-[#807d72] hover:text-[#26251e]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex items-center justify-center bg-[#fafaf7] rounded-md p-2 max-h-[75vh] overflow-hidden">
+              <img src={lightboxImage.src} alt={lightboxImage.title} className="max-h-[70vh] object-contain" />
+            </div>
+          </div>
+        </div>
+      )}
+
       <footer className="border-t border-[#e6e5e0] py-6 text-center text-xs text-[#807d72] bg-[#f7f7f4]">
-        CampusCast Multi-Stage Approval Engine • Developer Dialect Aesthetic
+        CampusCast Enterprise Signage Operations • Cursor Editorial Design Tokens
       </footer>
     </div>
   );
