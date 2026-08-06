@@ -21,6 +21,7 @@ import {
   UserCheck,
   ChevronDown,
   ChevronUp,
+  FileText,
 } from 'lucide-react';
 
 interface Poster {
@@ -117,13 +118,25 @@ interface DeviceCommandItem {
   screen: { name: string; slug: string };
 }
 
+interface AuditLogItem {
+  id: string;
+  actorId: string;
+  action: string;
+  resourceId: string;
+  previousState: string | null;
+  newState: string | null;
+  requestId: string;
+  timestamp: string;
+}
+
 export default function AdminDashboardPage() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'inbox' | 'enrollment' | 'telemetry'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'inbox' | 'enrollment' | 'telemetry' | 'audit'>('overview');
   const [screens, setScreens] = useState<ScreenData[]>([]);
   const [posters, setPosters] = useState<Poster[]>([]);
   const [inboxItems, setInboxItems] = useState<InboxItem[]>([]);
   const [playbackLogs, setPlaybackLogs] = useState<PlaybackLogItem[]>([]);
   const [deviceCommands, setDeviceCommands] = useState<DeviceCommandItem[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -181,16 +194,17 @@ export default function AdminDashboardPage() {
     }, 5000);
   };
 
-  // Fetch all admin data & approval inbox & telemetry logs
+  // Fetch all admin data & approval inbox & telemetry logs & audit logs
   const fetchData = async () => {
     try {
-      const [screensRes, postersRes, authRes, inboxRes, logsRes, cmdsRes] = await Promise.all([
+      const [screensRes, postersRes, authRes, inboxRes, logsRes, cmdsRes, auditRes] = await Promise.all([
         fetch('/api/screens'),
         fetch('/api/posters'),
         fetch('/api/auth/me'),
         fetch('/api/v1/approvals/inbox'),
         fetch('/api/v1/telemetry/playback'),
         fetch('/api/v1/commands'),
+        fetch('/api/v1/audit'),
       ]);
 
       const screensJson = await screensRes.json();
@@ -199,6 +213,7 @@ export default function AdminDashboardPage() {
       const inboxJson = await inboxRes.json();
       const logsJson = await logsRes.json();
       const cmdsJson = await cmdsRes.json();
+      const auditJson = await auditRes.json();
 
       if (authJson.success && authJson.user) {
         setUser(authJson.user);
@@ -220,6 +235,9 @@ export default function AdminDashboardPage() {
       }
       if (cmdsJson.success) {
         setDeviceCommands(cmdsJson.commands);
+      }
+      if (auditJson.success) {
+        setAuditLogs(auditJson.logs);
       }
     } catch (err) {
       console.error('Failed to fetch admin data:', err);
@@ -659,6 +677,17 @@ export default function AdminDashboardPage() {
           >
             <RefreshCw className="w-4 h-4" />
             Telemetry & Commands
+          </button>
+          <button
+            onClick={() => setActiveTab('audit')}
+            className={`px-5 py-3 border-b-2 transition flex items-center gap-2 ${
+              activeTab === 'audit'
+                ? 'border-[#f54e00] text-[#f54e00] bg-[#ffffff]'
+                : 'border-transparent text-[#5a5852] hover:text-[#26251e]'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            Audit Trail
           </button>
         </div>
       </header>
@@ -1352,6 +1381,72 @@ export default function AdminDashboardPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* TAB 6: AUDIT TRAIL LOG */}
+        {activeTab === 'audit' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-3">
+              <div>
+                <h3 className="text-base font-semibold text-[#26251e] flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-[#f54e00]" />
+                  Append-Only Compliance Audit Log
+                </h3>
+                <p className="text-xs text-[#5a5852]">
+                  Cryptographically trackable system mutations (Logins, Creations, Approvals, Rejections, Cancellations, Screen Enrollments).
+                </p>
+              </div>
+              <span className="text-xs font-mono text-[#807d72]">{auditLogs.length} Recorded Audit Entries</span>
+            </div>
+
+            {auditLogs.length === 0 ? (
+              <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-8 text-center text-xs text-[#807d72]">
+                No audit entries recorded yet. Perform actions like approvals, event creation, or cancellations to populate the immutable audit stream.
+              </div>
+            ) : (
+              <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl overflow-hidden shadow-sm">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#fafaf7] border-b border-[#e6e5e0] text-[#5a5852] font-mono text-[11px]">
+                    <tr>
+                      <th className="p-3">Request ID</th>
+                      <th className="p-3">Actor ID</th>
+                      <th className="p-3">Action</th>
+                      <th className="p-3">Resource ID</th>
+                      <th className="p-3">State Transition</th>
+                      <th className="p-3">Timestamp</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#e6e5e0]">
+                    {auditLogs.map((item) => (
+                      <tr key={item.id} className="hover:bg-[#fafaf7] transition font-mono text-[11px]">
+                        <td className="p-3 text-[#5a5852]">{item.requestId}</td>
+                        <td className="p-3 text-[#f54e00] font-semibold">{item.actorId}</td>
+                        <td className="p-3">
+                          <span className="px-2 py-0.5 rounded bg-[#fafaf7] text-[#26251e] border border-[#e6e5e0] font-bold">
+                            {item.action}
+                          </span>
+                        </td>
+                        <td className="p-3 text-[#5a5852] truncate max-w-[120px]">{item.resourceId}</td>
+                        <td className="p-3 text-[#26251e]">
+                          {item.previousState ? (
+                            <span>
+                              <span className="text-[#cf2d56]">{item.previousState}</span> →{' '}
+                              <span className="text-[#1f8a65]">{item.newState}</span>
+                            </span>
+                          ) : (
+                            <span className="text-[#1f8a65]">{item.newState}</span>
+                          )}
+                        </td>
+                        <td className="p-3 text-[#807d72]">
+                          {new Date(item.timestamp).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </main>
