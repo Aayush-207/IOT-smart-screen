@@ -4,28 +4,16 @@ import { useEffect, useState, useRef, ChangeEvent, FormEvent } from 'react';
 import {
   Monitor,
   Image as ImageIcon,
-  UploadCloud,
   CheckCircle2,
   XCircle,
-  Clock,
-  Trash2,
   PlusCircle,
   ExternalLink,
   RefreshCw,
-  SlidersHorizontal,
-  Layers,
-  AlertCircle,
-  ChevronUp,
-  ChevronDown,
   LogOut,
-  UserCheck,
   Calendar,
   Inbox,
   ShieldCheck,
-  Check,
   X,
-  MessageSquare,
-  Building,
   Tv,
 } from 'lucide-react';
 
@@ -137,15 +125,8 @@ export default function AdminDashboardPage() {
   const [enrollFloor, setEnrollFloor] = useState('1st Floor');
   const [enrolledSecret, setEnrolledSecret] = useState<{ deviceId: string; secret: string } | null>(null);
 
-  // Quick Assign Modal & Content Management
-  const [assigningPoster, setAssigningPoster] = useState<Poster | null>(null);
-  const [assignTargetScreenIds, setAssignTargetScreenIds] = useState<string[]>([]);
-  const [managingScreen, setManagingScreen] = useState<ScreenData | null>(null);
-
   // Notifications
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
     setMessage({ text, type });
@@ -174,10 +155,6 @@ export default function AdminDashboardPage() {
       }
       if (screensJson.success) {
         setScreens(screensJson.screens);
-        if (managingScreen) {
-          const updated = screensJson.screens.find((s: ScreenData) => s.id === managingScreen.id);
-          if (updated) setManagingScreen(updated);
-        }
       }
       if (postersJson.success) {
         setPosters(postersJson.posters);
@@ -255,7 +232,7 @@ export default function AdminDashboardPage() {
       } else {
         showNotification(data.error || 'Failed to create event.', 'error');
       }
-    } catch (err) {
+    } catch {
       showNotification('Error creating event.', 'error');
     }
   };
@@ -349,45 +326,61 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Summary Metrics
+  // Timeline stage pill helper
+  const renderStagePill = (status: string) => {
+    switch (status) {
+      case 'DRAFT':
+        return <span className="timeline-pill-thinking">DRAFT</span>;
+      case 'PENDING_PRESIDENT':
+        return <span className="timeline-pill-grep">PENDING PRESIDENT</span>;
+      case 'PENDING_HOD':
+        return <span className="timeline-pill-read">PENDING HOD</span>;
+      case 'PENDING_ADMIN':
+        return <span className="timeline-pill-edit">PENDING ADMIN</span>;
+      case 'APPROVED':
+        return <span className="timeline-pill-done">APPROVED</span>;
+      default:
+        return <span className="timeline-pill-thinking">{status}</span>;
+    }
+  };
+
   const totalScreens = screens.length;
   const onlineScreens = screens.filter((s) => s.isOnline).length;
   const totalPosters = posters.length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen bg-[#f7f7f4] text-[#26251e] flex flex-col font-sans selection:bg-[#f54e00] selection:text-white">
       {/* Top Header Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="border-b border-[#e6e5e0] bg-[#f7f7f4] sticky top-0 z-40">
+        <div className="max-w-[1200px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
-              <Monitor className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-md bg-[#26251e] text-white flex items-center justify-center font-bold">
+              <Monitor className="w-4 h-4 text-[#f54e00]" />
             </div>
             <div>
-              <h1 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                CampusCast Admin Operations
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                  SSO Protected
+              <h1 className="text-base font-semibold tracking-tight text-[#26251e] flex items-center gap-2">
+                CampusCast Operations
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#e6e5e0] text-[#5a5852]">
+                  SSO Authenticated
                 </span>
               </h1>
-              <p className="text-xs text-slate-400">IoT Digital Signage & Scoped Approvals</p>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
             {user && (
-              <div className="flex items-center gap-2.5 bg-slate-800/90 border border-slate-700/80 px-3 py-1.5 rounded-xl text-xs">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+              <div className="flex items-center gap-2 bg-[#ffffff] border border-[#e6e5e0] px-3 py-1.5 rounded-md text-xs">
+                <span className="w-2 h-2 rounded-full bg-[#1f8a65]"></span>
                 <div>
-                  <span className="font-bold text-white">{user.name}</span>
-                  <span className="text-[10px] text-cyan-300 font-mono ml-2 px-2 py-0.5 bg-slate-900 border border-slate-700 rounded-md">
+                  <span className="font-semibold text-[#26251e]">{user.name}</span>
+                  <span className="text-[10px] font-mono text-[#807d72] ml-2">
                     {user.role} ({user.clubId || 'global'})
                   </span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  title="SSO Logout"
-                  className="ml-2 p-1 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded-lg transition"
+                  title="Logout"
+                  className="ml-2 p-1 text-[#807d72] hover:text-[#cf2d56] transition"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -395,7 +388,7 @@ export default function AdminDashboardPage() {
             )}
             <button
               onClick={fetchData}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition flex items-center gap-2"
+              className="px-3 py-1.5 bg-[#ffffff] hover:bg-[#fafaf7] text-[#26251e] text-xs font-medium rounded-md border border-[#cfcdc4] transition flex items-center gap-2"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
@@ -404,13 +397,13 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex border-t border-slate-800 text-xs">
+        <div className="max-w-[1200px] mx-auto px-6 flex border-t border-[#e6e5e0] text-xs font-medium">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition flex items-center gap-2 ${
               activeTab === 'overview'
-                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#f54e00] text-[#f54e00] bg-[#ffffff]'
+                : 'border-transparent text-[#5a5852] hover:text-[#26251e]'
             }`}
           >
             <Monitor className="w-4 h-4" />
@@ -418,10 +411,10 @@ export default function AdminDashboardPage() {
           </button>
           <button
             onClick={() => setActiveTab('events')}
-            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition flex items-center gap-2 ${
               activeTab === 'events'
-                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#f54e00] text-[#f54e00] bg-[#ffffff]'
+                : 'border-transparent text-[#5a5852] hover:text-[#26251e]'
             }`}
           >
             <Calendar className="w-4 h-4" />
@@ -429,134 +422,131 @@ export default function AdminDashboardPage() {
           </button>
           <button
             onClick={() => setActiveTab('inbox')}
-            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition flex items-center gap-2 ${
               activeTab === 'inbox'
-                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#f54e00] text-[#f54e00] bg-[#ffffff]'
+                : 'border-transparent text-[#5a5852] hover:text-[#26251e]'
             }`}
           >
             <Inbox className="w-4 h-4" />
             Approval Inbox
             {inboxItems.length > 0 && (
-              <span className="px-2 py-0.5 rounded-full bg-cyan-500 text-slate-950 font-bold text-[10px]">
+              <span className="px-2 py-0.5 rounded-full bg-[#f54e00] text-white font-bold text-[10px]">
                 {inboxItems.length}
               </span>
             )}
           </button>
           <button
             onClick={() => setActiveTab('enrollment')}
-            className={`px-5 py-3 font-semibold border-b-2 transition flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition flex items-center gap-2 ${
               activeTab === 'enrollment'
-                ? 'border-cyan-400 text-cyan-400 bg-slate-800/40'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#f54e00] text-[#f54e00] bg-[#ffffff]'
+                : 'border-transparent text-[#5a5852] hover:text-[#26251e]'
             }`}
           >
             <Tv className="w-4 h-4" />
-            Screen Kiosk Enrollment
+            Screen Enrollment
           </button>
         </div>
       </header>
 
       {/* Notification Toast */}
       {message && (
-        <div className="max-w-7xl mx-auto px-4 mt-4 w-full">
+        <div className="max-w-[1200px] mx-auto px-6 mt-4 w-full">
           <div
-            className={`p-4 rounded-xl border text-xs font-medium flex items-center justify-between shadow-lg ${
+            className={`p-4 rounded-md border text-xs font-medium flex items-center justify-between ${
               message.type === 'success'
-                ? 'bg-emerald-950/80 border-emerald-800 text-emerald-300'
-                : 'bg-red-950/80 border-red-800 text-red-300'
+                ? 'bg-[#ffffff] border-[#1f8a65] text-[#1f8a65]'
+                : 'bg-[#ffffff] border-[#cf2d56] text-[#cf2d56]'
             }`}
           >
             <div className="flex items-center gap-2">
               {message.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
               <span>{message.text}</span>
             </div>
-            <button onClick={() => setMessage(null)} className="text-slate-400 hover:text-white">
+            <button onClick={() => setMessage(null)} className="text-[#807d72] hover:text-[#26251e]">
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+      {/* Main Content */}
+      <main className="max-w-[1200px] mx-auto px-6 py-8 flex-1 w-full space-y-8">
         {/* TAB 1: OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
-            {/* Metric Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between">
+              <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-5 shadow-sm flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-400">Total Kiosk Screens</p>
-                  <h3 className="text-2xl font-bold text-white mt-1">{totalScreens}</h3>
-                  <p className="text-[11px] text-emerald-400 mt-1 font-mono">{onlineScreens} Online & Syncing</p>
+                  <p className="text-xs text-[#807d72]">Total Kiosk Screens</p>
+                  <h3 className="text-2xl font-normal text-[#26251e] mt-1">{totalScreens}</h3>
+                  <p className="text-[11px] text-[#1f8a65] mt-1 font-mono">{onlineScreens} Online & Syncing</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center">
-                  <Monitor className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-md bg-[#fafaf7] border border-[#e6e5e0] flex items-center justify-center text-[#26251e]">
+                  <Monitor className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between">
+              <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-5 shadow-sm flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-400">Media Poster Library</p>
-                  <h3 className="text-2xl font-bold text-white mt-1">{totalPosters}</h3>
-                  <p className="text-[11px] text-cyan-400 mt-1 font-mono">Approved & Scoped Posters</p>
+                  <p className="text-xs text-[#807d72]">Media Poster Library</p>
+                  <h3 className="text-2xl font-normal text-[#26251e] mt-1">{totalPosters}</h3>
+                  <p className="text-[11px] text-[#5a5852] mt-1 font-mono">Approved & Scoped</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
-                  <ImageIcon className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-md bg-[#fafaf7] border border-[#e6e5e0] flex items-center justify-center text-[#26251e]">
+                  <ImageIcon className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex items-center justify-between">
+              <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-5 shadow-sm flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-400">Pending Approvals</p>
-                  <h3 className="text-2xl font-bold text-white mt-1">{inboxItems.length}</h3>
-                  <p className="text-[11px] text-amber-400 mt-1 font-mono">Multi-Stage Review Inbox</p>
+                  <p className="text-xs text-[#807d72]">Pending Approvals</p>
+                  <h3 className="text-2xl font-normal text-[#26251e] mt-1">{inboxItems.length}</h3>
+                  <p className="text-[11px] text-[#f54e00] mt-1 font-mono">Multi-Stage Review</p>
                 </div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
-                  <Inbox className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-md bg-[#fafaf7] border border-[#e6e5e0] flex items-center justify-center text-[#f54e00]">
+                  <Inbox className="w-5 h-5" />
                 </div>
               </div>
             </div>
 
-            {/* Active Screens Fleet */}
             <div className="space-y-4">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Tv className="w-5 h-5 text-cyan-400" />
-                Live Kiosk Billboard Fleet
+              <h2 className="text-lg font-normal text-[#26251e] flex items-center gap-2">
+                <Tv className="w-5 h-5 text-[#f54e00]" />
+                Live Kiosk Display Fleet
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {screens.map((screen) => (
-                  <div key={screen.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                  <div key={screen.id} className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 shadow-sm space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-bold text-white text-base">{screen.name}</h3>
-                        <p className="text-xs text-slate-400">{screen.location}</p>
+                        <h3 className="font-semibold text-[#26251e] text-base">{screen.name}</h3>
+                        <p className="text-xs text-[#5a5852]">{screen.location}</p>
                       </div>
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-mono border flex items-center gap-1.5 ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono border ${
                         screen.isOnline
-                          ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800'
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                          ? 'bg-[#fafaf7] text-[#1f8a65] border-[#e6e5e0]'
+                          : 'bg-[#fafaf7] text-[#807d72] border-[#e6e5e0]'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${screen.isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}></span>
-                        {screen.isOnline ? 'ONLINE' : 'OFFLINE'}
+                        {screen.isOnline ? '● ONLINE' : '○ OFFLINE'}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-400 space-y-1 bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
-                      <p>Building: <span className="text-slate-200">{screen.building}</span></p>
-                      <p>Floor: <span className="text-slate-200">{screen.floor}</span></p>
-                      <p>Playlist Manifest Version: <span className="text-cyan-400 font-mono">v{screen.playlistVersion || 1}</span></p>
+                    <div className="text-xs text-[#5a5852] space-y-1 bg-[#fafaf7] p-3 rounded-md border border-[#e6e5e0] font-mono">
+                      <p>Building: <span className="text-[#26251e]">{screen.building}</span></p>
+                      <p>Floor: <span className="text-[#26251e]">{screen.floor}</span></p>
+                      <p>Manifest Version: <span className="text-[#f54e00]">v{screen.playlistVersion || 1}</span></p>
                     </div>
 
                     <a
                       href={`/display/${screen.slug}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="w-full py-2 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 hover:border-cyan-400 transition flex items-center justify-center gap-2"
+                      className="w-full py-2 bg-[#fafaf7] hover:bg-[#26251e] hover:text-white text-[#26251e] text-xs font-medium rounded-md border border-[#e6e5e0] transition flex items-center justify-center gap-2"
                     >
-                      <span>Open Kiosk Display</span>
+                      <span>Open Display</span>
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
@@ -568,49 +558,49 @@ export default function AdminDashboardPage() {
 
         {/* TAB 2: CREATE EVENT */}
         {activeTab === 'events' && (
-          <div className="max-w-2xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
-            <div className="space-y-2 border-b border-slate-800 pb-4">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Calendar className="w-6 h-6 text-cyan-400" />
-                Step 2: Create Event & Submit Poster
+          <div className="max-w-2xl mx-auto bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-8 shadow-sm space-y-6">
+            <div className="space-y-1 border-b border-[#e6e5e0] pb-4">
+              <h2 className="text-xl font-normal text-[#26251e] flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-[#f54e00]" />
+                Create Event & Upload Poster
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#5a5852]">
                 Design Lead fills basic event details & uploads poster image. Creates an event & DRAFT poster record.
               </p>
             </div>
 
             <form onSubmit={handleCreateEvent} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Event Title *</label>
+                <label className="font-semibold text-[#26251e]">Event Title *</label>
                 <input
                   type="text"
                   required
                   value={eventName}
                   onChange={(e) => setEventName(e.target.value)}
                   placeholder="e.g. Annual AI & Robotics Hackathon 2026"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Description *</label>
+                <label className="font-semibold text-[#26251e]">Description *</label>
                 <textarea
                   required
                   rows={3}
                   value={eventDesc}
                   onChange={(e) => setEventDesc(e.target.value)}
                   placeholder="Event agenda, eligibility, and rules..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                 ></textarea>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Club Scope *</label>
+                  <label className="font-semibold text-[#26251e]">Club Scope *</label>
                   <select
                     value={eventClubId}
                     onChange={(e) => setEventClubId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   >
                     <option value="technology-club">Technology Club</option>
                     <option value="robotics-club">Robotics Club</option>
@@ -618,88 +608,87 @@ export default function AdminDashboardPage() {
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Venue *</label>
+                  <label className="font-semibold text-[#26251e]">Venue *</label>
                   <input
                     type="text"
                     required
                     value={eventVenue}
                     onChange={(e) => setEventVenue(e.target.value)}
                     placeholder="e.g. Main Auditorium"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Event Date *</label>
+                  <label className="font-semibold text-[#26251e]">Event Date *</label>
                   <input
                     type="date"
                     required
                     value={eventDate}
                     onChange={(e) => setEventDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Start Time *</label>
+                  <label className="font-semibold text-[#26251e]">Start Time *</label>
                   <input
                     type="text"
                     required
                     value={eventStartTime}
                     onChange={(e) => setEventStartTime(e.target.value)}
                     placeholder="09:00 AM"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">End Time *</label>
+                  <label className="font-semibold text-[#26251e]">End Time *</label>
                   <input
                     type="text"
                     required
                     value={eventEndTime}
                     onChange={(e) => setEventEndTime(e.target.value)}
                     placeholder="05:00 PM"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Contact Email/Phone *</label>
+                  <label className="font-semibold text-[#26251e]">Contact Email/Phone *</label>
                   <input
                     type="text"
                     required
                     value={eventContact}
                     onChange={(e) => setEventContact(e.target.value)}
                     placeholder="tech@college.edu"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Registration URL</label>
+                  <label className="font-semibold text-[#26251e]">Registration URL</label>
                   <input
                     type="url"
                     value={eventRegUrl}
                     onChange={(e) => setEventRegUrl(e.target.value)}
                     placeholder="https://..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
               </div>
 
-              {/* Target Screens Selection */}
               <div className="space-y-2 pt-2">
-                <label className="font-semibold text-slate-300 block">Target Kiosk Screens:</label>
+                <label className="font-semibold text-[#26251e] block">Target Kiosk Screens:</label>
                 <div className="grid grid-cols-3 gap-3">
                   {screens.map((screen) => (
                     <label
                       key={screen.slug}
-                      className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between ${
+                      className={`p-3 rounded-md border cursor-pointer flex items-center justify-between ${
                         eventTargetScreens.includes(screen.slug)
-                          ? 'bg-cyan-950/60 border-cyan-500 text-cyan-300'
-                          : 'bg-slate-950 border-slate-800 text-slate-400'
+                          ? 'bg-[#fafaf7] border-[#f54e00] text-[#f54e00]'
+                          : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
                       }`}
                     >
                       <span className="font-medium text-[11px] truncate">{screen.name}</span>
@@ -720,17 +709,16 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Poster Upload File */}
               <div className="space-y-2 pt-2">
-                <label className="font-semibold text-slate-300 block">Poster Image (PNG, JPEG, WebP) *</label>
+                <label className="font-semibold text-[#26251e] block">Poster Image (PNG, JPEG, WebP) *</label>
                 <input
                   type="file"
                   accept="image/png, image/jpeg, image/webp"
                   onChange={handleEventPosterChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-slate-300 text-xs"
+                  className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2 text-[#26251e] text-xs"
                 />
                 {eventPosterPreview && (
-                  <div className="mt-3 relative w-full h-44 rounded-xl overflow-hidden border border-slate-800 bg-black flex items-center justify-center">
+                  <div className="mt-3 relative w-full h-44 rounded-md overflow-hidden border border-[#e6e5e0] bg-[#fafaf7] flex items-center justify-center">
                     <img src={eventPosterPreview} alt="Preview" className="max-h-full object-contain" />
                   </div>
                 )}
@@ -738,7 +726,7 @@ export default function AdminDashboardPage() {
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2 mt-4"
+                className="w-full py-3 bg-[#f54e00] hover:bg-[#d04200] text-white font-medium rounded-md transition shadow-sm flex items-center justify-center gap-2 mt-4"
               >
                 <PlusCircle className="w-4 h-4" />
                 Create Event & Save DRAFT Poster
@@ -750,49 +738,47 @@ export default function AdminDashboardPage() {
         {/* TAB 3: APPROVAL INBOX */}
         {activeTab === 'inbox' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-4">
               <div>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <ShieldCheck className="w-6 h-6 text-cyan-400" />
-                  Multi-Stage Transactional Approval Inbox
+                <h2 className="text-xl font-normal text-[#26251e] flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-[#f54e00]" />
+                  Multi-Stage Approval Inbox
                 </h2>
-                <p className="text-xs text-slate-400">
-                  Workflow: <code className="text-cyan-300">DRAFT</code> → <code className="text-purple-300">PENDING_PRESIDENT</code> → <code className="text-amber-300">PENDING_HOD</code> → <code className="text-emerald-300">PENDING_ADMIN</code> → <code className="text-emerald-400">APPROVED</code>
+                <p className="text-xs text-[#5a5852]">
+                  Workflow Stages: <span className="timeline-pill-thinking">DRAFT</span> → <span className="timeline-pill-grep">PRESIDENT</span> → <span className="timeline-pill-read">HOD</span> → <span className="timeline-pill-edit">ADMIN</span> → <span className="timeline-pill-done">APPROVED</span>
                 </p>
               </div>
-              <span className="text-xs text-slate-400 font-mono bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
-                Current Role: <strong className="text-white">{user?.role || 'DESIGN_LEAD'}</strong>
+              <span className="text-xs font-mono text-[#5a5852] bg-[#fafaf7] border border-[#e6e5e0] px-3 py-1.5 rounded-md">
+                Active Role: <strong className="text-[#26251e]">{user?.role || 'DESIGN_LEAD'}</strong>
               </span>
             </div>
 
             {inboxItems.length === 0 ? (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-                <h3 className="font-bold text-white text-base">Approval Inbox Clean</h3>
-                <p className="text-xs text-slate-400">No posters are currently pending review for your role stage.</p>
+              <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-12 text-center space-y-2">
+                <CheckCircle2 className="w-8 h-8 text-[#1f8a65] mx-auto" />
+                <h3 className="font-semibold text-[#26251e] text-base">Approval Inbox Clean</h3>
+                <p className="text-xs text-[#5a5852]">No posters are currently pending review for your active stage.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {inboxItems.map((item) => (
-                  <div key={item.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                  <div key={item.id} className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 shadow-sm space-y-4">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          {item.status}
-                        </span>
-                        <h3 className="font-bold text-white text-base mt-1">{item.title}</h3>
-                        {item.event && <p className="text-xs text-cyan-400 font-medium">{item.event.name}</p>}
+                      <div className="space-y-2">
+                        {renderStagePill(item.status)}
+                        <h3 className="font-semibold text-[#26251e] text-base mt-2">{item.title}</h3>
+                        {item.event && <p className="text-xs text-[#f54e00] font-medium">{item.event.name}</p>}
                       </div>
-                      <div className="w-20 h-20 rounded-xl bg-black overflow-hidden border border-slate-800 flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-md bg-[#fafaf7] overflow-hidden border border-[#e6e5e0] flex items-center justify-center">
                         <img src={item.imagePath} alt={item.title} className="max-h-full object-contain" />
                       </div>
                     </div>
 
                     {item.event && (
-                      <div className="text-xs text-slate-400 space-y-1 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
-                        <p>Venue: <span className="text-slate-200">{item.event.venue}</span></p>
-                        <p>Event Date: <span className="text-slate-200">{new Date(item.event.eventDate).toLocaleDateString()}</span></p>
-                        <p>Calculated 21-Day Display: <span className="text-cyan-400 font-mono">{item.activeFrom ? new Date(item.activeFrom).toLocaleDateString() : 'Auto-Calculated'}</span></p>
+                      <div className="text-xs text-[#5a5852] space-y-1 bg-[#fafaf7] p-3 rounded-md border border-[#e6e5e0]">
+                        <p>Venue: <span className="text-[#26251e] font-medium">{item.event.venue}</span></p>
+                        <p>Event Date: <span className="text-[#26251e] font-medium">{new Date(item.event.eventDate).toLocaleDateString()}</span></p>
+                        <p>21-Day Display Start: <span className="text-[#f54e00] font-mono">{item.activeFrom ? new Date(item.activeFrom).toLocaleDateString() : 'Auto-Calculated'}</span></p>
                       </div>
                     )}
 
@@ -800,16 +786,16 @@ export default function AdminDashboardPage() {
                       {item.status === 'DRAFT' ? (
                         <button
                           onClick={() => handleSubmitPosterForApproval(item.id)}
-                          className="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs rounded-xl transition"
+                          className="w-full py-2.5 bg-[#f54e00] hover:bg-[#d04200] text-white font-medium text-xs rounded-md transition"
                         >
                           Submit for President Approval
                         </button>
                       ) : (
                         <button
                           onClick={() => setSelectedInboxItem(item)}
-                          className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
+                          className="w-full py-2.5 bg-[#ffffff] hover:bg-[#fafaf7] text-[#26251e] border border-[#cfcdc4] font-medium text-xs rounded-md transition flex items-center justify-center gap-2"
                         >
-                          <ShieldCheck className="w-4 h-4" />
+                          <ShieldCheck className="w-4 h-4 text-[#f54e00]" />
                           Review & Execute Approval Action
                         </button>
                       )}
@@ -821,34 +807,36 @@ export default function AdminDashboardPage() {
 
             {/* Approval Action Modal */}
             {selectedInboxItem && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-lg w-full space-y-6 shadow-2xl">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <h3 className="font-bold text-white text-base flex items-center gap-2">
-                      <ShieldCheck className="w-5 h-5 text-cyan-400" />
+              <div className="fixed inset-0 bg-[#26251e]/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 max-w-lg w-full space-y-6 shadow-lg">
+                  <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-3">
+                    <h3 className="font-semibold text-[#26251e] text-base flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-[#f54e00]" />
                       Review Poster Submission
                     </h3>
-                    <button onClick={() => setSelectedInboxItem(null)} className="text-slate-400 hover:text-white">
+                    <button onClick={() => setSelectedInboxItem(null)} className="text-[#807d72] hover:text-[#26251e]">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="space-y-3 text-xs">
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                      <p className="text-slate-400">Target Item: <strong className="text-white">{selectedInboxItem.title}</strong></p>
-                      <p className="text-slate-400 mt-0.5">Current Stage: <strong className="text-cyan-400 font-mono">{selectedInboxItem.status}</strong></p>
+                    <div className="p-3 bg-[#fafaf7] rounded-md border border-[#e6e5e0]">
+                      <p className="text-[#5a5852]">Target Poster: <strong className="text-[#26251e]">{selectedInboxItem.title}</strong></p>
+                      <p className="text-[#5a5852] mt-1 flex items-center gap-2">
+                        Current Stage: {renderStagePill(selectedInboxItem.status)}
+                      </p>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="font-semibold text-slate-300 block">Select Action:</label>
+                      <label className="font-semibold text-[#26251e] block">Select Action:</label>
                       <div className="grid grid-cols-3 gap-2">
                         <button
                           type="button"
                           onClick={() => setApprovalActionType('APPROVE')}
-                          className={`py-2 rounded-xl font-bold text-xs border ${
+                          className={`py-2 rounded-md font-medium text-xs border ${
                             approvalActionType === 'APPROVE'
-                              ? 'bg-emerald-950 border-emerald-500 text-emerald-300'
-                              : 'bg-slate-950 border-slate-800 text-slate-400'
+                              ? 'bg-[#fafaf7] border-[#1f8a65] text-[#1f8a65]'
+                              : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
                           }`}
                         >
                           Approve
@@ -856,10 +844,10 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           onClick={() => setApprovalActionType('REQUEST_CHANGES')}
-                          className={`py-2 rounded-xl font-bold text-xs border ${
+                          className={`py-2 rounded-md font-medium text-xs border ${
                             approvalActionType === 'REQUEST_CHANGES'
-                              ? 'bg-amber-950 border-amber-500 text-amber-300'
-                              : 'bg-slate-950 border-slate-800 text-slate-400'
+                              ? 'bg-[#fafaf7] border-[#f54e00] text-[#f54e00]'
+                              : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
                           }`}
                         >
                           Request Changes
@@ -867,10 +855,10 @@ export default function AdminDashboardPage() {
                         <button
                           type="button"
                           onClick={() => setApprovalActionType('REJECT')}
-                          className={`py-2 rounded-xl font-bold text-xs border ${
+                          className={`py-2 rounded-md font-medium text-xs border ${
                             approvalActionType === 'REJECT'
-                              ? 'bg-red-950 border-red-500 text-red-300'
-                              : 'bg-slate-950 border-slate-800 text-slate-400'
+                              ? 'bg-[#fafaf7] border-[#cf2d56] text-[#cf2d56]'
+                              : 'bg-[#ffffff] border-[#e6e5e0] text-[#5a5852]'
                           }`}
                         >
                           Reject
@@ -879,13 +867,13 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="font-semibold text-slate-300 block">Reviewer Comment:</label>
+                      <label className="font-semibold text-[#26251e] block">Reviewer Comment:</label>
                       <textarea
                         rows={3}
                         value={approvalComment}
                         onChange={(e) => setApprovalComment(e.target.value)}
                         placeholder="Add required comment or feedback for Design Lead..."
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                        className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-3 py-2 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                       ></textarea>
                     </div>
                   </div>
@@ -893,16 +881,16 @@ export default function AdminDashboardPage() {
                   <div className="flex items-center justify-end gap-3 pt-2">
                     <button
                       onClick={() => setSelectedInboxItem(null)}
-                      className="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-xl font-semibold hover:bg-slate-700"
+                      className="px-4 py-2 bg-[#fafaf7] text-[#5a5852] text-xs rounded-md font-medium hover:bg-[#e6e5e0]"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleApprovalActionSubmit}
                       disabled={isSubmittingApproval}
-                      className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg transition"
+                      className="px-5 py-2 bg-[#f54e00] hover:bg-[#d04200] text-white text-xs font-medium rounded-md shadow-sm transition"
                     >
-                      {isSubmittingApproval ? 'Processing...' : 'Execute Transaction'}
+                      {isSubmittingApproval ? 'Processing...' : 'Execute Action'}
                     </button>
                   </div>
                 </div>
@@ -914,66 +902,66 @@ export default function AdminDashboardPage() {
         {/* TAB 4: SCREEN ENROLLMENT */}
         {activeTab === 'enrollment' && (
           <div className="max-w-2xl mx-auto space-y-8">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
-              <div className="space-y-2 border-b border-slate-800 pb-4">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Tv className="w-6 h-6 text-cyan-400" />
-                  Step 12: Physical Display Screen Enrollment
+            <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-8 shadow-sm space-y-6">
+              <div className="space-y-1 border-b border-[#e6e5e0] pb-4">
+                <h2 className="text-xl font-normal text-[#26251e] flex items-center gap-2">
+                  <Tv className="w-5 h-5 text-[#f54e00]" />
+                  Physical Display Screen Enrollment
                 </h2>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-[#5a5852]">
                   Enrolls new kiosk screen node and generates hashed device credentials secret.
                 </p>
               </div>
 
               <form onSubmit={handleEnrollScreen} className="space-y-4 text-xs">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Screen Name *</label>
+                  <label className="font-semibold text-[#26251e]">Screen Name *</label>
                   <input
                     type="text"
                     required
                     value={enrollName}
                     onChange={(e) => setEnrollName(e.target.value)}
                     placeholder="e.g. Science Block Ground Floor Kiosk"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-300">Location Description *</label>
+                  <label className="font-semibold text-[#26251e]">Location Description *</label>
                   <input
                     type="text"
                     required
                     value={enrollLocation}
                     onChange={(e) => setEnrollLocation(e.target.value)}
                     placeholder="e.g. Near Physics Lab Room 102"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-300">Building</label>
+                    <label className="font-semibold text-[#26251e]">Building</label>
                     <input
                       type="text"
                       value={enrollBuilding}
                       onChange={(e) => setEnrollBuilding(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-300">Floor</label>
+                    <label className="font-semibold text-[#26251e]">Floor</label>
                     <input
                       type="text"
                       value={enrollFloor}
                       onChange={(e) => setEnrollFloor(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full bg-[#fafaf7] border border-[#e6e5e0] rounded-md px-4 py-2.5 text-[#26251e] focus:outline-none focus:border-[#f54e00]"
                     />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-[#f54e00] hover:bg-[#d04200] text-white font-medium rounded-md shadow-sm transition flex items-center justify-center gap-2"
                 >
                   <PlusCircle className="w-4 h-4" />
                   Enroll Physical Screen Node
@@ -982,17 +970,17 @@ export default function AdminDashboardPage() {
             </div>
 
             {enrolledSecret && (
-              <div className="bg-emerald-950/60 border border-emerald-800 rounded-2xl p-6 space-y-3 text-xs">
-                <h4 className="font-bold text-emerald-300 text-sm flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <div className="bg-[#ffffff] border border-[#1f8a65] rounded-xl p-6 space-y-3 text-xs shadow-sm">
+                <h4 className="font-semibold text-[#1f8a65] text-sm flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5" />
                   Screen Credentials Generated Successfully
                 </h4>
-                <p className="text-slate-300">
+                <p className="text-[#5a5852]">
                   Save these credentials for screen kiosk authentication. Only the SHA-256 hash is stored in PostgreSQL.
                 </p>
-                <div className="p-3 bg-slate-950 rounded-xl font-mono text-[11px] space-y-1 text-slate-200 border border-emerald-900">
-                  <p>Device ID: <span className="text-cyan-400">{enrolledSecret.deviceId}</span></p>
-                  <p>Device Secret: <span className="text-emerald-400">{enrolledSecret.secret}</span></p>
+                <div className="p-3 bg-[#fafaf7] rounded-md font-mono text-[11px] space-y-1 text-[#26251e] border border-[#e6e5e0]">
+                  <p>Device ID: <span className="text-[#f54e00]">{enrolledSecret.deviceId}</span></p>
+                  <p>Device Secret: <span className="text-[#1f8a65]">{enrolledSecret.secret}</span></p>
                 </div>
               </div>
             )}
@@ -1000,8 +988,8 @@ export default function AdminDashboardPage() {
         )}
       </main>
 
-      <footer className="border-t border-slate-900 py-6 text-center text-xs text-slate-600 bg-slate-950">
-        CampusCast IoT Network Operations • Multi-Stage Approval System
+      <footer className="border-t border-[#e6e5e0] py-6 text-center text-xs text-[#807d72] bg-[#f7f7f4]">
+        CampusCast Multi-Stage Approval Engine • Developer Dialect Aesthetic
       </footer>
     </div>
   );

@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, Lock, Building2, UserCheck, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Lock, Building2, UserCheck, ArrowRight, Monitor } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -16,7 +16,6 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is already authenticated
     fetch('/api/auth/me')
       .then((res) => res.json())
       .then((data) => {
@@ -30,21 +29,27 @@ function LoginForm() {
   const demoAccounts = [
     {
       userId: 'usr_101',
-      name: 'Gaurav',
+      name: 'Gaurav (Design Lead)',
       email: 'gaurav@college.edu',
       role: 'DESIGN_LEAD',
       clubId: 'technology-club',
       clubName: 'Technology Club',
-      badgeColor: 'bg-cyan-100 text-cyan-800 border-cyan-300',
     },
     {
       userId: 'usr_102',
-      name: 'Alex Rivera',
+      name: 'Alex Rivera (President)',
       email: 'alex@college.edu',
       role: 'PRESIDENT',
-      clubId: 'robotics-club',
-      clubName: 'Robotics Club',
-      badgeColor: 'bg-purple-100 text-purple-800 border-purple-300',
+      clubId: 'technology-club',
+      clubName: 'Technology Club',
+    },
+    {
+      userId: 'usr_103',
+      name: 'Dr. Smith (HOD)',
+      email: 'hod@college.edu',
+      role: 'HOD',
+      clubId: 'technology-club',
+      clubName: 'Technology Club',
     },
     {
       userId: 'usr_100',
@@ -53,7 +58,6 @@ function LoginForm() {
       role: 'SYSTEM_ADMIN',
       clubId: 'campus-wide',
       clubName: 'Campus Operations',
-      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
     },
   ];
 
@@ -74,68 +78,68 @@ function LoginForm() {
       } else {
         setError(data.error || 'Authentication failed');
       }
-    } catch (err) {
-      setError('Network connection error during SSO login');
+    } catch {
+      setError('Network error during SSO login');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between font-sans selection:bg-cyan-500 selection:text-black">
-      {/* Top Banner */}
-      <div className="border-b border-slate-800 bg-slate-900/50 py-3 px-6 text-center text-xs text-slate-400">
-        🔒 Campus Cast Secure Identity Provider • Caddy Reverse Proxy Protected
+    <div className="min-h-screen bg-[#f7f7f4] text-[#26251e] flex flex-col justify-between font-sans selection:bg-[#f54e00] selection:text-white">
+      {/* Top Bar */}
+      <div className="border-b border-[#e6e5e0] bg-[#fafaf7] py-3 px-6 text-center text-xs text-[#5a5852] font-mono">
+        🔒 CampusCast Central Authentication Service (SSO)
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-8 shadow-sm space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
-              <Building2 className="w-7 h-7" />
+            <div className="w-12 h-12 bg-[#26251e] text-[#f54e00] rounded-md flex items-center justify-center mx-auto mb-2">
+              <Monitor className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Campus SSO Login</h1>
-            <p className="text-xs text-slate-400">
-              Single Sign-On Authentication for <code className="text-cyan-400">campuscast.college.edu</code>
+            <h1 className="text-2xl font-normal tracking-tight text-[#26251e]">Campus SSO Authentication</h1>
+            <p className="text-xs text-[#5a5852]">
+              Select identity to authenticate for <code className="text-[#26251e] font-bold font-mono">campuscast.college.edu</code>
             </p>
           </div>
 
           {error && (
-            <div className="p-3 bg-red-950/60 border border-red-800 text-red-300 text-xs rounded-xl text-center">
+            <div className="p-3 bg-[#fafaf7] border border-[#cf2d56] text-[#cf2d56] text-xs rounded-md text-center font-medium">
               {error}
             </div>
           )}
 
           <div className="space-y-3">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+            <label className="text-xs font-semibold text-[#807d72] uppercase tracking-wider block">
               Select Campus Identity:
             </label>
             {demoAccounts.map((acc) => (
               <div
                 key={acc.userId}
                 onClick={() => setSelectedUserId(acc.userId)}
-                className={`p-4 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
+                className={`p-4 rounded-md border cursor-pointer transition flex items-center justify-between ${
                   selectedUserId === acc.userId
-                    ? 'bg-slate-800 border-cyan-500 ring-2 ring-cyan-500/20'
-                    : 'bg-slate-950/50 border-slate-800 hover:bg-slate-800/50'
+                    ? 'bg-[#fafaf7] border-[#f54e00] ring-1 ring-[#f54e00]'
+                    : 'bg-[#ffffff] border-[#e6e5e0] hover:bg-[#fafaf7]'
                 }`}
               >
-                <div className="space-y-1">
+                <div className="space-y-1 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-sm text-white">{acc.name}</span>
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${acc.badgeColor}`}>
+                    <span className="font-semibold text-sm text-[#26251e]">{acc.name}</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#e6e5e0] text-[#26251e]">
                       {acc.role}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400">{acc.email}</p>
-                  <p className="text-[11px] text-cyan-400 font-medium">
-                    Scoped Permission: {acc.clubName} ({acc.clubId})
+                  <p className="text-[#5a5852]">{acc.email}</p>
+                  <p className="text-[11px] text-[#807d72] font-mono">
+                    Scope: {acc.clubName} ({acc.clubId})
                   </p>
                 </div>
-                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                  selectedUserId === acc.userId ? 'border-cyan-400 bg-cyan-500 text-black' : 'border-slate-700'
+                <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                  selectedUserId === acc.userId ? 'border-[#f54e00] bg-[#f54e00] text-white' : 'border-[#cfcdc4]'
                 }`}>
-                  {selectedUserId === acc.userId && <UserCheck className="w-3 h-3" />}
+                  {selectedUserId === acc.userId && <UserCheck className="w-2.5 h-2.5" />}
                 </div>
               </div>
             ))}
@@ -144,22 +148,22 @@ function LoginForm() {
           <button
             onClick={() => handleLogin(selectedUserId)}
             disabled={isLoading}
-            className="w-full py-3.5 px-6 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-2.5 px-6 bg-[#f54e00] hover:bg-[#d04200] text-white font-medium text-sm rounded-md transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <span>{isLoading ? 'Verifying Identity...' : 'Authenticate & Continue'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
 
           <div className="text-center pt-2">
-            <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              Scoped Authorization: President of Technology Club ≠ President of every club
+            <p className="text-[11px] text-[#807d72] flex items-center justify-center gap-1 font-mono">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#1f8a65]" />
+              Scoped Authorization: President of Tech Club ≠ President of all clubs
             </p>
           </div>
         </div>
       </div>
 
-      <footer className="py-4 text-center text-[11px] text-slate-600 border-t border-slate-900">
+      <footer className="py-4 text-center text-[11px] text-[#807d72] border-t border-[#e6e5e0] font-mono">
         CampusCast IoT Signage Network • Central Authentication Service
       </footer>
     </div>
@@ -169,8 +173,8 @@ function LoginForm() {
 export default function CampusLoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center text-xs">
-        Loading Campus SSO Login System...
+      <div className="min-h-screen bg-[#f7f7f4] text-[#5a5852] flex items-center justify-center text-xs font-mono">
+        Loading Campus SSO Authentication Service...
       </div>
     }>
       <LoginForm />
