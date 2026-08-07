@@ -7,13 +7,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { userId, email } = body;
 
+    const conditions = [];
+    if (userId) conditions.push({ id: userId });
+    if (email) conditions.push({ email: email });
+
+    if (conditions.length === 0) {
+      return NextResponse.json(
+        { success: false, error: 'SSO Identity verification failed: User identifier required' },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          userId ? { id: userId } : {},
-          email ? { email: email } : {},
-        ],
-      },
+      where: { OR: conditions },
     });
 
     if (!user) {

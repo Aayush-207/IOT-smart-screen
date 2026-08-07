@@ -109,6 +109,7 @@ export async function POST(
         data: {
           status: newStatus,
           isPublic,
+          imagePath: publicImagePath,
         },
       });
 

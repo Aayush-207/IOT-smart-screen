@@ -1,0 +1,2680 @@
+{
+  "nodes": [
+    {
+      "id": "next_env_d_ts",
+      "label": "next-env.d.ts",
+      "file_type": "code",
+      "source_file": "next-env.d.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "next_config_mjs",
+      "label": "next.config.mjs",
+      "file_type": "code",
+      "source_file": "next.config.mjs",
+      "source_location": "L1"
+    },
+    {
+      "id": "ai_iot_based_smart_screen_next_config_nextconfig",
+      "label": "nextConfig",
+      "file_type": "code",
+      "source_file": "next.config.mjs",
+      "source_location": "L2"
+    },
+    {
+      "id": "prisma_seed_ts",
+      "label": "seed.ts",
+      "file_type": "code",
+      "source_file": "prisma\\seed.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "prisma_seed_prisma",
+      "label": "prisma",
+      "file_type": "code",
+      "source_file": "prisma\\seed.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "prisma_seed_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "prisma\\seed.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "public_sw_js",
+      "label": "sw.js",
+      "file_type": "code",
+      "source_file": "public\\sw.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "public_sw_shell",
+      "label": "SHELL",
+      "file_type": "code",
+      "source_file": "public\\sw.js",
+      "source_location": "L2"
+    },
+    {
+      "id": "public_sw_copy",
+      "label": "copy",
+      "file_type": "code",
+      "source_file": "public\\sw.js",
+      "source_location": "L26"
+    },
+    {
+      "id": "src_proxy_ts",
+      "label": "proxy.ts",
+      "file_type": "code",
+      "source_file": "src\\proxy.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_proxy_proxy",
+      "label": "proxy()",
+      "file_type": "code",
+      "source_file": "src\\proxy.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_proxy_config",
+      "label": "config",
+      "file_type": "code",
+      "source_file": "src\\proxy.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "src_app_layout_tsx",
+      "label": "layout.tsx",
+      "file_type": "code",
+      "source_file": "src\\app\\layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_layout_metadata",
+      "label": "metadata",
+      "file_type": "code",
+      "source_file": "src\\app\\layout.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "app_layout_rootlayout",
+      "label": "RootLayout()",
+      "file_type": "code",
+      "source_file": "src\\app\\layout.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_app_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "src\\app\\page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_page_roothomepage",
+      "label": "RootHomePage()",
+      "file_type": "code",
+      "source_file": "src\\app\\page.tsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "src_app_admin_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "admin_page_poster",
+      "label": "Poster",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L27"
+    },
+    {
+      "id": "admin_page_screenposter",
+      "label": "ScreenPoster",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "admin_page_screendata",
+      "label": "ScreenData",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L50"
+    },
+    {
+      "id": "admin_page_userprofile",
+      "label": "UserProfile",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L65"
+    },
+    {
+      "id": "admin_page_inboxitem",
+      "label": "InboxItem",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L73"
+    },
+    {
+      "id": "admin_page_playbacklogitem",
+      "label": "PlaybackLogItem",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L102"
+    },
+    {
+      "id": "admin_page_devicecommanditem",
+      "label": "DeviceCommandItem",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L114"
+    },
+    {
+      "id": "admin_page_auditlogitem",
+      "label": "AuditLogItem",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L122"
+    },
+    {
+      "id": "admin_page_admindashboardpage",
+      "label": "AdminDashboardPage()",
+      "file_type": "code",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L133"
+    },
+    {
+      "id": "src_app_api_assignments_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "assignments_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "assignments_route_delete",
+      "label": "DELETE()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L80"
+    },
+    {
+      "id": "src_app_api_assignments_reorder_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\assignments\\reorder\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "reorder_route_put",
+      "label": "PUT()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\assignments\\reorder\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_api_auth_login_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\auth\\login\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "login_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\auth\\login\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_auth_logout_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\auth\\logout\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "logout_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\auth\\logout\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_api_auth_me_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\auth\\me\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "me_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\auth\\me\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_posters_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\posters\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "posters_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\posters\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_api_posters_upload_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "upload_route_allowed_mime_types",
+      "label": "ALLOWED_MIME_TYPES",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "upload_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "src_app_api_posters_id_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "id_route_delete",
+      "label": "DELETE()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_app_api_screens_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "screens_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_screens_slug_heartbeat_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\screens\\[slug]\\heartbeat\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "heartbeat_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\screens\\[slug]\\heartbeat\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_api_screens_slug_playlist_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\screens\\[slug]\\playlist\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "playlist_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\screens\\[slug]\\playlist\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_api_v1_admin_cleanup_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "cleanup_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_v1_approvals_inbox_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\approvals\\inbox\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "inbox_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\approvals\\inbox\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "action_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_app_api_v1_audit_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\audit\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "audit_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\audit\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_api_v1_commands_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "commands_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "commands_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L53"
+    },
+    {
+      "id": "src_app_api_v1_events_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "events_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "events_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L209"
+    },
+    {
+      "id": "src_app_api_v1_events_id_cancel_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "cancel_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_v1_events_id_version_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "version_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_v1_posters_posterid_submit_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\posters\\[posterId]\\submit\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "submit_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\posters\\[posterId]\\submit\\route.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_app_api_v1_screens_enroll_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "enroll_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_app_api_v1_screens_slug_sync_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\screens\\[slug]\\sync\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "sync_route_post",
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\screens\\[slug]\\sync\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_api_v1_telemetry_playback_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\telemetry\\playback\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "playback_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\api\\v1\\telemetry\\playback\\route.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_app_display_slug_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "slug_page_manifestitem",
+      "label": "ManifestItem",
+      "file_type": "code",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "slug_page_commanditem",
+      "label": "CommandItem",
+      "file_type": "code",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "slug_page_playbackevent",
+      "label": "PlaybackEvent",
+      "file_type": "code",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L23"
+    },
+    {
+      "id": "slug_page_displayscreenpage",
+      "label": "DisplayScreenPage()",
+      "file_type": "code",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_app_login_page_tsx",
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "login_page_loginform",
+      "label": "LoginForm()",
+      "file_type": "code",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "login_page_campusloginpage",
+      "label": "CampusLoginPage()",
+      "file_type": "code",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L173"
+    },
+    {
+      "id": "src_app_media_filename_route_ts",
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "filename_route_get",
+      "label": "GET()",
+      "file_type": "code",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_lib_audit_ts",
+      "label": "audit.ts",
+      "file_type": "code",
+      "source_file": "src\\lib\\audit.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_audit_createauditlog",
+      "label": "createAuditLog()",
+      "file_type": "code",
+      "source_file": "src\\lib\\audit.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "src_lib_prisma_ts",
+      "label": "prisma.ts",
+      "file_type": "code",
+      "source_file": "src\\lib\\prisma.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_prisma_globalforprisma",
+      "label": "globalForPrisma",
+      "file_type": "code",
+      "source_file": "src\\lib\\prisma.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "src_lib_screen_status_ts",
+      "label": "screen-status.ts",
+      "file_type": "code",
+      "source_file": "src\\lib\\screen-status.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "lib_screen_status_isscreenonline",
+      "label": "isScreenOnline()",
+      "file_type": "code",
+      "source_file": "src\\lib\\screen-status.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "src_tests_status_test_ts",
+      "label": "status.test.ts",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "tests_status_test_now",
+      "label": "now",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "tests_status_test_recentheartbeat",
+      "label": "recentHeartbeat",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "tests_status_test_staleheartbeat",
+      "label": "staleHeartbeat",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "tests_status_test_screenids",
+      "label": "screenIds",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L27"
+    },
+    {
+      "id": "tests_status_test_uniqueids",
+      "label": "uniqueIds",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L28"
+    },
+    {
+      "id": "tests_status_test_items",
+      "label": "items",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "tests_status_test_sorted",
+      "label": "sorted",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L38"
+    },
+    {
+      "id": "tests_status_test_eventdate",
+      "label": "eventDate",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L46"
+    },
+    {
+      "id": "tests_status_test_activefrom",
+      "label": "activeFrom",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L49"
+    },
+    {
+      "id": "tests_status_test_activeuntil",
+      "label": "activeUntil",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L54"
+    },
+    {
+      "id": "tests_status_test_allowedmimes",
+      "label": "allowedMimes",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L66"
+    },
+    {
+      "id": "tests_status_test_expiresat",
+      "label": "expiresAt",
+      "file_type": "code",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L78"
+    }
+  ],
+  "edges": [
+    {
+      "source": "next_env_d_ts",
+      "target": "f_ai_iot_based_smart_screen_next_dev_types_routes_d_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "next-env.d.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "next_env_d_ts",
+      "target": "f_ai_iot_based_smart_screen_next_dev_types_root_params_d_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "next-env.d.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "next_config_mjs",
+      "target": "ai_iot_based_smart_screen_next_config_nextconfig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "next.config.mjs",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "prisma_seed_ts",
+      "target": "client",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma\\seed.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "prisma_seed_ts",
+      "target": "prisma_seed_prisma",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma\\seed.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "prisma_seed_ts",
+      "target": "prisma_seed_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "prisma\\seed.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "public_sw_js",
+      "target": "public_sw_shell",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public\\sw.js",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "public_sw_js",
+      "target": "public_sw_copy",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public\\sw.js",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "src_proxy_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\proxy.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_proxy_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\proxy.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_proxy_ts",
+      "target": "src_proxy_proxy",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\proxy.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_proxy_ts",
+      "target": "src_proxy_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\proxy.ts",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_layout_tsx",
+      "target": "next",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\layout.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_layout_tsx",
+      "target": "f_ai_iot_based_smart_screen_src_app_globals_css",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\layout.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_layout_tsx",
+      "target": "app_layout_metadata",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_layout_tsx",
+      "target": "app_layout_rootlayout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\layout.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_page_tsx",
+      "target": "link",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\page.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_page_tsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\page.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_page_tsx",
+      "target": "app_page_roothomepage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\page.tsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_poster",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_screenposter",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_screendata",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_userprofile",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L65",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_inboxitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L73",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_playbacklogitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_devicecommanditem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_auditlogitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L122",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_admin_page_tsx",
+      "target": "admin_page_admindashboardpage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\admin\\page.tsx",
+      "source_location": "L133",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_route_ts",
+      "target": "assignments_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_route_ts",
+      "target": "assignments_route_delete",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\route.ts",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_reorder_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\reorder\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_reorder_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\reorder\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_reorder_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\reorder\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_assignments_reorder_route_ts",
+      "target": "reorder_route_put",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\assignments\\reorder\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_login_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\login\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_login_route_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\login\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_login_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\login\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_login_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\login\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_login_route_ts",
+      "target": "login_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\login\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_logout_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\logout\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_logout_route_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\logout\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_logout_route_ts",
+      "target": "logout_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\logout\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_me_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\me\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_me_route_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\me\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_me_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\me\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_me_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\me\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_auth_me_route_ts",
+      "target": "me_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\auth\\me\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_route_ts",
+      "target": "posters_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "node_fs",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "node_path",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "node_crypto",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "upload_route_allowed_mime_types",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_upload_route_ts",
+      "target": "upload_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\upload\\route.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_id_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_id_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_id_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_id_route_ts",
+      "target": "node_fs",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_id_route_ts",
+      "target": "node_path",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_posters_id_route_ts",
+      "target": "id_route_delete",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\posters\\[id]\\route.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_route_ts",
+      "target": "src_lib_screen_status_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_route_ts",
+      "target": "lib_screen_status_isscreenonline",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_route_ts",
+      "target": "screens_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_heartbeat_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\heartbeat\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_heartbeat_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\heartbeat\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_heartbeat_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\heartbeat\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_heartbeat_route_ts",
+      "target": "heartbeat_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\heartbeat\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_playlist_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\playlist\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_playlist_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\playlist\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_playlist_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\playlist\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_screens_slug_playlist_route_ts",
+      "target": "playlist_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\screens\\[slug]\\playlist\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_admin_cleanup_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_admin_cleanup_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_admin_cleanup_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_admin_cleanup_route_ts",
+      "target": "src_lib_audit_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_admin_cleanup_route_ts",
+      "target": "lib_audit_createauditlog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_admin_cleanup_route_ts",
+      "target": "cleanup_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\admin\\cleanup\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_inbox_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\inbox\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_inbox_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\inbox\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_inbox_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\inbox\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_inbox_route_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\inbox\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_inbox_route_ts",
+      "target": "inbox_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\inbox\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "target": "src_lib_audit_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "target": "lib_audit_createauditlog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_approvals_posterid_action_route_ts",
+      "target": "action_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\approvals\\[posterId]\\action\\route.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_audit_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\audit\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_audit_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\audit\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_audit_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\audit\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_audit_route_ts",
+      "target": "audit_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\audit\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_commands_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_commands_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_commands_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_commands_route_ts",
+      "target": "commands_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_commands_route_ts",
+      "target": "commands_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\commands\\route.ts",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "src_lib_audit_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "lib_audit_createauditlog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "crypto",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "path",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "fs",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "events_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_route_ts",
+      "target": "events_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L209",
+      "weight": 1.0
+    },
+    {
+      "source": "events_route_post",
+      "target": "events_route_get",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\route.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_cancel_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_cancel_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_cancel_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_cancel_route_ts",
+      "target": "src_lib_audit_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_cancel_route_ts",
+      "target": "lib_audit_createauditlog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_cancel_route_ts",
+      "target": "cancel_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\cancel\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_version_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_version_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_version_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_version_route_ts",
+      "target": "src_lib_audit_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_version_route_ts",
+      "target": "lib_audit_createauditlog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_events_id_version_route_ts",
+      "target": "version_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "version_route_post",
+      "target": "crypto",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_posters_posterid_submit_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\posters\\[posterId]\\submit\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_posters_posterid_submit_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\posters\\[posterId]\\submit\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_posters_posterid_submit_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\posters\\[posterId]\\submit\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_posters_posterid_submit_route_ts",
+      "target": "headers",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\posters\\[posterId]\\submit\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_posters_posterid_submit_route_ts",
+      "target": "submit_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\posters\\[posterId]\\submit\\route.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_enroll_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_enroll_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_enroll_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_enroll_route_ts",
+      "target": "src_lib_audit_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_enroll_route_ts",
+      "target": "lib_audit_createauditlog",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_enroll_route_ts",
+      "target": "crypto",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_enroll_route_ts",
+      "target": "enroll_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_slug_sync_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\[slug]\\sync\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_slug_sync_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\[slug]\\sync\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_slug_sync_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\[slug]\\sync\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_screens_slug_sync_route_ts",
+      "target": "sync_route_post",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\screens\\[slug]\\sync\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_telemetry_playback_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\telemetry\\playback\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_telemetry_playback_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\telemetry\\playback\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_telemetry_playback_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\telemetry\\playback\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_api_v1_telemetry_playback_route_ts",
+      "target": "playback_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\api\\v1\\telemetry\\playback\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_display_slug_page_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_display_slug_page_tsx",
+      "target": "navigation",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_display_slug_page_tsx",
+      "target": "slug_page_manifestitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_display_slug_page_tsx",
+      "target": "slug_page_commanditem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_display_slug_page_tsx",
+      "target": "slug_page_playbackevent",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_display_slug_page_tsx",
+      "target": "slug_page_displayscreenpage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\display\\[slug]\\page.tsx",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_login_page_tsx",
+      "target": "react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_login_page_tsx",
+      "target": "navigation",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_login_page_tsx",
+      "target": "lucide_react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_login_page_tsx",
+      "target": "login_page_loginform",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_login_page_tsx",
+      "target": "login_page_campusloginpage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\login\\page.tsx",
+      "source_location": "L173",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_media_filename_route_ts",
+      "target": "server",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_media_filename_route_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_media_filename_route_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_media_filename_route_ts",
+      "target": "node_fs",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_media_filename_route_ts",
+      "target": "node_path",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_media_filename_route_ts",
+      "target": "filename_route_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\app\\media\\[filename]\\route.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_audit_ts",
+      "target": "src_lib_prisma_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\lib\\audit.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_audit_ts",
+      "target": "lib_prisma_prisma",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\lib\\audit.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_audit_ts",
+      "target": "lib_audit_createauditlog",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\lib\\audit.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_prisma_ts",
+      "target": "client",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\lib\\prisma.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_prisma_ts",
+      "target": "lib_prisma_globalforprisma",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\lib\\prisma.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_lib_screen_status_ts",
+      "target": "lib_screen_status_isscreenonline",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\lib\\screen-status.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "node_assert",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "node_test",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "src_lib_screen_status_ts",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "lib_screen_status_isscreenonline",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "lib_screen_status_online_threshold_ms",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_now",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_recentheartbeat",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_now",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_staleheartbeat",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_now",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_screenids",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_uniqueids",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_items",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_sorted",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_eventdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_activefrom",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_activeuntil",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_allowedmimes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_now",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "src_tests_status_test_ts",
+      "target": "tests_status_test_expiresat",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src\\tests\\status.test.ts",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "version_route_post",
+      "target": "lib_audit_createauditlog",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src\\app\\api\\v1\\events\\[id]\\version\\route.ts",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "enroll_route_post",
+      "target": "lib_audit_createauditlog",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src\\app\\api\\v1\\screens\\enroll\\route.ts",
+      "source_location": "L39",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
