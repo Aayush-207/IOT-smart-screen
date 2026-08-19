@@ -1,147 +1,155 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
 
-:root {
-  /* Brand & Accent */
-  --primary: #f54e00;
-  --primary-active: #d04200;
+@layer base {
+  :root {
+    --canvas: #fcfcfd;
+    --canvas-elevated: #ffffff;
+    --canvas-inset: #f3f4f6;
+    --ink: #0f172a;
+    --body: #475569;
+    --mute: #64748b;
+    --faint: #94a3b8;
+    --hairline: #e2e8f0;
+    --hairline-soft: #f1f5f9;
+    --link: #0070f3;
+    --link-deep: #0284c7;
+    --link-soft: #e0f2fe;
 
-  /* Surface */
-  --canvas: #f7f7f4;
-  --canvas-soft: #fafaf7;
-  --surface-card: #ffffff;
-  --surface-strong: #e6e5e0;
+    /* Accent Palette */
+    --accent-blue: #0070f3;
+    --accent-purple: #8b5cf6;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --accent-cyan: #06b6d4;
+  }
 
-  /* Hairlines */
-  --hairline: #e6e5e0;
-  --hairline-soft: #efeee8;
-  --hairline-strong: #cfcdc4;
+  .dark {
+    --canvas: #090d16;
+    --canvas-elevated: #0f172a;
+    --canvas-inset: #1e293b;
+    --ink: #f8fafc;
+    --body: #cbd5e1;
+    --mute: #94a3b8;
+    --faint: #64748b;
+    --hairline: #334155;
+    --hairline-soft: #1e293b;
+    --link: #38bdf8;
+    --link-deep: #0284c7;
+    --link-soft: #0c4a6e;
 
-  /* Text */
-  --ink: #26251e;
-  --body: #5a5852;
-  --body-strong: #26251e;
-  --muted: #807d72;
-  --muted-soft: #a09c92;
-  --on-primary: #ffffff;
-
-  /* AI Timeline Pastels */
-  --timeline-thinking: #dfa88f;
-  --timeline-grep: #9fc9a2;
-  --timeline-read: #9fbbe0;
-  --timeline-edit: #c0a8dd;
-  --timeline-done: #c08532;
+    /* Accent Palette Dark */
+    --accent-blue: #38bdf8;
+    --accent-purple: #a78bfa;
+    --accent-emerald: #34d399;
+    --accent-amber: #fbbf24;
+    --accent-rose: #fb7185;
+    --accent-cyan: #22d3ee;
+  }
 }
 
 body {
-  color: var(--ink);
   background-color: var(--canvas);
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-}
-
-code, kbd, samp, pre, .font-mono {
-  font-family: 'JetBrains Mono', monospace;
-}
-
-/* Custom Editorial Typography Classes */
-.display-mega {
-  font-size: 72px;
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: -2.16px;
-}
-
-.display-lg {
-  font-size: 36px;
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -0.72px;
-}
-
-.display-md {
-  font-size: 26px;
-  font-weight: 400;
-  line-height: 1.25;
-  letter-spacing: -0.325px;
-}
-
-.display-sm {
-  font-size: 22px;
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: -0.11px;
-}
-
-/* Timeline Pill Badges */
-.timeline-pill-thinking {
-  background-color: var(--timeline-thinking);
   color: var(--ink);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Geist Typography Helpers */
+.font-geist-sans {
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+.font-geist-mono {
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.tracking-display-xl {
+  letter-spacing: -0.05em;
+}
+
+.tracking-heading-lg {
+  letter-spacing: -0.035em;
+}
+
+.tracking-heading-md {
+  letter-spacing: -0.02em;
+}
+
+/* Glassmorphism Card Component */
+.geist-card {
+  background-color: var(--canvas-elevated);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.geist-card:hover {
+  border-color: var(--mute);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dark .geist-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .geist-card:hover {
+  border-color: #475569;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Whispered soft elevation shadow */
+.whisper-shadow {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Floating shadow for modals and popovers */
+.floating-shadow {
+  box-shadow: 0 0 0 1px var(--hairline), 0 12px 36px rgba(0, 0, 0, 0.12);
+}
+
+.dark .floating-shadow {
+  box-shadow: 0 0 0 1px var(--hairline), 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* Mesh Hero Background */
+.mesh-gradient-bg {
+  background: radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+              radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+              radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+}
+
+.dark .mesh-gradient-bg {
+  background: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+              radial-gradient(at 100% 0%, rgba(167, 139, 250, 0.15) 0px, transparent 50%),
+              radial-gradient(at 50% 100%, rgba(52, 211, 153, 0.12) 0px, transparent 50%);
+}
+
+/* Pulsing status indicator dot */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.pulse-dot {
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--faint);
   border-radius: 9999px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.88px;
-  text-transform: uppercase;
 }
-
-.timeline-pill-grep {
-  background-color: var(--timeline-grep);
-  color: var(--ink);
-  border-radius: 9999px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.88px;
-  text-transform: uppercase;
-}
-
-.timeline-pill-read {
-  background-color: var(--timeline-read);
-  color: var(--ink);
-  border-radius: 9999px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.88px;
-  text-transform: uppercase;
-}
-
-.timeline-pill-edit {
-  background-color: var(--timeline-edit);
-  color: var(--ink);
-  border-radius: 9999px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.88px;
-  text-transform: uppercase;
-}
-
-.timeline-pill-done {
-  background-color: var(--timeline-done);
-  color: #ffffff;
-  border-radius: 9999px;
-  padding: 3px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.88px;
-  text-transform: uppercase;
-}
-
-/* Subtle fade transition for kiosk slideshow */
-.fade-poster {
-  transition: opacity 0.8s ease-in-out;
-}
-
-.fade-in {
-  opacity: 1;
-}
-
-.fade-out {
-  opacity: 0;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mute);
 }

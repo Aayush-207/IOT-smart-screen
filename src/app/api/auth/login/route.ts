@@ -1,59 +1,42 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
-export async function POST(request: Request) {
+export const dynamic = "force-dynamic";
+
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { userId, email } = body;
+    const { email, userId } = await req.json();
 
-    const conditions = [];
-    if (userId) conditions.push({ id: userId });
-    if (email) conditions.push({ email: email });
-
-    if (conditions.length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'SSO Identity verification failed: User identifier required' },
-        { status: 400 }
-      );
+    let user = null;
+    if (userId) {
+      user = await prisma.user.findUnique({ where: { id: userId } });
+    } else if (email) {
+      user = await prisma.user.findFirst({
+        where: { email: { equals: email.trim().toLowerCase() } },
+      });
     }
-
-    const user = await prisma.user.findFirst({
-      where: { OR: conditions },
-    });
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'SSO Identity verification failed: User not found in database' },
+        { error: "User not found. Please check your credentials or sign up." },
         { status: 404 }
       );
     }
 
     const cookieStore = await cookies();
-    cookieStore.set('campuscast_session', user.id, {
+    cookieStore.set("campuscast_user_id", user.id, {
+      path: "/",
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return NextResponse.json({
-      success: true,
-      message: 'Verified campus identity successfully.',
-      user: {
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        clubId: user.clubId,
-      },
+      message: `Successfully logged in as ${user.name}`,
+      user,
     });
   } catch (error: any) {
-    console.error('SSO Login error:', error);
-    return NextResponse.json(
-      { success: false, error: 'SSO authentication error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

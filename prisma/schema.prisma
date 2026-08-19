@@ -1,157 +1,116 @@
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
-model Screen {
-  id               String             @id @default(uuid())
-  slug             String             @unique // deviceId
-  name             String
-  location         String
-  building         String             @default("Main Academic Block")
-  floor            String             @default("1st Floor")
-  deviceSecretHash String             @default("hash_demo_secret")
-  status           String             @default("ACTIVE")
-  playlistVersion  Int                @default(1)
-  freeStorageMb    Int                @default(2048)
-  lastSyncAt       DateTime?
-  lastSeenAt       DateTime?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  assignments      ScreenAssignment[]
-  playbackLogs     PlaybackLog[]
-  incidents        Incident[]
-  deviceCommands   DeviceCommand[]
-}
-
-model Event {
-  id              String   @id @default(uuid())
-  name            String
-  description     String
-  clubId          String
-  venue           String
-  eventDate       DateTime
-  startTime       String
-  endTime         String
-  contactInfo     String
-  registrationUrl String?
-  targetScreens   String   @default("[]") // JSON stringified array of screen slugs/ids
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  posters         Poster[]
-}
-
-model Poster {
-  id               String             @id @default(uuid())
-  eventId          String?
-  title            String
-  imagePath        String
-  originalFileName String
-  mimeType         String
-  checksum         String             @default("af1d9038c2")
-  status           String             @default("DRAFT") // DRAFT, PENDING_PRESIDENT, PENDING_HOD, PENDING_ADMIN, APPROVED, CHANGES_REQUESTED, REJECTED
-  activeFrom       DateTime?
-  activeUntil      DateTime?
-  isPublic         Boolean            @default(false)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  assignments      ScreenAssignment[]
-  approvals        Approval[]
-  playbackLogs     PlaybackLog[]
-  event            Event?             @relation(fields: [eventId], references: [id], onDelete: Cascade)
-}
-
-model ScreenAssignment {
-  id           String   @id @default(uuid())
-  screenId     String
-  posterId     String
-  displayOrder Int      @default(0)
+model Club {
+  id           String   @id @default(cuid())
+  name         String
+  hodUserId    String?  // nullable — null means this club skips HOD approval
+  departmentId String
+  events       Event[]
   createdAt    DateTime @default(now())
-
-  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
-  poster Poster @relation(fields: [posterId], references: [id], onDelete: Cascade)
-
-  @@unique([screenId, posterId])
-}
-
-model Approval {
-  id           String   @id @default(uuid())
-  posterId     String
-  stage        String   // PRESIDENT, HOD, ADMIN
-  reviewerId   String
-  reviewerName String
-  action       String   // APPROVE, REQUEST_CHANGES, REJECT
-  comment      String?
-  createdAt    DateTime @default(now())
-
-  poster Poster @relation(fields: [posterId], references: [id], onDelete: Cascade)
+  updatedAt    DateTime @updatedAt
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  role      String   @default("DESIGN_LEAD")
-  clubId    String?
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  role         String   // "club_president" | "club_hod" | "admin" | "viewer"
+  clubId       String?
+  departmentId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Event {
+  id           String        @id @default(cuid())
+  clubId       String
+  club         Club          @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  title        String
+  eventDate    DateTime
+  venue        String
+  contentItems ContentItem[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model ContentItem {
+  id            String           @id @default(cuid())
+  eventId       String
+  event         Event            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  mediaUrl      String
+  selfCertified Boolean          @default(false)
+  status        String           @default("awaiting_poster") // awaiting_poster, pending_hod_approval, pending_admin_approval, approved, rejected, ineligible, live, archived
+  submittedById String
+  approvedById  String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  approvalSteps ApprovalStep[]
+  versions      ContentVersion[]
+  schedules     Schedule[]
+}
+
+model ContentVersion {
+  id            String      @id @default(cuid())
+  contentItemId String
+  contentItem   ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  mediaUrl      String
+  createdAt     DateTime    @default(now())
+}
+
+model ApprovalStep {
+  id             String      @id @default(cuid())
+  contentItemId  String
+  contentItem    ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  approverUserId String?
+  approverRole   String
+  decision       String      // "approve" | "reject" | "override" | "system_ineligible"
+  comment        String?
+  createdAt      DateTime    @default(now())
+}
+
+model Device {
+  id              String     @id @default(cuid())
+  locationTag     String
+  zone            String
+  status          String     // "online" | "offline"
+  lastHeartbeat   DateTime?
+  firmwareVersion String?
+  schedules       Schedule[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Schedule {
+  id            String      @id @default(cuid())
+  contentItemId String
+  contentItem   ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  deviceId      String
+  device        Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  startAt       DateTime
+  endAt         DateTime
+  createdAt     DateTime    @default(now())
+}
+
+model DeviceLog {
+  id        String   @id @default(cuid())
+  deviceId  String
+  eventType String   // "heartbeat" | "failover" | "ota_result"
+  payload   String   // JSON stringified payload
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
-model PlaybackLog {
-  id              String   @id @default(uuid())
-  eventId         String   @unique
-  screenId        String
-  posterId        String
-  playlistVersion Int      @default(1)
-  startedAt       DateTime
-  completedAt     DateTime
-  status          String   @default("SUCCESS")
-  failureReason   String?
-  createdAt       DateTime @default(now())
-
-  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
-  poster Poster @relation(fields: [posterId], references: [id], onDelete: Cascade)
-}
-
-model Incident {
-  id          String    @id @default(uuid())
-  screenId    String
-  title       String
-  description String
-  severity    String    @default("WARNING")
-  status      String    @default("OPEN")
-  openedAt    DateTime  @default(now())
-  resolvedAt  DateTime?
-
-  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
-}
-
-model DeviceCommand {
-  id           String    @id @default(uuid())
-  screenId     String
-  command      String
-  params       String?
-  status       String    @default("QUEUED")
-  expiresAt    DateTime
-  deliveredAt  DateTime?
-  completedAt  DateTime?
-  errorMessage String?
-  createdAt    DateTime  @default(now())
-
-  screen Screen @relation(fields: [screenId], references: [id], onDelete: Cascade)
-}
-
-model AuditLog {
-  id            String   @id @default(uuid())
-  actorId       String
-  action        String
-  resourceId    String
-  previousState String?
-  newState      String?
-  requestId     String   @default("req_auto")
-  timestamp     DateTime @default(now())
+model JobRun {
+  id            String    @id @default(cuid())
+  jobName       String
+  status        String    // "success" | "failed" | "running"
+  rowsProcessed Int       @default(0)
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+  error         String?
 }

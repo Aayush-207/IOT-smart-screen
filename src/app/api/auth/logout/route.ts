@@ -1,20 +1,15 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
+export const dynamic = "force-dynamic";
 
 export async function POST() {
   try {
     const cookieStore = await cookies();
-    cookieStore.delete('campuscast_session');
+    cookieStore.delete("campuscast_user_id");
 
-    return NextResponse.json({
-      success: true,
-      message: 'Logged out successfully',
-    });
+    return NextResponse.json({ message: "Logged out successfully" });
   } catch (error: any) {
-    console.error('Logout error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to logout' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,9 +1,0 @@
-{
-  "name": "CampusCast Screen Player",
-  "short_name": "CampusCast",
-  "start_url": "/?kiosk=dev_tech_f1_01",
-  "display": "fullscreen",
-  "background_color": "#07111f",
-  "theme_color": "#07111f",
-  "description": "Offline-capable campus poster screen player"
-}

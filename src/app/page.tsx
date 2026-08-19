@@ -1,301 +1,304 @@
-import Link from 'next/link';
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { Navbar } from "@/components/Navbar";
 import {
+  Shield,
   Monitor,
-  ShieldCheck,
-  Building2,
-  Tv,
+  AlertTriangle,
+  Clock,
+  Play,
+  Calendar,
+  Sparkles,
   ArrowRight,
-  Radio,
+  Plus,
+  CheckCircle,
+  FileCheck,
   Zap,
-  Activity,
-  Layers,
-  ExternalLink,
-  Code2,
-  Terminal,
-  Cpu,
-} from 'lucide-react';
+} from "lucide-react";
+import { EventCreationUploadModal } from "@/components/EventCreationUploadModal";
 
-export default function RootHomePage() {
+export default function DashboardPage() {
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [clubs, setClubs] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const meRes = await fetch("/api/auth/me");
+      const meData = await meRes.json();
+      setCurrentUser(meData.user);
+
+      const [eventsRes, clubsRes] = await Promise.all([
+        fetch("/api/events"),
+        fetch("/api/clubs"),
+      ]);
+      const eventsData = await eventsRes.json();
+      const clubsData = await clubsRes.json();
+
+      if (Array.isArray(eventsData)) setEvents(eventsData);
+      if (Array.isArray(clubsData)) setClubs(clubsData);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const role = currentUser?.role || "viewer";
+
   return (
-    <div className="min-h-screen bg-[#f7f7f4] text-[#26251e] font-sans selection:bg-[#f54e00] selection:text-white flex flex-col justify-between">
-      {/* Top Nav (64px, #f7f7f4 canvas background, 1px #e6e5e0 hairline) */}
-      <header className="border-b border-[#e6e5e0] bg-[#f7f7f4]/90 backdrop-blur-md sticky top-0 z-50 h-16 flex items-center">
-        <div className="max-w-[1200px] mx-auto px-6 w-full flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-[#26251e] flex items-center justify-center text-[#f7f7f4] font-bold">
-              <Monitor className="w-4 h-4 text-[#f54e00]" />
+    <div className="min-h-screen bg-[var(--canvas)] text-[var(--ink)] flex flex-col font-geist-sans selection:bg-[#0070f3] selection:text-white">
+      <Navbar currentUser={currentUser} onUserSwitched={fetchDashboardData} />
+
+      {/* Hero Band with Multi-stop Mesh Gradient */}
+      <section className="relative overflow-hidden border-b border-[var(--hairline)] mesh-gradient-bg py-10 md:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[var(--hairline)] bg-[var(--canvas-elevated)]/80 whisper-shadow">
+                <Sparkles className="w-3.5 h-3.5 text-[#0070f3]" />
+                <span className="font-geist-mono text-[11px] font-medium uppercase tracking-wider text-[var(--mute)]">
+                  ACTIVE ROLE // {role.toUpperCase().replace("_", " ")}
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-display-xl text-[var(--ink)] leading-tight">
+                {role === "club_president" && `Welcome, ${currentUser?.name || "President"} — Poster Creation & Submission Hub`}
+                {role === "club_hod" && `Welcome, ${currentUser?.name || "HOD"} — Stage 1 Department Review Portal`}
+                {role === "admin" && `Welcome, ${currentUser?.name || "Admin"} — Executive Command Center`}
+                {role === "viewer" && `Welcome to CampusCast — Public IoT Screen Broadcasts`}
+              </h1>
+
+              <p className="text-sm text-[var(--body)] font-normal leading-relaxed">
+                {role === "club_president" && "Submit event posters, brand self-certify compliance, track HOD & Admin review stages, and manage poster revisions."}
+                {role === "club_hod" && "Inspect submitted club posters in your department, verify technical specifications, and route to Stage 2 Admin approval."}
+                {role === "admin" && "Complete final Stage 2 poster approvals, monitor IoT display heartbeats, manage BullMQ background tasks, and trigger emergency overrides."}
+                {role === "viewer" && "View live IoT billboard displays, active poster schedules, and campus event timelines."}
+              </p>
+
+              <div className="pt-2 flex flex-wrap items-center gap-3">
+                {role === "club_president" && (
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-5 py-2.5 rounded-full text-xs font-semibold bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 whisper-shadow transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" /> Create Event & Upload Poster
+                  </button>
+                )}
+
+                <Link
+                  href="/review"
+                  className="px-5 py-2.5 rounded-full text-xs font-semibold bg-[var(--canvas-elevated)] text-[var(--ink)] border border-[var(--hairline)] hover:border-[var(--ink)] whisper-shadow transition-all flex items-center gap-2"
+                >
+                  <Shield className="w-4 h-4 text-[#0070f3]" /> Open Review Queue
+                </Link>
+              </div>
             </div>
-            <span className="text-lg font-semibold tracking-tight text-[#26251e] flex items-center gap-2">
-              CampusCast
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#e6e5e0] text-[#5a5852]">
-                v1.0 IoT
-              </span>
-            </span>
-          </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#5a5852]">
-            <Link href="#architecture" className="hover:text-[#26251e] transition">Architecture</Link>
-            <Link href="#kiosks" className="hover:text-[#26251e] transition">Kiosk Nodes</Link>
-            <Link href="#timeline" className="hover:text-[#26251e] transition">AI Agent Pipeline</Link>
-          </nav>
+            {/* Spec Sheet Metrics Grid */}
+            <div className="w-full md:w-auto grid grid-cols-2 gap-3 min-w-[280px]">
+              <div className="geist-card p-4">
+                <span className="font-geist-mono text-[10px] uppercase tracking-wider text-[var(--mute)] block">
+                  EVENTS IN SYSTEM
+                </span>
+                <span className="text-2xl font-semibold tracking-heading-md text-[var(--ink)] mt-1 block">
+                  {events.length}
+                </span>
+              </div>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="px-4 py-2 bg-[#ffffff] hover:bg-[#fafaf7] text-[#26251e] text-sm font-medium rounded-md border border-[#cfcdc4] transition"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/admin"
-              className="px-4 py-2 bg-[#f54e00] hover:bg-[#d04200] text-white text-sm font-medium rounded-md transition shadow-sm"
-            >
-              Admin Dashboard
-            </Link>
+              <div className="geist-card p-4">
+                <span className="font-geist-mono text-[10px] uppercase tracking-wider text-[var(--mute)] block">
+                  APPROVAL STAGES
+                </span>
+                <span className="text-2xl font-semibold tracking-heading-md text-[#0070f3] mt-1 block">
+                  2-STAGE
+                </span>
+              </div>
+
+              <div className="geist-card p-4">
+                <span className="font-geist-mono text-[10px] uppercase tracking-wider text-[var(--mute)] block">
+                  ELIGIBILITY CUTOFF
+                </span>
+                <span className="text-2xl font-semibold tracking-heading-md text-amber-500 mt-1 block">
+                  7 DAYS
+                </span>
+              </div>
+
+              <div className="geist-card p-4">
+                <span className="font-geist-mono text-[10px] uppercase tracking-wider text-[var(--mute)] block">
+                  BROADCAST WINDOW
+                </span>
+                <span className="text-2xl font-semibold tracking-heading-md text-emerald-500 mt-1 block">
+                  21 DAYS
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </header>
+      </section>
 
-      {/* Hero Section (80px section rhythm) */}
-      <main className="max-w-[1200px] mx-auto px-6 py-20 flex-1 w-full space-y-20">
-        <div className="text-center space-y-6 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e6e5e0] text-[#26251e] text-xs font-semibold uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-[#f54e00]"></span>
-            Autonomous Signage Network
-          </div>
-          
-          <h1 className="text-5xl sm:text-7xl font-normal tracking-tight text-[#26251e] leading-[1.1] text-balance">
-            The AI-driven billboard network built for campus intelligence.
-          </h1>
-
-          <p className="text-lg text-[#5a5852] max-w-2xl mx-auto leading-relaxed">
-            Publish event announcements, emergency alerts, and club media across physical display kiosks with zero-latency heartbeat synchronization and transactional multi-stage approvals.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <Link
-              href="/admin"
-              className="px-6 py-3 bg-[#f54e00] hover:bg-[#d04200] text-white font-medium text-sm rounded-md transition flex items-center gap-2"
-            >
-              <Monitor className="w-4 h-4" />
-              <span>Launch Admin Dashboard</span>
-            </Link>
-            <Link
-              href="/login"
-              className="px-6 py-3 bg-[#26251e] hover:bg-[#1a1914] text-[#f7f7f4] font-medium text-sm rounded-md transition flex items-center gap-2"
-            >
-              <ShieldCheck className="w-4 h-4 text-[#f54e00]" />
-              <span>Simulate Campus SSO</span>
-            </Link>
-          </div>
+      {/* Main Flow Portal Links */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div>
+          <span className="font-geist-mono text-[11px] uppercase tracking-wider text-[var(--mute)]">
+            DEDICATED ROLE FLOWS // SEPARATE MODULES
+          </span>
+          <h2 className="text-xl font-semibold tracking-heading-lg text-[var(--ink)] mt-0.5">
+            CampusCast Core Modules & Workflows
+          </h2>
         </div>
 
-        {/* IDE Mockup Card with In-Product AI Action Signature Timeline */}
-        <div className="bg-[#ffffff] rounded-xl border border-[#e6e5e0] overflow-hidden shadow-sm">
-          {/* Editor Header Bar */}
-          <div className="bg-[#fafaf7] border-b border-[#e6e5e0] px-4 py-3 flex items-center justify-between text-xs text-[#5a5852]">
-            <div className="flex items-center gap-2 font-mono">
-              <span className="w-3 h-3 rounded-full bg-[#cfcdc4]"></span>
-              <span className="w-3 h-3 rounded-full bg-[#cfcdc4]"></span>
-              <span className="w-3 h-3 rounded-full bg-[#cfcdc4]"></span>
-              <span className="ml-2 text-[#26251e] font-semibold">campuscast-agent.ts — Active Execution</span>
-            </div>
-            <span className="font-mono text-[11px] text-[#807d72]">5s Telemetry Engine</span>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-[#e6e5e0]">
-            {/* Main IDE Code Pane */}
-            <div className="lg:col-span-2 bg-[#fafaf7] p-6 font-mono text-xs text-[#26251e] space-y-4 overflow-x-auto">
-              <div className="text-[#807d72]">// Step 13: Jitter Synchronization Protocol & Manifest Generator</div>
-              <div>
-                <span className="text-[#f54e00]">async function</span> <span className="font-bold">syncKioskNode</span>(deviceId: <span className="text-[#1f8a65]">string</span>) {'{'}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Card 1: Review Queue */}
+          <Link
+            href="/review"
+            className="geist-card p-6 flex flex-col justify-between hover:border-[var(--ink)] transition-all group whisper-shadow"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[6px] bg-[#0070f3]/10 border border-[#0070f3]/30 flex items-center justify-center text-[#0070f3]">
+                <Shield className="w-5 h-5" />
               </div>
-              <div className="pl-4 text-[#5a5852]">
-                const screen = <span className="text-[#f54e00]">await</span> db.screen.findUnique({'{'} where: {'{'} slug: deviceId {'}'} {'}'});
-              </div>
-              <div className="pl-4 text-[#5a5852]">
-                if (!screen) <span className="text-[#cf2d56]">throw new Error</span>('Node offline');
-              </div>
-              <div className="pl-4 border-l-2 border-[#f54e00] pl-3 py-1 bg-[#ffffff]">
-                <span className="text-[#807d72]">// Fetch active approved media for 21-day window</span>
-                <br />
-                const playlist = <span className="text-[#f54e00]">await</span> generateApprovedManifest(screen.id);
-              </div>
-              <div className="pl-4">
-                return {'{'} status: <span className="text-[#1f8a65]">'ACTIVE'</span>, version: screen.playlistVersion, playlist {'}'};
-              </div>
-              <div>{'}'}</div>
-            </div>
-
-            {/* AI Agent Timeline Signature Visualization (5 Pastel Action Pills) */}
-            <div className="bg-[#ffffff] p-6 space-y-4">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[#807d72] border-b border-[#e6e5e0] pb-2">
-                Agent Action Timeline
+              <h3 className="text-base font-semibold tracking-heading-md text-[var(--ink)] group-hover:text-[#0070f3] transition-colors">
+                Review Queue & Submissions
               </h3>
-
-              <div className="space-y-3 font-mono text-xs">
-                {/* 1. Thinking */}
-                <div className="flex items-center gap-2">
-                  <span className="timeline-pill-thinking">Thinking</span>
-                  <span className="text-[#5a5852] text-[11px]">Evaluating event date window</span>
-                </div>
-
-                {/* 2. Grepping */}
-                <div className="flex items-center gap-2">
-                  <span className="timeline-pill-grep">Grepping</span>
-                  <span className="text-[#5a5852] text-[11px]">Verifying SHA-256 media checksum</span>
-                </div>
-
-                {/* 3. Reading */}
-                <div className="flex items-center gap-2">
-                  <span className="timeline-pill-read">Reading</span>
-                  <span className="text-[#5a5852] text-[11px]">Loading President & HOD approvals</span>
-                </div>
-
-                {/* 4. Editing */}
-                <div className="flex items-center gap-2">
-                  <span className="timeline-pill-edit">Editing</span>
-                  <span className="text-[#5a5852] text-[11px]">Generating screen manifest v43</span>
-                </div>
-
-                {/* 5. Done */}
-                <div className="flex items-center gap-2">
-                  <span className="timeline-pill-done">Done</span>
-                  <span className="text-[#26251e] text-[11px] font-semibold">Broadcasting to Kiosks</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Live Kiosk Displays Section */}
-        <div id="kiosks" className="space-y-6 pt-8">
-          <div className="flex items-center justify-between border-b border-[#e6e5e0] pb-4">
-            <div>
-              <h2 className="text-2xl font-normal tracking-tight text-[#26251e]">
-                Active Kiosk Display Nodes
-              </h2>
-              <p className="text-sm text-[#5a5852] mt-1">
-                Physical screens receiving scheduled media manifests with 50-70s sync intervals
+              <p className="text-xs text-[var(--body)] leading-relaxed">
+                Stage 1 HOD verification, Stage 2 Admin final decisioning, and submission tracking with full audit trails.
               </p>
             </div>
-            <span className="text-xs font-mono text-[#807d72]">3 Active Nodes</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Screen 1 */}
-            <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 hover:border-[#cfcdc4] transition space-y-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-bold text-[#f54e00] bg-[#fafaf7] border border-[#e6e5e0] px-2 py-1 rounded">
-                  NODE-01
-                </span>
-                <span className="text-[11px] font-mono text-[#1f8a65] bg-[#fafaf7] border border-[#e6e5e0] px-2 py-0.5 rounded-full">
-                  ● Active
-                </span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-base text-[#26251e]">Screen 1 — Main Entrance</h3>
-                <p className="text-xs text-[#5a5852] mt-1">Main Entrance Hall Kiosk</p>
-              </div>
-              <Link
-                href="/display/screen-1"
-                target="_blank"
-                className="w-full py-2 bg-[#fafaf7] hover:bg-[#26251e] hover:text-[#f7f7f4] text-[#26251e] text-xs font-medium rounded-md border border-[#e6e5e0] transition flex items-center justify-center gap-2"
-              >
-                <span>Open Kiosk Display</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </Link>
+            <div className="mt-5 pt-3 border-t border-[var(--hairline)] flex items-center justify-between text-xs font-semibold text-[#0070f3]">
+              <span>Go to Review Queue</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
+          </Link>
 
-            {/* Screen 2 */}
-            <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 hover:border-[#cfcdc4] transition space-y-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-bold text-[#f54e00] bg-[#fafaf7] border border-[#e6e5e0] px-2 py-1 rounded">
-                  NODE-02
-                </span>
-                <span className="text-[11px] font-mono text-[#1f8a65] bg-[#fafaf7] border border-[#e6e5e0] px-2 py-0.5 rounded-full">
-                  ● Active
-                </span>
+          {/* Card 2: Events & Poster Management */}
+          <Link
+            href="/events"
+            className="geist-card p-6 flex flex-col justify-between hover:border-[var(--ink)] transition-all group whisper-shadow"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[6px] bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                <Calendar className="w-5 h-5" />
               </div>
-              <div>
-                <h3 className="font-semibold text-base text-[#26251e]">Screen 2 — Library</h3>
-                <p className="text-xs text-[#5a5852] mt-1">Central Library Foyer Kiosk</p>
-              </div>
-              <Link
-                href="/display/screen-2"
-                target="_blank"
-                className="w-full py-2 bg-[#fafaf7] hover:bg-[#26251e] hover:text-[#f7f7f4] text-[#26251e] text-xs font-medium rounded-md border border-[#e6e5e0] transition flex items-center justify-center gap-2"
-              >
-                <span>Open Kiosk Display</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </Link>
+              <h3 className="text-base font-semibold tracking-heading-md text-[var(--ink)] group-hover:text-purple-400 transition-colors">
+                Events & Poster Management
+              </h3>
+              <p className="text-xs text-[var(--body)] leading-relaxed">
+                Create new campus events, upload poster graphics, brand compliance self-certification, and version history.
+              </p>
             </div>
-
-            {/* Screen 3 */}
-            <div className="bg-[#ffffff] border border-[#e6e5e0] rounded-xl p-6 hover:border-[#cfcdc4] transition space-y-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-bold text-[#f54e00] bg-[#fafaf7] border border-[#e6e5e0] px-2 py-1 rounded">
-                  NODE-03
-                </span>
-                <span className="text-[11px] font-mono text-[#1f8a65] bg-[#fafaf7] border border-[#e6e5e0] px-2 py-0.5 rounded-full">
-                  ● Active
-                </span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-base text-[#26251e]">Screen 3 — Cafeteria</h3>
-                <p className="text-xs text-[#5a5852] mt-1">Student Cafeteria Kiosk</p>
-              </div>
-              <Link
-                href="/display/screen-3"
-                target="_blank"
-                className="w-full py-2 bg-[#fafaf7] hover:bg-[#26251e] hover:text-[#f7f7f4] text-[#26251e] text-xs font-medium rounded-md border border-[#e6e5e0] transition flex items-center justify-center gap-2"
-              >
-                <span>Open Kiosk Display</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </Link>
+            <div className="mt-5 pt-3 border-t border-[var(--hairline)] flex items-center justify-between text-xs font-semibold text-purple-400">
+              <span>Go to Events Hub</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </div>
-        </div>
+          </Link>
 
-        {/* System Architecture Features */}
-        <div id="architecture" className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-          <div className="p-6 bg-[#ffffff] border border-[#e6e5e0] rounded-xl space-y-2">
-            <h4 className="font-semibold text-sm text-[#26251e]">Transactional Approvals</h4>
-            <p className="text-xs text-[#5a5852] leading-relaxed">
-              Every stage (President → HOD → Admin) executes inside atomic database transactions with immutable audit trails.
-            </p>
-          </div>
+          {/* Card 3: Screen Fleet & Hardware IoT */}
+          <Link
+            href="/devices"
+            className="geist-card p-6 flex flex-col justify-between hover:border-[var(--ink)] transition-all group whisper-shadow"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[6px] bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <Monitor className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold tracking-heading-md text-[var(--ink)] group-hover:text-emerald-400 transition-colors">
+                Digital Display Fleet & IoT
+              </h3>
+              <p className="text-xs text-[var(--body)] leading-relaxed">
+                Real-time ESP32 display heartbeats, location zone mappings, AWS IoT Shadow inspection, and screen registration.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-[var(--hairline)] flex items-center justify-between text-xs font-semibold text-emerald-400">
+              <span>Go to Screen Fleet</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
 
-          <div className="p-6 bg-[#ffffff] border border-[#e6e5e0] rounded-xl space-y-2">
-            <h4 className="font-semibold text-sm text-[#26251e]">Automatic 21-Day Scheduling</h4>
-            <p className="text-xs text-[#5a5852] leading-relaxed">
-              Active display windows calculated automatically from event dates with SHA-256 media checksum verification.
-            </p>
-          </div>
+          {/* Card 4: 7-Day Cutoff & Deadlines */}
+          <Link
+            href="/deadlines"
+            className="geist-card p-6 flex flex-col justify-between hover:border-[var(--ink)] transition-all group whisper-shadow"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[6px] bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold tracking-heading-md text-[var(--ink)] group-hover:text-amber-500 transition-colors">
+                7-Day Cutoff & Deadlines
+              </h3>
+              <p className="text-xs text-[var(--body)] leading-relaxed">
+                Section 5.1 cutoff monitor, countdown timers, deadline breach alerts, and 48-hour automated reminders.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-[var(--hairline)] flex items-center justify-between text-xs font-semibold text-amber-500">
+              <span>Go to Cutoff Monitor</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
 
-          <div className="p-6 bg-[#ffffff] border border-[#e6e5e0] rounded-xl space-y-2">
-            <h4 className="font-semibold text-sm text-[#26251e]">Hashed Device Secrets</h4>
-            <p className="text-xs text-[#5a5852] leading-relaxed">
-              Physical kiosks authenticate using salted device secrets. Only SHA-256 hashes are persisted.
-            </p>
-          </div>
+          {/* Card 5: Velocity Analytics */}
+          <Link
+            href="/analytics"
+            className="geist-card p-6 flex flex-col justify-between hover:border-[var(--ink)] transition-all group whisper-shadow"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[6px] bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <Clock className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold tracking-heading-md text-[var(--ink)] group-hover:text-cyan-400 transition-colors">
+                Turnaround Velocity Analytics
+              </h3>
+              <p className="text-xs text-[var(--body)] leading-relaxed">
+                Metrics on Stage 1 HOD vs Stage 2 Admin review speeds, average approval durations, and broadcast efficiency.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-[var(--hairline)] flex items-center justify-between text-xs font-semibold text-cyan-400">
+              <span>Go to Analytics</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 6: Background Automation Jobs */}
+          <Link
+            href="/jobs"
+            className="geist-card p-6 flex flex-col justify-between hover:border-[var(--ink)] transition-all group whisper-shadow"
+          >
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-[6px] bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                <Play className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold tracking-heading-md text-[var(--ink)] group-hover:text-rose-400 transition-colors">
+                Automation & Worker Controls
+              </h3>
+              <p className="text-xs text-[var(--body)] leading-relaxed">
+                Manually trigger BullMQ scheduled jobs (Broadcast, Eligibility, Reminders, Archiving) and inspect execution logs.
+              </p>
+            </div>
+            <div className="mt-5 pt-3 border-t border-[var(--hairline)] flex items-center justify-between text-xs font-semibold text-rose-400">
+              <span>Go to Jobs Console</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[#e6e5e0] py-12 bg-[#f7f7f4] text-xs text-[#5a5852]">
-        <div className="max-w-[1200px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="font-semibold text-[#26251e]">CampusCast Network Engine</p>
-            <p className="text-[#807d72] mt-0.5">Designed with editorial clarity and developer-first aesthetics.</p>
-          </div>
-          <div className="flex items-center gap-6 font-medium">
-            <Link href="/admin" className="hover:text-[#26251e] transition">Admin Portal</Link>
-            <Link href="/login" className="hover:text-[#26251e] transition">SSO Login</Link>
-            <Link href="/display/screen-1" className="hover:text-[#26251e] transition">Kiosk Screen 1</Link>
-          </div>
-        </div>
-      </footer>
+      <EventCreationUploadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchDashboardData}
+        clubs={clubs}
+        currentUserId={currentUser?.id}
+      />
     </div>
   );
 }
