@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, Sparkles, UserCheck, Key, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Shield, Sparkles, UserCheck, Key, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -175,7 +175,7 @@ export default function LoginPage() {
 
           <div className="text-center pt-2 border-t border-[var(--hairline)]">
             <p className="text-xs text-[var(--body)]">
-              Don't have an account yet?{" "}
+              Don&apos;t have an account yet?{" "}
               <Link href="/signup" className="text-[#0070f3] font-semibold hover:underline">
                 Create a new account
               </Link>

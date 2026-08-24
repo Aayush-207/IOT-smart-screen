@@ -86,7 +86,27 @@ export async function GET() {
         ? parseFloat((totalStageHours / totalStageCount).toFixed(1))
         : 1.2;
 
+    const totalItemsCount = await prisma.contentItem.count();
+    const approvalRate = totalItemsCount > 0 ? Math.round((totalApprovedItems / totalItemsCount) * 100) : 92;
+
+    let hodHoursSum = 0;
+    let adminHoursSum = 0;
+    const validClubs = clubMetrics.length || 1;
+
+    clubMetrics.forEach((cm) => {
+      hodHoursSum += cm.stage1HodAvgHours;
+      adminHoursSum += cm.stage2AdminAvgHours;
+    });
+
+    const avgHodHours = parseFloat((hodHoursSum / validClubs).toFixed(1));
+    const avgAdminHours = parseFloat((adminHoursSum / validClubs).toFixed(1));
+    const avgTotalHours = parseFloat((avgHodHours + avgAdminHours).toFixed(1));
+
     return NextResponse.json({
+      avgTotalHours,
+      avgHodHours,
+      avgAdminHours,
+      approvalRate,
       byClub: clubMetrics,
       summary: {
         overallAvgHours,

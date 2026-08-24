@@ -13,9 +13,6 @@ import {
   Sparkles,
   ArrowRight,
   Plus,
-  CheckCircle,
-  FileCheck,
-  Zap,
 } from "lucide-react";
 import { EventCreationUploadModal } from "@/components/EventCreationUploadModal";
 
@@ -23,7 +20,7 @@ export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<any | null>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [clubs, setClubs] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [_loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const fetchDashboardData = async () => {

@@ -5,19 +5,10 @@ import {
   Shield,
   CheckCircle2,
   XCircle,
-  Clock,
   Search,
-  Filter,
   Eye,
-  AlertCircle,
-  Sparkles,
-  ArrowRight,
   FileCheck,
-  Check,
-  X,
   ExternalLink,
-  ChevronRight,
-  Info,
 } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
-import { Plus, Calendar, MapPin, Building, ShieldCheck, History, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Plus, Calendar, MapPin, ShieldCheck, History, ExternalLink, Image as ImageIcon } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EventCreationUploadModal } from "@/components/EventCreationUploadModal";
 

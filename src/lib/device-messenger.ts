@@ -44,7 +44,7 @@ class InMemoryDeviceMessenger implements DeviceMessenger {
       data: {
         deviceId,
         eventType: "heartbeat",
-        payload: JSON.parse(JSON.stringify(payload)),
+        payload: JSON.stringify(payload),
       },
     });
 

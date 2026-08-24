@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Clock, TrendingUp, ShieldCheck, Zap, Award, BarChart3, ArrowUpRight } from "lucide-react";
+import { Clock, BarChart3, ArrowUpRight } from "lucide-react";
 
 export const TurnaroundAnalytics: React.FC = () => {
   const [metrics, setMetrics] = useState<any | null>(null);

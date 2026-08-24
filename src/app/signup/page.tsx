@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, UserPlus, ArrowRight } from "lucide-react";
+import { Shield, ArrowRight } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();

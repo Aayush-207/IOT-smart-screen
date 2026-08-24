@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Play, Terminal, CheckCircle2, Clock, ShieldAlert, Sparkles, RefreshCw } from "lucide-react";
+import { Play, Terminal, RefreshCw } from "lucide-react";
 
 export const JobsControlPanel: React.FC = () => {
   const [runningJob, setRunningJob] = useState<string | null>(null);
@@ -132,7 +132,7 @@ export const JobsControlPanel: React.FC = () => {
         <div className="bg-slate-950 p-4 rounded-[8px] border border-slate-800 text-xs font-geist-mono text-emerald-400 overflow-y-auto max-h-80 space-y-3">
           {logs.length === 0 ? (
             <p className="text-slate-500 text-center py-6">
-              No manual jobs executed in this session yet. Click "Execute Job Now" above to run a worker.
+              No manual jobs executed in this session yet. Click &quot;Execute Job Now&quot; above to run a worker.
             </p>
           ) : (
             logs.map((log, idx) => (

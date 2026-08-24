@@ -37,8 +37,22 @@ export async function GET() {
       const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
       return {
+        id: item.event.id,
         contentItemId: item.id,
         eventId: item.event.id,
+        title: item.event.title,
+        venue: item.event.venue,
+        club: {
+          name: item.event.club.name,
+        },
+        contentItems: [
+          {
+            id: item.id,
+            status: item.status,
+            mediaUrl: item.mediaUrl,
+            selfCertified: item.selfCertified,
+          },
+        ],
         eventTitle: item.event.title,
         clubName: item.event.club.name,
         status: item.status,

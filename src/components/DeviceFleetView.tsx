@@ -4,17 +4,11 @@ import React, { useState, useEffect } from "react";
 import {
   Monitor,
   Wifi,
-  WifiOff,
   Cpu,
   MapPin,
   RefreshCw,
   Plus,
   Code,
-  CheckCircle,
-  AlertTriangle,
-  Play,
-  Layers,
-  Sparkles,
 } from "lucide-react";
 
 export const DeviceFleetView: React.FC = () => {
@@ -69,9 +63,9 @@ export const DeviceFleetView: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: deviceName,
-          location: `${zone} - ${location}`,
-          status: "online",
+          locationTag: deviceName ? `${deviceName} (${location})` : location,
+          zone: zone,
+          firmwareVersion: "v1.0.4-esp32",
         }),
       });
       if (res.ok) {
@@ -87,7 +81,8 @@ export const DeviceFleetView: React.FC = () => {
 
   const filteredDevices = devices.filter((d) => {
     if (selectedZone === "all") return true;
-    return d.location?.toLowerCase().includes(selectedZone.toLowerCase());
+    const searchTarget = `${d.zone || ""} ${d.locationTag || ""} ${d.location || ""} ${d.name || ""}`.toLowerCase();
+    return searchTarget.includes(selectedZone.toLowerCase());
   });
 
   return (
@@ -168,7 +163,7 @@ export const DeviceFleetView: React.FC = () => {
                         ESP32 DEVICE ID: {device.id.substring(0, 8)}...
                       </span>
                       <h3 className="text-base font-semibold tracking-heading-md text-[var(--ink)] mt-0.5">
-                        {device.name}
+                        {device.locationTag || device.name || "Display Screen"}
                       </h3>
                     </div>
 
@@ -188,7 +183,7 @@ export const DeviceFleetView: React.FC = () => {
                   <div className="p-3 bg-[var(--canvas-inset)] rounded-[6px] border border-[var(--hairline)] space-y-1.5 font-geist-mono text-[11px] text-[var(--body)]">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-3.5 h-3.5 text-[#0070f3]" />
-                      <span>{device.location}</span>
+                      <span>{device.zone ? `${device.zone} - ${device.locationTag || device.location || ""}` : (device.locationTag || device.location || "Main Campus")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Cpu className="w-3.5 h-3.5 text-purple-400" />

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AlertTriangle, Clock, Calendar, CheckCircle2, ShieldAlert, Sparkles, Filter } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
 
 export const DeadlinesView: React.FC = () => {

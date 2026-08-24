@@ -2,15 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Calendar,
-  Upload,
   ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
   X,
-  FileImage,
   ArrowRight,
-  Sparkles,
 } from "lucide-react";
 
 interface EventCreationUploadModalProps {

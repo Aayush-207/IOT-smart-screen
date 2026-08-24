@@ -22,15 +22,22 @@ export async function POST(req: NextRequest) {
     let result;
     switch (jobName) {
       case "broadcast":
+      case "broadcast_window":
         result = await runBroadcastWindowJob();
         break;
       case "deadlines":
+      case "eligibility_check":
+      case "eligibility_deadline":
         result = await runEligibilityDeadlineJob();
         break;
       case "reminders":
+      case "send_reminders":
+      case "reminder_escalation":
         result = await runReminderEscalationJob();
         break;
       case "archiving":
+      case "archive_past_events":
+      case "auto_archive":
         result = await runAutoArchiveJob();
         break;
       default:
