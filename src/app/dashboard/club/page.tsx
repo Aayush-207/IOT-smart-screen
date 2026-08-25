@@ -59,6 +59,8 @@ export default async function ClubDashboardPage() {
   requests?.forEach((req: any) => {
     if (req.status === 'rejected') {
       notifications.push({ id: `p-${req.id}`, type: 'error', title: 'Poster Rejected', message: `Reason: ${req.rejection_reason || 'N/A'}`, date: req.created_at })
+    } else if (req.status === 'changes_requested') {
+      notifications.push({ id: `p-${req.id}`, type: 'info', title: 'Poster Changes Requested', message: `Feedback: ${req.rejection_reason || 'N/A'}`, date: req.created_at })
     } else if (req.status === 'approved') {
       notifications.push({ id: `p-${req.id}`, type: 'success', title: 'Poster Approved', message: 'Your poster is now live on screen.', date: req.created_at })
     }
@@ -67,6 +69,8 @@ export default async function ClubDashboardPage() {
   screenRequests?.forEach((req: any) => {
     if (req.status === 'rejected') {
       notifications.push({ id: `s-${req.id}`, type: 'error', title: `Screen "${req.name}" Rejected`, message: `Reason: ${req.rejection_reason || 'Hardware denied'}`, date: req.created_at })
+    } else if (req.status === 'changes_requested') {
+      notifications.push({ id: `s-${req.id}`, type: 'info', title: `Screen "${req.name}" Changes Requested`, message: `Feedback: ${req.rejection_reason || 'Please adjust request'}`, date: req.created_at })
     } else if (req.status === 'approved') {
       notifications.push({ id: `s-${req.id}`, type: 'success', title: `Screen "${req.name}" Approved`, message: 'Your new screen slot is ready.', date: req.created_at })
     }

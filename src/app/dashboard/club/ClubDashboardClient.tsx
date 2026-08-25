@@ -103,6 +103,12 @@ export function ClubDashboardClient({
   const placeholderCount = Math.max(0, 3 - totalUsed)
   const placeholders = Array.from({ length: placeholderCount })
 
+  const allSlots = [
+    ...screens.map(s => ({ type: 'active', data: s, id: s.id })),
+    ...screenRequests.map(r => ({ type: 'pending', data: r, id: r.id })),
+    ...placeholders.map((_, i) => ({ type: 'unrequested', id: `placeholder-${i}` }))
+  ]
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -113,138 +119,110 @@ export function ClubDashboardClient({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Render real screens */}
-        {screens.map((screen) => {
-          const req = screen.latestRequest
+        {allSlots.map((slot) => {
+          const isBlurred = slot.type !== 'active'
+          const name = slot.type === 'active' || slot.type === 'pending' ? slot.data.name : "Available Screen Slot"
+          const location = slot.type === 'active' || slot.type === 'pending' ? slot.data.location : "Unallocated"
+          const req = slot.type === 'active' ? slot.data.latestRequest : null
 
           return (
-            <div key={screen.id} className="geist-card p-6 flex flex-col justify-between whisper-shadow group">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="font-semibold text-lg text-[var(--ink)]">{screen.name}</h3>
-                  <span className="text-xs bg-[var(--canvas-inset)] px-2 py-1 rounded border border-[var(--hairline)]">
-                    {screen.location}
-                  </span>
-                </div>
-                
-                {/* Status UI */}
-                <div className="mb-6">
-                  {!req ? (
-                    <div className="p-4 bg-[var(--canvas-inset)] border border-dashed border-[var(--hairline)] rounded-lg text-center text-sm text-[var(--mute)]">
-                      No active poster request.
-                    </div>
-                  ) : req.status === 'pending' ? (
-                    <div className="p-4 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg relative overflow-hidden">
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-4 text-center">
-                        <Clock className="w-6 h-6 text-amber-400 mb-2" />
-                        <p className="text-sm font-semibold text-white shadow-sm">Waiting for HOD approval</p>
-                      </div>
-                      <img src={req.image_url} alt="Pending Poster" className="w-full h-32 object-cover rounded-md opacity-60" />
-                    </div>
-                  ) : req.status === 'rejected' ? (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg flex gap-3 items-start">
-                      <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-rose-600 dark:text-rose-500">Request Rejected</p>
-                        <p className="text-xs text-rose-600/80 dark:text-rose-500/80 mt-1">Reason: {req.rejection_reason}</p>
-                      </div>
-                    </div>
+            <div key={slot.id} className="relative group h-full">
+              
+              {/* LOCK OVERLAY FOR PENDING/UNREQUESTED */}
+              {isBlurred && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--canvas)]/30 backdrop-blur-[4px] rounded-xl transition-all group-hover:backdrop-blur-[2px]">
+                  {slot.type === 'unrequested' ? (
+                     <button 
+                        onClick={() => setRequestModalOpen(true)}
+                        className="px-6 py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 transition-all whisper-shadow shadow-xl transform group-hover:scale-105"
+                     >
+                        <Plus className="w-4 h-4" />
+                        Request This Screen
+                     </button>
                   ) : (
-                    <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
-                      <div className="flex items-center gap-2 mb-3">
-                        <CheckCircle className="w-4 h-4 text-emerald-500" />
-                        <p className="text-sm font-medium text-emerald-600 dark:text-emerald-500">Live on Screen</p>
-                      </div>
-                      <img src={req.image_url} alt="Current Poster" className="rounded-md border border-[var(--hairline)] w-full h-32 object-cover" />
-                      <p className="text-xs text-[var(--mute)] mt-3 text-center" suppressHydrationWarning>
-                        Updated on {new Date(req.created_at).toLocaleString()}
-                      </p>
-                    </div>
+                     <div className={`px-6 py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 text-white shadow-xl ${slot.data?.status === 'changes_requested' ? 'bg-blue-500 shadow-blue-500/20' : 'bg-amber-500 shadow-amber-500/20'}`}>
+                        {slot.data?.status === 'changes_requested' ? <AlertCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                        {slot.data?.status === 'changes_requested' ? 'Changes Requested' : 'Waiting for Approval'}
+                     </div>
                   )}
                 </div>
-              </div>
+              )}
 
-              {/* Actions */}
-              <div>
-                <label className={`w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 cursor-pointer transition-all ${uploadingFor === screen.id ? 'bg-[var(--mute)] text-white cursor-not-allowed' : 'bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 whisper-shadow'}`}>
-                  <Upload className="w-4 h-4" />
-                  {uploadingFor === screen.id ? 'Uploading...' : 'Upload New Poster'}
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    onChange={(e) => handleFileUpload(e, screen.id)}
-                    disabled={uploadingFor === screen.id}
-                  />
-                </label>
+              {/* BASE CARD */}
+              <div className={`geist-card p-6 flex flex-col justify-between whisper-shadow h-full transition-all ${isBlurred ? 'opacity-70 blur-[3px] pointer-events-none select-none grayscale-[50%]' : ''}`}>
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="font-semibold text-lg text-[var(--ink)]">{name}</h3>
+                    <span className="text-xs bg-[var(--canvas-inset)] px-2 py-1 rounded border border-[var(--hairline)]">
+                      {location}
+                    </span>
+                  </div>
+                  
+                  {/* Status UI */}
+                  <div className="mb-6">
+                    {!req ? (
+                      <div className="p-4 bg-[var(--canvas-inset)] border border-dashed border-[var(--hairline)] rounded-lg text-center text-sm text-[var(--mute)]">
+                        No active poster request.
+                      </div>
+                    ) : req.status === 'pending' ? (
+                      <div className="p-4 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg relative overflow-hidden">
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-4 text-center">
+                          <Clock className="w-6 h-6 text-amber-400 mb-2" />
+                          <p className="text-sm font-semibold text-white shadow-sm">Waiting for HOD approval</p>
+                        </div>
+                        <img src={req.image_url} alt="Pending Poster" className="w-full h-32 object-cover rounded-md opacity-60" />
+                      </div>
+                    ) : req.status === 'changes_requested' ? (
+                      <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg flex gap-3 items-start">
+                        <AlertCircle className="w-5 h-5 text-blue-500 shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-blue-600 dark:text-blue-500">Changes Requested</p>
+                          <p className="text-xs text-blue-600/80 dark:text-blue-500/80 mt-1">Feedback: {req.rejection_reason}</p>
+                        </div>
+                      </div>
+                    ) : req.status === 'rejected' ? (
+                      <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg flex gap-3 items-start">
+                        <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-rose-600 dark:text-rose-500">Request Rejected</p>
+                          <p className="text-xs text-rose-600/80 dark:text-rose-500/80 mt-1">Reason: {req.rejection_reason}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                          <CheckCircle className="w-4 h-4 text-emerald-500" />
+                          <p className="text-sm font-medium text-emerald-600 dark:text-emerald-500">Live on Screen</p>
+                        </div>
+                        <img src={req.image_url} alt="Current Poster" className="rounded-md border border-[var(--hairline)] w-full h-32 object-cover" />
+                        <p className="text-xs text-[var(--mute)] mt-3 text-center" suppressHydrationWarning>
+                          Updated on {new Date(req.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div>
+                  <label className={`w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${slot.type === 'active' && uploadingFor === slot.data.id ? 'bg-[var(--mute)] text-white cursor-not-allowed' : 'bg-[var(--ink)] text-[var(--canvas)] whisper-shadow'} ${slot.type === 'active' ? 'cursor-pointer hover:opacity-90' : ''}`}>
+                    <Upload className="w-4 h-4" />
+                    {slot.type === 'active' && uploadingFor === slot.data.id ? 'Uploading...' : 'Upload New Poster'}
+                    {slot.type === 'active' && (
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => handleFileUpload(e, slot.data.id)}
+                        disabled={uploadingFor === slot.data.id}
+                      />
+                    )}
+                  </label>
+                </div>
               </div>
             </div>
           )
         })}
-
-        {/* Render ghost screen requests */}
-        {screenRequests.map((req) => (
-          <div key={req.id} className="geist-card p-6 flex flex-col justify-between border-dashed border-2 opacity-80">
-            <div>
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-semibold text-lg text-[var(--ink)]">{req.name}</h3>
-                <span className="text-xs bg-[var(--canvas-inset)] px-2 py-1 rounded border border-[var(--hairline)]">
-                  {req.location}
-                </span>
-              </div>
-              <div className="mb-6">
-                {req.status === 'pending' ? (
-                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex gap-3 items-start">
-                    <Clock className="w-5 h-5 text-amber-500 shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-amber-600">Screen Requested</p>
-                      <p className="text-xs text-amber-600/80 mt-1">Waiting for HOD approval</p>
-                    </div>
-                  </div>
-                ) : req.status === 'rejected' ? (
-                  <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg flex gap-3 items-start">
-                    <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-rose-600">Hardware Denied</p>
-                      <p className="text-xs text-rose-600/80 mt-1">Reason: {req.rejection_reason}</p>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-            <div>
-              <button disabled className="w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 bg-[var(--canvas-inset)] text-[var(--mute)] border border-[var(--hairline)] cursor-not-allowed">
-                <Tv className="w-4 h-4" />
-                Hardware Pending
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {/* Render placeholders */}
-        {placeholders.map((_, idx) => (
-          <div key={`placeholder-${idx}`} className="geist-card p-6 flex flex-col justify-between border-dashed border-2 opacity-60">
-            <div>
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-semibold text-lg text-[var(--ink)]">Available Screen</h3>
-              </div>
-              <div className="mb-6">
-                <div className="p-4 bg-[var(--canvas-inset)] border border-dashed border-[var(--hairline)] rounded-lg text-center text-sm text-[var(--mute)]">
-                  You can request access to this screen slot.
-                </div>
-              </div>
-            </div>
-            <div>
-              <button 
-                onClick={() => setRequestModalOpen(true)}
-                className="w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 transition-opacity whisper-shadow"
-              >
-                <Plus className="w-4 h-4" />
-                Request This Screen
-              </button>
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* Request Screen Modal */}

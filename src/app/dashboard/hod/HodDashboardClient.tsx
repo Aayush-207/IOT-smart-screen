@@ -44,6 +44,7 @@ export function HodDashboardClient({
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
   const [activeReqId, setActiveReqId] = useState<string | null>(null)
   const [activeReqType, setActiveReqType] = useState<'poster' | 'screen'>('poster')
+  const [rejectActionType, setRejectActionType] = useState<'reject' | 'changes'>('reject')
   const [rejectionReason, setRejectionReason] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -187,10 +188,11 @@ export function HodDashboardClient({
     setLoading(true)
     try {
       const table = activeReqType === 'poster' ? 'poster_requests' : 'screen_requests'
+      const statusValue = rejectActionType === 'changes' ? 'changes_requested' : 'rejected'
       const { error } = await supabase
         .from(table)
         .update({ 
-          status: 'rejected',
+          status: statusValue,
           rejection_reason: rejectionReason
         })
         .eq('id', activeReqId)
@@ -200,9 +202,9 @@ export function HodDashboardClient({
       router.refresh()
       
       if (activeReqType === 'poster') {
-        setRequests(prev => prev.map(r => r.id === activeReqId ? { ...r, status: 'rejected', rejection_reason: rejectionReason, updated_at: new Date().toISOString() } : r))
+        setRequests(prev => prev.map(r => r.id === activeReqId ? { ...r, status: statusValue, rejection_reason: rejectionReason, updated_at: new Date().toISOString() } : r))
       } else {
-        setScreenRequests(prev => prev.map(r => r.id === activeReqId ? { ...r, status: 'rejected', rejection_reason: rejectionReason, updated_at: new Date().toISOString() } : r))
+        setScreenRequests(prev => prev.map(r => r.id === activeReqId ? { ...r, status: statusValue, rejection_reason: rejectionReason, updated_at: new Date().toISOString() } : r))
       }
       
       setRejectModalOpen(false)
@@ -215,9 +217,10 @@ export function HodDashboardClient({
     }
   }
 
-  const openRejectModal = (reqId: string, type: 'poster' | 'screen') => {
+  const openRejectModal = (reqId: string, type: 'poster' | 'screen', actionType: 'reject' | 'changes' = 'reject') => {
     setActiveReqId(reqId)
     setActiveReqType(type)
+    setRejectActionType(actionType)
     setRejectModalOpen(true)
   }
 
@@ -395,11 +398,18 @@ export function HodDashboardClient({
                   {req.status === 'pending' && (
                     <div className="p-4 border-t border-[var(--hairline)] bg-[var(--canvas-inset)] flex gap-3">
                       <button 
-                        onClick={() => openRejectModal(req.id, 'poster')}
+                        onClick={() => openRejectModal(req.id, 'poster', 'changes')}
+                        disabled={loading}
+                        className="flex-1 py-2 rounded-lg text-xs font-medium text-blue-600 bg-[var(--canvas-elevated)] border border-[var(--hairline)] hover:border-blue-500 transition-colors flex items-center justify-center gap-1"
+                      >
+                        <Pencil className="w-3.5 h-3.5" /> Changes
+                      </button>
+                      <button 
+                        onClick={() => openRejectModal(req.id, 'poster', 'reject')}
                         disabled={loading}
                         className="flex-1 py-2 rounded-lg text-xs font-medium text-[var(--ink)] bg-[var(--canvas-elevated)] border border-[var(--hairline)] hover:border-rose-500 hover:text-rose-500 transition-colors flex items-center justify-center gap-1"
                       >
-                        <XCircle className="w-4 h-4" /> Reject
+                        <XCircle className="w-3.5 h-3.5" /> Reject
                       </button>
                       <button 
                         onClick={() => handleApprovePoster(req.id, req.screen_id, req.image_url)}
@@ -457,11 +467,18 @@ export function HodDashboardClient({
 
                   <div className="pt-4 border-t border-[var(--hairline)] flex gap-3">
                     <button 
-                      onClick={() => openRejectModal(req.id, 'screen')}
+                      onClick={() => openRejectModal(req.id, 'screen', 'changes')}
+                      disabled={loading}
+                      className="flex-1 py-2 rounded-lg text-xs font-medium text-blue-600 bg-[var(--canvas-elevated)] border border-[var(--hairline)] hover:border-blue-500 transition-colors flex items-center justify-center gap-1"
+                    >
+                      <Pencil className="w-3.5 h-3.5" /> Changes
+                    </button>
+                    <button 
+                      onClick={() => openRejectModal(req.id, 'screen', 'reject')}
                       disabled={loading}
                       className="flex-1 py-2 rounded-lg text-xs font-medium text-[var(--ink)] bg-[var(--canvas-elevated)] border border-[var(--hairline)] hover:border-rose-500 hover:text-rose-500 transition-colors flex items-center justify-center gap-1"
                     >
-                      <XCircle className="w-4 h-4" /> Reject
+                      <XCircle className="w-3.5 h-3.5" /> Reject
                     </button>
                     <button 
                       onClick={() => handleApproveScreen(req.id, req.club_id, req.name, req.location)}
@@ -714,31 +731,38 @@ export function HodDashboardClient({
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-[var(--canvas-elevated)] rounded-xl border border-[var(--hairline)] p-6 w-full max-w-md floating-shadow animate-in zoom-in-95 duration-200">
             <h3 className="text-lg font-semibold text-[var(--ink)] mb-1">
-              Reject {activeReqType === 'poster' ? 'Poster' : 'Screen'} Request
+              {rejectActionType === 'changes' ? 'Request Changes' : 'Reject Request'}
             </h3>
-            <p className="text-sm text-[var(--mute)] mb-4">Please provide a reason for rejecting this request. The club will see this reason.</p>
+            <p className="text-sm text-[var(--mute)] mb-4">
+              {rejectActionType === 'changes' 
+                ? 'Please provide detailed feedback on what needs to be changed.' 
+                : 'Please provide a reason for rejecting this request.'}
+            </p>
             
             <textarea
-              className="w-full p-3 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 mb-4 min-h-[100px]"
-              placeholder="e.g., Request exceeds budget, invalid file format..."
+              className="w-full p-3 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[#0070f3] focus:ring-1 focus:ring-[#0070f3] min-h-[100px] mb-4"
+              placeholder={rejectActionType === 'changes' ? "e.g., Update the font size and add more contrast..." : "e.g., Image quality is too low..."}
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
             />
             
             <div className="flex gap-3 justify-end">
-              <button 
-                onClick={() => setRejectModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-[var(--body)] hover:text-[var(--ink)]"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleReject}
-                disabled={loading || !rejectionReason.trim()}
-                className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                {loading ? 'Rejecting...' : 'Confirm Reject'}
-              </button>
+               <button 
+                 onClick={() => {
+                   setRejectModalOpen(false)
+                   setRejectionReason('')
+                 }}
+                 className="px-4 py-2 text-sm font-medium text-[var(--body)] hover:text-[var(--ink)]"
+               >
+                 Cancel
+               </button>
+               <button 
+                 onClick={handleReject}
+                 disabled={loading || !rejectionReason.trim()}
+                 className={`px-4 py-2 hover:opacity-90 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${rejectActionType === 'changes' ? 'bg-blue-600' : 'bg-rose-600'}`}
+               >
+                 {loading ? 'Processing...' : rejectActionType === 'changes' ? 'Submit Feedback' : 'Reject Request'}
+               </button>
             </div>
           </div>
         </div>
