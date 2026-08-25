@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ClubDashboardClient } from './ClubDashboardClient'
 import { LogoutButton } from '@/components/LogoutButton'
+import { NotificationsBell } from './NotificationsBell'
 
 export default async function ClubDashboardPage() {
   const supabase = await createClient()
@@ -46,13 +47,38 @@ export default async function ClubDashboardPage() {
     }
   }) || []
 
-  // Fetch pending or rejected screen requests to show as ghost cards
+  // Fetch all screen requests to compile notifications
   const { data: screenRequests } = await supabase
     .from('screen_requests')
     .select('*')
     .eq('club_id', club.id)
-    .neq('status', 'approved') // Approved ones become real screens
     .order('created_at', { ascending: false })
+
+  const notifications: any[] = []
+  
+  requests?.forEach((req: any) => {
+    if (req.status === 'rejected') {
+      notifications.push({ id: `p-${req.id}`, type: 'error', title: 'Poster Rejected', message: `Reason: ${req.rejection_reason || 'N/A'}`, date: req.created_at })
+    } else if (req.status === 'approved') {
+      notifications.push({ id: `p-${req.id}`, type: 'success', title: 'Poster Approved', message: 'Your poster is now live on screen.', date: req.created_at })
+    }
+  })
+
+  screenRequests?.forEach((req: any) => {
+    if (req.status === 'rejected') {
+      notifications.push({ id: `s-${req.id}`, type: 'error', title: `Screen "${req.name}" Rejected`, message: `Reason: ${req.rejection_reason || 'Hardware denied'}`, date: req.created_at })
+    } else if (req.status === 'approved') {
+      notifications.push({ id: `s-${req.id}`, type: 'success', title: `Screen "${req.name}" Approved`, message: 'Your new screen slot is ready.', date: req.created_at })
+    }
+  })
+
+  // Sort newest first
+  notifications.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  // Filter only pending requests for the dashboard placeholders
+  const pendingScreenRequests = screenRequests?.filter((req: any) => req.status === 'pending') || []
+
+  const rejectedRequests = screenRequests?.filter(req => req.status === 'rejected') || []
 
   return (
     <div className="min-h-screen bg-[var(--canvas)] text-[var(--ink)] font-geist-sans">
@@ -61,7 +87,10 @@ export default async function ClubDashboardPage() {
           <h1 className="text-xl font-semibold tracking-heading-lg">Club Dashboard</h1>
           <p className="text-sm text-[var(--mute)]">Managing {club.name}</p>
         </div>
-        <LogoutButton />
+        <div className="flex items-center gap-4">
+          <NotificationsBell notifications={notifications} />
+          <LogoutButton />
+        </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
@@ -69,7 +98,7 @@ export default async function ClubDashboardPage() {
 
         <ClubDashboardClient 
           initialScreens={screensWithRequests}
-          initialScreenRequests={screenRequests || []}
+          initialScreenRequests={pendingScreenRequests}
           clubId={club.id} 
         />
       </main>

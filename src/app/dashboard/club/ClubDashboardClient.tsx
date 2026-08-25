@@ -15,7 +15,8 @@ export function ClubDashboardClient({
   clubId: string 
 }) {
   const [screens, setScreens] = useState(initialScreens)
-  const [screenRequests, setScreenRequests] = useState(initialScreenRequests)
+  const activeRequests = initialScreenRequests.filter(r => r.status !== 'rejected')
+  const [screenRequests, setScreenRequests] = useState(activeRequests)
   const [uploadingFor, setUploadingFor] = useState<string | null>(null)
   
   // Modal state
@@ -98,6 +99,10 @@ export function ClubDashboardClient({
     }
   }
 
+  const totalUsed = screens.length + screenRequests.length
+  const placeholderCount = Math.max(0, 3 - totalUsed)
+  const placeholders = Array.from({ length: placeholderCount })
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -105,13 +110,6 @@ export function ClubDashboardClient({
           <h2 className="text-lg font-semibold">Your Screens</h2>
           <p className="text-sm text-[var(--mute)]">Manage posters or request new displays.</p>
         </div>
-        <button 
-          onClick={() => setRequestModalOpen(true)}
-          className="flex items-center gap-2 bg-[var(--ink)] text-[var(--canvas)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity whisper-shadow"
-        >
-          <Plus className="w-4 h-4" />
-          Request New Screen
-        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -158,7 +156,7 @@ export function ClubDashboardClient({
                         <p className="text-sm font-medium text-emerald-600 dark:text-emerald-500">Live on Screen</p>
                       </div>
                       <img src={req.image_url} alt="Current Poster" className="rounded-md border border-[var(--hairline)] w-full h-32 object-cover" />
-                      <p className="text-xs text-[var(--mute)] mt-3 text-center">
+                      <p className="text-xs text-[var(--mute)] mt-3 text-center" suppressHydrationWarning>
                         Updated on {new Date(req.created_at).toLocaleString()}
                       </p>
                     </div>
@@ -218,6 +216,31 @@ export function ClubDashboardClient({
               <button disabled className="w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 bg-[var(--canvas-inset)] text-[var(--mute)] border border-[var(--hairline)] cursor-not-allowed">
                 <Tv className="w-4 h-4" />
                 Hardware Pending
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {/* Render placeholders */}
+        {placeholders.map((_, idx) => (
+          <div key={`placeholder-${idx}`} className="geist-card p-6 flex flex-col justify-between border-dashed border-2 opacity-60">
+            <div>
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="font-semibold text-lg text-[var(--ink)]">Available Screen</h3>
+              </div>
+              <div className="mb-6">
+                <div className="p-4 bg-[var(--canvas-inset)] border border-dashed border-[var(--hairline)] rounded-lg text-center text-sm text-[var(--mute)]">
+                  You can request access to this screen slot.
+                </div>
+              </div>
+            </div>
+            <div>
+              <button 
+                onClick={() => setRequestModalOpen(true)}
+                className="w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 transition-opacity whisper-shadow"
+              >
+                <Plus className="w-4 h-4" />
+                Request This Screen
               </button>
             </div>
           </div>
