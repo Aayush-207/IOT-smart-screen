@@ -507,15 +507,33 @@ export function HodDashboardClient({
                   <p>No active screens allocated in this department.</p>
                 </div>
               )}
-              {screens.map(screen => (
+              {screens.map(screen => {
+                const activeReq = requests.find(req => {
+                  if (req.screen_id !== screen.id || req.status !== 'approved' || !req.scheduled_time || !req.duration_days) return false
+                  const start = new Date(req.scheduled_time)
+                  const end = new Date(start.getTime() + req.duration_days * 24 * 60 * 60 * 1000)
+                  const now = new Date()
+                  return now >= start && now <= end
+                })
+                
+                const displayImageUrl = activeReq ? activeReq.image_url : screen.current_poster_url
+                
+                let daysLeft = null
+                if (activeReq) {
+                  const end = new Date(new Date(activeReq.scheduled_time).getTime() + activeReq.duration_days * 24 * 60 * 60 * 1000)
+                  const now = new Date()
+                  daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+                }
+
+                return (
                 <div key={screen.id} className="geist-card p-0 whisper-shadow border-[var(--hairline)] flex flex-col overflow-hidden group">
                    <div className="h-40 bg-[var(--canvas-inset)] border-b border-[var(--hairline)] relative overflow-hidden flex items-center justify-center">
-                     {screen.current_poster_url ? (
+                     {displayImageUrl ? (
                        <>
-                         <img src={screen.current_poster_url} alt="Screen Poster" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                         <img src={displayImageUrl} alt="Screen Poster" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100">
                             <button 
-                              onClick={() => setLightboxImage(screen.current_poster_url)}
+                              onClick={() => setLightboxImage(displayImageUrl)}
                               className="bg-[var(--canvas)]/90 text-[var(--ink)] p-2 rounded-full shadow-lg hover:scale-110"
                             >
                               <Eye className="w-5 h-5" />
@@ -548,21 +566,29 @@ export function HodDashboardClient({
                        <p className="text-sm font-mono text-[var(--mute)] mt-1">{screen.location}</p>
                      </div>
                      <div className="mt-4 pt-4 border-t border-[var(--hairline)] flex items-center justify-between">
-                       {screen.current_poster_url ? (
+                       {activeReq ? (
+                         <span className="text-xs bg-blue-500/10 text-blue-600 px-3 py-1.5 rounded-md font-medium border border-blue-500/20 flex items-center gap-1">
+                           <Clock className="w-3.5 h-3.5" /> {daysLeft} Days Left
+                         </span>
+                       ) : screen.current_poster_url ? (
+                         <span className="text-xs bg-emerald-500/10 text-emerald-600 px-3 py-1.5 rounded-md font-medium">Legacy Poster Live</span>
+                       ) : (
+                         <span className="text-xs bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] px-3 py-1.5 rounded-md font-medium">Empty Screen</span>
+                       )}
+                       
+                       {displayImageUrl && (
                          <button 
                            onClick={() => handleClearPoster(screen.id)}
                            disabled={loading}
                            className="text-xs flex items-center gap-1.5 bg-rose-500/10 text-rose-600 px-3 py-1.5 rounded-md font-medium hover:bg-rose-500/20 transition-colors"
                          >
-                           <XCircle className="w-3.5 h-3.5" /> Delete Poster
+                           <XCircle className="w-3.5 h-3.5" /> Delete
                          </button>
-                       ) : (
-                         <span className="text-xs bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] px-3 py-1.5 rounded-md font-medium">Empty Screen</span>
                        )}
                      </div>
                    </div>
                 </div>
-              ))}
+              )})}
 
               {unusedScreens.map(unused => (
                 <div key={unused.id} className="geist-card p-0 border-dashed border-2 opacity-60 flex flex-col overflow-hidden group">
