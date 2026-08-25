@@ -63,7 +63,7 @@ export default async function HodDashboardPage() {
     <div className="min-h-screen bg-[var(--canvas)] text-[var(--ink)] font-geist-sans">
       <header className="sticky top-0 z-50 bg-[var(--canvas)]/90 border-b border-[var(--hairline)] backdrop-blur-md px-6 py-4 flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-semibold tracking-heading-lg">HOD Review Dashboard</h1>
+          <h1 className="text-xl font-semibold tracking-heading-lg">Council Dashboard</h1>
           <p className="text-sm text-[var(--mute)]">Department: {department.name}</p>
         </div>
         <LogoutButton />
