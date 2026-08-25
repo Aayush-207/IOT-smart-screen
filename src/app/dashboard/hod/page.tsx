@@ -75,6 +75,7 @@ export default async function HodDashboardPage() {
           initialRequests={requests} 
           initialScreenRequests={screenRequests}
           initialScreens={screens}
+          initialClubs={clubs || []}
         />
       </main>
     </div>

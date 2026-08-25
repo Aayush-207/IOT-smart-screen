@@ -4,33 +4,52 @@ import React, { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { 
   CheckCircle, XCircle, Clock, Tv, AlertCircle, 
-  Image as ImageIcon, Monitor, ScrollText, Eye, Maximize2, X, ChevronRight, ChevronLeft
+  Image as ImageIcon, Monitor, ScrollText, Eye, Maximize2, X, ChevronRight, ChevronLeft, Pencil
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export function HodDashboardClient({ 
   initialRequests, 
   initialScreenRequests,
-  initialScreens
+  initialScreens,
+  initialClubs
 }: { 
   initialRequests: any[], 
   initialScreenRequests: any[],
-  initialScreens: any[]
+  initialScreens: any[],
+  initialClubs: any[]
 }) {
   const [requests, setRequests] = useState(initialRequests)
   const [screenRequests, setScreenRequests] = useState(initialScreenRequests)
   const [screens, setScreens] = useState(initialScreens)
   
+  const unusedScreens = useMemo(() => {
+    if (!initialClubs) return []
+    return initialClubs.flatMap(club => {
+      const usedCount = screens.filter(s => s.club_id === club.id).length + 
+                        screenRequests.filter(r => r.club_id === club.id && r.status !== 'rejected').length
+      const unusedCount = Math.max(0, 3 - usedCount)
+      return Array.from({ length: unusedCount }).map((_, i) => ({
+        id: `unused-${club.id}-${i}`,
+        clubs: { name: club.name }
+      }))
+    })
+  }, [initialClubs, screens, screenRequests])
+  
   // Navigation State
   const [activeTab, setActiveTab] = useState<'posters' | 'hardware' | 'screens' | 'logs'>('posters')
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
 
-  // Modals
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
   const [activeReqId, setActiveReqId] = useState<string | null>(null)
   const [activeReqType, setActiveReqType] = useState<'poster' | 'screen'>('poster')
   const [rejectionReason, setRejectionReason] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Edit Modal
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [editingScreenId, setEditingScreenId] = useState<string | null>(null)
+  const [editingScreenName, setEditingScreenName] = useState('')
 
   // Lightbox & Modals
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
@@ -93,6 +112,7 @@ export function HodDashboardClient({
 
       router.refresh()
       setRequests(prev => prev.map(r => r.id === reqId ? { ...r, status: 'approved', updated_at: new Date().toISOString() } : r))
+      setScreens(prev => prev.map(s => s.id === screenId ? { ...s, current_poster_url: imageUrl } : s))
     } catch (e) {
       console.error(e)
       alert("Failed to approve poster.")
@@ -105,9 +125,11 @@ export function HodDashboardClient({
     setLoading(true)
     try {
       // 1. Insert actual screen hardware record
-      const { error: screenError } = await supabase
+      const { data: newScreen, error: screenError } = await supabase
         .from('screens')
         .insert({ name, location, club_id: clubId })
+        .select()
+        .single()
 
       if (screenError) throw screenError
 
@@ -121,9 +143,36 @@ export function HodDashboardClient({
 
       router.refresh()
       setScreenRequests(prev => prev.map(r => r.id === reqId ? { ...r, status: 'approved', updated_at: new Date().toISOString() } : r))
+      
+      // Attempt to attach club name for the UI immediately
+      if (newScreen) {
+        const clubName = screenRequests.find(r => r.id === reqId)?.clubs?.name
+        setScreens(prev => [...prev, { ...newScreen, clubs: { name: clubName } }])
+      }
     } catch (e) {
       console.error(e)
       alert("Failed to approve hardware screen request.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleClearPoster = async (screenId: string) => {
+    if (!confirm('Are you sure you want to remove the poster from this screen?')) return
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('screens')
+        .update({ current_poster_url: null })
+        .eq('id', screenId)
+
+      if (error) throw error
+
+      setScreens(prev => prev.map(s => s.id === screenId ? { ...s, current_poster_url: null } : s))
+      router.refresh()
+    } catch (e) {
+      console.error(e)
+      alert("Failed to clear poster")
     } finally {
       setLoading(false)
     }
@@ -162,6 +211,34 @@ export function HodDashboardClient({
     setActiveReqId(reqId)
     setActiveReqType(type)
     setRejectModalOpen(true)
+  }
+
+  const openEditModal = (screenId: string, currentName: string) => {
+    setEditingScreenId(screenId)
+    setEditingScreenName(currentName)
+    setEditModalOpen(true)
+  }
+
+  const handleEditScreenSubmit = async () => {
+    if (!editingScreenId || !editingScreenName.trim()) return
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('screens')
+        .update({ name: editingScreenName })
+        .eq('id', editingScreenId)
+
+      if (error) throw error
+
+      setScreens(prev => prev.map(s => s.id === editingScreenId ? { ...s, name: editingScreenName } : s))
+      router.refresh()
+      setEditModalOpen(false)
+    } catch (e) {
+      console.error(e)
+      alert("Failed to update screen name")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const navItems = [
@@ -375,29 +452,84 @@ export function HodDashboardClient({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {screens.length === 0 && (
+              {screens.length === 0 && unusedScreens.length === 0 && (
                 <div className="col-span-full p-12 text-center border border-dashed border-[var(--hairline)] rounded-xl bg-[var(--canvas-inset)] text-[var(--mute)]">
                   <p>No active screens allocated in this department.</p>
                 </div>
               )}
               {screens.map(screen => (
-                <div key={screen.id} className="geist-card p-5 whisper-shadow border-[var(--hairline)] flex flex-col justify-between">
-                   <div>
-                     <span className="text-xs font-semibold uppercase tracking-wider text-[var(--mute)] mb-1 block">
-                       {screen.clubs?.name}
-                     </span>
-                     <h3 className="font-semibold text-[var(--ink)] text-lg flex items-center gap-2">
-                       <Tv className="w-4 h-4" /> {screen.name}
-                     </h3>
-                     <p className="text-sm font-mono text-[var(--mute)] mt-1">{screen.location}</p>
-                   </div>
-                   <div className="mt-4 pt-4 border-t border-[var(--hairline)] flex items-center justify-between">
-                     <span className="text-xs text-[var(--mute)]">Current Poster:</span>
+                <div key={screen.id} className="geist-card p-0 whisper-shadow border-[var(--hairline)] flex flex-col overflow-hidden group">
+                   <div className="h-40 bg-[var(--canvas-inset)] border-b border-[var(--hairline)] relative overflow-hidden flex items-center justify-center">
                      {screen.current_poster_url ? (
-                       <span className="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded font-medium">Active</span>
+                       <>
+                         <img src={screen.current_poster_url} alt="Screen Poster" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center pointer-events-none group-hover:pointer-events-auto opacity-0 group-hover:opacity-100">
+                            <button 
+                              onClick={() => setLightboxImage(screen.current_poster_url)}
+                              className="bg-[var(--canvas)]/90 text-[var(--ink)] p-2 rounded-full shadow-lg hover:scale-110"
+                            >
+                              <Eye className="w-5 h-5" />
+                            </button>
+                         </div>
+                       </>
                      ) : (
-                       <span className="text-xs bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] px-2 py-0.5 rounded font-medium">None</span>
+                       <div className="text-[var(--mute)] flex flex-col items-center opacity-50">
+                         <Monitor className="w-8 h-8 mb-2" />
+                         <span className="text-xs font-medium uppercase tracking-wider">No Poster</span>
+                       </div>
                      )}
+                   </div>
+
+                   <div className="p-5 flex-1 flex flex-col justify-between">
+                     <div>
+                       <span className="text-xs font-semibold uppercase tracking-wider text-[var(--mute)] mb-1 block">
+                         {screen.clubs?.name}
+                       </span>
+                       <h3 className="font-semibold text-[var(--ink)] text-lg flex items-center gap-2 group/edit">
+                         <Tv className="w-4 h-4" /> {screen.name}
+                         <button 
+                           onClick={() => openEditModal(screen.id, screen.name)}
+                           className="opacity-0 group-hover/edit:opacity-100 p-1 text-[var(--mute)] hover:text-[#0070f3] hover:bg-[#0070f3]/10 rounded transition-all"
+                           title="Edit Screen Name"
+                         >
+                           <Pencil className="w-3.5 h-3.5" />
+                         </button>
+                       </h3>
+                       <p className="text-sm font-mono text-[var(--mute)] mt-1">{screen.location}</p>
+                     </div>
+                     <div className="mt-4 pt-4 border-t border-[var(--hairline)] flex items-center justify-between">
+                       {screen.current_poster_url ? (
+                         <button 
+                           onClick={() => handleClearPoster(screen.id)}
+                           disabled={loading}
+                           className="text-xs flex items-center gap-1.5 bg-rose-500/10 text-rose-600 px-3 py-1.5 rounded-md font-medium hover:bg-rose-500/20 transition-colors"
+                         >
+                           <XCircle className="w-3.5 h-3.5" /> Delete Poster
+                         </button>
+                       ) : (
+                         <span className="text-xs bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] px-3 py-1.5 rounded-md font-medium">Empty Screen</span>
+                       )}
+                     </div>
+                   </div>
+                </div>
+              ))}
+
+              {unusedScreens.map(unused => (
+                <div key={unused.id} className="geist-card p-0 border-dashed border-2 opacity-60 flex flex-col overflow-hidden group">
+                   <div className="h-40 bg-[var(--canvas-inset)] border-b border-[var(--hairline)] flex flex-col items-center justify-center text-[var(--mute)]">
+                     <Monitor className="w-8 h-8 mb-2 opacity-30" />
+                     <span className="text-xs font-medium uppercase tracking-wider">Unused Screen Slot</span>
+                   </div>
+                   <div className="p-5 flex-1 flex flex-col justify-between">
+                     <div>
+                       <span className="text-xs font-semibold uppercase tracking-wider text-[var(--mute)] mb-1 block">
+                         {unused.clubs.name}
+                       </span>
+                       <h3 className="font-semibold text-[var(--ink)] text-lg flex items-center gap-2">
+                         <Tv className="w-4 h-4 opacity-50" /> Unallocated
+                       </h3>
+                       <p className="text-sm font-mono text-[var(--mute)] mt-1">Waiting for club request</p>
+                     </div>
                    </div>
                 </div>
               ))}
@@ -566,6 +698,42 @@ export function HodDashboardClient({
               >
                 {loading ? 'Rejecting...' : 'Confirm Reject'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Screen Name Modal */}
+      {editModalOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-[var(--canvas-elevated)] rounded-xl border border-[var(--hairline)] p-6 w-full max-w-md floating-shadow animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-semibold text-[var(--ink)] mb-1">
+              Edit Screen Name
+            </h3>
+            <p className="text-sm text-[var(--mute)] mb-4">This new name will be updated instantly for the club.</p>
+            
+            <input
+              type="text"
+              className="w-full p-3 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[#0070f3] focus:ring-1 focus:ring-[#0070f3] mb-4"
+              placeholder="e.g., Main Hall Display"
+              value={editingScreenName}
+              onChange={(e) => setEditingScreenName(e.target.value)}
+            />
+            
+            <div className="flex gap-3 justify-end">
+               <button 
+                 onClick={() => setEditModalOpen(false)}
+                 className="px-4 py-2 text-sm font-medium text-[var(--body)] hover:text-[var(--ink)]"
+               >
+                 Cancel
+               </button>
+               <button 
+                 onClick={handleEditScreenSubmit}
+                 disabled={loading || !editingScreenName.trim()}
+                 className="px-4 py-2 bg-[var(--ink)] hover:opacity-90 text-[var(--canvas)] rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+               >
+                 {loading ? 'Saving...' : 'Save Name'}
+               </button>
             </div>
           </div>
         </div>
