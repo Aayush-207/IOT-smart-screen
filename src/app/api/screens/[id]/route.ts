@@ -8,20 +8,27 @@ export async function GET(
   try {
     const supabase = await createClient()
 
-    // Using service role or public policy depending on setup. 
-    // We configured a public policy for SELECT on screens in our setup script.
-    const { data: screen, error } = await supabase
-      .from('screens')
-      .select('current_poster_url')
-      .eq('id', params.id)
-      .single()
+    const { data: requests, error } = await supabase
+      .from('poster_requests')
+      .select('image_url, scheduled_time, duration_days')
+      .eq('screen_id', params.id)
+      .eq('status', 'approved')
+      .lte('scheduled_time', new Date().toISOString())
 
-    if (error || !screen) {
-      return NextResponse.json({ error: 'Screen not found or query failed' }, { status: 404 })
+    if (error) {
+      return NextResponse.json({ error: 'Query failed' }, { status: 500 })
     }
 
+    const now = new Date()
+    const activeRequest = requests?.find(req => {
+       if (!req.scheduled_time || !req.duration_days) return false
+       const start = new Date(req.scheduled_time)
+       const end = new Date(start.getTime() + req.duration_days * 24 * 60 * 60 * 1000)
+       return now >= start && now <= end
+    })
+
     return NextResponse.json({
-      poster_url: screen.current_poster_url || null
+      poster_url: activeRequest ? activeRequest.image_url : null
     })
   } catch (err) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Upload, AlertCircle, CheckCircle, Clock, Plus, Tv } from 'lucide-react'
+import { Upload, AlertCircle, CheckCircle, Clock, Plus, Tv, Calendar, Edit2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export function ClubDashboardClient({ 
@@ -25,51 +25,123 @@ export function ClubDashboardClient({
   const [newScreenLocation, setNewScreenLocation] = useState('')
   const [requesting, setRequesting] = useState(false)
 
+  // Schedule Modal state
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false)
+  const [activeScreenForSchedule, setActiveScreenForSchedule] = useState<string | null>(null)
+  const [scheduleFile, setScheduleFile] = useState<File | null>(null)
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [scheduleTime, setScheduleTime] = useState('')
+  const [scheduleDuration, setScheduleDuration] = useState('7')
+  const [scheduling, setScheduling] = useState(false)
+  const [editingReqId, setEditingReqId] = useState<string | null>(null)
+
   const supabase = createClient()
   const router = useRouter()
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, screenId: string) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleScheduleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!activeScreenForSchedule || !scheduleDate || !scheduleTime || !scheduleDuration) return
 
-    setUploadingFor(screenId)
+    setScheduling(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${clubId}/${fileName}`
+      const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`).toISOString()
 
-      // Upload to Storage
-      const { error: uploadError } = await supabase.storage
-        .from('posters')
-        .upload(filePath, file)
+      if (editingReqId && !scheduleFile) {
+        // Update schedule only
+        const { error: dbError } = await supabase
+          .from('poster_requests')
+          .update({
+            scheduled_time: scheduledDateTime,
+            duration_days: parseInt(scheduleDuration)
+          })
+          .eq('id', editingReqId)
 
-      if (uploadError) throw uploadError
+        if (dbError) throw dbError
+      } else {
+        // Upload new file and insert/update
+        if (!scheduleFile) throw new Error('No file selected')
+        
+        const fileExt = scheduleFile.name.split('.').pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        const filePath = `${clubId}/${fileName}`
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('posters')
-        .getPublicUrl(filePath)
+        const { error: uploadError } = await supabase.storage
+          .from('posters')
+          .upload(filePath, scheduleFile)
 
-      // Create Poster Request
-      const { error: dbError } = await supabase
-        .from('poster_requests')
-        .insert({
-          screen_id: screenId,
-          club_id: clubId,
-          image_url: publicUrl,
-          status: 'pending'
-        })
+        if (uploadError) throw uploadError
 
-      if (dbError) throw dbError
+        const { data: { publicUrl } } = supabase.storage
+          .from('posters')
+          .getPublicUrl(filePath)
 
-      // Refresh data
+        if (editingReqId) {
+          const { error: dbError } = await supabase
+            .from('poster_requests')
+            .update({
+              image_url: publicUrl,
+              scheduled_time: scheduledDateTime,
+              duration_days: parseInt(scheduleDuration)
+            })
+            .eq('id', editingReqId)
+          if (dbError) throw dbError
+        } else {
+          const { error: dbError } = await supabase
+            .from('poster_requests')
+            .insert({
+              screen_id: activeScreenForSchedule,
+              club_id: clubId,
+              image_url: publicUrl,
+              status: 'pending',
+              scheduled_time: scheduledDateTime,
+              duration_days: parseInt(scheduleDuration)
+            })
+          if (dbError) throw dbError
+        }
+      }
+
+      setScheduleModalOpen(false)
+      setScheduleFile(null)
       router.refresh()
       window.location.reload()
     } catch (error) {
-      alert('Error uploading poster!')
+      alert('Error scheduling poster!')
       console.error(error)
     } finally {
-      setUploadingFor(null)
+      setScheduling(false)
     }
+  }
+
+  const openScheduleModal = (screenId: string, req?: any) => {
+    setActiveScreenForSchedule(screenId)
+    if (req) {
+      setEditingReqId(req.id)
+      if (req.scheduled_time) {
+        const d = new Date(req.scheduled_time)
+        // Correct for timezone offset when formatting YYYY-MM-DD
+        const offset = d.getTimezoneOffset()
+        const dLocal = new Date(d.getTime() - (offset*60*1000))
+        setScheduleDate(dLocal.toISOString().split('T')[0])
+        setScheduleTime(d.toTimeString().split(' ')[0].substring(0,5))
+      } else {
+        const d = new Date()
+        const offset = d.getTimezoneOffset()
+        const dLocal = new Date(d.getTime() - (offset*60*1000))
+        setScheduleDate(dLocal.toISOString().split('T')[0])
+        setScheduleTime(d.toTimeString().split(' ')[0].substring(0,5))
+      }
+      setScheduleDuration(req.duration_days?.toString() || '7')
+    } else {
+      setEditingReqId(null)
+      const d = new Date()
+      const offset = d.getTimezoneOffset()
+      const dLocal = new Date(d.getTime() - (offset*60*1000))
+      setScheduleDate(dLocal.toISOString().split('T')[0])
+      setScheduleTime(d.toTimeString().split(' ')[0].substring(0,5))
+      setScheduleDuration('7')
+    }
+    setScheduleFile(null)
+    setScheduleModalOpen(true)
   }
 
   const handleRequestScreen = async (e: React.FormEvent) => {
@@ -124,6 +196,14 @@ export function ClubDashboardClient({
           const name = slot.type === 'active' || slot.type === 'pending' ? slot.data.name : "Available Screen Slot"
           const location = slot.type === 'active' || slot.type === 'pending' ? slot.data.location : "Unallocated"
           const req = slot.type === 'active' ? slot.data.latestRequest : null
+          
+          let isLive = false
+          if (req && req.status === 'approved' && req.scheduled_time && req.duration_days) {
+            const start = new Date(req.scheduled_time)
+            const end = new Date(start.getTime() + req.duration_days * 24 * 60 * 60 * 1000)
+            const now = new Date()
+            isLive = now >= start && now <= end
+          }
 
           return (
             <div key={slot.id} className="relative group h-full">
@@ -191,33 +271,41 @@ export function ClubDashboardClient({
                     ) : (
                       <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
                         <div className="flex items-center gap-2 mb-3">
-                          <CheckCircle className="w-4 h-4 text-emerald-500" />
-                          <p className="text-sm font-medium text-emerald-600 dark:text-emerald-500">Live on Screen</p>
+                          <CheckCircle className={`w-4 h-4 ${isLive ? 'text-emerald-500' : 'text-blue-500'}`} />
+                          <p className={`text-sm font-medium ${isLive ? 'text-emerald-600 dark:text-emerald-500' : 'text-blue-600 dark:text-blue-500'}`}>
+                            {isLive ? 'Live on Screen' : 'Scheduled'}
+                          </p>
                         </div>
                         <img src={req.image_url} alt="Current Poster" className="rounded-md border border-[var(--hairline)] w-full h-32 object-cover" />
-                        <p className="text-xs text-[var(--mute)] mt-3 text-center" suppressHydrationWarning>
-                          Updated on {new Date(req.created_at).toLocaleString()}
-                        </p>
+                        {req.scheduled_time && (
+                          <div className="text-[11px] text-[var(--mute)] mt-3 bg-[var(--canvas-elevated)] p-2 rounded text-center">
+                            <strong>Starts:</strong> {new Date(req.scheduled_time).toLocaleString()} <br/>
+                            <strong>Duration:</strong> {req.duration_days} Days
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div>
-                  <label className={`w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${slot.type === 'active' && uploadingFor === slot.data.id ? 'bg-[var(--mute)] text-white cursor-not-allowed' : 'bg-[var(--ink)] text-[var(--canvas)] whisper-shadow'} ${slot.type === 'active' ? 'cursor-pointer hover:opacity-90' : ''}`}>
-                    <Upload className="w-4 h-4" />
-                    {slot.type === 'active' && uploadingFor === slot.data.id ? 'Uploading...' : 'Upload New Poster'}
-                    {slot.type === 'active' && (
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={(e) => handleFileUpload(e, slot.data.id)}
-                        disabled={uploadingFor === slot.data.id}
-                      />
-                    )}
-                  </label>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => openScheduleModal(slot.data.id)}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all ${slot.type === 'active' && scheduling ? 'bg-[var(--mute)] text-white cursor-not-allowed' : 'bg-[var(--ink)] text-[var(--canvas)] whisper-shadow'} ${slot.type === 'active' ? 'cursor-pointer hover:opacity-90' : ''}`}
+                    disabled={slot.type !== 'active'}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Schedule New
+                  </button>
+                  {slot.type === 'active' && req && (
+                     <button
+                       onClick={() => openScheduleModal(slot.data.id, req)}
+                       className="py-2.5 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all bg-[var(--canvas-inset)] border border-[var(--hairline)] hover:border-[#0070f3] hover:text-[#0070f3]"
+                     >
+                       <Edit2 className="w-4 h-4" />
+                     </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -272,6 +360,84 @@ export function ClubDashboardClient({
                   className="px-4 py-2 bg-[var(--ink)] text-[var(--canvas)] hover:opacity-90 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
                 >
                   {requesting ? 'Requesting...' : 'Submit Request'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule Poster Modal */}
+      {scheduleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-[var(--canvas-elevated)] rounded-xl border border-[var(--hairline)] p-6 w-full max-w-md floating-shadow animate-in zoom-in-95 duration-200">
+            <h3 className="text-lg font-semibold text-[var(--ink)] mb-1">{editingReqId ? 'Edit Schedule' : 'Schedule Poster'}</h3>
+            <p className="text-sm text-[var(--mute)] mb-4">Set exactly when and how long your poster should be live.</p>
+            
+            <form onSubmit={handleScheduleSubmit}>
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-[var(--ink)] mb-1">Poster Image {editingReqId && '(Leave blank to keep current)'}</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => setScheduleFile(e.target.files?.[0] || null)}
+                    required={!editingReqId}
+                    className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none transition-all"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--ink)] mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      required
+                      value={scheduleDate}
+                      onChange={e => setScheduleDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm focus:border-[#0070f3] outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--ink)] mb-1">Start Time</label>
+                    <input
+                      type="time"
+                      required
+                      value={scheduleTime}
+                      onChange={e => setScheduleTime(e.target.value)}
+                      className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm focus:border-[#0070f3] outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--ink)] mb-1">Duration (Days)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="365"
+                    required
+                    value={scheduleDuration}
+                    onChange={e => setScheduleDuration(e.target.value)}
+                    className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm focus:border-[#0070f3] outline-none transition-all"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-3 justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setScheduleModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-[var(--mute)] hover:text-[var(--ink)]"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={scheduling}
+                  className="px-4 py-2 bg-[#0070f3] text-white hover:opacity-90 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50 flex items-center gap-2"
+                >
+                  {scheduling ? 'Saving...' : 'Save Schedule'}
                 </button>
               </div>
             </form>

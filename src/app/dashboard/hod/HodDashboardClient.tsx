@@ -107,17 +107,9 @@ export function HodDashboardClient({
 
       if (reqError) throw reqError
 
-      // 2. Update screen with new poster
-      const { error: screenError } = await supabase
-        .from('screens')
-        .update({ current_poster_url: imageUrl })
-        .eq('id', screenId)
-
-      if (screenError) throw screenError
-
       router.refresh()
       setRequests(prev => prev.map(r => r.id === reqId ? { ...r, status: 'approved', updated_at: new Date().toISOString() } : r))
-      setScreens(prev => prev.map(s => s.id === screenId ? { ...s, current_poster_url: imageUrl } : s))
+
     } catch (e) {
       console.error(e)
       alert("Failed to approve poster.")
@@ -386,8 +378,15 @@ export function HodDashboardClient({
                       </span>
                     </div>
                     <p className="text-sm font-semibold text-[var(--ink)]">{req.screens?.name}</p>
-                    <p className="text-xs text-[var(--mute)]">{req.screens?.location}</p>
+                    <p className="text-xs text-[var(--mute)] mb-2">{req.screens?.location}</p>
                     
+                    {req.scheduled_time && (
+                      <div className="text-[11px] bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded p-2 mb-2 text-[var(--mute)]">
+                        <strong>Schedule:</strong> {new Date(req.scheduled_time).toLocaleString()} <br/>
+                        <strong>Duration:</strong> {req.duration_days} Days
+                      </div>
+                    )}
+
                     {req.status === 'rejected' && (
                       <div className="mt-3 p-2 bg-rose-500/10 border border-rose-500/20 rounded text-xs text-rose-600">
                         <span className="font-semibold">Reason:</span> {req.rejection_reason}
