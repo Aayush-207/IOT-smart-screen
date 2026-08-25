@@ -30,7 +30,8 @@ export function HodDashboardClient({
                         screenRequests.filter(r => r.club_id === club.id && r.status !== 'rejected').length
       const unusedCount = Math.max(0, 3 - usedCount)
       return Array.from({ length: unusedCount }).map((_, i) => ({
-        id: `unused-${club.id}-${i}`,
+        id: `unused|${club.id}|${i}`,
+        club_id: club.id,
         clubs: { name: club.name }
       }))
     })
@@ -50,6 +51,7 @@ export function HodDashboardClient({
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [editingScreenId, setEditingScreenId] = useState<string | null>(null)
   const [editingScreenName, setEditingScreenName] = useState('')
+  const [editingScreenLocation, setEditingScreenLocation] = useState('')
 
   // Lightbox & Modals
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
@@ -96,6 +98,7 @@ export function HodDashboardClient({
   const handleApprovePoster = async (reqId: string, screenId: string, imageUrl: string) => {
     setLoading(true)
     try {
+      // 1. Update poster_requests status
       const { error: reqError } = await supabase
         .from('poster_requests')
         .update({ status: 'approved' })
@@ -103,6 +106,7 @@ export function HodDashboardClient({
 
       if (reqError) throw reqError
 
+      // 2. Update screen with new poster
       const { error: screenError } = await supabase
         .from('screens')
         .update({ current_poster_url: imageUrl })
@@ -185,12 +189,16 @@ export function HodDashboardClient({
       const table = activeReqType === 'poster' ? 'poster_requests' : 'screen_requests'
       const { error } = await supabase
         .from(table)
-        .update({ status: 'rejected', rejection_reason: rejectionReason })
+        .update({ 
+          status: 'rejected',
+          rejection_reason: rejectionReason
+        })
         .eq('id', activeReqId)
 
       if (error) throw error
 
       router.refresh()
+      
       if (activeReqType === 'poster') {
         setRequests(prev => prev.map(r => r.id === activeReqId ? { ...r, status: 'rejected', rejection_reason: rejectionReason, updated_at: new Date().toISOString() } : r))
       } else {
@@ -213,9 +221,10 @@ export function HodDashboardClient({
     setRejectModalOpen(true)
   }
 
-  const openEditModal = (screenId: string, currentName: string) => {
+  const openEditModal = (screenId: string, currentName: string, currentLocation: string = '') => {
     setEditingScreenId(screenId)
     setEditingScreenName(currentName)
+    setEditingScreenLocation(currentLocation)
     setEditModalOpen(true)
   }
 
@@ -223,14 +232,39 @@ export function HodDashboardClient({
     if (!editingScreenId || !editingScreenName.trim()) return
     setLoading(true)
     try {
-      const { error } = await supabase
-        .from('screens')
-        .update({ name: editingScreenName })
-        .eq('id', editingScreenId)
+      if (editingScreenId.startsWith('unused|')) {
+        // Create new screen from unused slot
+        const clubId = editingScreenId.split('|')[1]
+        
+        // Find club name for local state
+        const clubName = initialClubs?.find(c => c.id === clubId)?.name
+        
+        const { data: newScreen, error } = await supabase
+          .from('screens')
+          .insert({ name: editingScreenName, location: editingScreenLocation || 'TBD', club_id: clubId })
+          .select()
+          .single()
 
-      if (error) throw error
+        if (error) throw error
+        
+        if (newScreen) {
+          setScreens(prev => [...prev, { ...newScreen, clubs: { name: clubName } }])
+        }
+      } else {
+        // Update existing screen
+        const { error } = await supabase
+          .from('screens')
+          .update({ name: editingScreenName, location: editingScreenLocation || 'TBD' })
+          .eq('id', editingScreenId)
 
-      setScreens(prev => prev.map(s => s.id === editingScreenId ? { ...s, name: editingScreenName } : s))
+        if (error) throw error
+
+        setScreens(prev => prev.map(s => s.id === editingScreenId 
+          ? { ...s, name: editingScreenName, location: editingScreenLocation || 'TBD' } 
+          : s
+        ))
+      }
+
       router.refresh()
       setEditModalOpen(false)
     } catch (e) {
@@ -488,7 +522,7 @@ export function HodDashboardClient({
                        <h3 className="font-semibold text-[var(--ink)] text-lg flex items-center gap-2 group/edit">
                          <Tv className="w-4 h-4" /> {screen.name}
                          <button 
-                           onClick={() => openEditModal(screen.id, screen.name)}
+                           onClick={() => openEditModal(screen.id, screen.name, screen.location)}
                            className="opacity-0 group-hover/edit:opacity-100 p-1 text-[var(--mute)] hover:text-[#0070f3] hover:bg-[#0070f3]/10 rounded transition-all"
                            title="Edit Screen Name"
                          >
@@ -525,8 +559,15 @@ export function HodDashboardClient({
                        <span className="text-xs font-semibold uppercase tracking-wider text-[var(--mute)] mb-1 block">
                          {unused.clubs.name}
                        </span>
-                       <h3 className="font-semibold text-[var(--ink)] text-lg flex items-center gap-2">
+                       <h3 className="font-semibold text-[var(--ink)] text-lg flex items-center gap-2 group/edit">
                          <Tv className="w-4 h-4 opacity-50" /> Unallocated
+                         <button 
+                           onClick={() => openEditModal(unused.id, '', '')}
+                           className="opacity-0 group-hover/edit:opacity-100 p-1 text-[var(--mute)] hover:text-[#0070f3] hover:bg-[#0070f3]/10 rounded transition-all"
+                           title="Allocate and Name this screen"
+                         >
+                           <Pencil className="w-3.5 h-3.5" />
+                         </button>
                        </h3>
                        <p className="text-sm font-mono text-[var(--mute)] mt-1">Waiting for club request</p>
                      </div>
@@ -714,10 +755,17 @@ export function HodDashboardClient({
             
             <input
               type="text"
-              className="w-full p-3 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[#0070f3] focus:ring-1 focus:ring-[#0070f3] mb-4"
+              className="w-full p-3 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[#0070f3] focus:ring-1 focus:ring-[#0070f3] mb-3"
               placeholder="e.g., Main Hall Display"
               value={editingScreenName}
               onChange={(e) => setEditingScreenName(e.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full p-3 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[#0070f3] focus:ring-1 focus:ring-[#0070f3] mb-4"
+              placeholder="Location (Optional)"
+              value={editingScreenLocation}
+              onChange={(e) => setEditingScreenLocation(e.target.value)}
             />
             
             <div className="flex gap-3 justify-end">
