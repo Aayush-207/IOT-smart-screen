@@ -29,7 +29,12 @@ export const Navbar: React.FC<NavbarProps> = ({ currentUser, onUserSwitched }) =
   const fetchUsers = async () => {
     try {
       const res = await fetch("/api/users");
-      const data = await res.json();
+      const text = await res.text();
+      if (!res.ok || !text) {
+        console.error("Failed to fetch users", res.status, text);
+        return;
+      }
+      const data = JSON.parse(text);
       if (data.users) {
         setUsers(data.users);
       }
