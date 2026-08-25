@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Upload, AlertCircle, CheckCircle, Clock, Plus, Tv, Calendar, Edit2 } from 'lucide-react'
+import { Upload, AlertCircle, CheckCircle, Clock, Plus, Tv, Calendar, Edit2, CheckSquare } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export function ClubDashboardClient({ 
@@ -19,11 +19,26 @@ export function ClubDashboardClient({
   const [screenRequests, setScreenRequests] = useState(activeRequests)
   const [uploadingFor, setUploadingFor] = useState<string | null>(null)
   
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'hardware' | 'schedule'>('hardware')
+
   // Modal state
   const [requestModalOpen, setRequestModalOpen] = useState(false)
   const [newScreenName, setNewScreenName] = useState('')
   const [newScreenLocation, setNewScreenLocation] = useState('')
   const [requesting, setRequesting] = useState(false)
+
+  // Event Modal state
+  const [eventModalOpen, setEventModalOpen] = useState(false)
+  const [eventName, setEventName] = useState('')
+  const [eventDescription, setEventDescription] = useState('')
+  const [eventPoster, setEventPoster] = useState<File | null>(null)
+  const [eventStartDate, setEventStartDate] = useState('')
+  const [eventStartTime, setEventStartTime] = useState('')
+  const [eventEndDate, setEventEndDate] = useState('')
+  const [eventEndTime, setEventEndTime] = useState('')
+  const [selectedScreens, setSelectedScreens] = useState<string[]>([])
+  const [creatingEvent, setCreatingEvent] = useState(false)
 
   // Schedule Modal state
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false)
@@ -144,6 +159,50 @@ export function ClubDashboardClient({
     setScheduleModalOpen(true)
   }
 
+  const handleEventSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!eventName || !eventPoster || selectedScreens.length === 0 || !eventStartDate || !eventStartTime || !eventEndDate || !eventEndTime) return
+    
+    setCreatingEvent(true)
+    try {
+      const startDT = new Date(`${eventStartDate}T${eventStartTime}`).toISOString()
+      const endDT = new Date(`${eventEndDate}T${eventEndTime}`).toISOString()
+
+      const fileExt = eventPoster.name.split('.').pop()
+      const fileName = `${Math.random()}.${fileExt}`
+      const filePath = `${clubId}/${fileName}`
+
+      const { error: uploadError } = await supabase.storage.from('posters').upload(filePath, eventPoster)
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage.from('posters').getPublicUrl(filePath)
+
+      const requestsToInsert = selectedScreens.map(screenId => ({
+        screen_id: screenId,
+        club_id: clubId,
+        image_url: publicUrl,
+        status: 'pending',
+        scheduled_time: startDT,
+        end_time: endDT,
+        event_name: eventName,
+        description: eventDescription
+      }))
+
+      const { error: dbError } = await supabase.from('poster_requests').insert(requestsToInsert)
+      if (dbError) throw dbError
+
+      setEventModalOpen(false)
+      setActiveTab('schedule')
+      router.refresh()
+      window.location.reload()
+    } catch (error) {
+      console.error(error)
+      alert("Failed to create event")
+    } finally {
+      setCreatingEvent(false)
+    }
+  }
+
   const handleRequestScreen = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newScreenName || !newScreenLocation) return
@@ -183,14 +242,46 @@ export function ClubDashboardClient({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-lg font-semibold">Your Screens</h2>
-          <p className="text-sm text-[var(--mute)]">Manage posters or request new displays.</p>
+          <h2 className="text-2xl font-semibold text-[var(--ink)]">Club Dashboard</h2>
+          <p className="text-[var(--mute)]">Manage your hardware and poster schedules.</p>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setEventModalOpen(true)}
+            className="bg-[#0070f3] text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+          >
+            <Calendar className="w-4 h-4" /> Create an Event
+          </button>
+          <button 
+            onClick={() => setRequestModalOpen(true)}
+            className="bg-[var(--ink)] text-[var(--canvas)] px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Request Screen
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex gap-6 border-b border-[var(--hairline)] mb-6">
+        <button 
+          onClick={() => setActiveTab('hardware')}
+          className={`pb-3 font-medium text-sm transition-colors relative ${activeTab === 'hardware' ? 'text-[var(--ink)]' : 'text-[var(--mute)] hover:text-[var(--ink)]'}`}
+        >
+          Active Hardware
+          {activeTab === 'hardware' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--ink)] rounded-t-full" />}
+        </button>
+        <button 
+          onClick={() => setActiveTab('schedule')}
+          className={`pb-3 font-medium text-sm transition-colors relative ${activeTab === 'schedule' ? 'text-[var(--ink)]' : 'text-[var(--mute)] hover:text-[var(--ink)]'}`}
+        >
+          Schedule
+          {activeTab === 'schedule' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--ink)] rounded-t-full" />}
+        </button>
+      </div>
+
+      {activeTab === 'hardware' && (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {allSlots.map((slot) => {
           const isBlurred = slot.type !== 'active'
           const name = slot.type === 'active' || slot.type === 'pending' ? slot.data.name : "Available Screen Slot"
@@ -312,6 +403,48 @@ export function ClubDashboardClient({
           )
         })}
       </div>
+      )}
+
+      {activeTab === 'schedule' && (
+        <div className="space-y-4">
+          {screenRequests.length === 0 && (
+            <div className="p-12 text-center border border-dashed border-[var(--hairline)] rounded-xl bg-[var(--canvas-inset)] text-[var(--mute)]">
+              <Calendar className="w-8 h-8 mx-auto mb-3 opacity-50" />
+              <p>No events or posters scheduled yet.</p>
+            </div>
+          )}
+          {screenRequests.map(req => {
+            const screen = screens.find(s => s.id === req.screen_id)
+            const isLive = req.status === 'approved' && req.scheduled_time && (
+              req.end_time ? (new Date() >= new Date(req.scheduled_time) && new Date() <= new Date(req.end_time))
+              : (req.duration_days && new Date() >= new Date(req.scheduled_time) && new Date() <= new Date(new Date(req.scheduled_time).getTime() + req.duration_days * 24 * 60 * 60 * 1000))
+            )
+            return (
+              <div key={req.id} className="geist-card p-4 whisper-shadow border-[var(--hairline)] flex gap-4 items-center">
+                <img src={req.image_url} alt="Poster" className="w-24 h-32 object-cover rounded-md border border-[var(--hairline)]" />
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--ink)]">{req.event_name || req.screens?.name || 'Scheduled Poster'}</h3>
+                      <p className="text-sm text-[var(--mute)]">Screen: {screen ? screen.name : 'Unknown'}</p>
+                    </div>
+                    {req.status === 'pending' && <span className="text-xs bg-yellow-500/10 text-yellow-600 px-2 py-1 rounded border border-yellow-500/20">Pending Approval</span>}
+                    {req.status === 'approved' && isLive && <span className="text-xs bg-emerald-500/10 text-emerald-600 px-2 py-1 rounded border border-emerald-500/20">Live</span>}
+                    {req.status === 'approved' && !isLive && <span className="text-xs bg-blue-500/10 text-blue-600 px-2 py-1 rounded border border-blue-500/20">Approved (Upcoming)</span>}
+                  </div>
+                  {req.description && <p className="text-sm text-[var(--mute)] mt-2">{req.description}</p>}
+                  {req.scheduled_time && (
+                    <div className="mt-3 text-xs bg-[var(--canvas-inset)] p-2 rounded text-[var(--mute)] inline-block">
+                      <strong>Start:</strong> {new Date(req.scheduled_time).toLocaleString()} &nbsp;|&nbsp; 
+                      <strong>End:</strong> {req.end_time ? new Date(req.end_time).toLocaleString() : (req.duration_days ? `${req.duration_days} Days` : 'N/A')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Request Screen Modal */}
       {requestModalOpen && (
@@ -438,6 +571,119 @@ export function ClubDashboardClient({
                   className="px-4 py-2 bg-[#0070f3] text-white hover:opacity-90 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50 flex items-center gap-2"
                 >
                   {scheduling ? 'Saving...' : 'Save Schedule'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Event Creation Modal */}
+      {eventModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-[var(--canvas-elevated)] rounded-xl border border-[var(--hairline)] p-6 w-full max-w-2xl floating-shadow animate-in zoom-in-95 duration-200 my-8">
+            <h3 className="text-xl font-semibold text-[var(--ink)] mb-1">Create an Event</h3>
+            <p className="text-sm text-[var(--mute)] mb-6">Schedule a poster across multiple screens for your upcoming event.</p>
+            
+            <form onSubmit={handleEventSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                
+                {/* Left Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--ink)] mb-1">Event Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={eventName}
+                      onChange={e => setEventName(e.target.value)}
+                      placeholder="e.g. Annual Tech Symposium"
+                      className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none focus:border-[#0070f3]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--ink)] mb-1">Short Description</label>
+                    <textarea
+                      value={eventDescription}
+                      onChange={e => setEventDescription(e.target.value)}
+                      placeholder="Briefly describe the event..."
+                      rows={3}
+                      className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none focus:border-[#0070f3]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--ink)] mb-1">Poster Image *</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      required
+                      onChange={e => setEventPoster(e.target.files?.[0] || null)}
+                      className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[var(--ink)] mb-2">Target Screens *</label>
+                    <div className="max-h-32 overflow-y-auto bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg p-2 space-y-1">
+                      {screens.length === 0 && <p className="text-xs text-[var(--mute)] p-2">No active screens available.</p>}
+                      {screens.map(screen => (
+                        <label key={screen.id} className="flex items-center gap-2 p-2 hover:bg-[var(--canvas-elevated)] rounded cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={selectedScreens.includes(screen.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedScreens([...selectedScreens, screen.id])
+                              else setSelectedScreens(selectedScreens.filter(id => id !== screen.id))
+                            }}
+                            className="rounded border-[var(--hairline)] text-[#0070f3] focus:ring-[#0070f3]"
+                          />
+                          <span className="text-sm text-[var(--ink)]">{screen.name}</span>
+                          <span className="text-xs text-[var(--mute)] ml-auto">{screen.location}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--mute)] mb-1">Start Date *</label>
+                      <input type="date" required value={eventStartDate} onChange={e => setEventStartDate(e.target.value)} className="w-full px-3 py-1.5 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--mute)] mb-1">Start Time *</label>
+                      <input type="time" required value={eventStartTime} onChange={e => setEventStartTime(e.target.value)} className="w-full px-3 py-1.5 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--mute)] mb-1">End Date *</label>
+                      <input type="date" required value={eventEndDate} onChange={e => setEventEndDate(e.target.value)} className="w-full px-3 py-1.5 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--mute)] mb-1">End Time *</label>
+                      <input type="time" required value={eventEndTime} onChange={e => setEventEndTime(e.target.value)} className="w-full px-3 py-1.5 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              
+              <div className="flex gap-3 justify-end pt-4 border-t border-[var(--hairline)]">
+                <button 
+                  type="button"
+                  onClick={() => setEventModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-[var(--mute)] hover:text-[var(--ink)]"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={creatingEvent || selectedScreens.length === 0}
+                  className="px-6 py-2 bg-[#0070f3] text-white hover:opacity-90 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50 flex items-center gap-2"
+                >
+                  {creatingEvent ? 'Submitting...' : 'Submit Event'}
                 </button>
               </div>
             </form>

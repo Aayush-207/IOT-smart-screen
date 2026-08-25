@@ -377,13 +377,25 @@ export function HodDashboardClient({
                         {req.status.toUpperCase()}
                       </span>
                     </div>
-                    <p className="text-sm font-semibold text-[var(--ink)]">{req.screens?.name}</p>
-                    <p className="text-xs text-[var(--mute)] mb-2">{req.screens?.location}</p>
+                    <p className="text-sm font-semibold text-[var(--ink)]">
+                      {req.event_name ? req.event_name : req.screens?.name}
+                    </p>
+                    {req.event_name && (
+                       <p className="text-xs font-semibold text-[var(--mute)] mb-1">
+                         Screen: {req.screens?.name} ({req.screens?.location})
+                       </p>
+                    )}
+                    {!req.event_name && (
+                       <p className="text-xs text-[var(--mute)] mb-2">{req.screens?.location}</p>
+                    )}
+                    {req.description && (
+                       <p className="text-xs text-[var(--mute)] mb-2 bg-[var(--canvas-inset)] p-2 rounded">{req.description}</p>
+                    )}
                     
                     {req.scheduled_time && (
                       <div className="text-[11px] bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded p-2 mb-2 text-[var(--mute)]">
-                        <strong>Schedule:</strong> {new Date(req.scheduled_time).toLocaleString()} <br/>
-                        <strong>Duration:</strong> {req.duration_days} Days
+                        <strong>Start:</strong> {new Date(req.scheduled_time).toLocaleString()} <br/>
+                        <strong>End:</strong> {req.end_time ? new Date(req.end_time).toLocaleString() : `${req.duration_days} Days`}
                       </div>
                     )}
 
@@ -509,9 +521,16 @@ export function HodDashboardClient({
               )}
               {screens.map(screen => {
                 const activeReq = requests.find(req => {
-                  if (req.screen_id !== screen.id || req.status !== 'approved' || !req.scheduled_time || !req.duration_days) return false
+                  if (req.screen_id !== screen.id || req.status !== 'approved' || !req.scheduled_time) return false
                   const start = new Date(req.scheduled_time)
-                  const end = new Date(start.getTime() + req.duration_days * 24 * 60 * 60 * 1000)
+                  let end = new Date()
+                  if (req.end_time) {
+                    end = new Date(req.end_time)
+                  } else if (req.duration_days) {
+                    end = new Date(start.getTime() + req.duration_days * 24 * 60 * 60 * 1000)
+                  } else {
+                    return false
+                  }
                   const now = new Date()
                   return now >= start && now <= end
                 })
@@ -520,7 +539,12 @@ export function HodDashboardClient({
                 
                 let daysLeft = null
                 if (activeReq) {
-                  const end = new Date(new Date(activeReq.scheduled_time).getTime() + activeReq.duration_days * 24 * 60 * 60 * 1000)
+                  let end = new Date()
+                  if (activeReq.end_time) {
+                    end = new Date(activeReq.end_time)
+                  } else if (activeReq.duration_days) {
+                    end = new Date(new Date(activeReq.scheduled_time).getTime() + activeReq.duration_days * 24 * 60 * 60 * 1000)
+                  }
                   const now = new Date()
                   daysLeft = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
                 }

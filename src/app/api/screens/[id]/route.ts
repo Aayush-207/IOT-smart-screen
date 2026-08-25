@@ -10,7 +10,7 @@ export async function GET(
 
     const { data: requests, error } = await supabase
       .from('poster_requests')
-      .select('image_url, scheduled_time, duration_days')
+      .select('image_url, scheduled_time, duration_days, end_time')
       .eq('screen_id', params.id)
       .eq('status', 'approved')
       .lte('scheduled_time', new Date().toISOString())
@@ -21,9 +21,16 @@ export async function GET(
 
     const now = new Date()
     const activeRequest = requests?.find(req => {
-       if (!req.scheduled_time || !req.duration_days) return false
+       if (!req.scheduled_time) return false
        const start = new Date(req.scheduled_time)
-       const end = new Date(start.getTime() + req.duration_days * 24 * 60 * 60 * 1000)
+       let end = new Date()
+       if (req.end_time) {
+         end = new Date(req.end_time)
+       } else if (req.duration_days) {
+         end = new Date(start.getTime() + req.duration_days * 24 * 60 * 60 * 1000)
+       } else {
+         return false
+       }
        return now >= start && now <= end
     })
 
