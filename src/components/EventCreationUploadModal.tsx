@@ -22,7 +22,7 @@ export const EventCreationUploadModal: React.FC<EventCreationUploadModalProps> =
   onSuccess,
   targetEventId,
   clubs,
-  currentUserId,
+  currentUserId: _currentUserId,
 }) => {
   const [step, setStep] = useState<1 | 2>(1);
 

@@ -271,6 +271,24 @@ export const ReviewQueueView: React.FC<ReviewQueueViewProps> = ({
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" /> Evaluate & Decide
                     </button>
+                  ) : (item.status === "awaiting_poster" || item.status === "rejected") && (role === "club_president" || role === "admin") ? (
+                    <>
+                      <button
+                        onClick={() => onOpenUpload(item.eventId || item.event?.id)}
+                        className="flex-1 py-2 rounded-[6px] bg-[#0070f3] text-white text-xs font-semibold hover:bg-[#0060df] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        Upload Poster
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReviewingItem(item);
+                          setReviewDecision(null);
+                        }}
+                        className="px-3 py-2 rounded-[6px] bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--ink)] text-xs font-medium hover:border-[var(--ink)] transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-[var(--mute)]" /> Details
+                      </button>
+                    </>
                   ) : (
                     <button
                       onClick={() => {

@@ -221,7 +221,7 @@ export const DeviceFleetView: React.FC = () => {
                   AWS IOT DEVICE SHADOW // JSON PAYLOAD
                 </span>
                 <h3 className="text-base font-semibold text-[var(--ink)]">
-                  {inspectingShadow.name}
+                  {inspectingShadow.locationTag || inspectingShadow.name || "Display Screen"}
                 </h3>
               </div>
               <button
