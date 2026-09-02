@@ -190,6 +190,7 @@ export function AppSidebar({
           <button
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             className="p-1.5 rounded-md border border-[#362d59] bg-[#150f23] text-[#bdb8c0] hover:text-white cursor-pointer transition-colors"
           >
             {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-[#c2ef4e]" /> : <Moon className="w-3.5 h-3.5" />}

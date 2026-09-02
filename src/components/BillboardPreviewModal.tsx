@@ -46,7 +46,7 @@ export function BillboardPreviewModal({
   const isEmergency = priority === 'emergency'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200" role="dialog" aria-modal="true" aria-label="Display Screen Simulator">
       <div className="bg-[#150f23] border border-[#362d59] rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-white">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-[#362d59] flex items-center justify-between bg-[#150f23]">
@@ -90,6 +90,7 @@ export function BillboardPreviewModal({
             <button
               type="button"
               onClick={onClose}
+              aria-label="Close Preview"
               className="p-2 text-[#8b8496] hover:text-white rounded-lg hover:bg-[#1f1633] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
