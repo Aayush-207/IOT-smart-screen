@@ -52,7 +52,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col font-sans bg-[var(--canvas)] text-[var(--ink)] selection:bg-[#0070f3] selection:text-white"
+        className="min-h-full flex flex-col font-sans bg-[var(--canvas)] text-[var(--ink)] selection:bg-[var(--cohere-action-blue)] selection:text-white"
       >
         {children}
       </body>

@@ -344,7 +344,7 @@ export function VideoWallClient({
                     <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${DOT_COLOR[screen._status as DeviceStatus]}`} />
                     <Link
                       href={`/dashboard/admin/fleet/${screen.id}`}
-                      className="font-semibold text-[var(--ink)] hover:text-[#0070f3] truncate"
+                      className="font-semibold text-[var(--ink)] hover:text-[var(--link)] truncate"
                       title={screen.name}
                     >
                       {screen.name}
@@ -444,11 +444,11 @@ export function VideoWallClient({
                       onClick={() => handleForceRefresh(screen.id, screen.name)}
                       disabled={isBusy}
                       title="Force Sync / Refresh Screen"
-                      className="p-1.5 rounded-lg hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[#0070f3] disabled:opacity-50 cursor-pointer transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[var(--link)] disabled:opacity-50 cursor-pointer transition-colors"
                     >
                       <RefreshCw
                         className={`w-3.5 h-3.5 ${
-                          isBusy && busyType === 'refresh' ? 'animate-spin text-[#0070f3]' : ''
+                          isBusy && busyType === 'refresh' ? 'animate-spin text-[var(--link)]' : ''
                         }`}
                       />
                     </button>

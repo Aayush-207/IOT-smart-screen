@@ -114,7 +114,7 @@ export function OrgManagementClient({
                   placeholder="e.g. Computer Science"
                   value={newDeptName}
                   onChange={(e) => setNewDeptName(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[#0070f3]"
+                  className="w-full px-3 py-1.5 bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
                 />
               </div>
               <div>
@@ -122,7 +122,7 @@ export function OrgManagementClient({
                 <select
                   value={newDeptHod}
                   onChange={(e) => setNewDeptHod(e.target.value)}
-                  className="w-full bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-lg px-3 py-1.5 text-sm text-[var(--ink)] focus:outline-none focus:border-[#0070f3] h-[34px]"
+                  className="w-full bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-lg px-3 py-1.5 text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)] h-[34px]"
                 >
                   <option value="">-- None --</option>
                   {hodUsers.map((u) => (
@@ -133,7 +133,7 @@ export function OrgManagementClient({
               <button
                 type="submit"
                 disabled={loading || !newDeptName.trim()}
-                className="bg-[var(--ink)] text-[var(--canvas)] px-4 py-1.5 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity h-[34px] cursor-pointer"
+                className="cohere-btn-primary py-1.5 px-4 text-xs font-medium disabled:opacity-50 h-[34px] cursor-pointer"
               >
                 Create
               </button>
@@ -151,13 +151,13 @@ export function OrgManagementClient({
                 {initialDepartments.map((dept) => (
                   <tr key={dept.id} className="border-b border-[var(--hairline-soft)] last:border-0">
                     <td className="py-4 font-medium text-[var(--ink)]">{dept.name}</td>
-                    <td className="py-4">{dept.profiles?.email || 'Unassigned'}</td>
+                    <td className="py-4 text-[var(--slate)] font-mono text-xs">{dept.profiles?.email || 'Unassigned'}</td>
                     <td className="py-4">
                       <select
                         disabled={loading}
                         value={dept.hod_id || ''}
                         onChange={(e) => handleUpdateDepartment(dept.id, e.target.value)}
-                        className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#0070f3]"
+                        className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
                       >
                         <option value="">-- Unassign --</option>
                         {hodUsers.map((u) => (
@@ -190,7 +190,7 @@ export function OrgManagementClient({
                       disabled={loading}
                       value={p.role}
                       onChange={(e) => handleUpdateProfile(p.id, { role: e.target.value })}
-                      className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#0070f3]"
+                      className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
                     >
                       <option value="submitter">Submitter</option>
                       <option value="hod">HOD</option>
@@ -203,7 +203,7 @@ export function OrgManagementClient({
                       disabled={loading}
                       value={p.department_id || ''}
                       onChange={(e) => handleUpdateProfile(p.id, { department_id: e.target.value })}
-                      className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-[#0070f3]"
+                      className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
                     >
                       <option value="">-- None --</option>
                       {initialDepartments.map((d) => (

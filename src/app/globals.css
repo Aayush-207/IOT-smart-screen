@@ -19,6 +19,7 @@
     --canvas: #ffffff;
     --canvas-elevated: #ffffff;
     --canvas-stone: #eeece7;
+    --canvas-inset: #f8f8fa;
     --canvas-pale-green: #edfce9;
     --canvas-pale-blue: #f1f5ff;
     --canvas-card-border: #f2f2f2;
@@ -31,6 +32,7 @@
     --slate: #75758a;
     --faint: #b4b4be;
     --hairline: #d9d9dd;
+    --hairline-soft: #e5e7eb;
     --border-light: #e5e7eb;
     --link: #1863dc;
     --link-hover: #0f4cb8;
@@ -44,6 +46,7 @@
     --canvas: #0d0e12;
     --canvas-elevated: #17171c;
     --canvas-stone: #20222a;
+    --canvas-inset: #14151a;
     --canvas-pale-green: #0a241f;
     --canvas-pale-blue: #0c1a2e;
     --canvas-card-border: rgba(255, 255, 255, 0.08);
@@ -55,6 +58,7 @@
     --slate: #9fa4b8;
     --faint: #595f72;
     --hairline: rgba(255, 255, 255, 0.12);
+    --hairline-soft: rgba(255, 255, 255, 0.08);
     --border-light: rgba(255, 255, 255, 0.08);
     --link: #5b9aff;
     --link-hover: #8cb8ff;

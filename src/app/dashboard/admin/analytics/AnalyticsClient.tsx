@@ -226,7 +226,7 @@ export function AnalyticsClient({
             onClick={exportSummary}
             className="cohere-btn-pill-outline text-xs flex items-center gap-2 cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-[#0070f3]" /> Export Telemetry CSV
+            <Download className="w-3.5 h-3.5 text-[var(--link)]" /> Export Telemetry CSV
           </button>
         </div>
       </div>
@@ -278,7 +278,7 @@ export function AnalyticsClient({
         <div className="p-5 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] shadow-xs">
           <div className="flex items-center justify-between">
             <span className="cohere-mono-label text-[var(--mute)]">Estimated Reach</span>
-            <div className="p-2 rounded-xl bg-[#0070f3]/10 text-[#0070f3]">
+            <div className="p-2 rounded-xl bg-[var(--link)]/10 text-[var(--link)]">
               <Users className="w-4 h-4" />
             </div>
           </div>
@@ -403,8 +403,8 @@ export function AnalyticsClient({
             {/* Routine */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-semibold text-[#0070f3] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#0070f3]" /> Routine ({priorityStats.counts.routine})
+                <span className="font-semibold text-[var(--link)] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[var(--link)]" /> Routine ({priorityStats.counts.routine})
                 </span>
                 <span className="font-mono text-[var(--mute)]">
                   {announcements.length > 0
@@ -415,7 +415,7 @@ export function AnalyticsClient({
               </div>
               <div className="w-full bg-[var(--canvas-inset)] h-2 rounded-full overflow-hidden">
                 <div
-                  className="bg-[#0070f3] h-full rounded-full transition-all"
+                  className="bg-[var(--link)] h-full rounded-full transition-all"
                   style={{
                     width: `${
                       announcements.length > 0
@@ -452,7 +452,7 @@ export function AnalyticsClient({
                 <span className="font-mono font-medium text-[var(--ink)] capitalize">
                   {action.replace(/_/g, ' ')}
                 </span>
-                <span className="font-mono font-bold text-[#0070f3] bg-[#0070f3]/10 px-2 py-0.5 rounded-md">
+                <span className="font-mono font-bold text-[var(--link)] bg-[var(--link)]/10 px-2 py-0.5 rounded-md">
                   {count} calls
                 </span>
               </div>

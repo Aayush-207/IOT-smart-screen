@@ -297,7 +297,7 @@ export function FleetMonitoringClient({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by device, building, or zone..."
-            className="pl-9 pr-3.5 py-1.5 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-xl text-xs text-[var(--ink)] focus:outline-none focus:border-[#0070f3] focus:ring-2 focus:ring-[#0070f3]/20 w-full transition-all"
+            className="pl-9 pr-3.5 py-1.5 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-xl text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)] focus:ring-2 focus:ring-[var(--focus-blue)]/20 w-full transition-all"
           />
         </div>
       </div>
@@ -319,7 +319,7 @@ export function FleetMonitoringClient({
               {filtered.map((s) => (
                 <tr key={s.id} className="hover:bg-[var(--canvas-inset)]/50 transition-colors">
                   <td className="px-5 py-3 font-semibold text-[var(--ink)]">
-                    <Link href={`/dashboard/admin/fleet/${s.id}`} className="hover:text-[#0070f3] transition-colors">
+                    <Link href={`/dashboard/admin/fleet/${s.id}`} className="hover:text-[var(--link)] transition-colors">
                       {s.name}
                     </Link>
                   </td>
@@ -360,9 +360,9 @@ export function FleetMonitoringClient({
                         onClick={() => handleForceRefreshInline(s.id, s.name)}
                         disabled={busyId === s.id}
                         title="Force Refresh Screen"
-                        className="p-1.5 rounded-lg hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[#0070f3] disabled:opacity-50 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[var(--link)] disabled:opacity-50 transition-colors cursor-pointer"
                       >
-                        <RefreshCw className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[#0070f3]' : ''}`} />
+                        <RefreshCw className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[var(--link)]' : ''}`} />
                       </button>
                       <button
                         onClick={() => handleRebootInline(s.id, s.name)}
@@ -376,7 +376,7 @@ export function FleetMonitoringClient({
                         href={`/kiosk.html?id=${s.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-[#0070f3] hover:underline font-semibold inline-flex items-center gap-1 shrink-0 ml-1"
+                        className="text-xs text-[var(--link)] hover:underline font-semibold inline-flex items-center gap-1 shrink-0 ml-1"
                       >
                         Kiosk <ExternalLink className="w-3 h-3" />
                       </a>
@@ -451,9 +451,9 @@ export function FleetMonitoringClient({
                             onClick={() => handleForceRefreshInline(s.id, s.name)}
                             disabled={busyId === s.id}
                             title="Force Refresh"
-                            className="p-1 rounded hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[#0070f3] disabled:opacity-50 cursor-pointer"
+                            className="p-1 rounded hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[var(--link)] disabled:opacity-50 cursor-pointer"
                           >
-                            <RefreshCw className={`w-3 h-3 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[#0070f3]' : ''}`} />
+                            <RefreshCw className={`w-3 h-3 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[var(--link)]' : ''}`} />
                           </button>
                           <button
                             onClick={() => handleRebootInline(s.id, s.name)}
@@ -498,26 +498,26 @@ export function FleetMonitoringClient({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Device name (e.g. SCR-ENG-03)"
-                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm focus:outline-none focus:border-[#0070f3]"
+                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
               />
               <input
                 required
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Location (e.g. Eng Lobby)"
-                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm focus:outline-none focus:border-[#0070f3]"
+                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
               />
               <input
                 value={zone}
                 onChange={(e) => setZone(e.target.value)}
                 placeholder="Zone (defaults to location)"
-                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm focus:outline-none focus:border-[#0070f3]"
+                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
               />
               <div className="flex gap-3 justify-end pt-2">
                 <button type="button" onClick={() => setRegisterOpen(false)} className="px-4 py-2 text-sm font-medium text-[var(--mute)] cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" disabled={saving} className="px-4 py-2 bg-[var(--ink)] text-[var(--canvas)] rounded-lg text-sm font-medium disabled:opacity-50 cursor-pointer">
+                <button type="submit" disabled={saving} className="cohere-btn-primary py-2 px-5 text-xs font-medium disabled:opacity-50 cursor-pointer">
                   {saving ? 'Saving…' : 'Register'}
                 </button>
               </div>
