@@ -1,4 +1,5 @@
+import { redirect } from 'next/navigation'
+
 export default function RootPage() {
-  // Middleware handles routing to /login or /dashboard/*
-  return null
+  redirect('/login')
 }

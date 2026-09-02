@@ -1,6 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const DASHBOARD_BY_ROLE: Record<string, string> = {
+  submitter: '/dashboard/submitter',
+  hod: '/dashboard/hod',
+  admin: '/dashboard/admin',
+  emergency: '/dashboard/admin',
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -15,7 +22,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options: _options }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,64 +34,71 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data?.user ?? null
+  } catch (err) {
+    console.warn('Middleware auth error:', err)
+  }
 
-  // Define protected routes mapping
-  const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard')
-  const isClubRoute = request.nextUrl.pathname.startsWith('/dashboard/club')
-  const isHodRoute = request.nextUrl.pathname.startsWith('/dashboard/hod')
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/dashboard/admin')
-  const isLoginRoute = request.nextUrl.pathname.startsWith('/login')
+  const path = request.nextUrl.pathname
+  const isDashboardRoute = path.startsWith('/dashboard')
+  const isSubmitterRoute = path.startsWith('/dashboard/submitter')
+  const isHodRoute = path.startsWith('/dashboard/hod')
+  const isAdminRoute = path.startsWith('/dashboard/admin')
+  const isEmergencyRoute = path.startsWith('/dashboard/admin/emergency')
+  // Areas an Emergency Authority account must not reach (blueprint Part 8:
+  // they don't manage devices and don't approve content).
+  const isAdminOnlyArea =
+    path.startsWith('/dashboard/admin/fleet') || path.startsWith('/dashboard/admin/approvals')
+  const isLoginRoute = path.startsWith('/login')
 
-  // Not logged in and trying to access protected route
-  if (!user && isDashboardRoute) {
+  // Not logged in and trying to access protected route or root
+  if (!user && (isDashboardRoute || path === '/')) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
   if (user) {
-    // Redirect authenticated users away from login
-    if (isLoginRoute || request.nextUrl.pathname === '/') {
-      // Fetch user profile to get role
-      const { data: profile } = await supabase
+    let profile = null
+    try {
+      const { data } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
-        
-      const role = profile?.role
+      profile = data
+    } catch (err) {
+      console.warn('Middleware profile fetch error:', err)
+    }
+
+    const role = profile?.role
+
+    // Redirect authenticated users away from login / root
+    if (isLoginRoute || path === '/') {
       const url = request.nextUrl.clone()
-      
-      if (role === 'club') url.pathname = '/dashboard/club'
-      else if (role === 'hod') url.pathname = '/dashboard/hod'
-      else if (role === 'admin') url.pathname = '/dashboard/admin'
-      else url.pathname = '/login'
-      
+      url.pathname = (role && DASHBOARD_BY_ROLE[role]) || '/dashboard/submitter'
       return NextResponse.redirect(url)
     }
 
     // Role-based protection for dashboards
     if (isDashboardRoute) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-      
-      const role = profile?.role
-      
-      if (isClubRoute && role !== 'club') {
-         return NextResponse.redirect(new URL('/login', request.url))
+      if (isSubmitterRoute && role !== 'submitter') {
+        return NextResponse.redirect(new URL('/login', request.url))
       }
       if (isHodRoute && role !== 'hod') {
-         return NextResponse.redirect(new URL('/login', request.url))
+        return NextResponse.redirect(new URL('/login', request.url))
       }
-      if (isAdminRoute && role !== 'admin') {
-         return NextResponse.redirect(new URL('/login', request.url))
+      if (isAdminRoute && role !== 'admin' && role !== 'emergency') {
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+      if (isEmergencyRoute && role !== 'emergency') {
+        return NextResponse.redirect(new URL('/dashboard/admin', request.url))
+      }
+      if (isAdminOnlyArea && role === 'emergency') {
+        return NextResponse.redirect(new URL('/dashboard/admin', request.url))
       }
     }
   }

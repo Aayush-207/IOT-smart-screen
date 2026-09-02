@@ -6,49 +6,58 @@
 
 @layer base {
   :root {
-    --canvas: #fcfcfd;
-    --canvas-elevated: #ffffff;
-    --canvas-inset: #f3f4f6;
-    --ink: #0f172a;
-    --body: #475569;
-    --mute: #64748b;
-    --faint: #94a3b8;
-    --hairline: #e2e8f0;
-    --hairline-soft: #f1f5f9;
-    --link: #0070f3;
-    --link-deep: #0284c7;
-    --link-soft: #e0f2fe;
+    /* Cohere Primary Palette */
+    --cohere-black: #000000;
+    --cohere-near-black: #17171c;
+    --cohere-deep-green: #003c33;
+    --cohere-dark-navy: #071829;
+    --cohere-action-blue: #1863dc;
+    --cohere-coral: #ff7759;
+    --cohere-soft-coral: #ffad9b;
 
-    /* Accent Palette */
-    --accent-blue: #0070f3;
-    --accent-purple: #8b5cf6;
-    --accent-emerald: #10b981;
-    --accent-amber: #f59e0b;
-    --accent-rose: #f43f5e;
-    --accent-cyan: #06b6d4;
+    /* Surfaces & Backgrounds */
+    --canvas: #ffffff;
+    --canvas-elevated: #ffffff;
+    --canvas-stone: #eeece7;
+    --canvas-pale-green: #edfce9;
+    --canvas-pale-blue: #f1f5ff;
+    --canvas-card-border: #f2f2f2;
+    --canvas-dark: #17171c;
+
+    /* Text & Rules */
+    --ink: #212121;
+    --body: #4b4f58;
+    --mute: #93939f;
+    --slate: #75758a;
+    --faint: #b4b4be;
+    --hairline: #d9d9dd;
+    --border-light: #e5e7eb;
+    --link: #1863dc;
+    --link-hover: #0f4cb8;
+
+    /* Semantics */
+    --focus-blue: #4c6ee6;
+    --error-red: #b30000;
   }
 
   .dark {
-    --canvas: #090d16;
-    --canvas-elevated: #0f172a;
-    --canvas-inset: #1e293b;
-    --ink: #f8fafc;
-    --body: #cbd5e1;
-    --mute: #94a3b8;
-    --faint: #64748b;
-    --hairline: #334155;
-    --hairline-soft: #1e293b;
-    --link: #38bdf8;
-    --link-deep: #0284c7;
-    --link-soft: #0c4a6e;
+    --canvas: #0d0e12;
+    --canvas-elevated: #17171c;
+    --canvas-stone: #20222a;
+    --canvas-pale-green: #0a241f;
+    --canvas-pale-blue: #0c1a2e;
+    --canvas-card-border: rgba(255, 255, 255, 0.08);
+    --canvas-dark: #000000;
 
-    /* Accent Palette Dark */
-    --accent-blue: #38bdf8;
-    --accent-purple: #a78bfa;
-    --accent-emerald: #34d399;
-    --accent-amber: #fbbf24;
-    --accent-rose: #fb7185;
-    --accent-cyan: #22d3ee;
+    --ink: #f8f8fa;
+    --body: #c5c9d4;
+    --mute: #8d93a5;
+    --slate: #9fa4b8;
+    --faint: #595f72;
+    --hairline: rgba(255, 255, 255, 0.12);
+    --border-light: rgba(255, 255, 255, 0.08);
+    --link: #5b9aff;
+    --link-hover: #8cb8ff;
   }
   * {
     @apply border-border outline-ring/50;
@@ -66,10 +75,11 @@ body {
   color: var(--ink);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
-  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Geist Typography Helpers */
+/* Typography Hierarchy & Negative Tracking */
 .font-geist-sans {
   font-family: var(--font-geist-sans), sans-serif;
 }
@@ -78,89 +88,205 @@ body {
   font-family: var(--font-geist-mono), monospace;
 }
 
-.tracking-display-xl {
-  letter-spacing: -0.05em;
+.cohere-display-hero {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
 }
 
-.tracking-heading-lg {
+.cohere-display-product {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  line-height: 1.1;
   letter-spacing: -0.035em;
 }
 
-.tracking-heading-md {
-  letter-spacing: -0.02em;
+.cohere-heading-section {
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 
-/* Glassmorphism Card Component */
+.cohere-mono-label {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Cohere Standard Component Classes */
+.cohere-btn-primary {
+  background-color: var(--cohere-near-black);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.625rem 1.375rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  cursor: pointer;
+}
+
+.cohere-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.cohere-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.cohere-btn-secondary {
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  background: transparent;
+  padding: 0.5rem 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  transition: color 0.15s ease;
+  cursor: pointer;
+}
+
+.cohere-btn-secondary:hover {
+  color: var(--link);
+}
+
+.cohere-btn-pill-outline {
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.cohere-btn-pill-outline:hover {
+  border-color: var(--cohere-near-black);
+  background: var(--canvas-stone);
+}
+
+/* Cohere Coral & Taxonomy Chips */
+.cohere-chip-coral {
+  border: 1px solid var(--cohere-soft-coral);
+  color: var(--cohere-coral);
+  background: rgba(255, 119, 89, 0.06);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.625rem;
+  border-radius: 8px;
+}
+
+.cohere-chip-blue {
+  border: 1px solid rgba(24, 99, 220, 0.3);
+  color: var(--cohere-action-blue);
+  background: rgba(24, 99, 220, 0.06);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.625rem;
+  border-radius: 8px;
+}
+
+.cohere-chip-green {
+  border: 1px solid rgba(0, 60, 51, 0.3);
+  color: var(--cohere-deep-green);
+  background: rgba(0, 60, 51, 0.06);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.625rem;
+  border-radius: 8px;
+}
+
+.dark .cohere-chip-green {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+/* Dark Agent Console Mockup Card */
+.agent-console-card {
+  background-color: var(--cohere-near-black);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+/* Deep Green Hero / Capability Band */
+.cohere-band-green {
+  background-color: var(--cohere-deep-green);
+  color: #ffffff;
+}
+
+/* Dark Navy Hero / Capability Band */
+.cohere-band-navy {
+  background-color: var(--cohere-dark-navy);
+  color: #ffffff;
+}
+
+/* Soft Stone Card */
+.cohere-card-stone {
+  background-color: var(--canvas-stone);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+}
+
+/* Rule-Separated Editorial Table */
+.research-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.research-table tr {
+  border-bottom: 1px solid var(--hairline);
+  transition: background-color 0.15s ease;
+}
+
+.research-table tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark .research-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.research-table td {
+  padding: 1.125rem 1rem;
+}
+
+/* Standard Geist Card wrapper compatibility */
 .geist-card {
   background-color: var(--canvas-elevated);
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
 }
 
-.geist-card:hover {
-  border-color: var(--mute);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.dark .geist-card {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.dark .geist-card:hover {
-  border-color: #475569;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
-}
-
-/* Whispered soft elevation shadow */
-.whisper-shadow {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-/* Floating shadow for modals and popovers */
-.floating-shadow {
-  box-shadow: 0 0 0 1px var(--hairline), 0 12px 36px rgba(0, 0, 0, 0.12);
-}
-
-.dark .floating-shadow {
-  box-shadow: 0 0 0 1px var(--hairline), 0 16px 48px rgba(0, 0, 0, 0.6);
-}
-
-/* Mesh Hero Background */
-.mesh-gradient-bg {
-  background: radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
-              radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
-              radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
-}
-
-.dark .mesh-gradient-bg {
-  background: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
-              radial-gradient(at 100% 0%, rgba(167, 139, 250, 0.15) 0px, transparent 50%),
-              radial-gradient(at 50% 100%, rgba(52, 211, 153, 0.12) 0px, transparent 50%);
-}
-
-/* Pulsing status indicator dot */
-@keyframes pulse-ring {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
-}
-
-.pulse-dot {
-  animation: pulse-ring 2s infinite ease-in-out;
-}
-
-/* Custom Scrollbar */
+/* Custom Minimal Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--canvas);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--faint);
+  background: var(--hairline);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {

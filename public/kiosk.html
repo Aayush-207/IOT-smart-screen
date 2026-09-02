@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CampusCast Kiosk</title>
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #08080c; color: #fff; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  
+  #top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 100;
+  }
+  
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+  
+  #clock {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+  }
+
+  #stage { 
+    height: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    text-align: center; 
+    padding: 80px 6vw 50px; 
+    gap: 2.5vh; 
+    transition: opacity 0.4s ease, transform 0.4s ease, background 0.4s ease;
+    opacity: 1;
+  }
+
+  #stage.fade {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  #stage.emergency { 
+    background: radial-gradient(circle at center, #991b1b 0%, #350505 100%);
+    animation: siren-pulse 2s infinite ease-in-out;
+  }
+
+  @keyframes siren-pulse {
+    0%, 100% { box-shadow: inset 0 0 80px rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: inset 0 0 160px rgba(239, 68, 68, 0.9); }
+  }
+
+  #stage.emergency #kicker { 
+    color: #fee2e2; 
+    background: rgba(220, 38, 38, 0.7);
+    border: 2px solid #ef4444;
+    padding: 8px 24px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 2vh;
+    animation: pulse 1.5s infinite;
+  }
+
+  img { 
+    max-width: 90%; 
+    max-height: 48vh; 
+    object-fit: contain; 
+    border-radius: 16px; 
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); 
+  }
+
+  #kicker { 
+    text-transform: uppercase; 
+    letter-spacing: .25em; 
+    font-size: 1.5vh; 
+    font-weight: 700;
+    color: #94a3b8; 
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  #title { 
+    font-size: 5.5vh; 
+    font-weight: 800; 
+    line-height: 1.15; 
+    letter-spacing: -0.03em;
+    max-width: 45ch;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  #body { 
+    font-size: 2.6vh; 
+    max-width: 65ch; 
+    color: #cbd5e1; 
+    white-space: pre-wrap; 
+    line-height: 1.45;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  #meta { 
+    position: fixed; 
+    bottom: 14px; 
+    left: 24px; 
+    font-size: 12px; 
+    color: #475569; 
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  #idle { 
+    font-size: 3.2vh; 
+    color: #64748b; 
+    font-weight: 600; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  #sound-btn { 
+    background: rgba(255, 255, 255, 0.08); 
+    border: 1px solid rgba(255, 255, 255, 0.15); 
+    color: #cbd5e1; 
+    padding: 5px 12px; 
+    border-radius: 8px; 
+    font-size: 12px; 
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  #sound-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  #carousel-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 100;
+    display: none;
+  }
+  #carousel-progress {
+    height: 100%;
+    width: 0%;
+    background: #0070f3;
+    transition: width 0.1s linear;
+  }
+  #slide-pill {
+    position: fixed;
+    bottom: 14px;
+    right: 24px;
+    font-size: 11px;
+    color: #94a3b8;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="top-bar">
+  <div class="brand">
+    <span class="pulse-dot"></span>
+    <span>CampusCast Signage</span>
+  </div>
+  <div id="clock">00:00:00</div>
+  <button id="sound-btn" onclick="toggleAudio()">🔔 Audio Alert: OFF</button>
+</div>
+
+<div id="stage">
+  <div id="idle">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+    Connecting to Campus Network…
+  </div>
+</div>
+
+<div id="meta"></div>
+<div id="slide-pill"></div>
+<div id="carousel-bar"><div id="carousel-progress"></div></div>
+
+<script>
+  const qs = new URLSearchParams(location.search);
+  const base = (qs.get('base') || location.origin).replace(/\/$/, '');
+  const id = qs.get('id');
+  const token = qs.get('token');
+  const stage = document.getElementById('stage');
+  const meta = document.getElementById('meta');
+  const clockEl = document.getElementById('clock');
+  const carouselBar = document.getElementById('carousel-bar');
+  const carouselProgress = document.getElementById('carousel-progress');
+  const slidePill = document.getElementById('slide-pill');
+
+  let audioEnabled = false;
+  let audioCtx = null;
+  let currentAnnouncementId = null;
+
+  // Carousel & Playlist Rotation
+  let playlist = [];
+  let currentSlideIndex = 0;
+  let slideTimer = null;
+  let progressInterval = null;
+  const slideDuration = 10000; // 10 seconds per slide
+  let slideStartTime = Date.now();
+
+  // Real-time Clock
+  function updateClock() {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateStr = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    clockEl.textContent = `${dateStr}  •  ${timeStr}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  function toggleAudio() {
+    audioEnabled = !audioEnabled;
+    const btn = document.getElementById('sound-btn');
+    if (audioEnabled) {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      btn.textContent = '🔊 Audio Alert: ON';
+      btn.style.color = '#10b981';
+      btn.style.borderColor = '#10b981';
+      btn.style.background = 'rgba(16, 185, 129, 0.15)';
+    } else {
+      btn.textContent = '🔔 Audio Alert: OFF';
+      btn.style.color = '#cbd5e1';
+      btn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+      btn.style.background = 'rgba(255, 255, 255, 0.08)';
+    }
+  }
+
+  function playEmergencyBeep() {
+    if (!audioEnabled || !audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(850, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(450, audioCtx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    } catch(e) {}
+  }
+
+  function speakEmergency(text) {
+    if (!audioEnabled || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance('Attention. Campus Emergency Alert. ' + text);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    } catch(e) {}
+  }
+
+  if (!id) {
+    stage.innerHTML = '<div id="idle">Please specify ?id=&lt;screen-uuid&gt; in URL query parameter.</div>';
+    throw new Error('missing id');
+  }
+
+  function render(a, isCached = false) {
+    const wasEmergency = stage.classList.contains('emergency');
+    stage.className = a && a.is_emergency ? 'emergency' : '';
+    
+    if (a && a.is_emergency && !wasEmergency) {
+      playEmergencyBeep();
+      setTimeout(() => speakEmergency(a.body || a.title), 500);
+    }
+
+    if (!a) {
+      stage.innerHTML = '<div id="idle"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>No scheduled content for this screen. Standing by.</div>';
+      return;
+    }
+    const parts = [];
+    const kickerLabel = a.is_emergency 
+      ? ('🚨 EMERGENCY · ' + (a.severity || 'CRITICAL')) 
+      : (isCached ? 'Campus Announcement (Edge Cache)' : 'Campus Announcement');
+    parts.push('<div id="kicker">' + kickerLabel + '</div>');
+    if (a.attachment_url) parts.push('<img src="' + a.attachment_url + '" alt="Announcement Visual" />');
+    parts.push('<div id="title"></div>');
+    if (a.body) parts.push('<div id="body"></div>');
+    stage.innerHTML = parts.join('');
+    stage.querySelector('#title').textContent = a.title || '';
+    if (a.body) stage.querySelector('#body').textContent = a.body;
+  }
+
+  function startRotation() {
+    if (slideTimer) clearTimeout(slideTimer);
+    if (progressInterval) clearInterval(progressInterval);
+
+    if (!playlist || playlist.length <= 1) {
+      carouselBar.style.display = 'none';
+      slidePill.style.display = 'none';
+      if (playlist && playlist.length === 1) render(playlist[0]);
+      return;
+    }
+
+    carouselBar.style.display = 'block';
+    slidePill.style.display = 'block';
+    slidePill.textContent = `Slide ${currentSlideIndex + 1} of ${playlist.length}`;
+
+    slideStartTime = Date.now();
+    render(playlist[currentSlideIndex]);
+
+    progressInterval = setInterval(() => {
+      const elapsed = Date.now() - slideStartTime;
+      const pct = Math.min(100, (elapsed / slideDuration) * 100);
+      carouselProgress.style.width = pct + '%';
+    }, 100);
+
+    slideTimer = setTimeout(() => {
+      clearInterval(progressInterval);
+      stage.classList.add('fade');
+      setTimeout(() => {
+        currentSlideIndex = (currentSlideIndex + 1) % playlist.length;
+        startRotation();
+        stage.classList.remove('fade');
+      }, 300);
+    }, slideDuration);
+  }
+
+  async function tick() {
+    try {
+      const headers = { accept: 'application/json' };
+      if (token) headers['x-device-token'] = token;
+      const res = await fetch(base + '/api/screens/' + id, { headers });
+      if (!res.ok) { 
+        meta.textContent = 'HTTP ' + res.status + ' • ' + new Date().toLocaleTimeString(); 
+        return; 
+      }
+      const data = await res.json();
+      
+      // Cache payload for offline resilience (Blueprint Part 28)
+      try {
+        localStorage.setItem('campuscast_cache_' + id, JSON.stringify(data));
+      } catch (err) {}
+
+      const newPlaylist = data.playlist || (data.announcement ? [data.announcement] : []);
+      const hasEmergency = newPlaylist.some(item => item.is_emergency);
+
+      if (hasEmergency) {
+        if (slideTimer) clearTimeout(slideTimer);
+        if (progressInterval) clearInterval(progressInterval);
+        carouselBar.style.display = 'none';
+        slidePill.style.display = 'none';
+        const em = newPlaylist.find(item => item.is_emergency);
+        render(em);
+        playlist = [em];
+      } else {
+        const oldIds = (playlist || []).map(p => p.id).join(',');
+        const newIds = newPlaylist.map(p => p.id).join(',');
+        if (oldIds !== newIds) {
+          playlist = newPlaylist;
+          currentSlideIndex = 0;
+          startRotation();
+        }
+      }
+
+      meta.innerHTML = '<span style="color: #10b981;">● Online</span> • Node ' + id.slice(0, 8) + '… • Last Sync: ' + new Date().toLocaleTimeString() +
+        (data.force_refresh ? ' • Refreshing' : '') + (data.reboot_requested ? ' • Rebooting' : '');
+    } catch (e) {
+      // Offline fallback: load from local edge cache
+      try {
+        const cached = localStorage.getItem('campuscast_cache_' + id);
+        if (cached) {
+          const cachedData = JSON.parse(cached);
+          const cachedPlaylist = cachedData.playlist || (cachedData.announcement ? [cachedData.announcement] : []);
+          playlist = cachedPlaylist;
+          startRotation();
+          meta.innerHTML = '<span style="color: #f59e0b;">⚡ Edge Cache Active (Offline)</span> • Last check: ' + new Date().toLocaleTimeString();
+          return;
+        }
+      } catch (err) {}
+      meta.innerHTML = '<span style="color: #ef4444;">● Disconnected</span> • Last attempt: ' + new Date().toLocaleTimeString();
+    }
+  }
+
+  tick();
+  setInterval(tick, 5000);
+</script>
+</body>
+</html>
