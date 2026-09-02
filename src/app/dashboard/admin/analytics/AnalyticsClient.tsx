@@ -11,7 +11,6 @@ import {
   ArrowUpRight,
   TrendingUp,
   Clock,
-  Download,
 } from 'lucide-react'
 import { deviceStatus, type DeviceStatus } from '@/lib/fleet'
 import { type Priority } from '@/lib/priority'
@@ -58,72 +57,75 @@ export function AnalyticsClient({
 
   // Announcement priority breakdown
   const priorityStats = useMemo(() => {
-    const counts: Record<Priority, number> = { emergency: 0, critical: 0, timesensitive: 0, routine: 0 }
+    const counts: Record<Priority, number> = {
+      routine: 0,
+      timesensitive: 0,
+      critical: 0,
+      emergency: 0,
+    }
     announcements.forEach((a) => {
-      if (a.priority && a.priority in counts) {
-        counts[a.priority as Priority]++
-      }
+      const p = (a.priority || 'routine') as Priority
+      if (counts[p] !== undefined) counts[p]++
     })
-    const total = announcements.length
-    return { counts, total }
+    return { counts }
   }, [announcements])
 
   // Status breakdown
   const statusStats = useMemo(() => {
-    const counts = { approved: 0, pending: 0, draft: 0, rejected: 0, expired: 0 }
+    const counts = { approved: 0, pending: 0, rejected: 0, draft: 0, withdrawn: 0 }
     announcements.forEach((a) => {
-      if (a.status === 'approved') counts.approved++
-      else if (a.status === 'pending_approval') counts.pending++
-      else if (a.status === 'draft') counts.draft++
-      else if (a.status === 'rejected') counts.rejected++
-      else if (a.status === 'expired') counts.expired++
+      const st = a.status as keyof typeof counts
+      if (counts[st] !== undefined) counts[st]++
     })
     return counts
   }, [announcements])
 
-  // Estimated daily impression reach
-  const estimatedDailyReach = useMemo(() => {
-    let reach = 0
-    screens.forEach((s) => {
-      const status = deviceStatus(s.last_seen_at)
-      if (status !== 'offline') {
-        const zoneKey = (s.zone || s.location || 'main').toLowerCase()
-        const matched = Object.keys(ZONE_REACH_WEIGHT).find((k) => zoneKey.includes(k))
-        reach += matched ? ZONE_REACH_WEIGHT[matched] : 1200
-      }
-    })
-    return reach
-  }, [screens])
-
-  // Delivery state machine stats
+  // Delivery confirmation metrics
   const deliveryStats = useMemo(() => {
-    const states = { displaying: 0, acknowledged: 0, dispatched: 0, expired: 0 }
+    const states = { displaying: 0, pending: 0, delivered: 0, failed: 0 }
     deliveries.forEach((d) => {
-      if (d.state in states) states[d.state as keyof typeof states]++
+      const s = d.status as keyof typeof states
+      if (states[s] !== undefined) states[s]++
     })
-    const confirmed = states.displaying + states.acknowledged
     const total = deliveries.length
-    const rate = total > 0 ? Math.round((confirmed / total) * 100) : 0
+    const rate = total > 0 ? Math.round(((states.displaying + states.delivered) / total) * 100) : 100
     return { states, total, rate }
   }, [deliveries])
 
-  // Department activity breakdown
+  // Department publication volume
   const departmentStats = useMemo(() => {
     const map: Record<string, { name: string; total: number; approved: number }> = {}
     departments.forEach((d) => {
       map[d.id] = { name: d.name, total: 0, approved: 0 }
     })
-    map['general'] = { name: 'General / Campus-Wide', total: 0, approved: 0 }
-
     announcements.forEach((a) => {
-      const key = a.department_id || 'general'
-      if (!map[key]) map[key] = { name: 'Other', total: 0, approved: 0 }
-      map[key].total++
-      if (a.status === 'approved') map[key].approved++
+      if (a.department_id && map[a.department_id]) {
+        map[a.department_id].total++
+        if (a.status === 'approved') map[a.department_id].approved++
+      }
     })
-
     return Object.values(map).sort((a, b) => b.total - a.total)
   }, [departments, announcements])
+
+  // Estimated daily foot traffic reached across online screens
+  const estimatedDailyReach = useMemo(() => {
+    let total = 0
+    screens.forEach((s) => {
+      const status = deviceStatus(s.last_seen_at)
+      if (status !== 'offline') {
+        const zoneKey = (s.zone || s.location || '').toLowerCase()
+        let match = 2000
+        for (const [k, v] of Object.entries(ZONE_REACH_WEIGHT)) {
+          if (zoneKey.includes(k)) {
+            match = v
+            break
+          }
+        }
+        total += match
+      }
+    })
+    return total
+  }, [screens])
 
   // Top audit actions
   const auditActionCounts = useMemo(() => {
@@ -134,234 +136,176 @@ export function AnalyticsClient({
     return Object.entries(counts)
       .map(([action, count]) => ({ action, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 6)
+      .slice(0, 5)
   }, [auditRows])
 
-  const exportSummary = () => {
-    const csv = [
-      ['Metric', 'Value'],
-      ['Total Displays', screenStats.total],
-      ['Online Displays', screenStats.counts.online],
-      ['Stale Displays', screenStats.counts.stale],
-      ['Offline Displays', screenStats.counts.offline],
-      ['Fleet Uptime Rate', `${screenStats.uptime}%`],
-      ['Estimated Daily Audience Reach', estimatedDailyReach],
-      ['Total Announcements', announcements.length],
-      ['Approved Announcements', statusStats.approved],
-      ['Pending Approvals', statusStats.pending],
-      ['Critical Announcements', priorityStats.counts.critical],
-      ['Time-Sensitive Announcements', priorityStats.counts.timesensitive],
-      ['Routine Announcements', priorityStats.counts.routine],
-      ['Delivery Verification Rate', `${deliveryStats.rate}%`],
-    ]
-      .map((row) => row.join(','))
-      .join('\n')
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `campuscast-telemetry-${new Date().toISOString().slice(0, 10)}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
   return (
-    <div className="space-y-8 max-w-6xl pb-16">
+    <div className="space-y-8 max-w-6xl pb-16 text-white">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--hairline)]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#362d59]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-green flex items-center gap-1.5">
-              <BarChart3 className="w-3.5 h-3.5" /> Intelligence Center
-            </span>
-            <span className="text-xs font-mono text-[var(--mute)]">Telemetry Node Online</span>
+            <span className="sentry-chip-green">Network Telemetry</span>
+            <span className="text-xs font-mono text-[#8b8496]">5s Heartbeat Stream</span>
           </div>
-          <h1 className="cohere-display-product text-[var(--ink)]">
-            Campus Broadcast &amp; Fleet Intelligence
+          <h1 className="sentry-display-section text-white flex items-center gap-3">
+            <BarChart3 className="w-6 h-6 text-[#c2ef4e]" /> Screen Analytics &amp; Telemetry
           </h1>
-          <p className="text-sm text-[var(--slate)] max-w-2xl mt-1.5 leading-relaxed">
-            Real-time analytics covering broadcast reach, department publication velocity, delivery verification rates, and physical screen node uptime.
+          <p className="text-sm text-[#bdb8c0] max-w-xl mt-1.5 leading-relaxed">
+            Real-time screen fleet health, estimated daily campus reach, publication approval rates, and delivery verification.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
-          <div className="flex items-center p-1 rounded-full border border-[var(--hairline)] bg-[var(--canvas-stone)]/40 text-xs">
-            <button
-              onClick={() => setTimeRange('all')}
-              className={`px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
-                timeRange === 'all'
-                  ? 'bg-[var(--cohere-near-black)] text-white shadow-xs'
-                  : 'text-[var(--slate)] hover:text-[var(--ink)]'
-              }`}
-            >
-              All Time
-            </button>
-            <button
-              onClick={() => setTimeRange('30d')}
-              className={`px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
-                timeRange === '30d'
-                  ? 'bg-[var(--cohere-near-black)] text-white shadow-xs'
-                  : 'text-[var(--slate)] hover:text-[var(--ink)]'
-              }`}
-            >
-              30 Days
-            </button>
-            <button
-              onClick={() => setTimeRange('7d')}
-              className={`px-3 py-1 rounded-full font-medium transition-all cursor-pointer ${
-                timeRange === '7d'
-                  ? 'bg-[var(--cohere-near-black)] text-white shadow-xs'
-                  : 'text-[var(--slate)] hover:text-[var(--ink)]'
-              }`}
-            >
-              7 Days
-            </button>
+        <div className="flex items-center gap-2">
+          <div className="flex bg-[#150f23] p-1 rounded-xl border border-[#362d59] text-xs font-bold">
+            {(['all', '30d', '7d'] as const).map((r) => (
+              <button
+                key={r}
+                onClick={() => setTimeRange(r)}
+                className={`px-3 py-1 rounded-lg uppercase transition-all cursor-pointer ${
+                  timeRange === r
+                    ? 'bg-[#c2ef4e] text-[#150f23]'
+                    : 'text-[#8b8496] hover:text-white'
+                }`}
+              >
+                {r === 'all' ? 'All Time' : r}
+              </button>
+            ))}
           </div>
-
-          <button
-            type="button"
-            onClick={exportSummary}
-            className="cohere-btn-pill-outline text-xs flex items-center gap-2 cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5 text-[var(--link)]" /> Export Telemetry CSV
-          </button>
         </div>
       </div>
 
-      {/* Primary KPI Metrics Grid */}
+      {/* Top 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Fleet Health Card */}
-        <div className="p-5 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] shadow-xs relative overflow-hidden">
+        {/* Screen Uptime */}
+        <div className="sentry-card p-5 border-[#c2ef4e]/30">
           <div className="flex items-center justify-between">
-            <span className="cohere-mono-label text-[var(--mute)]">Mesh Health</span>
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
+            <span className="sentry-mono-label text-[#c2ef4e]">Screen Uptime</span>
+            <div className="p-2 rounded-xl bg-[#c2ef4e]/10 text-[#c2ef4e]">
               <Radio className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[var(--ink)]">{screenStats.uptime}%</span>
-            <span className="text-xs font-mono text-emerald-600 font-semibold">
+            <span className="text-3xl font-extrabold text-white">{screenStats.uptime}%</span>
+            <span className="text-xs font-mono text-[#c2ef4e] font-bold">
               {screenStats.counts.online}/{screenStats.total} Online
             </span>
           </div>
-          <div className="mt-3 w-full bg-[var(--canvas-inset)] h-1.5 rounded-full overflow-hidden flex">
+          <div className="mt-3 w-full bg-[#1f1633] h-1.5 rounded-full overflow-hidden flex">
             <div
-              className="bg-emerald-500 h-full transition-all"
+              className="bg-[#c2ef4e] h-full transition-all"
               style={{ width: `${(screenStats.counts.online / (screenStats.total || 1)) * 100}%` }}
             />
             <div
-              className="bg-amber-500 h-full transition-all"
+              className="bg-amber-400 h-full transition-all"
               style={{ width: `${(screenStats.counts.stale / (screenStats.total || 1)) * 100}%` }}
             />
             <div
-              className="bg-neutral-400 h-full transition-all"
+              className="bg-[#4c445c] h-full transition-all"
               style={{ width: `${(screenStats.counts.offline / (screenStats.total || 1)) * 100}%` }}
             />
           </div>
-          <div className="mt-2.5 flex items-center justify-between text-[10px] font-mono text-[var(--mute)]">
+          <div className="mt-2.5 flex items-center justify-between text-[10px] font-mono text-[#8b8496]">
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {screenStats.counts.online} Active
+              <span className="w-1.5 h-1.5 rounded-full bg-[#c2ef4e]" /> {screenStats.counts.online} Active
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> {screenStats.counts.stale} Stale
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> {screenStats.counts.stale} Stale
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" /> {screenStats.counts.offline} Offline
+              <span className="w-1.5 h-1.5 rounded-full bg-[#4c445c]" /> {screenStats.counts.offline} Offline
             </span>
           </div>
         </div>
 
         {/* Estimated Daily Reach */}
-        <div className="p-5 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] shadow-xs">
+        <div className="sentry-card p-5">
           <div className="flex items-center justify-between">
-            <span className="cohere-mono-label text-[var(--mute)]">Estimated Reach</span>
-            <div className="p-2 rounded-xl bg-[var(--link)]/10 text-[var(--link)]">
+            <span className="sentry-mono-label text-[#8b8496]">Estimated Reach</span>
+            <div className="p-2 rounded-xl bg-[#6a5fc1]/20 text-[#a79df5]">
               <Users className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[var(--ink)]">
+            <span className="text-3xl font-extrabold text-white">
               {estimatedDailyReach.toLocaleString()}
             </span>
-            <span className="text-xs font-mono text-[var(--slate)]">views/day</span>
+            <span className="text-xs font-mono text-[#8b8496]">views/day</span>
           </div>
-          <p className="mt-3 text-xs text-[var(--slate)] flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Aggregated across {screens.length} active campus zones</span>
+          <p className="mt-3 text-xs text-[#8b8496] flex items-center gap-1">
+            <TrendingUp className="w-3.5 h-3.5 text-[#c2ef4e]" />
+            <span>Across {screens.length} active campus zones</span>
           </p>
         </div>
 
         {/* Delivery Verification Rate */}
-        <div className="p-5 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] shadow-xs">
+        <div className="sentry-card p-5">
           <div className="flex items-center justify-between">
-            <span className="cohere-mono-label text-[var(--mute)]">Delivery Rate</span>
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-600">
+            <span className="sentry-mono-label text-[#8b8496]">Delivery Sync</span>
+            <div className="p-2 rounded-xl bg-[#c2ef4e]/10 text-[#c2ef4e]">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[var(--ink)]">{deliveryStats.rate}%</span>
-            <span className="text-xs font-mono text-cyan-600 font-semibold">Verified</span>
+            <span className="text-3xl font-extrabold text-white">{deliveryStats.rate}%</span>
+            <span className="text-xs font-mono text-[#c2ef4e] font-bold">Verified</span>
           </div>
-          <p className="mt-3 text-xs text-[var(--slate)] flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-[var(--mute)]" />
-            <span>{deliveryStats.states.displaying} currently displaying on nodes</span>
+          <p className="mt-3 text-xs text-[#8b8496] flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-[#8b8496]" />
+            <span>{deliveryStats.states.displaying} currently displaying</span>
           </p>
         </div>
 
         {/* Total Publications */}
-        <div className="p-5 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] shadow-xs">
+        <div className="sentry-card p-5">
           <div className="flex items-center justify-between">
-            <span className="cohere-mono-label text-[var(--mute)]">Total Notices</span>
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-600">
+            <span className="sentry-mono-label text-[#8b8496]">Total Notices</span>
+            <div className="p-2 rounded-xl bg-[#fa7faa]/10 text-[#fa7faa]">
               <Layers className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[var(--ink)]">{announcements.length}</span>
-            <span className="text-xs font-mono text-emerald-600 font-semibold">
+            <span className="text-3xl font-extrabold text-white">{announcements.length}</span>
+            <span className="text-xs font-mono text-[#c2ef4e] font-bold">
               {statusStats.approved} Live
             </span>
           </div>
-          <p className="mt-3 text-xs text-[var(--slate)] flex items-center gap-1">
-            <ArrowUpRight className="w-3.5 h-3.5 text-amber-500" />
-            <span>{statusStats.pending} pending governance approval</span>
+          <p className="mt-3 text-xs text-[#8b8496] flex items-center gap-1">
+            <ArrowUpRight className="w-3.5 h-3.5 text-amber-400" />
+            <span>{statusStats.pending} pending HOD approval</span>
           </p>
         </div>
       </div>
 
-      {/* Two Column Section: Priority Distribution & Audit Velocity */}
+      {/* Two Column Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Priority Tier Distribution */}
-        <div className="p-6 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] space-y-4">
+        <div className="sentry-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="cohere-mono-label text-[var(--mute)]">Priority Mix</span>
-              <h3 className="text-base font-bold text-[var(--ink)] mt-0.5">Broadcast Priority Distribution</h3>
+              <span className="sentry-mono-label text-[#8b8496]">Priority Mix</span>
+              <h3 className="text-base font-bold text-white mt-0.5">Announcement Priority Breakdown</h3>
             </div>
-            <span className="text-xs font-mono text-[var(--mute)]">{announcements.length} Submissions</span>
+            <span className="text-xs font-mono text-[#8b8496]">{announcements.length} Submissions</span>
           </div>
 
           <div className="space-y-3 pt-2">
             {/* Critical */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-600" /> Critical ({priorityStats.counts.critical})
+                <span className="font-bold text-[#fa5252] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#fa5252]" /> Critical ({priorityStats.counts.critical})
                 </span>
-                <span className="font-mono text-[var(--mute)]">
+                <span className="font-mono text-[#8b8496]">
                   {announcements.length > 0
                     ? Math.round((priorityStats.counts.critical / announcements.length) * 100)
                     : 0}
                   %
                 </span>
               </div>
-              <div className="w-full bg-[var(--canvas-inset)] h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-[#1f1633] h-2 rounded-full overflow-hidden">
                 <div
-                  className="bg-rose-600 h-full rounded-full transition-all"
+                  className="bg-[#fa5252] h-full rounded-full transition-all"
                   style={{
                     width: `${
                       announcements.length > 0
@@ -376,19 +320,19 @@ export function AnalyticsClient({
             {/* Time-sensitive */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" /> Time-Sensitive ({priorityStats.counts.timesensitive})
+                <span className="font-bold text-amber-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" /> Time-Sensitive ({priorityStats.counts.timesensitive})
                 </span>
-                <span className="font-mono text-[var(--mute)]">
+                <span className="font-mono text-[#8b8496]">
                   {announcements.length > 0
                     ? Math.round((priorityStats.counts.timesensitive / announcements.length) * 100)
                     : 0}
                   %
                 </span>
               </div>
-              <div className="w-full bg-[var(--canvas-inset)] h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-[#1f1633] h-2 rounded-full overflow-hidden">
                 <div
-                  className="bg-amber-500 h-full rounded-full transition-all"
+                  className="bg-amber-400 h-full rounded-full transition-all"
                   style={{
                     width: `${
                       announcements.length > 0
@@ -403,19 +347,19 @@ export function AnalyticsClient({
             {/* Routine */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="font-semibold text-[var(--link)] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[var(--link)]" /> Routine ({priorityStats.counts.routine})
+                <span className="font-bold text-[#c2ef4e] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#c2ef4e]" /> Routine ({priorityStats.counts.routine})
                 </span>
-                <span className="font-mono text-[var(--mute)]">
+                <span className="font-mono text-[#8b8496]">
                   {announcements.length > 0
                     ? Math.round((priorityStats.counts.routine / announcements.length) * 100)
                     : 0}
                   %
                 </span>
               </div>
-              <div className="w-full bg-[var(--canvas-inset)] h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-[#1f1633] h-2 rounded-full overflow-hidden">
                 <div
-                  className="bg-[var(--link)] h-full rounded-full transition-all"
+                  className="bg-[#c2ef4e] h-full rounded-full transition-all"
                   style={{
                     width: `${
                       announcements.length > 0
@@ -428,94 +372,92 @@ export function AnalyticsClient({
             </div>
           </div>
 
-          <p className="text-xs text-[var(--slate)] leading-relaxed pt-2 border-t border-[var(--hairline)]">
-            Emergency and critical broadcasts preempt all rotation timers across matching zones. Routine content rotates in 10-second intervals.
+          <p className="text-xs text-[#8b8496] leading-relaxed pt-2 border-t border-[#362d59]">
+            Emergency and critical broadcasts preempt all rotation timers. Routine posts rotate in 10-second intervals.
           </p>
         </div>
 
-        {/* Audit Velocity / Operational Activity */}
-        <div className="p-6 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] space-y-4">
+        {/* Operational Activity */}
+        <div className="sentry-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="cohere-mono-label text-[var(--mute)]">Operations</span>
-              <h3 className="text-base font-bold text-[var(--ink)] mt-0.5">Administrative Mutation Stream</h3>
+              <span className="sentry-mono-label text-[#8b8496]">Operations</span>
+              <h3 className="text-base font-bold text-white mt-0.5">Recent Admin Actions</h3>
             </div>
-            <span className="text-xs font-mono text-[var(--mute)]">{auditRows.length} Logged Events</span>
+            <span className="text-xs font-mono text-[#8b8496]">{auditRows.length} Logged Events</span>
           </div>
 
           <div className="space-y-2.5 pt-2">
             {auditActionCounts.map(({ action, count }) => (
               <div
                 key={action}
-                className="flex items-center justify-between p-2.5 rounded-xl border border-[var(--hairline)] bg-[var(--canvas-stone)]/30 text-xs"
+                className="flex items-center justify-between p-2.5 rounded-xl border border-[#362d59] bg-[#1f1633] text-xs"
               >
-                <span className="font-mono font-medium text-[var(--ink)] capitalize">
+                <span className="font-mono font-bold text-white capitalize">
                   {action.replace(/_/g, ' ')}
                 </span>
-                <span className="font-mono font-bold text-[var(--link)] bg-[var(--link)]/10 px-2 py-0.5 rounded-md">
+                <span className="font-mono font-bold text-[#c2ef4e] bg-[#c2ef4e]/10 px-2 py-0.5 rounded-md border border-[#c2ef4e]/30">
                   {count} calls
                 </span>
               </div>
             ))}
             {auditActionCounts.length === 0 && (
-              <div className="py-8 text-center text-xs text-[var(--mute)]">No audit activity recorded.</div>
+              <div className="py-8 text-center text-xs text-[#8b8496]">No activity recorded.</div>
             )}
           </div>
         </div>
       </div>
 
       {/* Department Activity Leaderboard */}
-      <div className="p-6 rounded-2xl border border-[var(--hairline)] bg-[var(--canvas-elevated)] space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="sentry-card overflow-hidden">
+        <div className="p-5 border-b border-[#362d59] flex items-center justify-between">
           <div>
-            <span className="cohere-chip-green flex items-center gap-1 mb-1">
-              <Building2 className="w-3 h-3" /> Academic &amp; Administrative Units
+            <span className="sentry-chip-green flex items-center gap-1 mb-1">
+              <Building2 className="w-3 h-3" /> Campus Departments
             </span>
-            <h3 className="text-base font-bold text-[var(--ink)]">Department Publishing Leaderboard</h3>
+            <h3 className="text-base font-bold text-white">Department Submissions</h3>
           </div>
-          <span className="text-xs font-mono text-[var(--mute)]">Sorted by submission volume</span>
+          <span className="text-xs font-mono text-[#8b8496]">Ranked by volume</span>
         </div>
 
-        <div className="overflow-x-auto border border-[var(--hairline)] rounded-xl">
-          <table className="research-table text-left text-xs">
-            <thead>
-              <tr className="border-b border-[var(--hairline)] bg-[var(--canvas-stone)]/40 text-[var(--mute)] font-mono text-[10px] uppercase">
-                <th className="py-3 px-4 font-semibold">Department Unit</th>
-                <th className="py-3 px-4 font-semibold text-center">Total Submissions</th>
-                <th className="py-3 px-4 font-semibold text-center">Approved &amp; Live</th>
-                <th className="py-3 px-4 font-semibold text-right">Approval Rate</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--hairline)]">
-              {departmentStats.map((d) => {
-                const rate = d.total > 0 ? Math.round((d.approved / d.total) * 100) : 0
-                return (
-                  <tr key={d.name} className="hover:bg-[var(--canvas-stone)]/20 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-[var(--ink)]">
-                      {d.name}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono text-[var(--ink)]">
-                      {d.total}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono text-emerald-600 font-semibold">
-                      {d.approved}
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-mono font-bold text-[var(--ink)]">
-                      {rate}%
-                    </td>
-                  </tr>
-                )
-              })}
-              {departmentStats.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-xs text-[var(--mute)]">
-                    No departments recorded.
+        <table className="sentry-table text-left text-xs">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th className="text-center">Total Submissions</th>
+              <th className="text-center">Approved &amp; Live</th>
+              <th className="text-right">Approval Rate</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#362d59]">
+            {departmentStats.map((d) => {
+              const rate = d.total > 0 ? Math.round((d.approved / d.total) * 100) : 0
+              return (
+                <tr key={d.name} className="hover:bg-[#1f1633]/60 transition-colors">
+                  <td className="py-3.5 px-4 font-bold text-white">
+                    {d.name}
+                  </td>
+                  <td className="py-3.5 px-4 text-center font-mono text-[#bdb8c0]">
+                    {d.total}
+                  </td>
+                  <td className="py-3.5 px-4 text-center font-mono text-[#c2ef4e] font-bold">
+                    {d.approved}
+                  </td>
+                  <td className="py-3.5 px-4 text-right font-mono font-bold text-white">
+                    {rate}%
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              )
+            })}
+            {departmentStats.length === 0 && (
+              <tr>
+                <td colSpan={4} className="py-8 text-center text-xs text-[#8b8496]">
+                  No departments recorded.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

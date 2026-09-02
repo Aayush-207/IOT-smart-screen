@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ClipboardCheck } from 'lucide-react'
+import { CheckSquare } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 
 export default async function HodDashboardPage() {
@@ -13,8 +13,8 @@ export default async function HodDashboardPage() {
 
   if (!profile?.department_id) {
     return (
-      <div className="p-8 text-center text-[var(--ink)]">
-        <h2>You are not assigned to any department yet. Contact an admin.</h2>
+      <div className="p-8 text-center text-white sentry-card">
+        <h2 className="text-base font-bold">You are not assigned to any department yet. Please contact an admin.</h2>
       </div>
     )
   }
@@ -44,94 +44,92 @@ export default async function HodDashboardPage() {
   return (
     <div className="space-y-8 max-w-5xl pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[var(--hairline)]">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#362d59]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-coral">{department?.name}</span>
-            <span className="text-xs font-mono text-[var(--mute)]">Department Authority</span>
+            <span className="sentry-chip-pink">{department?.name || 'Department'}</span>
+            <span className="text-xs font-mono text-[#8b8496]">Department Approver</span>
           </div>
-          <h1 className="cohere-display-product text-[var(--ink)]">
-            Department Review &amp; Publishing
+          <h1 className="sentry-display-section text-white">
+            Department Overview
           </h1>
-          <p className="text-sm text-[var(--slate)] max-w-xl mt-1.5 leading-relaxed">
-            Faculty and student submission review queue. Inspect automated AI policy advisories and authorize broadcast transmission across departmental screens.
+          <p className="text-sm text-[#bdb8c0] max-w-xl mt-1.5 leading-relaxed">
+            Review and approve student and faculty announcements with AI guidance before they go live on departmental screens.
           </p>
         </div>
 
         <Link
           href="/dashboard/hod/approvals"
-          className="cohere-btn-primary self-start sm:self-auto shrink-0"
+          className="sentry-btn-lime self-start sm:self-auto shrink-0"
         >
-          <ClipboardCheck className="w-4 h-4" /> Review Queue ({pending || 0})
+          <CheckSquare className="w-4 h-4" /> Pending Approvals ({pending || 0})
         </Link>
       </div>
 
-      {/* Metrics Row (Soft Stone Cards) */}
+      {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="cohere-card-stone p-6 space-y-1">
-          <span className="cohere-mono-label text-[var(--mute)]">Awaiting Decision</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{pending || 0}</div>
-          <p className="text-xs text-[var(--slate)] mt-1">Pending faculty / student notices</p>
+        <div className="sentry-card p-6 space-y-1 border-[#fa7faa]/40">
+          <span className="sentry-mono-label text-[#fa7faa]">Pending Decisions</span>
+          <div className="text-3xl font-bold text-[#fa7faa]">{pending || 0}</div>
+          <p className="text-xs text-[#bdb8c0] mt-1">Awaiting your approval</p>
         </div>
 
-        <div className="cohere-card-stone p-6 space-y-1">
-          <span className="cohere-mono-label text-[var(--cohere-deep-green)] dark:text-emerald-400">Approved &amp; Broadcasted</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{approvedTotal || 0}</div>
-          <p className="text-xs text-[var(--slate)] mt-1">Active departmental notices</p>
+        <div className="sentry-card p-6 space-y-1 border-[#c2ef4e]/40">
+          <span className="sentry-mono-label text-[#c2ef4e]">Approved &amp; Live</span>
+          <div className="text-3xl font-bold text-[#c2ef4e]">{approvedTotal || 0}</div>
+          <p className="text-xs text-[#bdb8c0] mt-1">Active on screens</p>
         </div>
 
-        <div className="cohere-card-stone p-6 space-y-1">
-          <span className="cohere-mono-label text-[var(--mute)]">Assigned Department</span>
-          <div className="text-xl font-normal text-[var(--ink)] truncate">{department?.name}</div>
-          <p className="text-xs text-[var(--slate)] mt-1">Authorized Department Approver</p>
+        <div className="sentry-card p-6 space-y-1">
+          <span className="sentry-mono-label text-[#8b8496]">Assigned Department</span>
+          <div className="text-xl font-bold text-white truncate">{department?.name}</div>
+          <p className="text-xs text-[#8b8496] mt-1">Department Head Access</p>
         </div>
       </div>
 
-      {/* Research-style Submissions Table */}
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center justify-between pb-2">
+      {/* Submissions Table */}
+      <div className="sentry-card overflow-hidden">
+        <div className="p-5 border-b border-[#362d59] flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              Recent Department Submissions
+            <h2 className="text-base font-bold text-white">
+              Recent Submissions
             </h2>
-            <p className="text-xs text-[var(--slate)]">Latest notices submitted for verification.</p>
+            <p className="text-xs text-[#8b8496]">Notices submitted by students and faculty in your department</p>
           </div>
-          <Link href="/dashboard/hod/approvals" className="cohere-btn-secondary text-xs">
-            Review Queue &rarr;
+          <Link href="/dashboard/hod/approvals" className="sentry-btn-outline text-xs">
+            Open Queue &rarr;
           </Link>
         </div>
 
         {(!recentNotices || recentNotices.length === 0) ? (
-          <div className="p-12 text-center border border-[var(--hairline)] rounded-xl bg-[var(--canvas-stone)]/30 text-xs text-[var(--slate)]">
-            No announcements recorded in this department yet.
+          <div className="p-12 text-center text-xs text-[#8b8496]">
+            No announcements submitted to your department yet.
           </div>
         ) : (
-          <div className="border-t border-[var(--hairline)]">
-            <table className="research-table text-left text-sm">
-              <thead>
-                <tr className="border-b border-[var(--hairline)] text-[var(--mute)] font-mono text-[10px] uppercase tracking-wider">
-                  <th className="py-3 px-2 font-semibold">Notice Title</th>
-                  <th className="py-3 px-2 font-semibold">Submitted By</th>
-                  <th className="py-3 px-2 font-semibold">Status</th>
-                  <th className="py-3 px-2 font-semibold text-right">Submitted</th>
+          <table className="sentry-table text-left text-sm">
+            <thead>
+              <tr>
+                <th>Notice Title</th>
+                <th>Submitted By</th>
+                <th>Status</th>
+                <th className="text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#362d59]">
+              {recentNotices.map((n: any) => (
+                <tr key={n.id} className="hover:bg-[#1f1633]/60 transition-colors">
+                  <td className="py-4 px-4 font-bold text-xs text-white">{n.title}</td>
+                  <td className="py-4 px-4 text-xs text-[#bdb8c0] font-mono">{n.profiles?.email}</td>
+                  <td className="py-4 px-4">
+                    <StatusBadge status={n.status} />
+                  </td>
+                  <td className="py-4 px-4 text-xs text-[#8b8496] text-right font-mono">
+                    {new Date(n.created_at).toLocaleDateString()}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--hairline)]">
-                {recentNotices.map((n: any) => (
-                  <tr key={n.id} className="hover:bg-[var(--canvas-stone)]/30 transition-colors">
-                    <td className="py-4 px-2 font-medium text-xs text-[var(--ink)]">{n.title}</td>
-                    <td className="py-4 px-2 text-xs text-[var(--slate)] font-mono">{n.profiles?.email}</td>
-                    <td className="py-4 px-2">
-                      <StatusBadge status={n.status} />
-                    </td>
-                    <td className="py-4 px-2 text-xs text-[var(--mute)] text-right font-mono">
-                      {new Date(n.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>

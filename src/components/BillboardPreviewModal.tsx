@@ -43,55 +43,54 @@ export function BillboardPreviewModal({
   if (!isOpen) return null
 
   const displayImage = objectUrl || attachmentUrl || null
-
   const isEmergency = priority === 'emergency'
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="bg-[#150f23] border border-[#362d59] rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden text-white">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-[var(--hairline)] flex items-center justify-between bg-[var(--canvas)]">
+        <div className="px-6 py-4 border-b border-[#362d59] flex items-center justify-between bg-[#150f23]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[var(--canvas-inset)] border border-[var(--hairline)]">
-              <Monitor className="w-5 h-5 text-[var(--ink)]" />
+            <div className="p-2 rounded-lg bg-[#1f1633] border border-[#362d59]">
+              <Monitor className="w-5 h-5 text-[#c2ef4e]" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-[var(--ink)]">Billboard Screen Simulator</h2>
-              <p className="text-xs text-[var(--mute)]">Real-time preview of how your announcement renders on campus screens</p>
+              <h2 className="text-base font-bold text-white">Display Screen Simulator</h2>
+              <p className="text-xs text-[#8b8496]">Real-time preview of your notice rendered on physical displays</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Orientation toggles */}
-            <div className="flex bg-[var(--canvas-inset)] p-1 rounded-lg border border-[var(--hairline)] text-xs font-medium">
+            <div className="flex bg-[#1f1633] p-1 rounded-lg border border-[#362d59] text-xs font-bold">
               <button
                 type="button"
                 onClick={() => setOrientation('landscape')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all cursor-pointer ${
                   orientation === 'landscape'
-                    ? 'bg-[var(--canvas-elevated)] text-[var(--ink)] shadow-sm'
-                    : 'text-[var(--mute)] hover:text-[var(--ink)]'
+                    ? 'bg-[#c2ef4e] text-[#150f23] shadow-sm'
+                    : 'text-[#8b8496] hover:text-white'
                 }`}
               >
-                <Monitor className="w-3.5 h-3.5" /> 16:9 Landscape
+                <Monitor className="w-3.5 h-3.5" /> 16:9 Horizontal
               </button>
               <button
                 type="button"
                 onClick={() => setOrientation('portrait')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all cursor-pointer ${
                   orientation === 'portrait'
-                    ? 'bg-[var(--canvas-elevated)] text-[var(--ink)] shadow-sm'
-                    : 'text-[var(--mute)] hover:text-[var(--ink)]'
+                    ? 'bg-[#c2ef4e] text-[#150f23] shadow-sm'
+                    : 'text-[#8b8496] hover:text-white'
                 }`}
               >
-                <Smartphone className="w-3.5 h-3.5" /> 9:16 Portrait
+                <Smartphone className="w-3.5 h-3.5" /> 9:16 Vertical
               </button>
             </div>
 
             <button
               type="button"
               onClick={onClose}
-              className="p-2 text-[var(--mute)] hover:text-[var(--ink)] rounded-lg hover:bg-[var(--canvas-inset)] transition-colors"
+              className="p-2 text-[#8b8496] hover:text-white rounded-lg hover:bg-[#1f1633] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -99,7 +98,7 @@ export function BillboardPreviewModal({
         </div>
 
         {/* Modal Body / Simulated Hardware Screen */}
-        <div className="flex-1 p-6 overflow-auto bg-[var(--canvas-inset)] flex flex-col items-center justify-center relative">
+        <div className="flex-1 p-6 overflow-auto bg-[#140e21] flex flex-col items-center justify-center relative">
           <div
             className={`transition-all duration-300 relative rounded-3xl border-8 border-neutral-900 shadow-[0_0_50px_rgba(0,0,0,0.8)] bg-black overflow-hidden flex flex-col ${
               orientation === 'landscape'
@@ -110,11 +109,11 @@ export function BillboardPreviewModal({
             {/* Top Billboard Status Bar */}
             <div className="px-4 py-2.5 bg-neutral-900/95 border-b border-neutral-800 flex items-center justify-between text-[11px] text-neutral-400">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse" />
-                <span className="font-bold tracking-tight text-neutral-200">CampusCast Signage Pro</span>
+                <span className="w-2 h-2 rounded-full bg-[#c2ef4e] shadow-[0_0_8px_#c2ef4e] animate-pulse" />
+                <span className="font-bold tracking-tight text-white">CampusCast Display Pro</span>
               </div>
               <div className="flex items-center gap-1.5 font-mono text-[10px] text-neutral-400">
-                <Clock className="w-3 h-3 text-[#38bdf8]" />
+                <Clock className="w-3 h-3 text-[#c2ef4e]" />
                 <span>1080p &bull; 60 FPS</span>
               </div>
             </div>
@@ -151,7 +150,7 @@ export function BillboardPreviewModal({
               </h1>
 
               {body.trim() && (
-                <p className="text-xs sm:text-sm text-neutral-300 max-w-md line-clamp-3 whitespace-pre-wrap leading-relaxed px-2">
+                <p className="text-xs sm:text-sm text-neutral-300 max-w-md line-clamp-3 whitespace-pre-wrap leading-relaxed px-2 font-normal">
                   {body}
                 </p>
               )}
@@ -160,7 +159,7 @@ export function BillboardPreviewModal({
             {/* Bottom Footer Info */}
             <div className="px-4 py-2 bg-neutral-900 border-t border-neutral-800 text-[10px] text-neutral-400 flex justify-between font-mono">
               <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" /> IoT Connected
+                <span className="w-1.5 h-1.5 rounded-full bg-[#c2ef4e]" /> Connected Screen
               </span>
               <span>Sync Cycle: 5s</span>
             </div>
@@ -168,14 +167,14 @@ export function BillboardPreviewModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 border-t border-[var(--hairline)] bg-[var(--canvas)] flex justify-between items-center">
-          <span className="text-xs text-[var(--mute)]">Simulating direct hardware output at Native Aspect Ratio</span>
+        <div className="px-6 py-3.5 border-t border-[#362d59] bg-[#150f23] flex justify-between items-center">
+          <span className="text-xs text-[#8b8496]">Simulating native screen output at scale</span>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[var(--ink)] text-[var(--canvas)] text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+            className="sentry-btn-lime text-xs cursor-pointer"
           >
-            Done Previewing
+            Close Preview
           </button>
         </div>
       </div>

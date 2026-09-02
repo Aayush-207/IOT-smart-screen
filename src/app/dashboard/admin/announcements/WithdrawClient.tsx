@@ -7,6 +7,7 @@ import { logAudit } from '@/lib/audit'
 import { StatusBadge } from '@/components/StatusBadge'
 import { announcementDisplayStatus } from '@/lib/fleet'
 import { priorityLabel } from '@/lib/priority'
+import { Search, Ban } from 'lucide-react'
 
 export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; actorId: string }) {
   const [rows, setRows] = useState(initialRows)
@@ -52,112 +53,103 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
   })
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--hairline)]">
+    <div className="space-y-8 max-w-6xl pb-16 text-white">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#362d59]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-green">Broadcast Archives</span>
-            <span className="text-xs font-mono text-[var(--mute)]">{rows.length} Total Registered</span>
+            <span className="sentry-chip-green">Broadcast Archives</span>
+            <span className="text-xs font-mono text-[#8b8496]">{rows.length} Total Notices</span>
           </div>
-          <h1 className="cohere-display-product text-[var(--ink)]">
-            Broadcasted Catalog &amp; Active Airtime
+          <h1 className="sentry-display-section text-white">
+            Broadcast Catalog &amp; Active Content
           </h1>
-          <p className="text-sm text-[var(--slate)] max-w-xl mt-1.5 leading-relaxed">
-            Immutable publication ledger across campus screens. Withdrawing immediately evicts slides from display node caches.
+          <p className="text-sm text-[#bdb8c0] max-w-xl mt-1.5 leading-relaxed">
+            Review all scheduled and live announcements on campus displays. Take down notices immediately if needed.
           </p>
         </div>
-      </div>
 
-      {/* Filter toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-1 p-1 rounded-full border border-[var(--hairline)] bg-[var(--canvas-stone)]/40">
-          {(['all', 'live', 'scheduled', 'withdrawn', 'expired'] as const).map((st) => (
-            <button
-              key={st}
-              type="button"
-              onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 rounded-full text-xs font-medium capitalize transition-all cursor-pointer ${
-                statusFilter === st
-                  ? 'bg-[var(--cohere-near-black)] text-white shadow-xs'
-                  : 'text-[var(--slate)] hover:text-[var(--ink)]'
-              }`}
-            >
-              {st}
-            </button>
-          ))}
-        </div>
-
-        <div className="w-full sm:w-64">
+        <div className="w-full sm:w-72 relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8b8496]" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search broadcasted notices..."
-            className="w-full px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+            placeholder="Search catalog by title..."
+            className="sentry-input pl-9 text-xs"
           />
         </div>
       </div>
 
-      <div className="border-t border-[var(--hairline)]">
-        <table className="research-table text-left text-sm">
+      <div className="flex flex-wrap items-center gap-1.5 bg-[#150f23] p-1 rounded-xl border border-[#362d59] w-fit">
+        {(['all', 'live', 'scheduled', 'expired', 'withdrawn'] as const).map((st) => (
+          <button
+            key={st}
+            onClick={() => setStatusFilter(st)}
+            className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
+              statusFilter === st
+                ? 'bg-[#c2ef4e] text-[#150f23]'
+                : 'text-[#8b8496] hover:text-white'
+            }`}
+          >
+            {st}
+          </button>
+        ))}
+      </div>
+
+      <div className="sentry-card overflow-hidden">
+        <table className="sentry-table text-left text-sm">
           <thead>
-            <tr className="border-b border-[var(--hairline)] text-[var(--mute)] font-mono text-[10px] uppercase tracking-wider">
-              <th className="py-3 px-2 font-semibold">Title</th>
-              <th className="py-3 px-2 font-semibold">Department</th>
-              <th className="py-3 px-2 font-semibold">Priority</th>
-              <th className="py-3 px-2 font-semibold">Status</th>
-              <th className="py-3 px-2 font-semibold">Display Window</th>
-              <th className="py-3 px-2 font-semibold text-right">Actions</th>
+            <tr>
+              <th>Notice Title &amp; Details</th>
+              <th>Department</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Display Schedule</th>
+              <th className="text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--hairline)]">
+          <tbody className="divide-y divide-[#362d59]">
             {filtered.map((r) => {
               const disp = r.status === 'approved' ? announcementDisplayStatus(r) : r.status
+              const isWithdrawn = r.status === 'withdrawn'
               return (
-                <tr key={r.id} className="hover:bg-[var(--canvas-stone)]/30 transition-colors">
-                  <td className="py-4 px-2">
-                    <div className="font-medium text-xs text-[var(--ink)]">{r.title}</div>
-                    {r.body && <div className="text-[11px] text-[var(--slate)] truncate max-w-xs mt-0.5">{r.body}</div>}
+                <tr key={r.id} className="hover:bg-[#1f1633]/60 transition-colors">
+                  <td className="px-5 py-4">
+                    <div className="font-bold text-xs text-white">{r.title}</div>
+                    {r.body && <div className="text-[11px] text-[#8b8496] truncate max-w-xs mt-0.5">{r.body}</div>}
                   </td>
-                  <td className="py-4 px-2 text-xs text-[var(--slate)] font-mono">{r.departments?.name || 'General'}</td>
-                  <td className="py-4 px-2">
-                    <span className="font-mono text-[10px] uppercase font-semibold text-[var(--slate)]">{priorityLabel(r.priority)}</span>
+                  <td className="px-5 py-4 text-xs text-[#bdb8c0] font-mono">
+                    {r.departments?.name || 'General'}
                   </td>
-                  <td className="py-4 px-2">
+                  <td className="px-5 py-4 text-xs font-mono">
+                    <span className="sentry-chip-violet">{priorityLabel(r.priority)}</span>
+                  </td>
+                  <td className="px-5 py-4">
                     <StatusBadge status={disp} />
                   </td>
-                  <td className="py-4 px-2 text-xs text-[var(--mute)] font-mono">
+                  <td className="px-5 py-4 text-xs text-[#8b8496] font-mono">
                     {r.display_start ? new Date(r.display_start).toLocaleDateString() : 'Immediate'}
-                    {r.display_end ? ` → ${new Date(r.display_end).toLocaleDateString()}` : ' (No expiry)'}
+                    {r.display_end ? ` → ${new Date(r.display_end).toLocaleDateString()}` : ' (Continuous)'}
                   </td>
-                  <td className="py-4 px-2 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      {r.status !== 'withdrawn' && (
-                        <button
-                          disabled={busy === r.id}
-                          onClick={() => withdraw(r)}
-                          className="text-xs text-rose-600 hover:underline font-semibold disabled:opacity-50 cursor-pointer"
-                        >
-                          {busy === r.id ? 'Evicting…' : 'Withdraw'}
-                        </button>
-                      )}
-                      {r.attachment_url && (
-                        <a
-                          href={r.attachment_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="cohere-btn-secondary text-xs"
-                        >
-                          Visual &rarr;
-                        </a>
-                      )}
-                    </div>
+                  <td className="px-5 py-4 text-right">
+                    {isWithdrawn ? (
+                      <span className="text-[11px] text-[#8b8496] italic font-mono">Withdrawn</span>
+                    ) : (
+                      <button
+                        onClick={() => withdraw(r)}
+                        disabled={busy === r.id}
+                        className="sentry-btn-secondary text-[#fa5252] border-[#fa5252]/40 hover:bg-[#fa5252]/10 text-xs inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <Ban className="w-3.5 h-3.5" />
+                        {busy === r.id ? 'Taking down…' : 'Take Down'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               )
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-12 text-center text-xs text-[var(--mute)]">
+                <td colSpan={6} className="px-5 py-12 text-center text-xs text-[#8b8496]">
                   No announcements match the selected filter.
                 </td>
               </tr>

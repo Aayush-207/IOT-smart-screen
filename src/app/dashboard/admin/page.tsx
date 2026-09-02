@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Monitor, ScrollText, ClipboardCheck, AlertTriangle } from 'lucide-react'
+import { Monitor, ScrollText, CheckSquare, AlertTriangle, Tv, ListOrdered, BarChart3 } from 'lucide-react'
 import { deviceStatus } from '@/lib/fleet'
 import { OrgManagementClient } from './OrgManagementClient'
 import { ClearEmergencyButton } from '@/components/ClearEmergencyButton'
@@ -51,47 +51,47 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8 max-w-6xl pb-16">
-      {/* Header with Editorial Declaration */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--hairline)]">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#362d59]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-green">Central Console</span>
-            <span className="text-xs font-mono text-[var(--mute)]">Mesh Health: {healthRate}%</span>
+            <span className="sentry-chip-green">Central Command</span>
+            <span className="text-xs font-mono text-[#8b8496]">Screen Health: {healthRate}%</span>
           </div>
-          <h1 className="cohere-display-product text-[var(--ink)]">
-            Institutional Operations &amp; Fleet Command
+          <h1 className="sentry-display-section text-white">
+            Admin Dashboard &amp; Hardware Network
           </h1>
-          <p className="text-sm text-[var(--slate)] max-w-2xl mt-1.5 leading-relaxed">
-            Central orchestration node for campus-wide digital displays, urgent priority reviews, remote device hardware lifecycle, and immediate emergency overrides.
+          <p className="text-sm text-[#bdb8c0] max-w-2xl mt-1.5 leading-relaxed">
+            Central dashboard for managing campus digital screens, urgent announcement approvals, live video walls, and emergency safety broadcasts.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/admin/fleet"
-            className="cohere-btn-primary"
+            className="sentry-btn-lime"
           >
-            <Monitor className="w-4 h-4" /> Manage Fleet ({totalScreens})
+            <Monitor className="w-4 h-4" /> Screens &amp; Fleet ({totalScreens})
           </Link>
           <Link
             href="/dashboard/admin/emergency"
-            className="cohere-btn-pill-outline border-rose-400 text-rose-700 dark:text-rose-400 hover:bg-rose-50"
+            className="sentry-btn-secondary border-[#fa5252]/40 text-[#fa5252] hover:bg-[#fa5252]/10"
           >
-            <AlertTriangle className="w-4 h-4 text-rose-600" /> Emergency Console
+            <AlertTriangle className="w-4 h-4 text-[#fa5252]" /> Emergency Alert
           </Link>
         </div>
       </div>
 
-      {/* Emergency Active Banner */}
+      {/* Active Emergency Alert Banner */}
       {(activeEmergencies || []).length > 0 && (
-        <div className="p-6 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-6 rounded-2xl bg-[#fa5252]/15 border-2 border-[#fa5252]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-rose-600 text-white shrink-0">
+            <div className="p-2.5 rounded-xl bg-[#fa5252] text-white shrink-0 animate-bounce">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <span className="cohere-mono-label text-rose-700 dark:text-rose-300">Active Global Override</span>
-              <p className="text-sm font-semibold text-[var(--ink)] mt-0.5">
+              <span className="sentry-mono-label text-[#fa5252]">Active Campus-Wide Emergency Override</span>
+              <p className="text-sm font-bold text-white mt-0.5">
                 &ldquo;{activeEmergencies![0].body || activeEmergencies![0].title}&rdquo;
               </p>
             </div>
@@ -100,82 +100,95 @@ export default async function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Telemetry Metrics Row (Soft Stone Cards) */}
+      {/* Telemetry Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
-        <div className="cohere-card-stone p-5 space-y-1">
+        <div className="sentry-card p-5 space-y-1 border-[#c2ef4e]/30">
           <div className="flex items-center justify-between">
-            <span className="cohere-mono-label text-[var(--cohere-deep-green)] dark:text-emerald-400">Online</span>
-            <span className="w-2 h-2 rounded-full bg-[#003c33] dark:bg-emerald-400" />
+            <span className="sentry-mono-label text-[#c2ef4e]">Online</span>
+            <span className="w-2 h-2 rounded-full bg-[#c2ef4e] shadow-[0_0_6px_rgba(194,239,78,0.8)]" />
           </div>
-          <div className="text-3xl font-normal text-[var(--ink)]">{counts.online}</div>
-          <p className="text-[10px] font-mono text-[var(--mute)]">Heartbeat active</p>
+          <div className="text-3xl font-extrabold text-[#c2ef4e]">{counts.online}</div>
+          <p className="text-[10px] font-mono text-[#bdb8c0]">Active Heartbeat</p>
         </div>
 
-        <div className="cohere-card-stone p-5 space-y-1">
-          <span className="cohere-mono-label text-amber-700 dark:text-amber-400">Stale Sync</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{counts.stale}</div>
-          <p className="text-[10px] font-mono text-[var(--mute)]">Delayed ping</p>
+        <div className="sentry-card p-5 space-y-1 border-amber-500/30">
+          <span className="sentry-mono-label text-amber-400">Delayed Sync</span>
+          <div className="text-3xl font-extrabold text-amber-400">{counts.stale}</div>
+          <p className="text-[10px] font-mono text-[#bdb8c0]">Slow ping</p>
         </div>
 
-        <div className="cohere-card-stone p-5 space-y-1">
-          <span className="cohere-mono-label text-[var(--mute)]">Offline</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{counts.offline}</div>
-          <p className="text-[10px] font-mono text-[var(--mute)]">Unreachable</p>
+        <div className="sentry-card p-5 space-y-1">
+          <span className="sentry-mono-label text-[#8b8496]">Offline</span>
+          <div className="text-3xl font-extrabold text-white">{counts.offline}</div>
+          <p className="text-[10px] font-mono text-[#8b8496]">Unreachable</p>
         </div>
 
-        <div className="cohere-card-stone p-5 space-y-1">
-          <span className="cohere-mono-label text-[var(--cohere-action-blue)]">All Queues</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{pendingApprovals || 0}</div>
-          <p className="text-[10px] font-mono text-[var(--mute)]">Campus-wide</p>
+        <div className="sentry-card p-5 space-y-1 border-[#6a5fc1]/30">
+          <span className="sentry-mono-label text-[#a79df5]">Total Pending</span>
+          <div className="text-3xl font-extrabold text-white">{pendingApprovals || 0}</div>
+          <p className="text-[10px] font-mono text-[#bdb8c0]">Campus Queues</p>
         </div>
 
-        <div className="cohere-card-stone p-5 space-y-1 border-[#ffad9b]">
-          <span className="cohere-mono-label text-[#ff7759]">Critical (You)</span>
-          <div className="text-3xl font-normal text-[#ff7759]">{criticalApprovals || 0}</div>
-          <Link href="/dashboard/admin/approvals" className="text-[10px] text-[#1863dc] hover:underline font-mono block">
-            Review Queue &rarr;
+        <div className="sentry-card p-5 space-y-1 border-[#fa7faa]/40">
+          <span className="sentry-mono-label text-[#fa7faa]">Admin Reviews</span>
+          <div className="text-3xl font-extrabold text-[#fa7faa]">{criticalApprovals || 0}</div>
+          <Link href="/dashboard/admin/approvals" className="text-[10px] text-[#c2ef4e] hover:underline font-mono block">
+            Review Now &rarr;
           </Link>
         </div>
       </div>
 
-      {/* Fast Action Links Strip */}
-      <div className="flex flex-wrap gap-3 pt-2">
+      {/* Quick Action Navigation Buttons */}
+      <div className="flex flex-wrap gap-2.5 pt-1">
         {!isEmergencyRole && (
           <Link
             href="/dashboard/admin/approvals"
-            className="cohere-btn-primary text-xs"
+            className="sentry-btn-primary text-xs"
           >
-            <ClipboardCheck className="w-3.5 h-3.5" /> Critical Approvals ({criticalApprovals || 0})
+            <CheckSquare className="w-3.5 h-3.5" /> Urgent Approvals ({criticalApprovals || 0})
           </Link>
         )}
         <Link
-          href="/dashboard/admin/fleet"
-          className="cohere-btn-pill-outline text-xs"
+          href="/dashboard/admin/wall"
+          className="sentry-btn-secondary text-xs"
         >
-          <Monitor className="w-3.5 h-3.5" /> Device Fleet ({totalScreens})
+          <Tv className="w-3.5 h-3.5 text-[#c2ef4e]" /> Live Screen Wall
+        </Link>
+        <Link
+          href="/dashboard/admin/fleet"
+          className="sentry-btn-secondary text-xs"
+        >
+          <Monitor className="w-3.5 h-3.5 text-[#c2ef4e]" /> Screen Fleet ({totalScreens})
         </Link>
         <Link
           href="/dashboard/admin/announcements"
-          className="cohere-btn-pill-outline text-xs"
+          className="sentry-btn-secondary text-xs"
         >
-          <ScrollText className="w-3.5 h-3.5" /> Published Catalog
+          <ListOrdered className="w-3.5 h-3.5" /> Broadcast Catalog
+        </Link>
+        <Link
+          href="/dashboard/admin/analytics"
+          className="sentry-btn-secondary text-xs"
+        >
+          <BarChart3 className="w-3.5 h-3.5" /> Analytics &amp; Telemetry
         </Link>
         <Link
           href="/dashboard/admin/audit"
-          className="cohere-btn-pill-outline text-xs"
+          className="sentry-btn-secondary text-xs"
         >
-          <ScrollText className="w-3.5 h-3.5" /> Immutable Audit Log
+          <ScrollText className="w-3.5 h-3.5" /> Activity Audit Log
         </Link>
       </div>
 
       {/* Organization Hierarchy Section */}
       {!isEmergencyRole && (
-        <div className="pt-6 border-t border-[var(--hairline)]">
+        <div className="pt-6 border-t border-[#362d59]">
           <div className="mb-4">
-            <span className="cohere-mono-label text-[var(--mute)]">Access Governance</span>
-            <h2 className="text-lg font-semibold tracking-tight text-[var(--ink)]">
-              Department &amp; User Hierarchy
+            <span className="sentry-mono-label text-[#8b8496]">Governance</span>
+            <h2 className="text-lg font-bold text-white">
+              Departments &amp; User Roles
             </h2>
+            <p className="text-xs text-[#bdb8c0] mt-0.5">Assign department heads (HODs) and configure user permissions.</p>
           </div>
           <OrgManagementClient initialDepartments={departments || []} initialProfiles={profiles || []} />
         </div>

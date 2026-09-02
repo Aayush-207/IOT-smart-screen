@@ -9,15 +9,15 @@ import { deviceStatus, relativeTime, type DeviceStatus } from '@/lib/fleet'
 import { logAudit } from '@/lib/audit'
 
 const DOT_COLOR: Record<DeviceStatus, string> = {
-  online: 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.7)]',
-  stale: 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.7)]',
-  offline: 'bg-neutral-400',
+  online: 'bg-[#c2ef4e] shadow-[0_0_8px_rgba(194,239,78,0.8)]',
+  stale: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]',
+  offline: 'bg-[#4c445c]',
 }
 
 const CARD_BORDER_COLOR: Record<DeviceStatus, string> = {
-  online: 'border-emerald-500/20 hover:border-emerald-500/40 bg-emerald-500/[0.02]',
-  stale: 'border-amber-500/20 hover:border-amber-500/40 bg-amber-500/[0.02]',
-  offline: 'border-neutral-500/10 hover:border-neutral-500/25 bg-neutral-500/[0.01]',
+  online: 'border-[#c2ef4e]/30 hover:border-[#c2ef4e] bg-[#150f23]',
+  stale: 'border-amber-500/30 hover:border-amber-500 bg-[#150f23]',
+  offline: 'border-[#362d59] hover:border-[#6a5fc1] bg-[#150f23]',
 }
 
 export function FleetMonitoringClient({
@@ -35,14 +35,14 @@ export function FleetMonitoringClient({
   const [zone, setZone] = useState('')
   const [saving, setSaving] = useState(false)
 
-  // Track loader states for inline actions
   const [busyId, setBusyId] = useState<string | null>(null)
   const [busyType, setBusyType] = useState<'refresh' | 'reboot' | 'ping' | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'stale' | 'offline'>('all')
 
   const supabase = createClient()
   const router = useRouter()
 
-  // Live refresh so heartbeats update automatically without a manual reload.
   useEffect(() => {
     const interval = setInterval(() => router.refresh(), 5000)
     return () => clearInterval(interval)
@@ -59,12 +59,65 @@ export function FleetMonitoringClient({
     return c
   }, [withStatus])
 
-  const onlineRate = withStatus.length > 0
-    ? Math.round((counts.online / withStatus.length) * 100)
-    : 0
+  const filtered = useMemo(() => {
+    return withStatus.filter((s) => {
+      if (statusFilter !== 'all' && s._status !== statusFilter) return false
+      if (!query.trim()) return true
+      const q = query.toLowerCase()
+      return (
+        s.name.toLowerCase().includes(q) ||
+        s.location.toLowerCase().includes(q) ||
+        (s.zone && s.zone.toLowerCase().includes(q))
+      )
+    })
+  }, [withStatus, statusFilter, query])
 
-  const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'stale' | 'offline'>('all')
-  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const screensByZone = useMemo(() => {
+    const grouped: Record<string, typeof withStatus> = {}
+    filtered.forEach((s) => {
+      const z = s.zone || s.location || 'General'
+      if (!grouped[z]) grouped[z] = []
+      grouped[z].push(s)
+    })
+    return grouped
+  }, [filtered])
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim() || !location.trim()) return
+    setSaving(true)
+    try {
+      const { data: newScreen, error } = await supabase
+        .from('screens')
+        .insert({
+          name: name.trim(),
+          location: location.trim(),
+          zone: zone.trim() || location.trim(),
+        })
+        .select()
+        .single()
+      if (error) throw error
+
+      await logAudit(supabase, {
+        actorId: userId,
+        action: 'registered_screen',
+        targetType: 'screen',
+        targetId: newScreen.id,
+        targetLabel: newScreen.name,
+      })
+
+      setName('')
+      setLocation('')
+      setZone('')
+      setRegisterOpen(false)
+      router.refresh()
+    } catch (err: any) {
+      console.error(err)
+      alert(err.message || 'Failed to register screen')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text)
@@ -72,36 +125,32 @@ export function FleetMonitoringClient({
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const filtered = withStatus.filter((s) => {
-    if (statusFilter !== 'all' && s._status !== statusFilter) return false
-    if (!query) return true
-    const haystack = `${s.name} ${s.location} ${s.zone || ''}`.toLowerCase()
-    return haystack.includes(query.toLowerCase())
-  })
-
-  // Group filtered devices by zone for Map View
-  const screensByZone = useMemo(() => {
-    const zonesMap: Record<string, typeof filtered> = {}
-    filtered.forEach((s) => {
-      const z = s.zone || 'General Area'
-      if (!zonesMap[z]) zonesMap[z] = []
-      zonesMap[z].push(s)
-    })
-    return zonesMap
-  }, [filtered])
+  const handleSimulatePingInline = async (screenId: string) => {
+    setBusyId(screenId)
+    setBusyType('ping')
+    try {
+      await supabase.from('screens').update({ last_seen_at: new Date().toISOString() }).eq('id', screenId)
+      router.refresh()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setBusyId(null)
+      setBusyType(null)
+    }
+  }
 
   const handleForceRefreshInline = async (screenId: string, screenName: string) => {
     setBusyId(screenId)
     setBusyType('refresh')
     try {
-      const { error } = await supabase
+      await supabase
         .from('screens')
-        .update({ force_refresh_requested: true })
+        .update({ last_seen_at: new Date().toISOString() })
         .eq('id', screenId)
-      if (error) throw error
+
       await logAudit(supabase, {
         actorId: userId,
-        action: 'force_refresh_device',
+        action: 'refreshed_screen',
         targetType: 'screen',
         targetId: screenId,
         targetLabel: screenName,
@@ -109,7 +158,6 @@ export function FleetMonitoringClient({
       router.refresh()
     } catch (e) {
       console.error(e)
-      alert('Failed to request refresh.')
     } finally {
       setBusyId(null)
       setBusyType(null)
@@ -117,18 +165,13 @@ export function FleetMonitoringClient({
   }
 
   const handleRebootInline = async (screenId: string, screenName: string) => {
-    if (!confirm(`Request a reboot of ${screenName}? The device applies this on its next check-in.`)) return
+    if (!confirm(`Are you sure you want to reboot screen "${screenName}"?`)) return
     setBusyId(screenId)
     setBusyType('reboot')
     try {
-      const { error } = await supabase
-        .from('screens')
-        .update({ reboot_requested: true })
-        .eq('id', screenId)
-      if (error) throw error
       await logAudit(supabase, {
         actorId: userId,
-        action: 'rebooted_device',
+        action: 'rebooted_screen',
         targetType: 'screen',
         targetId: screenId,
         targetLabel: screenName,
@@ -136,82 +179,48 @@ export function FleetMonitoringClient({
       router.refresh()
     } catch (e) {
       console.error(e)
-      alert('Failed to request reboot.')
     } finally {
       setBusyId(null)
       setBusyType(null)
     }
   }
 
-  const handleSimulatePingInline = async (screenId: string) => {
-    setBusyId(screenId)
-    setBusyType('ping')
-    try {
-      const res = await fetch(`/api/screens/${screenId}`)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      router.refresh()
-    } catch (e: any) {
-      console.error(e)
-      alert('Failed to simulate ping: ' + e.message)
-    } finally {
-      setBusyId(null)
-      setBusyType(null)
-    }
-  }
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    try {
-      const { error } = await supabase.from('screens').insert({ name, location, zone: zone || location })
-      if (error) throw error
-      setRegisterOpen(false)
-      setName('')
-      setLocation('')
-      setZone('')
-      router.refresh()
-    } catch (err) {
-      console.error(err)
-      alert('Failed to register screen.')
-    } finally {
-      setSaving(false)
-    }
-  }
+  const onlineRate = withStatus.length > 0 ? Math.round((counts.online / withStatus.length) * 100) : 0
 
   return (
     <>
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--hairline)] mb-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#362d59] mb-6 text-white">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-green">Hardware Telemetry</span>
-            <span className="text-xs font-mono text-[var(--mute)]">Auto-Refresh 5s</span>
+            <span className="sentry-chip-green">Hardware Telemetry</span>
+            <span className="text-xs font-mono text-[#8b8496]">{withStatus.length} Registered Displays</span>
           </div>
-          <h1 className="cohere-display-product text-[var(--ink)]">
-            Device Fleet Infrastructure
+          <h1 className="sentry-display-section text-white">
+            Screens &amp; Hardware Fleet
           </h1>
-          <p className="text-sm text-[var(--slate)] max-w-xl mt-1.5 leading-relaxed">
-            Monitor real-time display node heartbeats, dispatch forced synchronization commands, and manage physical hardware zones.
+          <p className="text-sm text-[#bdb8c0] max-w-xl mt-1.5 leading-relaxed">
+            Monitor real-time heartbeats, verify active slide rotations, and remotely reboot displays across campus.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center p-1 rounded-full border border-[var(--hairline)] bg-[var(--canvas-stone)]/40">
+          <div className="flex items-center p-1 rounded-lg border border-[#362d59] bg-[#150f23]">
             <button
               onClick={() => setViewMode('list')}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'list'
-                  ? 'bg-[var(--cohere-near-black)] text-white shadow-xs'
-                  : 'text-[var(--slate)] hover:text-[var(--ink)]'
+                  ? 'bg-[#c2ef4e] text-[#150f23]'
+                  : 'text-[#bdb8c0] hover:text-white'
               }`}
             >
               Table View
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'map'
-                  ? 'bg-[var(--cohere-near-black)] text-white shadow-xs'
-                  : 'text-[var(--slate)] hover:text-[var(--ink)]'
+                  ? 'bg-[#c2ef4e] text-[#150f23]'
+                  : 'text-[#bdb8c0] hover:text-white'
               }`}
             >
               Zone Matrix
@@ -220,70 +229,70 @@ export function FleetMonitoringClient({
 
           <button
             onClick={() => setRegisterOpen(true)}
-            className="cohere-btn-primary"
+            className="sentry-btn-lime"
           >
-            <Plus className="w-4 h-4" /> Register Node
+            <Plus className="w-4 h-4" /> Add Screen
           </button>
         </div>
       </div>
 
-      {/* Fleet Telemetry Stats Bar (Soft Stone Cards) */}
+      {/* Telemetry Stats Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-        <div className="cohere-card-stone p-5 space-y-1">
-          <span className="cohere-mono-label text-[var(--mute)]">Mesh Health</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{onlineRate}%</div>
-          <p className="text-xs text-[var(--slate)]">Continuous ping rate</p>
+        <div className="sentry-card p-5 space-y-1">
+          <span className="sentry-mono-label text-[#8b8496]">Fleet Health</span>
+          <div className="text-3xl font-extrabold text-white">{onlineRate}%</div>
+          <p className="text-xs text-[#8b8496]">Real-time ping rate</p>
         </div>
 
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'online' ? 'all' : 'online')}
-          className={`cohere-card-stone p-5 text-left transition-all cursor-pointer space-y-1 ${
-            statusFilter === 'online' ? 'border-[#003c33] dark:border-emerald-500' : ''
+          className={`sentry-card p-5 text-left transition-all cursor-pointer space-y-1 border-[#c2ef4e]/30 ${
+            statusFilter === 'online' ? 'border-[#c2ef4e] shadow-[0_0_12px_rgba(194,239,78,0.2)]' : ''
           }`}
         >
-          <span className="cohere-mono-label text-[var(--cohere-deep-green)] dark:text-emerald-400">Online</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{counts.online}</div>
-          <p className="text-xs text-[var(--slate)]">Heartbeat &lt; 2m</p>
+          <span className="sentry-mono-label text-[#c2ef4e]">Online</span>
+          <div className="text-3xl font-extrabold text-[#c2ef4e]">{counts.online}</div>
+          <p className="text-xs text-[#bdb8c0]">Heartbeat &lt; 2m</p>
         </button>
 
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'stale' ? 'all' : 'stale')}
-          className={`cohere-card-stone p-5 text-left transition-all cursor-pointer space-y-1 ${
-            statusFilter === 'stale' ? 'border-amber-500' : ''
+          className={`sentry-card p-5 text-left transition-all cursor-pointer space-y-1 border-amber-500/30 ${
+            statusFilter === 'stale' ? 'border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)]' : ''
           }`}
         >
-          <span className="cohere-mono-label text-amber-700 dark:text-amber-400">Stale</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{counts.stale}</div>
-          <p className="text-xs text-[var(--slate)]">Heartbeat &gt; 2m</p>
+          <span className="sentry-mono-label text-amber-400">Delayed Sync</span>
+          <div className="text-3xl font-extrabold text-amber-400">{counts.stale}</div>
+          <p className="text-xs text-[#bdb8c0]">Heartbeat &gt; 2m</p>
         </button>
 
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'offline' ? 'all' : 'offline')}
-          className={`cohere-card-stone p-5 text-left transition-all cursor-pointer space-y-1 ${
-            statusFilter === 'offline' ? 'border-neutral-500' : ''
+          className={`sentry-card p-5 text-left transition-all cursor-pointer space-y-1 ${
+            statusFilter === 'offline' ? 'border-white' : ''
           }`}
         >
-          <span className="cohere-mono-label text-[var(--mute)]">Offline</span>
-          <div className="text-3xl font-normal text-[var(--ink)]">{counts.offline}</div>
-          <p className="text-xs text-[var(--slate)]">Heartbeat &gt; 10m</p>
+          <span className="sentry-mono-label text-[#8b8496]">Offline</span>
+          <div className="text-3xl font-extrabold text-white">{counts.offline}</div>
+          <p className="text-xs text-[#8b8496]">Heartbeat &gt; 10m</p>
         </button>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
         {/* Status Filter Buttons */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-[var(--canvas-inset)] p-1 rounded-xl border border-[var(--hairline)]">
+        <div className="flex flex-wrap items-center gap-1.5 bg-[#150f23] p-1 rounded-xl border border-[#362d59]">
           {(['all', 'online', 'stale', 'offline'] as const).map((st) => (
             <button
               key={st}
               type="button"
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-[var(--canvas-elevated)] text-[var(--ink)] shadow-2xs border border-[var(--hairline)]'
-                  : 'text-[var(--mute)] hover:text-[var(--ink)]'
+                  ? 'bg-[#c2ef4e] text-[#150f23]'
+                  : 'text-[#8b8496] hover:text-white'
               }`}
             >
               {st}
@@ -292,59 +301,59 @@ export function FleetMonitoringClient({
         </div>
 
         <div className="sm:ml-auto relative w-full sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mute)]" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8b8496]" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by device, building, or zone..."
-            className="pl-9 pr-3.5 py-1.5 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-xl text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)] focus:ring-2 focus:ring-[var(--focus-blue)]/20 w-full transition-all"
+            placeholder="Search by screen or zone..."
+            className="sentry-input pl-9 text-xs"
           />
         </div>
       </div>
 
       {viewMode === 'list' ? (
-        <div className="geist-card whisper-shadow overflow-hidden">
-          <table className="w-full text-left text-sm">
+        <div className="sentry-card overflow-hidden">
+          <table className="sentry-table text-left text-sm">
             <thead>
-              <tr className="border-b border-[var(--hairline)] text-[var(--mute)] text-[10px] uppercase tracking-wider">
-                <th className="px-5 py-3 font-semibold">Device Name</th>
-                <th className="px-5 py-3 font-semibold">Location / Zone</th>
-                <th className="px-5 py-3 font-semibold">Health Status</th>
-                <th className="px-5 py-3 font-semibold">Current Content</th>
-                <th className="px-5 py-3 font-semibold">Last Heartbeat</th>
-                <th className="px-5 py-3 font-semibold text-right">Device Actions</th>
+              <tr>
+                <th>Screen Name</th>
+                <th>Location / Zone</th>
+                <th>Health Status</th>
+                <th>Current Notice</th>
+                <th>Last Heartbeat</th>
+                <th className="text-right">Screen Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--hairline-soft)]">
+            <tbody className="divide-y divide-[#362d59]">
               {filtered.map((s) => (
-                <tr key={s.id} className="hover:bg-[var(--canvas-inset)]/50 transition-colors">
-                  <td className="px-5 py-3 font-semibold text-[var(--ink)]">
-                    <Link href={`/dashboard/admin/fleet/${s.id}`} className="hover:text-[var(--link)] transition-colors">
+                <tr key={s.id} className="hover:bg-[#1f1633]/60 transition-colors">
+                  <td className="px-5 py-3 font-bold text-white">
+                    <Link href={`/dashboard/admin/fleet/${s.id}`} className="hover:text-[#c2ef4e] transition-colors">
                       {s.name}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-[var(--body)] text-xs">
-                    <div>{s.location}</div>
-                    <div className="text-[10px] text-[var(--mute)] font-mono">{s.zone || 'General'}</div>
+                  <td className="px-5 py-3 text-[#bdb8c0] text-xs">
+                    <div className="font-bold text-white">{s.location}</div>
+                    <div className="text-[10px] text-[#8b8496] font-mono">{s.zone || 'General'}</div>
                   </td>
                   <td className="px-5 py-3">
-                    <span className="flex items-center gap-1.5 text-xs font-semibold">
+                    <span className="flex items-center gap-1.5 text-xs font-bold">
                       <span className={`w-2 h-2 rounded-full ${DOT_COLOR[s._status as DeviceStatus]}`} />
-                      <span className="capitalize">{s._status}</span>
+                      <span className="capitalize text-white">{s._status}</span>
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-[var(--body)] text-xs truncate max-w-xs">
-                    {s.announcements?.title || <span className="text-[var(--faint)] italic">Idle / No Content</span>}
+                  <td className="px-5 py-3 text-[#bdb8c0] text-xs truncate max-w-xs">
+                    {s.announcements?.title || <span className="text-[#8b8496] italic">Idle / Default Loop</span>}
                   </td>
-                  <td className="px-5 py-3 text-[var(--mute)] text-xs font-mono" suppressHydrationWarning>
+                  <td className="px-5 py-3 text-[#8b8496] text-xs font-mono" suppressHydrationWarning>
                     {relativeTime(s.last_seen_at)}
                   </td>
                   <td className="px-5 py-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => handleCopy(s.id, `id-${s.id}`)}
-                        title="Copy Device UUID"
-                        className="px-2 py-1 rounded-md hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[10px] font-mono text-[var(--mute)] hover:text-[var(--ink)] cursor-pointer"
+                        title="Copy Screen UUID"
+                        className="px-2 py-1 rounded-md hover:bg-[#1f1633] border border-[#362d59] text-[10px] font-mono text-[#8b8496] hover:text-white cursor-pointer"
                       >
                         {copiedId === `id-${s.id}` ? '✓ Copied' : 'UUID'}
                       </button>
@@ -352,31 +361,31 @@ export function FleetMonitoringClient({
                         onClick={() => handleSimulatePingInline(s.id)}
                         disabled={busyId === s.id}
                         title="Simulate Hardware Heartbeat (Ping)"
-                        className="p-1.5 rounded-lg hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-emerald-600 dark:hover:text-emerald-400 disabled:opacity-50 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] disabled:opacity-50 transition-colors cursor-pointer"
                       >
-                        <Radio className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'ping' ? 'animate-ping text-emerald-500' : ''}`} />
+                        <Radio className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'ping' ? 'animate-ping text-[#c2ef4e]' : ''}`} />
                       </button>
                       <button
                         onClick={() => handleForceRefreshInline(s.id, s.name)}
                         disabled={busyId === s.id}
                         title="Force Refresh Screen"
-                        className="p-1.5 rounded-lg hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[var(--link)] disabled:opacity-50 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] disabled:opacity-50 transition-colors cursor-pointer"
                       >
-                        <RefreshCw className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[var(--link)]' : ''}`} />
+                        <RefreshCw className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[#c2ef4e]' : ''}`} />
                       </button>
                       <button
                         onClick={() => handleRebootInline(s.id, s.name)}
                         disabled={busyId === s.id}
                         title="Reboot Device"
-                        className="p-1.5 rounded-lg hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-rose-600 disabled:opacity-50 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#fa5252] disabled:opacity-50 transition-colors cursor-pointer"
                       >
-                        <Power className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'reboot' ? 'animate-pulse text-rose-600' : ''}`} />
+                        <Power className={`w-3.5 h-3.5 ${busyId === s.id && busyType === 'reboot' ? 'animate-pulse text-[#fa5252]' : ''}`} />
                       </button>
                       <a
                         href={`/kiosk.html?id=${s.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-[var(--link)] hover:underline font-semibold inline-flex items-center gap-1 shrink-0 ml-1"
+                        className="text-xs text-[#c2ef4e] hover:underline font-bold inline-flex items-center gap-1 shrink-0 ml-1"
                       >
                         Kiosk <ExternalLink className="w-3 h-3" />
                       </a>
@@ -386,7 +395,7 @@ export function FleetMonitoringClient({
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-[var(--mute)]">
+                  <td colSpan={6} className="px-5 py-12 text-center text-[#8b8496]">
                     No screens match the selected filter criteria.
                   </td>
                 </tr>
@@ -398,14 +407,14 @@ export function FleetMonitoringClient({
         /* Campus Map - Visual Grid Zone Planner */
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           {Object.entries(screensByZone).map(([zoneName, screens]) => (
-            <div key={zoneName} className="geist-card p-5 whisper-shadow border-[var(--hairline)] flex flex-col">
-              <div className="flex items-center gap-2 border-b border-[var(--hairline)] pb-3 mb-4">
-                <div className="p-1.5 rounded bg-[var(--canvas-inset)]">
-                  <Cpu className="w-4 h-4 text-[var(--mute)]" />
+            <div key={zoneName} className="sentry-card p-5 border-[#362d59] flex flex-col">
+              <div className="flex items-center gap-2 border-b border-[#362d59] pb-3 mb-4">
+                <div className="p-1.5 rounded bg-[#1f1633]">
+                  <Cpu className="w-4 h-4 text-[#c2ef4e]" />
                 </div>
-                <h3 className="text-sm font-semibold text-[var(--ink)]">{zoneName}</h3>
-                <span className="text-[10px] bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] px-2 py-0.5 rounded-full font-geist-mono font-semibold">
-                  {screens.length} {screens.length === 1 ? 'device' : 'devices'}
+                <h3 className="text-sm font-bold text-white">{zoneName}</h3>
+                <span className="text-[10px] bg-[#1f1633] border border-[#362d59] text-[#bdb8c0] px-2 py-0.5 rounded-full font-mono font-bold">
+                  {screens.length} {screens.length === 1 ? 'screen' : 'screens'}
                 </span>
               </div>
 
@@ -413,61 +422,61 @@ export function FleetMonitoringClient({
                 {screens.map((s) => (
                   <div
                     key={s.id}
-                    className={`p-3.5 border rounded-xl flex flex-col justify-between transition-all duration-200 hover:shadow-md ${
+                    className={`p-3.5 border rounded-xl flex flex-col justify-between transition-all duration-200 shadow-md ${
                       CARD_BORDER_COLOR[s._status as DeviceStatus]
                     }`}
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <Link href={`/dashboard/admin/fleet/${s.id}`} className="font-semibold text-xs text-[var(--ink)] hover:underline truncate" title={s.name}>
+                        <Link href={`/dashboard/admin/fleet/${s.id}`} className="font-bold text-xs text-white hover:text-[#c2ef4e] truncate" title={s.name}>
                           {s.name}
                         </Link>
                         <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-0.5 ${DOT_COLOR[s._status as DeviceStatus]}`} />
                       </div>
                       
-                      <div className="text-[10px] text-[var(--mute)] truncate mb-2">{s.location}</div>
+                      <div className="text-[10px] text-[#8b8496] truncate mb-2">{s.location}</div>
 
-                      <div className="p-2 bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-lg text-[11px] text-[var(--body)] mb-3">
-                        <div className="text-[9px] uppercase tracking-wider text-[var(--mute)] font-semibold mb-0.5">Now Playing</div>
-                        <div className="truncate font-medium text-[var(--ink)]">
-                          {s.announcements?.title || <em className="text-[var(--faint)] font-normal">Idle Rotation</em>}
+                      <div className="p-2 bg-[#1f1633] border border-[#362d59] rounded-lg text-[11px] text-[#bdb8c0] mb-3">
+                        <div className="text-[9px] uppercase tracking-wider text-[#8b8496] font-bold mb-0.5">Now Playing</div>
+                        <div className="truncate font-bold text-white">
+                          {s.announcements?.title || <em className="text-[#8b8496] font-normal">Idle Loop</em>}
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between border-t border-[var(--hairline-soft)] pt-2.5 mt-1 text-[10px] text-[var(--mute)]">
+                      <div className="flex items-center justify-between border-t border-[#362d59] pt-2.5 mt-1 text-[10px] text-[#8b8496]">
                         <span suppressHydrationWarning>Seen: {relativeTime(s.last_seen_at)}</span>
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleSimulatePingInline(s.id)}
                             disabled={busyId === s.id}
                             title="Simulate Heartbeat (Ping)"
-                            className="p-1 rounded hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-emerald-600 dark:hover:text-emerald-400 disabled:opacity-50 cursor-pointer"
+                            className="p-1 rounded hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] disabled:opacity-50 cursor-pointer"
                           >
-                            <Radio className={`w-3 h-3 ${busyId === s.id && busyType === 'ping' ? 'animate-ping text-emerald-500' : ''}`} />
+                            <Radio className={`w-3 h-3 ${busyId === s.id && busyType === 'ping' ? 'animate-ping text-[#c2ef4e]' : ''}`} />
                           </button>
                           <button
                             onClick={() => handleForceRefreshInline(s.id, s.name)}
                             disabled={busyId === s.id}
                             title="Force Refresh"
-                            className="p-1 rounded hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[var(--link)] disabled:opacity-50 cursor-pointer"
+                            className="p-1 rounded hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] disabled:opacity-50 cursor-pointer"
                           >
-                            <RefreshCw className={`w-3 h-3 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[var(--link)]' : ''}`} />
+                            <RefreshCw className={`w-3 h-3 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-[#c2ef4e]' : ''}`} />
                           </button>
                           <button
                             onClick={() => handleRebootInline(s.id, s.name)}
                             disabled={busyId === s.id}
                             title="Reboot Device"
-                            className="p-1 rounded hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-rose-600 disabled:opacity-50 cursor-pointer"
+                            className="p-1 rounded hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#fa5252] disabled:opacity-50 cursor-pointer"
                           >
-                            <Power className={`w-3 h-3 ${busyId === s.id && busyType === 'reboot' ? 'animate-pulse text-rose-600' : ''}`} />
+                            <Power className={`w-3 h-3 ${busyId === s.id && busyType === 'reboot' ? 'animate-pulse text-[#fa5252]' : ''}`} />
                           </button>
                           <a
                             href={`/kiosk.html?id=${s.id}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-1 rounded hover:bg-[var(--canvas-inset)] border border-[var(--hairline)] text-[var(--mute)] hover:text-[var(--ink)] cursor-pointer"
+                            className="p-1 rounded hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] cursor-pointer"
                             title="Open Kiosk"
                           >
                             <ExternalLink className="w-3 h-3" />
@@ -481,44 +490,44 @@ export function FleetMonitoringClient({
             </div>
           ))}
           {Object.keys(screensByZone).length === 0 && (
-            <div className="col-span-full py-12 text-center text-[var(--mute)] geist-card whisper-shadow">
-              No screens or zones found matching search criteria.
+            <div className="col-span-full py-12 text-center text-[#8b8496] sentry-card">
+              No screens found matching search criteria.
             </div>
           )}
         </div>
       )}
 
       {registerOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-[var(--canvas-elevated)] rounded-xl border border-[var(--hairline)] p-6 w-full max-w-md floating-shadow">
-            <h3 className="text-lg font-semibold text-[var(--ink)] mb-4">Register New Screen</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#150f23] rounded-2xl border border-[#362d59] p-6 w-full max-w-md shadow-2xl text-white">
+            <h3 className="text-lg font-bold text-white mb-4">Register New Display</h3>
             <form onSubmit={handleRegister} className="space-y-3">
               <input
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Device name (e.g. SCR-ENG-03)"
-                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                placeholder="Screen name (e.g. SCR-ENG-03)"
+                className="sentry-input text-xs"
               />
               <input
                 required
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Location (e.g. Eng Lobby)"
-                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                placeholder="Location (e.g. Engineering Lobby)"
+                className="sentry-input text-xs"
               />
               <input
                 value={zone}
                 onChange={(e) => setZone(e.target.value)}
-                placeholder="Zone (defaults to location)"
-                className="w-full px-3 py-2 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                placeholder="Zone (e.g. Engineering Wing)"
+                className="sentry-input text-xs"
               />
               <div className="flex gap-3 justify-end pt-2">
-                <button type="button" onClick={() => setRegisterOpen(false)} className="px-4 py-2 text-sm font-medium text-[var(--mute)] cursor-pointer">
+                <button type="button" onClick={() => setRegisterOpen(false)} className="px-4 py-2 text-xs font-bold text-[#8b8496] hover:text-white cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" disabled={saving} className="cohere-btn-primary py-2 px-5 text-xs font-medium disabled:opacity-50 cursor-pointer">
-                  {saving ? 'Saving…' : 'Register'}
+                <button type="submit" disabled={saving} className="sentry-btn-lime text-xs cursor-pointer disabled:opacity-50">
+                  {saving ? 'Saving…' : 'Register Screen'}
                 </button>
               </div>
             </form>

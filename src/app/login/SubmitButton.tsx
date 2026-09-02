@@ -12,7 +12,6 @@ export function SubmitButton() {
     let interval: NodeJS.Timeout
     if (pending) {
       setProgress(0)
-      // Simulate rapid progress up to 99%
       interval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 99) {
@@ -33,30 +32,30 @@ export function SubmitButton() {
       <button 
         type="submit"
         disabled={pending}
-        className="w-full bg-[var(--cohere-near-black)] text-white hover:opacity-90 disabled:opacity-50 py-3 px-6 rounded-full font-medium text-xs transition-all shadow-xs flex justify-center items-center gap-2 cursor-pointer"
+        className="sentry-btn-lime w-full py-3 px-6 text-xs font-bold uppercase tracking-wider flex justify-center items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
       >
         {pending ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Authenticating Node...
+            <Loader2 className="w-4 h-4 animate-spin text-[#150f23]" />
+            <span>Signing in...</span>
           </>
         ) : (
-          'Sign In to Console &rarr;'
+          <span>Sign In &rarr;</span>
         )}
       </button>
 
       {pending && (
-        <div className="w-full space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-300">
-          <div className="flex justify-between items-center text-[10px] font-mono text-[var(--mute)]">
+        <div className="w-full space-y-1.5 animate-in fade-in duration-300">
+          <div className="flex justify-between items-center text-[10px] font-mono text-[#a39cb0]">
             <span className="flex items-center gap-1.5">
-               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-               Establishing Secure Session
+               <span className="w-1.5 h-1.5 bg-[#c2ef4e] rounded-full animate-pulse" />
+               Establishing Session
             </span>
-            <span className="tabular-nums">{progress}%</span>
+            <span className="tabular-nums text-[#c2ef4e] font-bold">{progress}%</span>
           </div>
-          <div className="w-full h-1 bg-[var(--canvas-stone)] rounded-full overflow-hidden border border-[var(--hairline)]">
+          <div className="w-full h-1 bg-[#1f1633] rounded-full overflow-hidden border border-[#362d59]">
             <div 
-              className="h-full bg-[var(--cohere-near-black)] transition-all duration-150 ease-out"
+              className="h-full bg-[#c2ef4e] transition-all duration-150 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

@@ -1,9 +1,7 @@
 import React from 'react'
-import { Info } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
-// Renders the advisory metadata attached to an announcement during the
-// submit -> review transition (blueprint Part 22). Advisory only — it never
-// gates the approver's decision.
+// Renders the automated advisory checks attached to an announcement
 export function AiAdvisoryPanel({ advisory }: { advisory: any }) {
   if (!advisory || typeof advisory !== 'object') return null
   const deterministic: string[] = Array.isArray(advisory.deterministic) ? advisory.deterministic : []
@@ -11,20 +9,21 @@ export function AiAdvisoryPanel({ advisory }: { advisory: any }) {
   if (deterministic.length === 0 && !ai) return null
 
   return (
-    <div className="rounded-lg border border-amber-400/40 bg-amber-500/5 p-3 text-xs text-[var(--body)]">
-      <div className="flex items-center gap-1.5 font-semibold text-amber-700 dark:text-amber-400 mb-1.5">
-        <Info className="w-3.5 h-3.5" /> Advisory checks (not a decision)
+    <div className="rounded-xl border border-[#6a5fc1]/40 bg-[#422082]/25 p-3.5 text-xs text-[#bdb8c0] space-y-1.5 shadow-sm">
+      <div className="flex items-center gap-2 font-bold text-[#c2ef4e]">
+        <Sparkles className="w-3.5 h-3.5" />
+        <span>AI Compliance &amp; Policy Checks</span>
       </div>
       {deterministic.length > 0 && (
-        <ul className="list-disc pl-4 space-y-0.5">
+        <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-[#bdb8c0]">
           {deterministic.map((d, i) => (
             <li key={i}>{d}</li>
           ))}
         </ul>
       )}
       {ai && (
-        <div className="mt-1.5 pt-1.5 border-t border-amber-400/30 whitespace-pre-wrap">
-          <span className="font-medium">AI reviewer:</span> {ai}
+        <div className="pt-1.5 border-t border-[#6a5fc1]/30 text-xs text-white/90">
+          <span className="font-bold text-[#a79df5]">AI Review:</span> {ai}
         </div>
       )}
     </div>
