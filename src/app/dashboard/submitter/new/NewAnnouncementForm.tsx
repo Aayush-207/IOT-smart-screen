@@ -12,8 +12,6 @@ interface Department {
   name: string
 }
 
-// Submitters and HODs pick from these three; Emergency broadcasts go through
-// the dedicated /dashboard/admin/emergency screen instead.
 const SUBMITTER_PRIORITIES: Priority[] = ['routine', 'timesensitive', 'critical']
 
 function toLocalDatetimeInput(isoStr?: string | null): string {
@@ -68,12 +66,10 @@ export function NewAnnouncementForm({
       setAttachmentPreview(null)
       return
     }
-    // Security validation: max 10MB
     if (file.size > 10 * 1024 * 1024) {
       setError('Attachment must be smaller than 10MB.')
       return
     }
-    // Security validation: image types only
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Only JPEG, PNG, and WebP images are allowed.')
       return
@@ -110,95 +106,80 @@ export function NewAnnouncementForm({
     setTargetZones([])
   }
 
-  const handleSubmit = async (mode: 'draft' | 'approval') => {
+  const handleSubmit = async (action: 'draft' | 'approval') => {
     setError(null)
     if (!title.trim()) {
-      setError('Title is required.')
+      setError('Please provide a title for the announcement.')
       return
     }
-    if (mode === 'approval' && !targetAll && targetZones.length === 0) {
-      setError('Select at least one target zone, or "All Screens".')
-      return
-    }
-    if (mode === 'approval' && (!displayStart || !displayEnd)) {
-      setError('Display start and end are required to submit for approval.')
-      return
-    }
-    if (mode === 'approval' && displayStart && displayEnd && new Date(displayEnd).getTime() <= new Date(displayStart).getTime()) {
-      setError('Display stop time must be later than the display start time.')
+    if (displayStart && displayEnd && new Date(displayStart) >= new Date(displayEnd)) {
+      setError('The display start date must be before the end date.')
       return
     }
 
-    setSubmitting(mode)
+    setSubmitting(action)
     try {
-      let attachmentUrl: string | null = existing?.attachment_url || null
+      let uploadedUrl = existing?.attachment_url || null
+
       if (attachment) {
-        const fileExt = attachment.name.split('.').pop()
-        const filePath = `announcements/${userId}/${Math.random()}.${fileExt}`
-        const { error: uploadError } = await supabase.storage.from('posters').upload(filePath, attachment)
-        if (uploadError) throw uploadError
-        const { data: { publicUrl } } = supabase.storage.from('posters').getPublicUrl(filePath)
-        attachmentUrl = publicUrl
+        const ext = attachment.name.split('.').pop() || 'jpg'
+        const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+        const { error: uploadErr } = await supabase.storage
+          .from('announcement-attachments')
+          .upload(path, attachment, { contentType: attachment.type, upsert: true })
+
+        if (uploadErr) throw uploadErr
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('announcement-attachments')
+          .getPublicUrl(path)
+
+        uploadedUrl = publicUrl
       }
 
       const payload = {
         title: title.trim(),
-        body: body.trim(),
+        body: body.trim() || null,
         department_id: departmentId || null,
         priority,
         target_all: targetAll,
         target_zones: targetAll ? [] : targetZones,
-        attachment_url: attachmentUrl,
         display_start: displayStart ? new Date(displayStart).toISOString() : null,
         display_end: displayEnd ? new Date(displayEnd).toISOString() : null,
-        status: mode === 'approval' ? 'pending_approval' : 'draft',
-        rejection_reason: null,
+        attachment_url: uploadedUrl,
+        submitted_by: userId,
+        status: action === 'approval' ? 'pending_hod' : 'draft',
       }
 
-      let announcementId: string | undefined = existing?.id
-      if (existing) {
-        const { error: dbError } = await supabase.from('announcements').update(payload).eq('id', existing.id)
-        if (dbError) throw dbError
-      } else {
-        const { data: inserted, error: dbError } = await supabase
+      if (existing?.id) {
+        const { error: updateErr } = await supabase
           .from('announcements')
-          .insert({ ...payload, submitted_by: userId })
-          .select('id')
-          .single()
-        if (dbError) throw dbError
-        announcementId = inserted?.id
-      }
-
-      // Advisory moderation pass — non-blocking (blueprint Part 22).
-      if (mode === 'approval' && announcementId) {
-        fetch('/api/announcements/moderate', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ id: announcementId }),
-        }).catch(() => {})
+          .update(payload)
+          .eq('id', existing.id)
+        if (updateErr) throw updateErr
+      } else {
+        const { error: insertErr } = await supabase
+          .from('announcements')
+          .insert(payload)
+        if (insertErr) throw insertErr
       }
 
       router.push('/dashboard/submitter')
       router.refresh()
-    } catch (e: any) {
-      console.error(e)
-      setError(e.message || 'Failed to save announcement.')
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || 'Failed to submit announcement.')
     } finally {
       setSubmitting(null)
     }
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-6xl">
-      {/* Main Form (Left 2 cols) */}
-      <div className="xl:col-span-2 p-6 md:p-8 rounded-2xl border border-[#362d59] bg-[#150f23] text-white shadow-xl space-y-6">
-        <div>
-          <span className="sentry-mono-label text-[#8b8496]">Post Editor</span>
-          <h2 className="text-xl font-bold tracking-tight text-white mt-1">Create Announcement</h2>
-        </div>
-
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-white">
+      {/* Form Fields (Left 2 Cols) */}
+      <div className="lg:col-span-2 bg-[#141414] border border-[#212327] rounded-lg p-6 sm:p-8 space-y-6">
         {error && (
-          <div className="p-3.5 bg-[#fa5252]/15 border border-[#fa5252]/40 text-[#fa5252] rounded-lg text-xs font-bold">
+          <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-lg text-xs font-mono">
             {error}
           </div>
         )}
@@ -206,10 +187,10 @@ export function NewAnnouncementForm({
         {/* Title Input */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0]">
-              Announcement Title <span className="text-[#fa5252]">*</span>
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf]">
+              Announcement Title <span className="text-rose-400">*</span>
             </label>
-            <span className="font-mono text-[11px] text-[#8b8496]">
+            <span className="font-mono text-[11px] text-[#7d8187]">
               {title.length}/100
             </span>
           </div>
@@ -218,18 +199,18 @@ export function NewAnnouncementForm({
             value={title}
             maxLength={100}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Annual Tech Fest Registrations Open"
-            className="sentry-input text-sm font-semibold"
+            placeholder="e.g. Annual Tech Symposium Registrations Open"
+            className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white transition-colors"
           />
         </div>
 
         {/* Body Textarea */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0]">
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf]">
               Message Details
             </label>
-            <span className="font-mono text-[11px] text-[#8b8496]">
+            <span className="font-mono text-[11px] text-[#7d8187]">
               {body.length}/500
             </span>
           </div>
@@ -238,21 +219,21 @@ export function NewAnnouncementForm({
             maxLength={500}
             onChange={(e) => setBody(e.target.value)}
             rows={4}
-            placeholder="Describe the details, dates, venue, or eligibility requirements for students and faculty..."
-            className="sentry-input text-sm leading-relaxed"
+            placeholder="Provide key details, dates, venue, or eligibility requirements..."
+            className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white transition-colors leading-relaxed"
           />
         </div>
 
         {/* Department & Priority */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0] mb-1.5">
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf] mb-1.5">
               Department
             </label>
             <select
               value={departmentId}
               onChange={(e) => setDepartmentId(e.target.value)}
-              className="sentry-input text-xs"
+              className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-white transition-colors"
             >
               <option value="">General / Campus-Wide</option>
               {departments.map((d) => (
@@ -262,8 +243,8 @@ export function NewAnnouncementForm({
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0] mb-1.5">
-              Priority
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf] mb-1.5">
+              Priority Tier
             </label>
             <div className="grid grid-cols-3 gap-1.5">
               {SUBMITTER_PRIORITIES.map((p) => {
@@ -273,14 +254,10 @@ export function NewAnnouncementForm({
                     key={p}
                     type="button"
                     onClick={() => setPriority(p)}
-                    className={`py-2 px-2 rounded-lg text-[11px] font-mono font-bold uppercase tracking-wider border transition-all cursor-pointer truncate ${
+                    className={`py-2 px-2 rounded-full text-[10px] font-mono uppercase tracking-wider border transition-all cursor-pointer truncate ${
                       isSelected
-                        ? p === 'critical'
-                          ? 'border-[#fa5252] bg-[#fa5252] text-white'
-                          : p === 'timesensitive'
-                          ? 'border-[#c2ef4e] bg-[#c2ef4e] text-[#150f23]'
-                          : 'border-white bg-white text-[#150f23]'
-                        : 'border-[#362d59] text-[#8b8496] hover:bg-[#1f1633]'
+                        ? 'border-white bg-white text-[#0a0a0a] font-medium'
+                        : 'border-[#212327] bg-[#0a0a0a] text-[#7d8187] hover:border-white/20'
                     }`}
                   >
                     {PRIORITY_LABEL[p]}
@@ -294,22 +271,22 @@ export function NewAnnouncementForm({
         {/* Target Screens & Zones */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0]">
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf]">
               Target Display Locations
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={selectAllZones}
-                className="text-[11px] text-[#c2ef4e] hover:underline font-bold cursor-pointer"
+                className="text-[11px] font-mono text-white hover:underline cursor-pointer"
               >
                 Select All
               </button>
-              <span className="text-[#362d59]">&bull;</span>
+              <span className="text-[#212327]">&bull;</span>
               <button
                 type="button"
                 onClick={clearAllZones}
-                className="text-[11px] text-[#8b8496] hover:underline font-medium cursor-pointer"
+                className="text-[11px] font-mono text-[#7d8187] hover:underline cursor-pointer"
               >
                 Clear
               </button>
@@ -318,10 +295,10 @@ export function NewAnnouncementForm({
 
           <div className="flex flex-wrap gap-2">
             <label
-              className={`px-3 py-1.5 rounded-full text-xs font-bold border cursor-pointer transition-all ${
+              className={`px-3 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider border cursor-pointer transition-all ${
                 targetAll
-                  ? 'bg-[#c2ef4e] text-[#150f23] border-[#c2ef4e]'
-                  : 'border-[#362d59] text-[#bdb8c0] hover:bg-[#1f1633]'
+                  ? 'bg-white text-[#0a0a0a] border-white font-medium'
+                  : 'border-[#212327] bg-[#0a0a0a] text-[#7d8187] hover:border-white/30'
               }`}
             >
               <input type="checkbox" className="hidden" checked={targetAll} onChange={(e) => setTargetAll(e.target.checked)} />
@@ -330,12 +307,12 @@ export function NewAnnouncementForm({
             {zones.map((zone) => (
               <label
                 key={zone}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold border cursor-pointer transition-all ${
+                className={`px-3 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider border cursor-pointer transition-all ${
                   targetAll ? 'opacity-40 pointer-events-none' : ''
                 } ${
                   targetZones.includes(zone)
-                    ? 'bg-[#c2ef4e] text-[#150f23] border-[#c2ef4e]'
-                    : 'border-[#362d59] text-[#bdb8c0] hover:bg-[#1f1633]'
+                    ? 'bg-white text-[#0a0a0a] border-white font-medium'
+                    : 'border-[#212327] bg-[#0a0a0a] text-[#7d8187] hover:border-white/30'
                 }`}
               >
                 <input type="checkbox" className="hidden" checked={targetZones.includes(zone)} onChange={() => toggleZone(zone)} />
@@ -348,52 +325,52 @@ export function NewAnnouncementForm({
         {/* Display Duration */}
         <div>
           <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0]">
-              Display Schedule
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf]">
+              Broadcast Schedule
             </label>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-mono uppercase text-[#8b8496]">Quick Presets:</span>
+              <span className="text-[10px] font-mono uppercase text-[#7d8187]">Presets:</span>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(24)}
-                className="px-2.5 py-0.5 rounded-full border border-[#362d59] text-[10px] font-mono text-[#bdb8c0] hover:bg-[#1f1633] cursor-pointer"
+                className="px-2.5 py-0.5 rounded-full border border-[#212327] text-[10px] font-mono text-[#dadbdf] hover:bg-white/5 cursor-pointer"
               >
-                24 Hours
+                24h
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(72)}
-                className="px-2.5 py-0.5 rounded-full border border-[#362d59] text-[10px] font-mono text-[#bdb8c0] hover:bg-[#1f1633] cursor-pointer"
+                className="px-2.5 py-0.5 rounded-full border border-[#212327] text-[10px] font-mono text-[#dadbdf] hover:bg-white/5 cursor-pointer"
               >
-                3 Days
+                3d
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(168)}
-                className="px-2.5 py-0.5 rounded-full border border-[#362d59] text-[10px] font-mono text-[#bdb8c0] hover:bg-[#1f1633] cursor-pointer"
+                className="px-2.5 py-0.5 rounded-full border border-[#212327] text-[10px] font-mono text-[#dadbdf] hover:bg-white/5 cursor-pointer"
               >
-                7 Days
+                7d
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <span className="text-[11px] text-[#8b8496] block mb-1">Start Date &amp; Time</span>
+              <span className="text-[11px] text-[#7d8187] font-mono block mb-1">Start Date &amp; Time</span>
               <input
                 type="datetime-local"
                 value={displayStart}
                 onChange={(e) => setDisplayStart(e.target.value)}
-                className="sentry-input text-xs"
+                className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white"
               />
             </div>
             <div>
-              <span className="text-[11px] text-[#8b8496] block mb-1">End Date (Auto Expire)</span>
+              <span className="text-[11px] text-[#7d8187] font-mono block mb-1">End Date (Auto Expire)</span>
               <input
                 type="datetime-local"
                 value={displayEnd}
                 onChange={(e) => setDisplayEnd(e.target.value)}
-                className="sentry-input text-xs"
+                className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white"
               />
             </div>
           </div>
@@ -401,39 +378,39 @@ export function NewAnnouncementForm({
 
         {/* Attachment Upload Zone */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0] mb-1.5">
-            Slide Poster Image (Optional)
+          <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf] mb-1.5">
+            Slide Poster (Optional)
           </label>
           
           {attachmentPreview || (existing?.attachment_url && !attachment) ? (
-            <div className="relative p-3 bg-[#1f1633] border border-[#362d59] rounded-xl flex items-center gap-4">
+            <div className="relative p-3 bg-[#0a0a0a] border border-[#212327] rounded-lg flex items-center gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={attachmentPreview || existing.attachment_url}
                 alt="Poster preview"
-                className="w-20 h-20 rounded-lg object-cover border border-[#362d59] shrink-0"
+                className="w-20 h-20 rounded-md object-cover border border-[#212327] shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-white truncate">
+                <p className="text-xs font-normal text-white truncate">
                   {attachment ? attachment.name : 'Current Attachment'}
                 </p>
-                <p className="text-[11px] text-[#8b8496]">
-                  {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored image'}
+                <p className="text-[11px] text-[#7d8187] font-mono">
+                  {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored visual'}
                 </p>
                 <button
                   type="button"
                   onClick={removeAttachment}
-                  className="mt-1 text-xs text-[#fa5252] hover:underline font-bold cursor-pointer"
+                  className="mt-1 text-xs text-rose-400 hover:underline font-mono cursor-pointer"
                 >
                   Remove visual
                 </button>
               </div>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center p-6 border border-dashed border-[#362d59] hover:border-[#c2ef4e] rounded-xl cursor-pointer transition-colors bg-[#1f1633]/60 hover:bg-[#1f1633]">
-              <UploadCloud className="w-6 h-6 text-[#8b8496] mb-2" />
-              <p className="text-xs font-bold text-white">Click to upload poster or drag and drop</p>
-              <p className="text-[10px] text-[#8b8496] mt-0.5 font-mono">JPEG, PNG, or WebP up to 10MB</p>
+            <label className="flex flex-col items-center justify-center p-6 border border-dashed border-[#212327] hover:border-white/40 rounded-lg cursor-pointer transition-colors bg-[#0a0a0a]">
+              <UploadCloud className="w-5 h-5 text-[#7d8187] mb-2" />
+              <p className="text-xs text-white">Click or drag image to upload poster</p>
+              <p className="text-[10px] text-[#7d8187] mt-0.5 font-mono">JPEG, PNG, or WebP up to 10MB</p>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -445,13 +422,13 @@ export function NewAnnouncementForm({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-[#362d59]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-[#212327]">
           <div className="flex items-center gap-3">
             <button
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('approval')}
-              className="sentry-btn-lime"
+              className="px-5 py-2.5 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {submitting === 'approval' ? 'Submitting…' : 'Submit for Approval'}
             </button>
@@ -459,7 +436,7 @@ export function NewAnnouncementForm({
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('draft')}
-              className="sentry-btn-secondary"
+              className="px-5 py-2.5 rounded-full border border-white/20 text-white text-xs hover:bg-white/5 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {submitting === 'draft' ? 'Saving…' : 'Save Draft'}
             </button>
@@ -468,25 +445,25 @@ export function NewAnnouncementForm({
           <button
             type="button"
             onClick={() => setPreviewOpen(true)}
-            className="sentry-btn-outline flex items-center gap-1.5"
+            className="px-4 py-2 rounded-full border border-white/20 text-white text-xs hover:bg-white/5 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
-            <Eye className="w-3.5 h-3.5 text-[#c2ef4e]" /> Screen Simulator
+            <Eye className="w-3.5 h-3.5 text-white" /> Screen Simulator
           </button>
         </div>
       </div>
 
       {/* Live Mini Screen Preview (Right Col) */}
       <div className="space-y-4">
-        <div className="sentry-card p-6 border border-[#362d59]">
-          <div className="flex items-center justify-between mb-4 border-b border-[#362d59] pb-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#c2ef4e] animate-pulse" /> Live Display Output
+        <div className="bg-[#141414] border border-[#212327] rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4 border-b border-[#212327] pb-3">
+            <span className="text-xs font-mono uppercase tracking-wider text-white flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Display Output
             </span>
-            <span className="text-[10px] font-mono text-[#8b8496]">16:9 Aspect</span>
+            <span className="text-[10px] font-mono text-[#7d8187]">16:9 Aspect</span>
           </div>
 
-          <div className="aspect-[16/9] rounded-xl bg-black border border-[#362d59] flex flex-col justify-between p-3.5 text-center text-white overflow-hidden relative shadow-inner">
-            <div className="text-[8px] font-mono uppercase tracking-widest text-[#8b8496] truncate">
+          <div className="aspect-[16/9] rounded-lg bg-black border border-[#212327] flex flex-col justify-between p-3.5 text-center text-white overflow-hidden relative shadow-inner">
+            <div className="text-[8px] font-mono uppercase tracking-widest text-[#7d8187] truncate">
               {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'} &bull; {PRIORITY_LABEL[priority]}
             </div>
 
@@ -501,24 +478,24 @@ export function NewAnnouncementForm({
                   />
                 </div>
               )}
-              <h4 className="text-xs font-bold line-clamp-2 px-1 text-white">
+              <h4 className="text-xs font-normal line-clamp-2 px-1 text-white">
                 {title.trim() || 'Announcement Title'}
               </h4>
               {body.trim() && (
-                <p className="text-[9px] text-[#bdb8c0] line-clamp-2 mt-1 px-2 font-normal">
+                <p className="text-[9px] text-[#dadbdf] line-clamp-2 mt-1 px-2 font-normal">
                   {body}
                 </p>
               )}
             </div>
 
-            <div className="text-[7px] font-mono text-[#8b8496] flex justify-between border-t border-white/10 pt-1">
+            <div className="text-[7px] font-mono text-[#7d8187] flex justify-between border-t border-white/10 pt-1">
               <span>CampusCast Engine</span>
               <span>{targetAll ? 'All Screens' : `${targetZones.length} Target Zones`}</span>
             </div>
           </div>
 
-          <p className="text-[11px] text-[#8b8496] mt-4 leading-relaxed">
-            Content is automatically checked by AI before delivery to department heads for approval.
+          <p className="text-[11px] text-[#7d8187] mt-4 leading-relaxed font-mono">
+            Submissions are verified by policy heuristics before routing to department heads.
           </p>
         </div>
       </div>

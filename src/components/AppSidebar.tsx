@@ -27,11 +27,11 @@ interface NavItem {
   badge?: number
 }
 
-const ROLE_DISPLAY: Record<Role, { title: string; tag: string; chipClass: string }> = {
-  submitter: { title: 'Submitter', tag: 'Club & Faculty', chipClass: 'sentry-chip-violet' },
-  hod: { title: 'Department Head', tag: 'Approver', chipClass: 'sentry-chip-pink' },
-  admin: { title: 'Central Admin', tag: 'Full Access', chipClass: 'sentry-chip-green' },
-  emergency: { title: 'Emergency Officer', tag: 'Override Auth', chipClass: 'sentry-chip-pink' },
+const ROLE_DISPLAY: Record<Role, { title: string; tag: string }> = {
+  submitter: { title: 'Submitter', tag: 'Club & Faculty' },
+  hod: { title: 'Department Head', tag: 'Approver' },
+  admin: { title: 'Central Admin', tag: 'Full Access' },
+  emergency: { title: 'Emergency Officer', tag: 'Override Auth' },
 }
 
 function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
@@ -97,39 +97,39 @@ export function AppSidebar({
     }
   }
 
-  const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User', chipClass: 'sentry-chip-violet' }
+  const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User' }
 
   return (
-    <aside className="w-[260px] shrink-0 border-r border-[#362d59] bg-[#150f23] text-white flex flex-col h-screen sticky top-0 select-none z-30">
+    <aside className="w-[260px] shrink-0 border-r border-[#212327] bg-[#0a0a0a] text-white flex flex-col h-screen sticky top-0 select-none z-30">
       {/* Brand Header */}
-      <div className="p-5 border-b border-[#362d59] flex items-center justify-between shrink-0">
+      <div className="p-5 border-b border-[#212327] flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-8 h-8 rounded-lg bg-[#c2ef4e] text-[#150f23] flex items-center justify-center font-black text-sm shadow-[0_0_12px_rgba(194,239,78,0.4)] group-hover:scale-105 transition-transform">
-            ⚡
+          <div className="w-8 h-8 rounded-full border border-white/20 bg-white/5 text-white flex items-center justify-center font-mono font-bold text-sm group-hover:border-white transition-colors">
+            X
           </div>
           <div>
-            <div className="text-sm font-bold tracking-tight text-white flex items-center gap-1.5">
+            <div className="text-sm font-normal tracking-tight text-white flex items-center gap-1.5">
               CampusCast
             </div>
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[#a39cb0]">Smart Screen Hub</div>
+            <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#7d8187]">Display Mesh</div>
           </div>
         </Link>
       </div>
 
       {/* Role Pill Banner */}
-      <div className="px-5 py-3 border-b border-[#362d59] bg-[#1f1633]/60 flex items-center justify-between shrink-0">
+      <div className="px-5 py-3 border-b border-[#212327] bg-[#141414] flex items-center justify-between shrink-0">
         <div>
-          <span className="font-semibold text-xs text-white block leading-tight">{roleInfo.title}</span>
-          <span className="text-[10px] text-[#bdb8c0] font-mono">{roleInfo.tag}</span>
+          <span className="font-normal text-xs text-white block leading-tight">{roleInfo.title}</span>
+          <span className="text-[10px] text-[#7d8187] font-mono">{roleInfo.tag}</span>
         </div>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-[#c2ef4e] font-bold">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#c2ef4e] animate-pulse" /> ONLINE
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-white border border-white/20 px-2 py-0.5 rounded-full bg-white/5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ACTIVE
         </span>
       </div>
 
       {/* Navigation Stack */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        <div className="px-3 py-1.5 text-[10px] font-mono uppercase font-bold tracking-widest text-[#8b8496]">
+        <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.12em] text-[#7d8187]">
           Navigation
         </div>
 
@@ -140,21 +140,21 @@ export function AppSidebar({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center justify-between px-3.5 py-2 rounded-full text-xs transition-all ${
                 isActive
-                  ? 'bg-[#c2ef4e] text-[#150f23] font-bold shadow-[0_0_10px_rgba(194,239,78,0.3)]'
-                  : 'text-[#bdb8c0] hover:text-white hover:bg-[#1f1633]'
+                  ? 'bg-white text-[#0a0a0a] font-medium shadow-sm'
+                  : 'text-[#dadbdf] hover:text-white hover:bg-[#141414]'
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#150f23]' : 'text-[#8b8496]'}`} />
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#0a0a0a]' : 'text-[#7d8187]'}`} />
                 <span className="truncate">{item.label}</span>
               </div>
 
               {!!item.badge && item.badge > 0 && (
                 <span
-                  className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                    isActive ? 'bg-[#150f23] text-[#c2ef4e]' : 'bg-[#fa7faa]/20 text-[#fa7faa] border border-[#fa7faa]/40'
+                  className={`text-[10px] font-mono px-2 py-0.2 rounded-full ${
+                    isActive ? 'bg-[#0a0a0a] text-white' : 'bg-white/10 text-white border border-white/20'
                   }`}
                 >
                   {item.badge}
@@ -168,9 +168,9 @@ export function AppSidebar({
           <div className="pt-4">
             <Link
               href="/dashboard/admin/emergency"
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-[#fa5252] text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 shadow-md"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-rose-600 text-white text-xs uppercase tracking-wider hover:bg-rose-500 transition-colors"
             >
-              <AlertTriangle className="w-4 h-4 shrink-0 animate-bounce" />
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0 animate-bounce" />
               <span>Broadcast Alert</span>
             </Link>
           </div>
@@ -178,26 +178,26 @@ export function AppSidebar({
       </nav>
 
       {/* User Footer Profile */}
-      <div className="p-4 border-t border-[#362d59] bg-[#1f1633]/80 space-y-3 shrink-0">
+      <div className="p-4 border-t border-[#212327] bg-[#141414] space-y-3 shrink-0">
         <div className="flex items-center justify-between text-xs">
           <div className="min-w-0 pr-2">
-            <p className="font-semibold text-white truncate text-[11px]" title={userEmail}>
+            <p className="font-normal text-white truncate text-[11px]" title={userEmail}>
               {userEmail}
             </p>
-            <p className="text-[10px] text-[#8b8496] font-mono uppercase tracking-wider">{role}</p>
+            <p className="text-[10px] text-[#7d8187] font-mono uppercase tracking-wider">{role}</p>
           </div>
 
           <button
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            className="p-1.5 rounded-md border border-[#362d59] bg-[#150f23] text-[#bdb8c0] hover:text-white cursor-pointer transition-colors"
+            className="p-1.5 rounded-full border border-[#212327] bg-[#0a0a0a] text-[#7d8187] hover:text-white cursor-pointer transition-colors"
           >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-[#c2ef4e]" /> : <Moon className="w-3.5 h-3.5" />}
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-white" /> : <Moon className="w-3.5 h-3.5" />}
           </button>
         </div>
 
-        <div className="pt-1 border-t border-[#362d59]">
+        <div className="pt-1 border-t border-[#212327]">
           <LogoutButton />
         </div>
       </div>

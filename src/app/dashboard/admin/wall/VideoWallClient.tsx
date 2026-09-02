@@ -22,9 +22,9 @@ import { logAudit } from '@/lib/audit'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 
 const DOT_COLOR: Record<DeviceStatus, string> = {
-  online: 'bg-[#c2ef4e] shadow-[0_0_8px_rgba(194,239,78,0.8)]',
-  stale: 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]',
-  offline: 'bg-[#4c445c]',
+  online: 'bg-emerald-400',
+  stale: 'bg-amber-400',
+  offline: 'bg-neutral-600',
 }
 
 export function VideoWallClient({
@@ -172,52 +172,54 @@ export function VideoWallClient({
   }
 
   return (
-    <div className={`space-y-6 text-white ${isFullscreen ? 'p-6 bg-[#1f1633] min-h-screen' : ''}`}>
+    <div className={`space-y-6 text-white ${isFullscreen ? 'p-6 bg-[#0a0a0a] min-h-screen' : ''}`}>
       {/* Top Video Wall Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#362d59]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#212327]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="sentry-chip-green">Real-time Stream</span>
-            <span className="text-xs font-mono text-[#8b8496]">{counts.online} Screens Broadcasting</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+              Live Mesh Mirror
+            </span>
+            <span className="text-xs font-mono text-[#7d8187]">{counts.online} Nodes Broadcasting</span>
           </div>
-          <h1 className="sentry-display-section text-white flex items-center gap-3">
-            <Tv className="w-6 h-6 text-[#c2ef4e]" /> Live Visual Screen Wall
+          <h1 className="xai-display-section text-white flex items-center gap-3">
+            <Tv className="w-5 h-5 text-white" /> Visual Screen Wall
           </h1>
-          <p className="text-sm text-[#bdb8c0] max-w-xl mt-1.5 leading-relaxed">
-            Multi-display mirror grid. View real-time visual output across all campus TVs and kiosks simultaneously.
+          <p className="text-sm text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+            Multi-display mirror grid. View real-time output across all campus screen hardware simultaneously.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center p-1 rounded-lg border border-[#362d59] bg-[#150f23]">
+          <div className="flex items-center p-1 rounded-full border border-[#212327] bg-[#141414]">
             <button
               onClick={() => setAspectMode('16:9')}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
                 aspectMode === '16:9'
-                  ? 'bg-[#c2ef4e] text-[#150f23]'
-                  : 'text-[#8b8496] hover:text-white'
+                  ? 'bg-white text-[#0a0a0a] font-medium'
+                  : 'text-[#7d8187] hover:text-white'
               }`}
             >
-              <Monitor className="w-3.5 h-3.5" /> 16:9 Horizontal
+              <Monitor className="w-3.5 h-3.5" /> 16:9
             </button>
             <button
               onClick={() => setAspectMode('9:16')}
-              className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
                 aspectMode === '9:16'
-                  ? 'bg-[#c2ef4e] text-[#150f23]'
-                  : 'text-[#8b8496] hover:text-white'
+                  ? 'bg-white text-[#0a0a0a] font-medium'
+                  : 'text-[#7d8187] hover:text-white'
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5" /> 9:16 Vertical
+              <Smartphone className="w-3.5 h-3.5" /> 9:16
             </button>
           </div>
 
           <button
             onClick={toggleFullscreen}
-            className="sentry-btn-outline text-xs flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
             title="Toggle NOC Fullscreen Mode"
           >
-            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-[#c2ef4e]" />}
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-white" />}
             <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Wall'}</span>
           </button>
         </div>
@@ -225,19 +227,19 @@ export function VideoWallClient({
 
       {/* Active Global Override Banner */}
       {activeEmergencies.length > 0 && (
-        <div className="p-4 rounded-xl bg-[#fa5252]/15 border border-[#fa5252]/50 flex items-center justify-between gap-4 text-[#fa5252]">
+        <div className="p-4 rounded-lg bg-rose-950/40 border border-rose-500/50 flex items-center justify-between gap-4 text-rose-300">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-[#fa5252] text-white shrink-0 animate-bounce">
-              <AlertTriangle className="w-5 h-5" />
+            <div className="p-2 rounded-full bg-rose-600 text-white shrink-0 animate-bounce">
+              <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <span className="sentry-mono-label text-[#fa5252]">Emergency Override Active</span>
-              <p className="text-sm font-bold text-white mt-0.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-rose-400">Emergency Broadcast Active</span>
+              <p className="text-sm font-normal text-white mt-0.5">
                 &ldquo;{activeEmergencies[0].body || activeEmergencies[0].title}&rdquo;
               </p>
             </div>
           </div>
-          <span className="text-xs font-mono font-bold bg-[#fa5252] text-white px-3 py-1 rounded-full shrink-0">
+          <span className="text-[10px] font-mono uppercase tracking-wider bg-rose-600 text-white px-3 py-1 rounded-full shrink-0">
             ALL SCREENS OVERRIDDEN
           </span>
         </div>
@@ -248,38 +250,38 @@ export function VideoWallClient({
         {/* Status and Zone Filters */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Badges */}
-          <div className="flex items-center p-1 rounded-xl border border-[#362d59] bg-[#150f23] text-xs font-bold">
+          <div className="flex items-center p-1 rounded-full border border-[#212327] bg-[#141414] text-xs font-mono">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1 rounded-lg cursor-pointer transition-all ${
-                statusFilter === 'all' ? 'bg-[#c2ef4e] text-[#150f23]' : 'text-[#8b8496] hover:text-white'
+              className={`px-3 py-1 rounded-full cursor-pointer transition-all ${
+                statusFilter === 'all' ? 'bg-white text-[#0a0a0a] font-medium' : 'text-[#7d8187] hover:text-white'
               }`}
             >
               All ({screens.length})
             </button>
             <button
               onClick={() => setStatusFilter('online')}
-              className={`px-3 py-1 rounded-lg cursor-pointer transition-all flex items-center gap-1.5 ${
-                statusFilter === 'online' ? 'bg-[#c2ef4e] text-[#150f23]' : 'text-[#8b8496] hover:text-white'
+              className={`px-3 py-1 rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
+                statusFilter === 'online' ? 'bg-white text-[#0a0a0a] font-medium' : 'text-[#7d8187] hover:text-white'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-[#c2ef4e]" /> Online ({counts.online})
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Online ({counts.online})
             </button>
             <button
               onClick={() => setStatusFilter('stale')}
-              className={`px-3 py-1 rounded-lg cursor-pointer transition-all flex items-center gap-1.5 ${
-                statusFilter === 'stale' ? 'bg-[#c2ef4e] text-[#150f23]' : 'text-[#8b8496] hover:text-white'
+              className={`px-3 py-1 rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
+                statusFilter === 'stale' ? 'bg-white text-[#0a0a0a] font-medium' : 'text-[#7d8187] hover:text-white'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-amber-400" /> Stale ({counts.stale})
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Stale ({counts.stale})
             </button>
             <button
               onClick={() => setStatusFilter('offline')}
-              className={`px-3 py-1 rounded-lg cursor-pointer transition-all flex items-center gap-1.5 ${
-                statusFilter === 'offline' ? 'bg-[#c2ef4e] text-[#150f23]' : 'text-[#8b8496] hover:text-white'
+              className={`px-3 py-1 rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
+                statusFilter === 'offline' ? 'bg-white text-[#0a0a0a] font-medium' : 'text-[#7d8187] hover:text-white'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-[#4c445c]" /> Offline ({counts.offline})
+              <span className="w-1.5 h-1.5 rounded-full bg-neutral-600" /> Offline ({counts.offline})
             </button>
           </div>
 
@@ -287,7 +289,7 @@ export function VideoWallClient({
           <select
             value={selectedZone}
             onChange={(e) => setSelectedZone(e.target.value)}
-            className="sentry-input text-xs"
+            className="bg-[#0a0a0a] border border-[#212327] rounded-full px-4 py-1.5 text-xs text-white focus:outline-none focus:border-white font-mono"
           >
             <option value="all">All Campus Zones ({zones.length})</option>
             {zones.map((z) => (
@@ -300,28 +302,28 @@ export function VideoWallClient({
 
         {/* Search */}
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8b8496]" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#7d8187]" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search screens, locations, or titles…"
-            className="sentry-input pl-9 text-xs"
+            placeholder="Search screens or notices…"
+            className="w-full bg-[#0a0a0a] border border-[#212327] rounded-full pl-8 pr-3.5 py-1.5 text-xs text-white focus:outline-none focus:border-white font-mono"
           />
         </div>
       </div>
 
       {/* Live Video Wall Grid */}
       {filtered.length === 0 ? (
-        <div className="p-16 text-center border border-[#362d59] rounded-2xl bg-[#150f23] text-[#8b8496]">
-          <Monitor className="w-8 h-8 mx-auto mb-3 opacity-50 text-[#8b8496]" />
-          <h3 className="text-sm font-bold text-white">No Display Screens Found</h3>
-          <p className="text-xs max-w-sm mx-auto mt-1">
+        <div className="p-16 text-center border border-[#212327] rounded-lg bg-[#141414] text-[#7d8187]">
+          <Monitor className="w-8 h-8 mx-auto mb-3 opacity-50 text-[#7d8187]" />
+          <h3 className="text-sm font-normal text-white">No Display Screens Found</h3>
+          <p className="text-xs max-w-sm mx-auto mt-1 font-mono">
             No screens match the applied zone or status filter.
           </p>
         </div>
       ) : (
         <div
-          className={`grid gap-6 ${
+          className={`grid gap-4 ${
             aspectMode === '16:9'
               ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'
               : 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
@@ -335,45 +337,45 @@ export function VideoWallClient({
             return (
               <div
                 key={screen.id}
-                className="sentry-card overflow-hidden shadow-lg flex flex-col"
+                className="bg-[#141414] border border-[#212327] rounded-lg overflow-hidden flex flex-col hover:border-white/30 transition-colors"
               >
                 {/* Node Title Header */}
-                <div className="px-4 py-2.5 border-b border-[#362d59] bg-[#1f1633]/60 flex items-center justify-between text-xs">
+                <div className="px-4 py-2.5 border-b border-[#212327] bg-[#0a0a0a] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${DOT_COLOR[screen._status as DeviceStatus]}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${DOT_COLOR[screen._status as DeviceStatus]}`} />
                     <Link
                       href={`/dashboard/admin/fleet/${screen.id}`}
-                      className="font-bold text-white hover:text-[#c2ef4e] truncate"
+                      className="font-normal text-white hover:underline truncate"
                       title={screen.name}
                     >
                       {screen.name}
                     </Link>
                   </div>
-                  <span className="text-[10px] font-mono text-[#8b8496] shrink-0 ml-2">
+                  <span className="text-[10px] font-mono text-[#7d8187] shrink-0 ml-2">
                     {screen.zone || screen.location || 'General'}
                   </span>
                 </div>
 
                 {/* Simulated Screen Mirror Frame */}
-                <div className="p-3 bg-[#140e21] flex-1 flex flex-col items-center justify-center">
+                <div className="p-3 bg-[#0a0a0a] flex-1 flex flex-col items-center justify-center">
                   <div
-                    className={`w-full relative rounded-xl border-4 border-neutral-900 bg-black overflow-hidden flex flex-col justify-between p-3 text-center transition-all ${
+                    className={`w-full relative rounded-lg border border-[#212327] bg-black overflow-hidden flex flex-col justify-between p-3 text-center transition-all ${
                       aspectMode === '16:9' ? 'aspect-[16/9]' : 'aspect-[9/16]'
                     } ${
                       isEmergency
-                        ? 'bg-radial from-rose-950 to-black text-rose-100 shadow-[0_0_20px_rgba(239,68,68,0.4)]'
+                        ? 'border-rose-500/50 bg-rose-950/20 text-rose-100'
                         : 'text-white'
                     }`}
                   >
                     {/* Top Screen Status Line */}
-                    <div className="text-[8px] font-mono uppercase tracking-widest text-[#8b8496] flex items-center justify-between border-b border-white/10 pb-1">
+                    <div className="text-[8px] font-mono uppercase tracking-widest text-[#7d8187] flex items-center justify-between border-b border-white/10 pb-1">
                       <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#c2ef4e] animate-pulse" />
-                        <span className="text-[#c2ef4e] font-bold">LIVE DISPLAY</span>
+                        <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-emerald-400">ONLINE</span>
                       </span>
-                      <span className="truncate max-w-[120px] font-bold">
+                      <span className="truncate max-w-[120px]">
                         {isEmergency
-                          ? '🚨 EMERGENCY'
+                          ? 'EMERGENCY'
                           : current
                           ? PRIORITY_LABEL[current.priority as Priority] || 'Routine'
                           : 'STANDBY'}
@@ -394,34 +396,34 @@ export function VideoWallClient({
                       )}
                       {current ? (
                         <div>
-                          <h4 className="text-xs font-bold line-clamp-2 px-1 text-white leading-snug">
+                          <h4 className="text-xs font-normal line-clamp-2 px-1 text-white leading-snug">
                             {current.title}
                           </h4>
                           {current.body && (
-                            <p className="text-[9px] text-[#bdb8c0] line-clamp-2 mt-1 px-2 font-normal leading-tight">
+                            <p className="text-[9px] text-[#dadbdf] line-clamp-2 mt-1 px-2 font-normal leading-tight">
                               {current.body}
                             </p>
                           )}
                         </div>
                       ) : (
-                        <div className="text-[10px] text-[#8b8496] font-mono italic">
-                          [Screen Idle &bull; Standby]
+                        <div className="text-[10px] text-[#7d8187] font-mono italic">
+                          [Idle Standby Loop]
                         </div>
                       )}
                     </div>
 
                     {/* Bottom Screen Kiosk Sub-Bar */}
-                    <div className="text-[7px] font-mono text-[#8b8496] flex justify-between border-t border-white/5 pt-1">
-                      <span>CampusCast Display Engine</span>
+                    <div className="text-[7px] font-mono text-[#7d8187] flex justify-between border-t border-white/5 pt-1">
+                      <span>CampusCast Engine</span>
                       <span suppressHydrationWarning>{relativeTime(screen.last_seen_at)}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Node Control Footer */}
-                <div className="px-3.5 py-2.5 border-t border-[#362d59] bg-[#150f23] flex items-center justify-between text-xs gap-1">
-                  <div className="text-[10px] font-mono text-[#8b8496] truncate" suppressHydrationWarning>
-                    Heartbeat: {relativeTime(screen.last_seen_at)}
+                <div className="px-3.5 py-2.5 border-t border-[#212327] bg-[#141414] flex items-center justify-between text-xs gap-1">
+                  <div className="text-[10px] font-mono text-[#7d8187] truncate" suppressHydrationWarning>
+                    Ping: {relativeTime(screen.last_seen_at)}
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0">
@@ -429,12 +431,12 @@ export function VideoWallClient({
                       type="button"
                       onClick={() => handleSimulatePing(screen.id)}
                       disabled={isBusy}
-                      title="Simulate Hardware Ping (Check-in)"
-                      className="p-1.5 rounded-lg hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] disabled:opacity-50 cursor-pointer transition-colors"
+                      title="Simulate Hardware Ping"
+                      className="p-1.5 rounded-full hover:bg-white/10 border border-[#212327] text-[#7d8187] hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
                     >
                       <Radio
-                        className={`w-3.5 h-3.5 ${
-                          isBusy && busyType === 'ping' ? 'animate-ping text-[#c2ef4e]' : ''
+                        className={`w-3 h-3 ${
+                          isBusy && busyType === 'ping' ? 'animate-ping text-white' : ''
                         }`}
                       />
                     </button>
@@ -442,12 +444,12 @@ export function VideoWallClient({
                       type="button"
                       onClick={() => handleForceRefresh(screen.id, screen.name)}
                       disabled={isBusy}
-                      title="Force Sync / Refresh Screen"
-                      className="p-1.5 rounded-lg hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] disabled:opacity-50 cursor-pointer transition-colors"
+                      title="Force Sync Screen"
+                      className="p-1.5 rounded-full hover:bg-white/10 border border-[#212327] text-[#7d8187] hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
                     >
                       <RefreshCw
-                        className={`w-3.5 h-3.5 ${
-                          isBusy && busyType === 'refresh' ? 'animate-spin text-[#c2ef4e]' : ''
+                        className={`w-3 h-3 ${
+                          isBusy && busyType === 'refresh' ? 'animate-spin text-white' : ''
                         }`}
                       />
                     </button>
@@ -456,11 +458,11 @@ export function VideoWallClient({
                       onClick={() => handleReboot(screen.id, screen.name)}
                       disabled={isBusy}
                       title="Reboot Node"
-                      className="p-1.5 rounded-lg hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#fa5252] disabled:opacity-50 cursor-pointer transition-colors"
+                      className="p-1.5 rounded-full hover:bg-rose-500/10 border border-[#212327] text-[#7d8187] hover:text-rose-400 disabled:opacity-50 cursor-pointer transition-colors"
                     >
                       <Power
-                        className={`w-3.5 h-3.5 ${
-                          isBusy && busyType === 'reboot' ? 'animate-pulse text-[#fa5252]' : ''
+                        className={`w-3 h-3 ${
+                          isBusy && busyType === 'reboot' ? 'animate-pulse text-rose-400' : ''
                         }`}
                       />
                     </button>
@@ -469,9 +471,9 @@ export function VideoWallClient({
                       target="_blank"
                       rel="noreferrer"
                       title="Launch Kiosk Window"
-                      className="p-1.5 rounded-lg hover:bg-[#1f1633] border border-[#362d59] text-[#8b8496] hover:text-[#c2ef4e] cursor-pointer transition-colors"
+                      className="p-1.5 rounded-full hover:bg-white/10 border border-[#212327] text-[#7d8187] hover:text-white cursor-pointer transition-colors"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
                 </div>

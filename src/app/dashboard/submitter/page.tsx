@@ -30,75 +30,77 @@ export default async function SubmitterDashboardPage() {
   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1)
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16">
+    <div className="space-y-8 max-w-6xl pb-16 text-white">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#362d59]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#212327]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="sentry-chip-green">Announcement Studio</span>
-            <span className="text-xs font-mono text-[#8b8496]">{stats.live} Active on Screens</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+              Submitter Workspace
+            </span>
+            <span className="text-xs font-mono text-[#7d8187]">{stats.live} Active on Mesh</span>
           </div>
-          <h1 className="sentry-display-section text-white">
+          <h1 className="xai-display-section text-white">
             My Announcements
           </h1>
-          <p className="text-sm text-[#bdb8c0] max-w-xl mt-1.5 leading-relaxed">
-            Welcome back, <strong className="font-bold text-white">{capitalizedName}</strong>. Create and manage your campus screen posts with automatic AI compliance check.
+          <p className="text-sm text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+            Welcome back, <strong className="font-normal text-white">{capitalizedName}</strong>. Create and manage your campus screen broadcasts with automated policy scoring.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/submitter/new"
-            className="sentry-btn-lime"
+            className="px-5 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2"
           >
-            <Plus className="w-4 h-4" /> Create Announcement
+            <Plus className="w-3.5 h-3.5" /> Create Announcement
           </Link>
         </div>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="sentry-card p-5 space-y-1">
-          <span className="sentry-mono-label text-[#8b8496]">Total Submissions</span>
-          <div className="text-3xl font-bold text-white">{stats.total}</div>
-          <p className="text-[11px] text-[#8b8496]">Created by your account</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">Total Submissions</span>
+          <div className="text-3xl font-normal text-white">{stats.total}</div>
+          <p className="text-[11px] text-[#7d8187] font-mono">Created by you</p>
         </div>
 
-        <div className="sentry-card p-5 space-y-1 border-[#c2ef4e]/30">
-          <span className="sentry-mono-label text-[#c2ef4e]">Currently Live</span>
-          <div className="text-3xl font-bold text-[#c2ef4e]">{stats.live}</div>
-          <p className="text-[11px] text-[#bdb8c0]">Broadcasting on TVs</p>
+        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400">Currently Live</span>
+          <div className="text-3xl font-normal text-white">{stats.live}</div>
+          <p className="text-[11px] text-[#7d8187] font-mono">Broadcasting now</p>
         </div>
 
-        <div className="sentry-card p-5 space-y-1 border-[#fa7faa]/30">
-          <span className="sentry-mono-label text-[#fa7faa]">Pending Review</span>
-          <div className="text-3xl font-bold text-[#fa7faa]">{stats.pending}</div>
-          <p className="text-[11px] text-[#bdb8c0]">Awaiting HOD approval</p>
+        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">Pending Review</span>
+          <div className="text-3xl font-normal text-white">{stats.pending}</div>
+          <p className="text-[11px] text-[#7d8187] font-mono">Awaiting HOD</p>
         </div>
 
-        <div className="sentry-card p-5 space-y-1">
-          <span className="sentry-mono-label text-[#8b8496]">Drafts / Revisions</span>
-          <div className="text-3xl font-bold text-white">{stats.drafts}</div>
-          <p className="text-[11px] text-[#8b8496]">Requires updates</p>
+        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">Drafts / Edits</span>
+          <div className="text-3xl font-normal text-white">{stats.drafts}</div>
+          <p className="text-[11px] text-[#7d8187] font-mono">Requires changes</p>
         </div>
       </div>
 
       {/* Announcements Table */}
-      <div className="sentry-card overflow-hidden">
-        <div className="p-5 border-b border-[#362d59] flex items-center justify-between">
+      <div className="bg-[#141414] border border-[#212327] rounded-lg overflow-hidden">
+        <div className="p-5 border-b border-[#212327] flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-white">Announcement History</h3>
-            <p className="text-xs text-[#8b8496]">All announcements created by your account</p>
+            <h3 className="text-sm font-normal text-white">Announcement History</h3>
+            <p className="text-xs text-[#7d8187]">All notices submitted through your account</p>
           </div>
           <Link
             href="/dashboard/submitter/new"
-            className="sentry-btn-outline text-xs"
+            className="px-3 py-1 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono transition-colors"
           >
             + New Post
           </Link>
         </div>
 
-        <table className="sentry-table text-left text-sm">
+        <table className="xai-table text-left text-sm">
           <thead>
             <tr>
               <th>Title &amp; Target</th>
@@ -108,34 +110,34 @@ export default async function SubmitterDashboardPage() {
               <th className="text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#362d59]">
+          <tbody className="divide-y divide-[#212327]">
             {rows.map((r: any) => {
               const disp = r.status === 'approved' ? displayStatus(r) : r.status
               return (
-                <tr key={r.id} className="hover:bg-[#1f1633]/60 transition-colors">
+                <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-4 px-4">
-                    <div className="font-bold text-xs text-white">{r.title}</div>
+                    <div className="font-normal text-xs text-white">{r.title}</div>
                     {r.rejection_reason && (
-                      <div className="flex items-center gap-1 text-[11px] text-[#fa5252] mt-1 font-mono">
+                      <div className="flex items-center gap-1 text-[11px] text-rose-400 mt-1 font-mono">
                         <AlertCircle className="w-3 h-3 shrink-0" />
                         <span>Feedback: {r.rejection_reason}</span>
                       </div>
                     )}
                   </td>
-                  <td className="py-4 px-4 text-xs text-[#bdb8c0] font-mono">
+                  <td className="py-4 px-4 text-xs text-[#7d8187] font-mono">
                     {r.departments?.name || 'General'}
                   </td>
                   <td className="py-4 px-4">
                     <StatusBadge status={disp} />
                   </td>
-                  <td className="py-4 px-4 text-xs text-[#8b8496] font-mono">
+                  <td className="py-4 px-4 text-xs text-[#7d8187] font-mono">
                     {r.display_start ? new Date(r.display_start).toLocaleDateString() : 'Immediate'}
                     {r.display_end ? ` → ${new Date(r.display_end).toLocaleDateString()}` : ' (No expiry)'}
                   </td>
                   <td className="py-4 px-4 text-right">
                     <Link
                       href={`/dashboard/submitter/${r.id}`}
-                      className="sentry-btn-outline text-xs inline-flex items-center gap-1"
+                      className="px-3 py-1 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono inline-flex items-center gap-1 transition-colors"
                     >
                       <Eye className="w-3 h-3" /> View
                     </Link>
@@ -145,8 +147,8 @@ export default async function SubmitterDashboardPage() {
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-xs text-[#8b8496]">
-                  No announcements yet. Click &ldquo;Create Announcement&rdquo; above to create your first post!
+                <td colSpan={5} className="py-12 text-center text-xs text-[#7d8187]">
+                  No announcements yet. Click &ldquo;Create Announcement&rdquo; above to create your first post.
                 </td>
               </tr>
             )}

@@ -8,23 +8,25 @@ export default async function LoginPage({
 }) {
   const resolvedSearchParams = await searchParams
   return (
-    <div className="min-h-screen relative flex flex-col items-center justify-center bg-[#1f1633] text-white p-6 font-sans selection:bg-[#c2ef4e] selection:text-[#150f23]">
-      <div className="w-full max-w-md p-8 md:p-10 rounded-2xl border border-[#362d59] bg-[#150f23] shadow-2xl space-y-6">
+    <div className="min-h-screen relative flex flex-col items-center justify-center bg-[#0a0a0a] text-white p-6 font-sans selection:bg-white selection:text-black">
+      <div className="w-full max-w-md p-8 md:p-10 rounded-xl border border-[#212327] bg-[#141414] shadow-2xl space-y-6">
         {/* Brand Header */}
         <div className="text-center">
           <Link href="/" className="inline-block group cursor-pointer">
-            <div className="w-12 h-12 rounded-xl bg-[#c2ef4e] text-[#150f23] flex items-center justify-center mx-auto mb-3 font-black text-xl shadow-[0_0_15px_rgba(194,239,78,0.4)] group-hover:scale-105 transition-transform">
-              ⚡
+            <div className="w-10 h-10 rounded-full border border-white/20 bg-white/5 text-white flex items-center justify-center mx-auto mb-3 font-mono font-bold text-lg group-hover:border-white transition-colors">
+              X
             </div>
           </Link>
           <div className="flex items-center justify-center gap-1.5 mb-2">
-            <span className="sentry-chip-green">Smart Screen Hub</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+              Access Gateway
+            </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Welcome to CampusCast
+          <h1 className="text-xl font-normal tracking-tight text-white">
+            CampusCast Network
           </h1>
-          <p className="text-xs text-[#bdb8c0] mt-1 leading-relaxed">
-            Select a demo account below or sign in with your email.
+          <p className="text-xs text-[#7d8187] mt-1 leading-relaxed">
+            Select a demo role or enter your institutional credentials.
           </p>
         </div>
 
@@ -32,8 +34,8 @@ export default async function LoginPage({
       </div>
 
       {/* Feature Capabilities Footer */}
-      <div className="mt-8 text-center text-xs font-mono text-[#8b8496]">
-        <span>5s Screen Refresh &bull; Real-time AI Review &bull; Instant Emergency Broadcast</span>
+      <div className="mt-8 text-center text-xs font-mono text-[#7d8187]">
+        <span>5s Telemetry &bull; Safety Inference Engine &bull; Instant Broadcast</span>
       </div>
     </div>
   )

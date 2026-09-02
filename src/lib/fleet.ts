@@ -4,6 +4,7 @@ const DELIVERY_FRESH_MS = 5 * 60_000 // confirmed delivery still counts as "deli
 
 export type DeviceStatus = 'online' | 'stale' | 'offline'
 export type DeliveryState = 'delivered' | 'pending' | 'failed'
+export type AnnouncementDisplayStatus = 'scheduled' | 'archived' | 'live' | string
 
 export function deviceStatus(lastSeenAt: string | null | undefined): DeviceStatus {
   if (!lastSeenAt) return 'offline'

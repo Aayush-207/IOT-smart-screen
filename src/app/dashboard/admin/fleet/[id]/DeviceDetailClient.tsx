@@ -95,37 +95,39 @@ export function DeviceDetailClient({
 
   return (
     <div className="space-y-8 max-w-5xl pb-16 text-white">
-      <Link href="/dashboard/admin/fleet" className="sentry-btn-outline text-xs inline-flex items-center gap-1.5">
+      <Link href="/dashboard/admin/fleet" className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono inline-flex items-center gap-1.5 transition-colors">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to Screens &amp; Fleet
       </Link>
 
       {/* Hero Header */}
-      <div className="p-6 md:p-8 rounded-2xl border border-[#362d59] bg-[#150f23] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
+      <div className="p-6 md:p-8 rounded-lg border border-[#212327] bg-[#141414] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="sentry-chip-green">{screen.zone || 'General Zone'}</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+              {screen.zone || 'General Zone'}
+            </span>
             <StatusBadge status={status} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            {screen.name} &mdash; <span className="text-[#bdb8c0] font-normal">{screen.location}</span>
+          <h1 className="text-2xl font-normal tracking-tight text-white">
+            {screen.name} &mdash; <span className="text-[#dadbdf] font-normal">{screen.location}</span>
           </h1>
-          <p className="text-xs text-[#8b8496] font-mono mt-1.5">
-            Display UUID: {screen.id}
+          <p className="text-xs text-[#7d8187] font-mono mt-1.5">
+            Node UUID: {screen.id}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <a
             href={`/kiosk.html?id=${screen.id}`}
             target="_blank"
             rel="noreferrer"
-            className="sentry-btn-lime text-xs"
+            className="px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors"
           >
             Launch Kiosk &rarr;
           </a>
           <button
             onClick={() => setEditOpen(true)}
-            className="sentry-btn-outline text-xs flex items-center gap-1.5"
+            className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer"
             title="Edit Screen Information"
           >
             <Pencil className="w-3.5 h-3.5" /> Edit Metadata
@@ -134,34 +136,34 @@ export function DeviceDetailClient({
       </div>
 
       {/* Screen Mirror & Telemetry */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Screen Mirror */}
-        <div className="lg:col-span-7 sentry-card p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4 border-b border-[#362d59] pb-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#c2ef4e] animate-pulse" /> Live Display Output
+        <div className="lg:col-span-7 bg-[#141414] border border-[#212327] rounded-lg p-6 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4 border-b border-[#212327] pb-3">
+            <span className="text-xs font-mono uppercase tracking-wider text-white flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Display Output
             </span>
-            <span className="text-[10px] font-mono text-[#8b8496]">Aspect: 16:9</span>
+            <span className="text-[10px] font-mono text-[#7d8187]">Aspect: 16:9</span>
           </div>
 
-          <div className="aspect-[16/9] rounded-xl bg-black border border-[#362d59] overflow-hidden flex flex-col justify-center items-center text-center p-4 text-white relative shadow-inner">
+          <div className="aspect-[16/9] rounded-lg bg-black border border-[#212327] overflow-hidden flex flex-col justify-center items-center text-center p-4 text-white relative shadow-inner">
             {currentAnnouncement?.attachment_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={currentAnnouncement.attachment_url} alt="Current content" className="max-h-36 object-contain rounded-lg mb-2" />
             ) : null}
             {currentAnnouncement ? (
               <div>
-                <h4 className="text-sm font-bold text-white line-clamp-2 px-2">{currentAnnouncement.title}</h4>
+                <h4 className="text-sm font-normal text-white line-clamp-2 px-2">{currentAnnouncement.title}</h4>
                 {currentAnnouncement.body && (
-                  <p className="text-[10px] text-[#bdb8c0] line-clamp-2 mt-1 px-4">{currentAnnouncement.body}</p>
+                  <p className="text-[10px] text-[#dadbdf] line-clamp-2 mt-1 px-4">{currentAnnouncement.body}</p>
                 )}
               </div>
             ) : (
-              <div className="text-xs text-[#8b8496] font-mono">
-                [Display Idle &bull; Standby Rotation]
+              <div className="text-xs text-[#7d8187] font-mono">
+                [Display Idle &bull; Standby Rotation Loop]
               </div>
             )}
-            <div className="absolute bottom-2 left-3 right-3 text-[8px] text-[#8b8496] flex justify-between font-mono border-t border-white/10 pt-1">
+            <div className="absolute bottom-2 left-3 right-3 text-[8px] text-[#7d8187] flex justify-between font-mono border-t border-white/10 pt-1">
               <span>Stream: WebSocket &bull; 5s Poll</span>
               <span>Online</span>
             </div>
@@ -169,44 +171,44 @@ export function DeviceDetailClient({
         </div>
 
         {/* Right: Telemetry & Controls */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="sentry-card p-6 space-y-3">
-            <h3 className="sentry-mono-label text-[#8b8496] border-b border-[#362d59] pb-2">
+        <div className="lg:col-span-5 space-y-4">
+          <div className="bg-[#141414] border border-[#212327] rounded-lg p-6 space-y-3">
+            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187] border-b border-[#212327] pb-2">
               Hardware Telemetry
             </h3>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between py-1 border-b border-[#362d59]">
-                <span className="text-[#8b8496]">Now Playing</span>
-                <span className="font-bold text-white truncate max-w-[180px]">{currentAnnouncement?.title || 'Idle Standby'}</span>
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex justify-between py-1 border-b border-[#212327]">
+                <span className="text-[#7d8187]">Now Playing</span>
+                <span className="text-white truncate max-w-[180px]">{currentAnnouncement?.title || 'Idle Standby'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[#362d59]">
-                <span className="text-[#8b8496]">Last Heartbeat</span>
-                <span className="font-mono text-white" suppressHydrationWarning>{relativeTime(screen.last_seen_at)}</span>
+              <div className="flex justify-between py-1 border-b border-[#212327]">
+                <span className="text-[#7d8187]">Last Heartbeat</span>
+                <span className="text-white" suppressHydrationWarning>{relativeTime(screen.last_seen_at)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[#362d59]">
-                <span className="text-[#8b8496]">Firmware</span>
-                <span className="font-mono text-white">{screen.firmware_version || 'v2.4.0-edge'}</span>
+              <div className="flex justify-between py-1 border-b border-[#212327]">
+                <span className="text-[#7d8187]">Firmware</span>
+                <span className="text-white">{screen.firmware_version || 'v2.4.0-edge'}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-[#8b8496]">Location Zone</span>
-                <span className="font-bold text-white">{screen.zone || screen.location}</span>
+                <span className="text-[#7d8187]">Location Zone</span>
+                <span className="text-white">{screen.zone || screen.location}</span>
               </div>
             </div>
 
             {screen.force_refresh_requested && (
-              <div className="p-3 bg-amber-500/15 border border-amber-500/40 rounded-lg text-xs text-amber-400 font-mono">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-xs text-amber-400 font-mono">
                 Forced synchronization queued &mdash; executing on next ping.
               </div>
             )}
             {screen.reboot_requested && (
-              <div className="p-3 bg-[#fa5252]/15 border border-[#fa5252]/40 rounded-lg text-xs text-[#fa5252] font-mono">
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg text-xs text-rose-400 font-mono">
                 Hardware reboot queued &mdash; executing on next sync.
               </div>
             )}
           </div>
 
-          <div className="sentry-card p-6 space-y-3">
-            <h3 className="sentry-mono-label text-[#8b8496]">
+          <div className="bg-[#141414] border border-[#212327] rounded-lg p-6 space-y-3">
+            <h3 className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">
               Remote Controls
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -214,7 +216,7 @@ export function DeviceDetailClient({
                 type="button"
                 onClick={handleSimulatePing}
                 disabled={!!loading}
-                className="sentry-btn-lime col-span-2 text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="col-span-2 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Radio className={`w-3.5 h-3.5 ${loading === 'ping' ? 'animate-ping' : ''}`} /> Simulate Heartbeat (Ping)
               </button>
@@ -222,17 +224,17 @@ export function DeviceDetailClient({
                 type="button"
                 onClick={handleForceRefresh}
                 disabled={!!loading}
-                className="sentry-btn-secondary text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading === 'refresh' ? 'animate-spin text-[#c2ef4e]' : ''}`} /> Force Sync
+                <RefreshCw className={`w-3.5 h-3.5 ${loading === 'refresh' ? 'animate-spin' : ''}`} /> Force Sync
               </button>
               <button
                 type="button"
                 onClick={handleReboot}
                 disabled={!!loading}
-                className="sentry-btn-secondary text-[#fa5252] border-[#fa5252]/40 hover:bg-[#fa5252]/10 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2 rounded-full border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
               >
-                <Power className={`w-3.5 h-3.5 ${loading === 'reboot' ? 'animate-pulse text-[#fa5252]' : ''}`} /> Reboot
+                <Power className={`w-3.5 h-3.5 ${loading === 'reboot' ? 'animate-pulse' : ''}`} /> Reboot
               </button>
             </div>
           </div>
@@ -240,15 +242,15 @@ export function DeviceDetailClient({
       </div>
 
       {/* Activity Timeline */}
-      <div className="sentry-card p-6">
-        <h3 className="font-bold text-xs uppercase tracking-wider text-white mb-4 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-[#c2ef4e]" />
+      <div className="bg-[#141414] border border-[#212327] rounded-lg p-6">
+        <h3 className="font-mono text-xs uppercase tracking-wider text-[#7d8187] mb-4 flex items-center gap-2">
+          <Clock className="w-3.5 h-3.5 text-white" />
           <span>Screen Delivery &amp; Activity Log</span>
         </h3>
         {deliveries.length === 0 && auditRows.length === 0 ? (
-          <p className="text-xs text-[#8b8496]">No activity recorded yet for this device.</p>
+          <p className="text-xs text-[#7d8187] font-mono">No activity recorded yet for this device.</p>
         ) : (
-          <div className="space-y-3 text-xs text-[#bdb8c0] font-mono text-[11px]">
+          <div className="space-y-3 text-xs text-[#dadbdf] font-mono text-[11px]">
             {[...deliveries.map((d: any) => ({
               date: d.last_confirmed_at,
               text: `${d.announcements?.title || 'Announcement'} — ${d.state || 'delivered'}`,
@@ -258,9 +260,9 @@ export function DeviceDetailClient({
             }))]
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
               .map((entry, i) => (
-                <div key={i} className="flex flex-wrap items-center justify-between border-t border-[#362d59] pt-2.5 first:border-0 first:pt-0">
-                  <span className="font-bold text-white">{entry.text}</span>
-                  <span className="text-[10px] text-[#8b8496]">{new Date(entry.date).toLocaleString()}</span>
+                <div key={i} className="flex flex-wrap items-center justify-between border-t border-[#212327] pt-2.5 first:border-0 first:pt-0">
+                  <span className="text-white">{entry.text}</span>
+                  <span className="text-[10px] text-[#7d8187]">{new Date(entry.date).toLocaleString()}</span>
                 </div>
               ))}
           </div>
@@ -269,26 +271,26 @@ export function DeviceDetailClient({
 
       {/* Rename Modal */}
       {editOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#150f23] rounded-2xl border border-[#362d59] p-6 w-full max-w-md space-y-4 shadow-2xl text-white">
-            <h3 className="text-base font-bold text-white">Update Display Metadata</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#141414] rounded-xl border border-[#212327] p-6 w-full max-w-md space-y-4 shadow-2xl text-white">
+            <h3 className="text-sm font-normal text-white">Update Display Node Metadata</h3>
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] uppercase font-bold text-[#8b8496] block mb-1">Screen Name</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Screen name" className="sentry-input text-xs" />
+                <label className="text-[10px] uppercase font-mono text-[#7d8187] block mb-1">Screen Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Screen name" className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-white" />
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-[#8b8496] block mb-1">Building Location</label>
-                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="sentry-input text-xs" />
+                <label className="text-[10px] uppercase font-mono text-[#7d8187] block mb-1">Building Location</label>
+                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-white" />
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-[#8b8496] block mb-1">Campus Zone</label>
-                <input value={zone} onChange={(e) => setZone(e.target.value)} placeholder="Zone" className="sentry-input text-xs" />
+                <label className="text-[10px] uppercase font-mono text-[#7d8187] block mb-1">Campus Zone</label>
+                <input value={zone} onChange={(e) => setZone(e.target.value)} placeholder="Zone" className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-white" />
               </div>
             </div>
             <div className="flex gap-2.5 justify-end pt-2">
-              <button onClick={() => setEditOpen(false)} className="px-4 py-2 text-xs font-bold text-[#8b8496] hover:text-white cursor-pointer">Cancel</button>
-              <button onClick={handleRename} disabled={!!loading} className="sentry-btn-lime text-xs cursor-pointer disabled:opacity-50">
+              <button onClick={() => setEditOpen(false)} className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono cursor-pointer">Cancel</button>
+              <button onClick={handleRename} disabled={!!loading} className="px-5 py-1.5 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 cursor-pointer disabled:opacity-50 transition-colors">
                 {loading === 'rename' ? 'Saving…' : 'Save Changes'}
               </button>
             </div>

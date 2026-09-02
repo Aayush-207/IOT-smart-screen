@@ -66,7 +66,7 @@ export function ClearEmergencyButton({
       disabled={busy}
       className={
         className ||
-        'inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#c2ef4e] text-[#150f23] text-xs font-bold hover:brightness-105 transition-all disabled:opacity-50 cursor-pointer shadow-md'
+        'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-all disabled:opacity-50 cursor-pointer shadow-sm'
       }
     >
       <ShieldCheck className="w-4 h-4" />

@@ -7,7 +7,7 @@ export function LogoutButton() {
     <form action="/auth/signout" method="post" className="w-full">
       <button 
         type="submit"
-        className="w-full px-3 py-2 rounded-lg bg-[#150f23] hover:bg-[#fa5252]/15 hover:text-[#fa5252] hover:border-[#fa5252]/40 border border-[#362d59] text-[#8b8496] transition-all flex items-center justify-center gap-2 text-xs font-bold cursor-pointer"
+        className="w-full px-3 py-1.5 rounded-full bg-[#0a0a0a] hover:bg-white/10 border border-[#212327] text-[#7d8187] hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-normal cursor-pointer"
         title="Sign Out of CampusCast"
       >
         <LogOut className="w-3.5 h-3.5" />

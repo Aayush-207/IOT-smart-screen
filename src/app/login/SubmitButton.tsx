@@ -32,12 +32,12 @@ export function SubmitButton() {
       <button 
         type="submit"
         disabled={pending}
-        className="sentry-btn-lime w-full py-3 px-6 text-xs font-bold uppercase tracking-wider flex justify-center items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
+        className="w-full py-2.5 px-6 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50"
       >
         {pending ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin text-[#150f23]" />
-            <span>Signing in...</span>
+            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0a0a0a]" />
+            <span>Authenticating...</span>
           </>
         ) : (
           <span>Sign In &rarr;</span>
@@ -46,16 +46,16 @@ export function SubmitButton() {
 
       {pending && (
         <div className="w-full space-y-1.5 animate-in fade-in duration-300">
-          <div className="flex justify-between items-center text-[10px] font-mono text-[#a39cb0]">
+          <div className="flex justify-between items-center text-[10px] font-mono text-[#7d8187]">
             <span className="flex items-center gap-1.5">
-               <span className="w-1.5 h-1.5 bg-[#c2ef4e] rounded-full animate-pulse" />
-               Establishing Session
+               <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+               Connecting
             </span>
-            <span className="tabular-nums text-[#c2ef4e] font-bold">{progress}%</span>
+            <span className="tabular-nums text-white">{progress}%</span>
           </div>
-          <div className="w-full h-1 bg-[#1f1633] rounded-full overflow-hidden border border-[#362d59]">
+          <div className="w-full h-1 bg-[#141414] rounded-full overflow-hidden border border-[#212327]">
             <div 
-              className="h-full bg-[#c2ef4e] transition-all duration-150 ease-out"
+              className="h-full bg-white transition-all duration-150 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

@@ -9,21 +9,21 @@ export function AiAdvisoryPanel({ advisory }: { advisory: any }) {
   if (deterministic.length === 0 && !ai) return null
 
   return (
-    <div className="rounded-xl border border-[#6a5fc1]/40 bg-[#422082]/25 p-3.5 text-xs text-[#bdb8c0] space-y-1.5 shadow-sm">
-      <div className="flex items-center gap-2 font-bold text-[#c2ef4e]">
-        <Sparkles className="w-3.5 h-3.5" />
-        <span>AI Compliance &amp; Policy Checks</span>
+    <div className="rounded-lg border border-[#212327] bg-[#141414] p-3.5 text-xs text-[#dadbdf] space-y-2">
+      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-white">
+        <Sparkles className="w-3.5 h-3.5 text-white" />
+        <span>Automated Policy &amp; Safety Checks</span>
       </div>
       {deterministic.length > 0 && (
-        <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-[#bdb8c0]">
+        <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-[#7d8187]">
           {deterministic.map((d, i) => (
             <li key={i}>{d}</li>
           ))}
         </ul>
       )}
       {ai && (
-        <div className="pt-1.5 border-t border-[#6a5fc1]/30 text-xs text-white/90">
-          <span className="font-bold text-[#a79df5]">AI Review:</span> {ai}
+        <div className="pt-1.5 border-t border-[#212327] text-xs text-white/90">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-[#dadbdf]">Model Analysis:</span> {ai}
         </div>
       )}
     </div>

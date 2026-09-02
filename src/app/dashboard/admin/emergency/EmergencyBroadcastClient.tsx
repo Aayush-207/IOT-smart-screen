@@ -78,9 +78,9 @@ export function EmergencyBroadcastClient({
 
   const EMERGENCY_PRESETS = [
     { label: 'Campus Lockdown', text: 'SECURITY ALERT: Campus Lockdown in effect. Shelter in place immediately, lock doors, and stay away from windows.', severity: 'critical' as const },
-    { label: 'Severe Weather Alert', text: 'WEATHER WARNING: Severe storm warning active. Move to lowest interior floor or designated storm shelter.', severity: 'warning' as const },
-    { label: 'Fire Evacuation', text: 'EMERGENCY EVACUATION: Fire alarm active. Please calmly evacuate the building through the nearest safe exit.', severity: 'critical' as const },
-    { label: 'Power Outage Notice', text: 'UTILITY NOTICE: Main power substation outage. Backup emergency systems active. Classes suspended.', severity: 'warning' as const },
+    { label: 'Severe Weather Warning', text: 'WEATHER WARNING: Severe storm warning active. Move to lowest interior floor or designated storm shelter.', severity: 'warning' as const },
+    { label: 'Building Evacuation', text: 'EMERGENCY EVACUATION: Alarm active. Please calmly evacuate the building through the nearest safe exit.', severity: 'critical' as const },
+    { label: 'Power / Network Outage', text: 'FACILITIES NOTICE: Campus power outage. Backup systems active. Awaiting restoration.', severity: 'warning' as const },
   ]
 
   const applyPreset = (preset: typeof EMERGENCY_PRESETS[0]) => {
@@ -91,36 +91,36 @@ export function EmergencyBroadcastClient({
   return (
     <div className="max-w-4xl space-y-6 text-white">
       {/* Warning Banner */}
-      <div className="border border-[#fa5252]/50 bg-[#fa5252]/15 text-[#fa5252] font-bold text-xs p-4 rounded-2xl flex items-center gap-3 shadow-md">
-        <div className="p-2 rounded-xl bg-[#fa5252] text-white shrink-0 shadow-xs animate-bounce">
-          <AlertTriangle className="w-5 h-5" />
+      <div className="border border-rose-500/40 bg-rose-950/30 text-rose-300 text-xs p-4 rounded-lg flex items-center gap-3">
+        <div className="p-2 rounded-full bg-rose-600 text-white shrink-0 animate-bounce">
+          <AlertTriangle className="w-4 h-4" />
         </div>
         <div>
-          <p className="font-extrabold uppercase tracking-wider text-[11px]">Emergency Broadcast Console</p>
-          <p className="font-normal text-xs text-[#bdb8c0] mt-0.5">
-            Sending a broadcast overrides all active slides across <b className="text-white">{screenCount} screens</b> campus-wide with zero delay.
+          <p className="font-mono uppercase tracking-wider text-[11px] text-rose-400">Emergency Override Gateway</p>
+          <p className="text-xs text-[#dadbdf] mt-0.5">
+            Dispatching an emergency broadcast overrides all active slides across <b className="text-white font-mono">{screenCount} nodes</b> campus-wide with sub-second latency.
           </p>
         </div>
       </div>
 
       {activeEmergencies.length > 0 && (
-        <div className="sentry-card border-2 border-[#fa5252]/60 bg-[#fa5252]/10 p-5">
+        <div className="bg-[#141414] border border-rose-500/60 rounded-lg p-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#fa5252] animate-ping" />
-                <h3 className="font-bold text-sm text-[#fa5252] uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                <h3 className="font-mono text-xs text-rose-400 uppercase tracking-wider">
                   {activeEmergencies.length === 1 ? '1 Active Emergency Broadcast Live' : `${activeEmergencies.length} Active Emergency Broadcasts Live`}
                 </h3>
               </div>
-              <ul className="mt-2 text-xs text-[#bdb8c0] space-y-1">
+              <ul className="mt-2 text-xs text-[#dadbdf] space-y-1">
                 {activeEmergencies.map((e) => (
-                  <li key={e.id} className="font-medium">
-                    &ldquo;{e.body || e.title}&rdquo; &bull; <span className="font-mono uppercase text-[#fa5252] font-bold">[{e.severity || 'critical'}]</span>
+                  <li key={e.id} className="font-normal">
+                    &ldquo;{e.body || e.title}&rdquo; &bull; <span className="font-mono uppercase text-rose-400">[{e.severity || 'critical'}]</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-[10px] font-mono text-[#8b8496]">
+              <p className="mt-2 text-[10px] font-mono text-[#7d8187]">
                 Safety-net auto-expires in {EMERGENCY_MAX_HOURS} hours if not manually cleared.
               </p>
             </div>
@@ -131,82 +131,82 @@ export function EmergencyBroadcastClient({
 
       {/* Preset Action Bar */}
       <div>
-        <span className="sentry-mono-label text-[#8b8496] block mb-2">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187] block mb-2">
           Emergency Quick-Load Templates:
         </span>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {EMERGENCY_PRESETS.map((p) => (
             <button
               key={p.label}
               type="button"
               onClick={() => applyPreset(p)}
-              className="p-3.5 text-left rounded-xl border border-[#362d59] hover:border-[#fa5252] bg-[#150f23] hover:bg-[#fa5252]/10 text-xs transition-all cursor-pointer group"
+              className="p-3.5 text-left rounded-lg border border-[#212327] hover:border-rose-500/40 bg-[#141414] hover:bg-rose-950/20 text-xs transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between font-bold text-white group-hover:text-[#fa5252] mb-1">
-                <span>{p.label}</span>
-                <span className={`text-[9px] uppercase px-1.5 py-0.2 rounded font-mono font-bold ${p.severity === 'critical' ? 'bg-[#fa5252] text-white' : 'bg-amber-500 text-black'}`}>
+              <div className="flex items-center justify-between text-white group-hover:text-rose-300 mb-1">
+                <span className="font-normal text-xs">{p.label}</span>
+                <span className={`text-[9px] uppercase px-2 py-0.5 rounded-full font-mono ${p.severity === 'critical' ? 'bg-rose-600 text-white' : 'border border-amber-500/40 text-amber-400 bg-amber-500/10'}`}>
                   {p.severity}
                 </span>
               </div>
-              <p className="text-[11px] text-[#8b8496] line-clamp-1">{p.text}</p>
+              <p className="text-[11px] text-[#7d8187] line-clamp-1 font-mono">{p.text}</p>
             </button>
           ))}
         </div>
       </div>
 
       {/* Main Broadcast Form */}
-      <div className="sentry-card p-6 space-y-5 border border-[#362d59]">
+      <div className="bg-[#141414] border border-[#212327] rounded-lg p-6 space-y-5">
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#bdb8c0]">
-              Broadcast Message Text <span className="text-[#fa5252]">*</span>
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf]">
+              Broadcast Message Text <span className="text-rose-400">*</span>
             </label>
-            <span className="text-[10px] font-mono text-[#8b8496]">{message.length}/200</span>
+            <span className="text-[10px] font-mono text-[#7d8187]">{message.length}/200</span>
           </div>
           <textarea
             value={message}
             maxLength={200}
             onChange={(e) => setMessage(e.target.value)}
             rows={4}
-            placeholder='Type emergency message to display across all screens (e.g. "Campus lockdown in effect. Shelter in place immediately.")'
-            className="sentry-input text-sm leading-relaxed"
+            placeholder='Type emergency message to broadcast across all screens (e.g. "Campus lockdown in effect. Shelter in place immediately.")'
+            className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-white leading-relaxed"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#8b8496] mb-2">Severity Level</label>
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#7d8187] mb-2">Severity Tier</label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setSeverity('critical')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                className={`py-2 px-3 rounded-full text-xs font-mono uppercase tracking-wider border transition-all cursor-pointer ${
                   severity === 'critical'
-                    ? 'bg-[#fa5252] text-white border-[#fa5252] shadow-md'
-                    : 'border-[#362d59] text-[#fa5252] hover:bg-[#fa5252]/10'
+                    ? 'bg-rose-600 text-white border-rose-600'
+                    : 'border-[#212327] text-rose-400 hover:border-rose-500/30'
                 }`}
               >
-                CRITICAL (Red Alert)
+                CRITICAL (Red)
               </button>
               <button
                 type="button"
                 onClick={() => setSeverity('warning')}
-                className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                className={`py-2 px-3 rounded-full text-xs font-mono uppercase tracking-wider border transition-all cursor-pointer ${
                   severity === 'warning'
-                    ? 'bg-amber-500 text-black border-amber-500 shadow-md font-extrabold'
-                    : 'border-[#362d59] text-amber-400 hover:bg-amber-500/10'
+                    ? 'bg-amber-500 text-black border-amber-500 font-medium'
+                    : 'border-[#212327] text-amber-400 hover:border-amber-500/30'
                 }`}
               >
-                WARNING (Amber Alert)
+                WARNING (Amber)
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#8b8496] mb-2">Target Scope</label>
-            <div className="px-3.5 py-2.5 bg-[#1f1633] border border-[#362d59] rounded-xl text-xs font-mono font-bold text-white flex items-center justify-between">
-              <span>All Campus Screens ({screenCount})</span>
-              <span className="text-[10px] text-[#fa5252] font-bold uppercase">Immediate Override</span>
+            <label className="block text-xs font-mono uppercase tracking-wider text-[#7d8187] mb-2">Target Scope</label>
+            <div className="px-3.5 py-2 bg-[#0a0a0a] border border-[#212327] rounded-lg text-xs font-mono text-white flex items-center justify-between">
+              <span>All Mesh Displays ({screenCount})</span>
+              <span className="text-[10px] text-rose-400 uppercase">Immediate Override</span>
             </div>
           </div>
         </div>
@@ -215,7 +215,7 @@ export function EmergencyBroadcastClient({
           type="button"
           disabled={!message.trim()}
           onClick={() => setConfirmOpen(true)}
-          className="sentry-btn-secondary w-full py-3.5 bg-[#fa5252] text-white border-transparent font-extrabold text-sm disabled:opacity-50 transition-all cursor-pointer shadow-lg tracking-wider uppercase flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-mono uppercase tracking-wider text-xs disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <AlertTriangle className="w-4 h-4" /> Arm &amp; Broadcast Emergency Alert
         </button>
@@ -223,38 +223,38 @@ export function EmergencyBroadcastClient({
 
       {/* Safety Confirmation Modal */}
       {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#150f23] rounded-2xl border-2 border-[#fa5252] p-6 w-full max-w-lg shadow-2xl space-y-4 text-white">
-            <div className="flex items-center gap-3 text-[#fa5252]">
-              <div className="p-2.5 rounded-xl bg-[#fa5252] text-white">
-                <AlertTriangle className="w-6 h-6 animate-bounce" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#141414] rounded-xl border border-rose-500/60 p-6 w-full max-w-lg shadow-2xl space-y-4 text-white">
+            <div className="flex items-center gap-3 text-rose-400">
+              <div className="p-2 rounded-full bg-rose-600 text-white">
+                <AlertTriangle className="w-5 h-5 animate-bounce" />
               </div>
               <div>
-                <h3 className="text-lg font-bold">Safety Lock Confirmation</h3>
-                <p className="text-xs text-[#8b8496]">This action will immediately override all campus screens.</p>
+                <h3 className="text-base font-normal">Safety Lock Confirmation</h3>
+                <p className="text-xs text-[#7d8187] font-mono">This action will immediately override all campus screens.</p>
               </div>
             </div>
 
-            <div className="p-3.5 bg-[#fa5252]/15 border border-[#fa5252]/40 rounded-xl text-xs text-white font-medium">
+            <div className="p-3.5 bg-rose-950/30 border border-rose-500/40 rounded-lg text-xs text-white">
               &ldquo;{message}&rdquo;
             </div>
 
-            <p className="text-xs text-[#bdb8c0]">
-              To prevent accidental triggers, please type <b className="text-[#fa5252] font-mono tracking-widest">CONFIRM</b> below:
+            <p className="text-xs text-[#dadbdf]">
+              To prevent accidental triggers, please type <b className="text-rose-400 font-mono tracking-widest">CONFIRM</b> below:
             </p>
 
             <input
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder="CONFIRM"
-              className="sentry-input text-center font-mono font-bold tracking-widest text-sm"
+              className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 text-center font-mono tracking-widest text-sm text-white focus:outline-none focus:border-rose-500"
             />
 
-            <div className="flex gap-2.5 justify-end pt-2">
+            <div className="flex gap-2.5 justify-end pt-2 border-t border-[#212327]">
               <button
                 type="button"
                 onClick={() => { setConfirmOpen(false); setConfirmText('') }}
-                className="px-4 py-2 text-xs font-bold text-[#8b8496] hover:text-white cursor-pointer"
+                className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono cursor-pointer"
               >
                 Cancel
               </button>
@@ -262,7 +262,7 @@ export function EmergencyBroadcastClient({
                 type="button"
                 onClick={handleSend}
                 disabled={confirmText !== 'CONFIRM' || sending}
-                className="sentry-btn-secondary bg-[#fa5252] text-white border-transparent px-5 py-2.5 text-xs font-bold tracking-wider uppercase disabled:opacity-50 cursor-pointer shadow-md"
+                className="px-5 py-1.5 rounded-full bg-rose-600 text-white text-xs font-mono uppercase tracking-wider hover:bg-rose-500 disabled:opacity-50 cursor-pointer"
               >
                 {sending ? 'Transmitting…' : 'Execute Emergency Broadcast'}
               </button>

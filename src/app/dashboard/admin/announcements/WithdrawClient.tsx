@@ -54,40 +54,42 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
 
   return (
     <div className="space-y-8 max-w-6xl pb-16 text-white">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#362d59]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#212327]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="sentry-chip-green">Broadcast Archives</span>
-            <span className="text-xs font-mono text-[#8b8496]">{rows.length} Total Notices</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+              Broadcast Directory
+            </span>
+            <span className="text-xs font-mono text-[#7d8187]">{rows.length} Total Notices</span>
           </div>
-          <h1 className="sentry-display-section text-white">
+          <h1 className="xai-display-section text-white">
             Broadcast Catalog &amp; Active Content
           </h1>
-          <p className="text-sm text-[#bdb8c0] max-w-xl mt-1.5 leading-relaxed">
-            Review all scheduled and live announcements on campus displays. Take down notices immediately if needed.
+          <p className="text-sm text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+            Review all scheduled, live, and historical notices across campus screens. Take down notices immediately if needed.
           </p>
         </div>
 
         <div className="w-full sm:w-72 relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8b8496]" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#7d8187]" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search catalog by title..."
-            className="sentry-input pl-9 text-xs"
+            className="w-full bg-[#0a0a0a] border border-[#212327] rounded-full pl-8 pr-3.5 py-1.5 text-xs text-white focus:outline-none focus:border-white font-mono"
           />
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5 bg-[#150f23] p-1 rounded-xl border border-[#362d59] w-fit">
+      <div className="flex flex-wrap items-center gap-1 bg-[#141414] p-1 rounded-full border border-[#212327] w-fit">
         {(['all', 'live', 'scheduled', 'expired', 'withdrawn'] as const).map((st) => (
           <button
             key={st}
             onClick={() => setStatusFilter(st)}
-            className={`px-3 py-1 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-xs font-mono capitalize transition-all cursor-pointer ${
               statusFilter === st
-                ? 'bg-[#c2ef4e] text-[#150f23]'
-                : 'text-[#8b8496] hover:text-white'
+                ? 'bg-white text-[#0a0a0a] font-medium'
+                : 'text-[#7d8187] hover:text-white'
             }`}
           >
             {st}
@@ -95,8 +97,8 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
         ))}
       </div>
 
-      <div className="sentry-card overflow-hidden">
-        <table className="sentry-table text-left text-sm">
+      <div className="bg-[#141414] border border-[#212327] rounded-lg overflow-hidden">
+        <table className="xai-table text-left text-sm">
           <thead>
             <tr>
               <th>Notice Title &amp; Details</th>
@@ -107,37 +109,39 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
               <th className="text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#362d59]">
+          <tbody className="divide-y divide-[#212327]">
             {filtered.map((r) => {
               const disp = r.status === 'approved' ? announcementDisplayStatus(r) : r.status
               const isWithdrawn = r.status === 'withdrawn'
               return (
-                <tr key={r.id} className="hover:bg-[#1f1633]/60 transition-colors">
+                <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
                   <td className="px-5 py-4">
-                    <div className="font-bold text-xs text-white">{r.title}</div>
-                    {r.body && <div className="text-[11px] text-[#8b8496] truncate max-w-xs mt-0.5">{r.body}</div>}
+                    <div className="font-normal text-xs text-white">{r.title}</div>
+                    {r.body && <div className="text-[11px] text-[#7d8187] truncate max-w-xs mt-0.5 font-mono">{r.body}</div>}
                   </td>
-                  <td className="px-5 py-4 text-xs text-[#bdb8c0] font-mono">
+                  <td className="px-5 py-4 text-xs text-[#7d8187] font-mono">
                     {r.departments?.name || 'General'}
                   </td>
                   <td className="px-5 py-4 text-xs font-mono">
-                    <span className="sentry-chip-violet">{priorityLabel(r.priority)}</span>
+                    <span className="px-2 py-0.5 rounded-full border border-white/20 text-white bg-white/5 text-[10px] uppercase">
+                      {priorityLabel(r.priority)}
+                    </span>
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge status={disp} />
                   </td>
-                  <td className="px-5 py-4 text-xs text-[#8b8496] font-mono">
+                  <td className="px-5 py-4 text-xs text-[#7d8187] font-mono">
                     {r.display_start ? new Date(r.display_start).toLocaleDateString() : 'Immediate'}
                     {r.display_end ? ` → ${new Date(r.display_end).toLocaleDateString()}` : ' (Continuous)'}
                   </td>
                   <td className="px-5 py-4 text-right">
                     {isWithdrawn ? (
-                      <span className="text-[11px] text-[#8b8496] italic font-mono">Withdrawn</span>
+                      <span className="text-[11px] text-[#7d8187] italic font-mono">Withdrawn</span>
                     ) : (
                       <button
                         onClick={() => withdraw(r)}
                         disabled={busy === r.id}
-                        className="sentry-btn-secondary text-[#fa5252] border-[#fa5252]/40 hover:bg-[#fa5252]/10 text-xs inline-flex items-center gap-1 cursor-pointer"
+                        className="px-3 py-1 rounded-full border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-mono inline-flex items-center gap-1 cursor-pointer transition-colors"
                       >
                         <Ban className="w-3.5 h-3.5" />
                         {busy === r.id ? 'Taking down…' : 'Take Down'}
@@ -149,7 +153,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
             })}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-5 py-12 text-center text-xs text-[#8b8496]">
+                <td colSpan={6} className="px-5 py-12 text-center text-xs text-[#7d8187]">
                   No announcements match the selected filter.
                 </td>
               </tr>
