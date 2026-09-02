@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CampusCast Kiosk</title>
+<title>CampusCast Screen Display</title>
 <style>
   :root { color-scheme: dark; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; background: #08080c; color: #fff; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  html, body { height: 100%; background: #1f1633; color: #fff; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
   
   #top-bar {
     position: fixed;
@@ -15,9 +15,9 @@
     left: 0;
     right: 0;
     height: 50px;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(21, 15, 35, 0.85);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid #362d59;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -29,17 +29,18 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 15px;
     letter-spacing: -0.02em;
+    color: #ffffff;
   }
 
   .pulse-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 10px #10b981;
+    background: #c2ef4e;
+    box-shadow: 0 0 10px #c2ef4e;
     animation: pulse 2s infinite;
   }
   
@@ -51,8 +52,8 @@
   #clock {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 14px;
-    font-weight: 600;
-    color: #94a3b8;
+    font-weight: 700;
+    color: #bdb8c0;
     letter-spacing: 0.05em;
   }
 
@@ -75,19 +76,19 @@
   }
 
   #stage.emergency { 
-    background: radial-gradient(circle at center, #991b1b 0%, #350505 100%);
+    background: radial-gradient(circle at center, #7f1d1d 0%, #1f1633 100%);
     animation: siren-pulse 2s infinite ease-in-out;
   }
 
   @keyframes siren-pulse {
-    0%, 100% { box-shadow: inset 0 0 80px rgba(239, 68, 68, 0.4); }
-    50% { box-shadow: inset 0 0 160px rgba(239, 68, 68, 0.9); }
+    0%, 100% { box-shadow: inset 0 0 80px rgba(250, 82, 82, 0.4); }
+    50% { box-shadow: inset 0 0 160px rgba(250, 82, 82, 0.9); }
   }
 
   #stage.emergency #kicker { 
     color: #fee2e2; 
-    background: rgba(220, 38, 38, 0.7);
-    border: 2px solid #ef4444;
+    background: rgba(250, 82, 82, 0.8);
+    border: 2px solid #fa5252;
     padding: 8px 24px;
     border-radius: 999px;
     font-weight: 800;
@@ -100,7 +101,7 @@
     max-height: 48vh; 
     object-fit: contain; 
     border-radius: 16px; 
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid #362d59;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); 
   }
 
@@ -109,11 +110,11 @@
     letter-spacing: .25em; 
     font-size: 1.5vh; 
     font-weight: 700;
-    color: #94a3b8; 
-    background: rgba(255, 255, 255, 0.05);
+    color: #c2ef4e; 
+    background: rgba(194, 239, 78, 0.1);
     padding: 6px 16px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(194, 239, 78, 0.35);
   }
 
   #title { 
@@ -122,13 +123,14 @@
     line-height: 1.15; 
     letter-spacing: -0.03em;
     max-width: 45ch;
+    color: #ffffff;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
   }
 
   #body { 
     font-size: 2.6vh; 
     max-width: 65ch; 
-    color: #cbd5e1; 
+    color: #bdb8c0; 
     white-space: pre-wrap; 
     line-height: 1.45;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
@@ -139,13 +141,13 @@
     bottom: 14px; 
     left: 24px; 
     font-size: 12px; 
-    color: #475569; 
+    color: #8b8496; 
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   }
 
   #idle { 
     font-size: 3.2vh; 
-    color: #64748b; 
+    color: #8b8496; 
     font-weight: 600; 
     display: flex;
     flex-direction: column;
@@ -155,8 +157,8 @@
 
   #sound-btn { 
     background: rgba(255, 255, 255, 0.08); 
-    border: 1px solid rgba(255, 255, 255, 0.15); 
-    color: #cbd5e1; 
+    border: 1px solid #362d59; 
+    color: #bdb8c0; 
     padding: 5px 12px; 
     border-radius: 8px; 
     font-size: 12px; 
@@ -174,14 +176,15 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: #362d59;
     z-index: 100;
     display: none;
   }
   #carousel-progress {
     height: 100%;
     width: 0%;
-    background: #0070f3;
+    background: #c2ef4e;
+    box-shadow: 0 0 10px rgba(194, 239, 78, 0.8);
     transition: width 0.1s linear;
   }
   #slide-pill {
@@ -189,12 +192,13 @@
     bottom: 14px;
     right: 24px;
     font-size: 11px;
-    color: #94a3b8;
+    color: #c2ef4e;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    background: rgba(255, 255, 255, 0.05);
+    font-weight: 700;
+    background: rgba(194, 239, 78, 0.1);
     padding: 3px 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(194, 239, 78, 0.35);
     display: none;
   }
 </style>
@@ -213,7 +217,7 @@
 <div id="stage">
   <div id="idle">
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
-    Connecting to Campus Network…
+    Connecting to Screen Network…
   </div>
 </div>
 
@@ -261,13 +265,13 @@
     if (audioEnabled) {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       btn.textContent = '🔊 Audio Alert: ON';
-      btn.style.color = '#10b981';
-      btn.style.borderColor = '#10b981';
-      btn.style.background = 'rgba(16, 185, 129, 0.15)';
+      btn.style.color = '#c2ef4e';
+      btn.style.borderColor = '#c2ef4e';
+      btn.style.background = 'rgba(194, 239, 78, 0.15)';
     } else {
       btn.textContent = '🔔 Audio Alert: OFF';
-      btn.style.color = '#cbd5e1';
-      btn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+      btn.style.color = '#bdb8c0';
+      btn.style.borderColor = '#362d59';
       btn.style.background = 'rgba(255, 255, 255, 0.08)';
     }
   }
@@ -377,7 +381,6 @@
       }
       const data = await res.json();
       
-      // Cache payload for offline resilience (Blueprint Part 28)
       try {
         localStorage.setItem('campuscast_cache_' + id, JSON.stringify(data));
       } catch (err) {}
@@ -403,10 +406,9 @@
         }
       }
 
-      meta.innerHTML = '<span style="color: #10b981;">● Online</span> • Node ' + id.slice(0, 8) + '… • Last Sync: ' + new Date().toLocaleTimeString() +
+      meta.innerHTML = '<span style="color: #c2ef4e; font-weight: bold;">● Online</span> • Node ' + id.slice(0, 8) + '… • Last Sync: ' + new Date().toLocaleTimeString() +
         (data.force_refresh ? ' • Refreshing' : '') + (data.reboot_requested ? ' • Rebooting' : '');
     } catch (e) {
-      // Offline fallback: load from local edge cache
       try {
         const cached = localStorage.getItem('campuscast_cache_' + id);
         if (cached) {
@@ -414,11 +416,11 @@
           const cachedPlaylist = cachedData.playlist || (cachedData.announcement ? [cachedData.announcement] : []);
           playlist = cachedPlaylist;
           startRotation();
-          meta.innerHTML = '<span style="color: #f59e0b;">⚡ Edge Cache Active (Offline)</span> • Last check: ' + new Date().toLocaleTimeString();
+          meta.innerHTML = '<span style="color: #f59e0b; font-weight: bold;">⚡ Edge Cache Active (Offline)</span> • Last check: ' + new Date().toLocaleTimeString();
           return;
         }
       } catch (err) {}
-      meta.innerHTML = '<span style="color: #ef4444;">● Disconnected</span> • Last attempt: ' + new Date().toLocaleTimeString();
+      meta.innerHTML = '<span style="color: #fa5252; font-weight: bold;">● Disconnected</span> • Last attempt: ' + new Date().toLocaleTimeString();
     }
   }
 
