@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Search, Plus, RefreshCw, Power, Cpu, ExternalLink, Radio } from 'lucide-react'
+import { Search, Plus, RefreshCw, Power, Cpu, ExternalLink, Radio, Loader2 } from 'lucide-react'
 import { deviceStatus, relativeTime, type DeviceStatus } from '@/lib/fleet'
 import { logAudit } from '@/lib/audit'
 
@@ -523,8 +523,15 @@ export function FleetMonitoringClient({
                 <button type="button" onClick={() => setRegisterOpen(false)} className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" disabled={saving} className="px-5 py-1.5 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 cursor-pointer disabled:opacity-50 transition-colors">
-                  {saving ? 'Saving…' : 'Register Node'}
+                <button type="submit" disabled={saving} className="px-5 py-1.5 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 cursor-pointer disabled:opacity-50 transition-colors inline-flex items-center gap-1.5">
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Registering…</span>
+                    </>
+                  ) : (
+                    <span>Register Node</span>
+                  )}
                 </button>
               </div>
             </form>

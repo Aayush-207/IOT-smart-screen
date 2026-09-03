@@ -7,7 +7,7 @@ import { logAudit } from '@/lib/audit'
 import { StatusBadge } from '@/components/StatusBadge'
 import { announcementDisplayStatus } from '@/lib/fleet'
 import { priorityLabel } from '@/lib/priority'
-import { Search, Ban } from 'lucide-react'
+import { Search, Ban, Loader2 } from 'lucide-react'
 
 export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; actorId: string }) {
   const [rows, setRows] = useState(initialRows)
@@ -141,10 +141,19 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                       <button
                         onClick={() => withdraw(r)}
                         disabled={busy === r.id}
-                        className="px-3 py-1 rounded-full border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-mono inline-flex items-center gap-1 cursor-pointer transition-colors"
+                        className="px-3 py-1 rounded-full border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-mono inline-flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50"
                       >
-                        <Ban className="w-3.5 h-3.5" />
-                        {busy === r.id ? 'Taking down…' : 'Take Down'}
+                        {busy === r.id ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Taking down…</span>
+                          </>
+                        ) : (
+                          <>
+                            <Ban className="w-3.5 h-3.5" />
+                            <span>Take Down</span>
+                          </>
+                        )}
                       </button>
                     )}
                   </td>

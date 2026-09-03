@@ -42,27 +42,27 @@ export default async function HodDashboardPage() {
   ])
 
   return (
-    <div className="space-y-8 max-w-5xl pb-16 text-white">
+    <div className="space-y-8 max-w-5xl pb-16 text-neutral-900 dark:text-white">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-[#212327]">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
               {department?.name || 'Department'}
             </span>
-            <span className="text-xs font-mono text-[#7d8187]">Approver Workspace</span>
+            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">Approver Workspace</span>
           </div>
-          <h1 className="xai-display-section text-white">
+          <h1 className="text-2xl font-normal tracking-tight text-neutral-900 dark:text-white">
             Department Overview
           </h1>
-          <p className="text-sm text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
             Review and authorize departmental submissions with automated policy verification before display node broadcasting.
           </p>
         </div>
 
         <Link
           href="/dashboard/hod/approvals"
-          className="px-5 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2 self-start sm:self-auto shrink-0"
+          className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 self-start sm:self-auto shrink-0 shadow-sm"
         >
           <CheckSquare className="w-3.5 h-3.5" /> Pending Approvals ({pending || 0})
         </Link>
@@ -70,62 +70,62 @@ export default async function HodDashboardPage() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-6 space-y-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">Pending Decisions</span>
-          <div className="text-3xl font-normal text-white">{pending || 0}</div>
-          <p className="text-xs text-[#7d8187] mt-1 font-mono">Awaiting your decision</p>
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400">Pending Decisions</span>
+          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{pending || 0}</div>
+          <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">Awaiting your decision</p>
         </div>
 
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-6 space-y-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400">Authorized &amp; Live</span>
-          <div className="text-3xl font-normal text-white">{approvedTotal || 0}</div>
-          <p className="text-xs text-[#7d8187] mt-1 font-mono">Active on screens</p>
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Authorized &amp; Live</span>
+          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{approvedTotal || 0}</div>
+          <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">Active on screens</p>
         </div>
 
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-6 space-y-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">Assigned Unit</span>
-          <div className="text-xl font-normal text-white truncate">{department?.name}</div>
-          <p className="text-xs text-[#7d8187] mt-1 font-mono">HOD Access Tier</p>
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Assigned Unit</span>
+          <div className="text-xl font-normal text-neutral-900 dark:text-white truncate">{department?.name}</div>
+          <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">HOD Access Tier</p>
         </div>
       </div>
 
       {/* Submissions Table */}
-      <div className="bg-[#141414] border border-[#212327] rounded-lg overflow-hidden">
-        <div className="p-5 border-b border-[#212327] flex items-center justify-between">
+      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl overflow-hidden shadow-sm">
+        <div className="p-5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-normal text-white">
+            <h2 className="text-sm font-medium text-neutral-900 dark:text-white">
               Recent Submissions
             </h2>
-            <p className="text-xs text-[#7d8187]">Notices submitted by students and faculty in your department</p>
+            <p className="text-xs text-neutral-500 dark:text-[#7d8187]">Notices submitted by students and faculty in your department</p>
           </div>
-          <Link href="/dashboard/hod/approvals" className="px-3 py-1 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono transition-colors">
+          <Link href="/dashboard/hod/approvals" className="px-3 py-1 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors">
             Open Queue &rarr;
           </Link>
         </div>
 
         {(!recentNotices || recentNotices.length === 0) ? (
-          <div className="p-12 text-center text-xs text-[#7d8187]">
+          <div className="p-12 text-center text-xs text-neutral-500 dark:text-[#7d8187]">
             No announcements submitted to your department yet.
           </div>
         ) : (
-          <table className="xai-table text-left text-sm">
+          <table className="w-full text-left text-sm">
             <thead>
-              <tr>
-                <th>Notice Title</th>
-                <th>Submitted By</th>
-                <th>Status</th>
-                <th className="text-right">Date</th>
+              <tr className="border-b border-neutral-200 dark:border-[#212327] text-neutral-400 dark:text-[#7d8187] text-[10px] uppercase tracking-wider font-mono">
+                <th className="py-3 px-4">Notice Title</th>
+                <th className="py-3 px-4">Submitted By</th>
+                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4 text-right">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#212327]">
+            <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
               {recentNotices.map((n: any) => (
-                <tr key={n.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-4 px-4 font-normal text-xs text-white">{n.title}</td>
-                  <td className="py-4 px-4 text-xs text-[#7d8187] font-mono">{n.profiles?.email}</td>
+                <tr key={n.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors">
+                  <td className="py-4 px-4 font-normal text-xs text-neutral-900 dark:text-white">{n.title}</td>
+                  <td className="py-4 px-4 text-xs text-neutral-500 dark:text-[#7d8187] font-mono">{n.profiles?.email}</td>
                   <td className="py-4 px-4">
                     <StatusBadge status={n.status} />
                   </td>
-                  <td className="py-4 px-4 text-xs text-[#7d8187] text-right font-mono">
+                  <td className="py-4 px-4 text-xs text-neutral-500 dark:text-[#7d8187] text-right font-mono">
                     {new Date(n.created_at).toLocaleDateString()}
                   </td>
                 </tr>

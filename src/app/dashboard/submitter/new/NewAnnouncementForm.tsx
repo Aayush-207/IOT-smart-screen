@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { UploadCloud, Eye, Monitor, Smartphone } from 'lucide-react'
+import { UploadCloud, Eye, Monitor, Smartphone, Loader2 } from 'lucide-react'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
 
@@ -440,17 +440,31 @@ export function NewAnnouncementForm({
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('approval')}
-              className="cohere-btn-primary"
+              className="cohere-btn-primary inline-flex items-center gap-2"
             >
-              {submitting === 'approval' ? 'Submitting…' : 'Submit for Approval'}
+              {submitting === 'approval' ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Submitting…</span>
+                </>
+              ) : (
+                <span>Submit for Approval</span>
+              )}
             </button>
             <button
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('draft')}
-              className="cohere-btn-secondary"
+              className="cohere-btn-secondary inline-flex items-center gap-1.5"
             >
-              {submitting === 'draft' ? 'Saving…' : 'Save Draft'}
+              {submitting === 'draft' ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Saving…</span>
+                </>
+              ) : (
+                <span>Save Draft</span>
+              )}
             </button>
           </div>
 

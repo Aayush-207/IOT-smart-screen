@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { logAudit } from '@/lib/audit'
 import { ClearEmergencyButton } from '@/components/ClearEmergencyButton'
 
@@ -262,9 +262,16 @@ export function EmergencyBroadcastClient({
                 type="button"
                 onClick={handleSend}
                 disabled={confirmText !== 'CONFIRM' || sending}
-                className="px-5 py-1.5 rounded-full bg-rose-600 text-white text-xs font-mono uppercase tracking-wider hover:bg-rose-500 disabled:opacity-50 cursor-pointer"
+                className="px-5 py-1.5 rounded-full bg-rose-600 text-white text-xs font-mono uppercase tracking-wider hover:bg-rose-500 disabled:opacity-50 cursor-pointer inline-flex items-center gap-2"
               >
-                {sending ? 'Transmitting…' : 'Execute Emergency Broadcast'}
+                {sending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Transmitting…</span>
+                  </>
+                ) : (
+                  <span>Execute Emergency Broadcast</span>
+                )}
               </button>
             </div>
           </div>

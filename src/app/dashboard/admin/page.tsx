@@ -50,20 +50,20 @@ export default async function AdminDashboardPage() {
   const healthRate = totalScreens > 0 ? Math.round((counts.online / totalScreens) * 100) : 0
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16 text-white">
+    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#212327]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
               Command Mesh
             </span>
-            <span className="text-xs font-mono text-[#7d8187]">Health Index: {healthRate}%</span>
+            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">Health Index: {healthRate}%</span>
           </div>
-          <h1 className="xai-display-section text-white">
+          <h1 className="text-2xl font-normal tracking-tight text-neutral-900 dark:text-white">
             System Overview &amp; Network
           </h1>
-          <p className="text-sm text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
             Central orchestration console for digital screen nodes, authorization queues, live mirror wall, and emergency broadcast overrides.
           </p>
         </div>
@@ -71,13 +71,13 @@ export default async function AdminDashboardPage() {
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/admin/fleet"
-            className="px-5 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2"
+            className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
           >
             <Monitor className="w-3.5 h-3.5" /> Screens &amp; Fleet ({totalScreens})
           </Link>
           <Link
             href="/dashboard/admin/emergency"
-            className="px-4 py-2 rounded-full border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-mono flex items-center gap-2 transition-colors"
+            className="px-4 py-2 rounded-full border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-mono flex items-center gap-2 transition-colors"
           >
             <AlertTriangle className="w-3.5 h-3.5" /> Emergency Alert
           </Link>
@@ -86,14 +86,14 @@ export default async function AdminDashboardPage() {
 
       {/* Active Emergency Alert Banner */}
       {(activeEmergencies || []).length > 0 && (
-        <div className="p-6 rounded-lg bg-rose-950/40 border border-rose-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+        <div className="p-6 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-full bg-rose-600 text-white shrink-0 animate-bounce">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-rose-400">Active Campus Emergency Broadcast</span>
-              <p className="text-sm text-white mt-0.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-rose-600 dark:text-rose-400">Active Campus Emergency Broadcast</span>
+              <p className="text-sm text-neutral-900 dark:text-white mt-0.5">
                 &ldquo;{activeEmergencies![0].body || activeEmergencies![0].title}&rdquo;
               </p>
             </div>
@@ -104,37 +104,37 @@ export default async function AdminDashboardPage() {
 
       {/* Telemetry Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400">Online</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Online</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <div className="text-3xl font-normal text-emerald-400">{counts.online}</div>
-          <p className="text-[10px] font-mono text-[#7d8187]">Active ping</p>
+          <div className="text-3xl font-normal text-emerald-600 dark:text-emerald-400">{counts.online}</div>
+          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">Active ping</p>
         </div>
 
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">Delayed Sync</span>
-          <div className="text-3xl font-normal text-amber-400">{counts.stale}</div>
-          <p className="text-[10px] font-mono text-[#7d8187]">Slow ping</p>
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400">Delayed Sync</span>
+          <div className="text-3xl font-normal text-amber-600 dark:text-amber-400">{counts.stale}</div>
+          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">Slow ping</p>
         </div>
 
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">Offline</span>
-          <div className="text-3xl font-normal text-white">{counts.offline}</div>
-          <p className="text-[10px] font-mono text-[#7d8187]">Unreachable</p>
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Offline</span>
+          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{counts.offline}</div>
+          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">Unreachable</p>
         </div>
 
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">Total Pending</span>
-          <div className="text-3xl font-normal text-white">{pendingApprovals || 0}</div>
-          <p className="text-[10px] font-mono text-[#7d8187]">All Units</p>
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Total Pending</span>
+          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{pendingApprovals || 0}</div>
+          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">All Units</p>
         </div>
 
-        <div className="bg-[#141414] border border-[#212327] rounded-lg p-5 space-y-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-400">Admin Reviews</span>
-          <div className="text-3xl font-normal text-amber-400">{criticalApprovals || 0}</div>
-          <Link href="/dashboard/admin/approvals" className="text-[10px] text-white hover:underline font-mono block">
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400">Admin Reviews</span>
+          <div className="text-3xl font-normal text-amber-600 dark:text-amber-400">{criticalApprovals || 0}</div>
+          <Link href="/dashboard/admin/approvals" className="text-[10px] text-neutral-900 dark:text-white hover:underline font-mono block">
             Review Now &rarr;
           </Link>
         </div>
@@ -145,38 +145,38 @@ export default async function AdminDashboardPage() {
         {!isEmergencyRole && (
           <Link
             href="/dashboard/admin/approvals"
-            className="px-4 py-1.5 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors inline-flex items-center gap-1.5"
+            className="px-4 py-1.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 shadow-sm"
           >
             <CheckSquare className="w-3.5 h-3.5" /> Urgent Approvals ({criticalApprovals || 0})
           </Link>
         )}
         <Link
           href="/dashboard/admin/wall"
-          className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <Tv className="w-3.5 h-3.5" /> Live Screen Wall
         </Link>
         <Link
           href="/dashboard/admin/fleet"
-          className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <Monitor className="w-3.5 h-3.5" /> Screen Fleet ({totalScreens})
         </Link>
         <Link
           href="/dashboard/admin/announcements"
-          className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <ListOrdered className="w-3.5 h-3.5" /> Broadcast Catalog
         </Link>
         <Link
           href="/dashboard/admin/analytics"
-          className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <BarChart3 className="w-3.5 h-3.5" /> Analytics &amp; Telemetry
         </Link>
         <Link
           href="/dashboard/admin/audit"
-          className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <ScrollText className="w-3.5 h-3.5" /> Activity Audit Log
         </Link>
@@ -184,13 +184,13 @@ export default async function AdminDashboardPage() {
 
       {/* Organization Hierarchy Section */}
       {!isEmergencyRole && (
-        <div className="pt-6 border-t border-[#212327]">
+        <div className="pt-6 border-t border-neutral-200 dark:border-[#212327]">
           <div className="mb-4">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">Governance</span>
-            <h2 className="text-base font-normal text-white">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Governance</span>
+            <h2 className="text-base font-medium text-neutral-900 dark:text-white">
               Departments &amp; Permissions
             </h2>
-            <p className="text-xs text-[#7d8187] mt-0.5">Assign department heads and manage system authorizations.</p>
+            <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-0.5">Assign department heads and manage system authorizations.</p>
           </div>
           <OrgManagementClient initialDepartments={departments || []} initialProfiles={profiles || []} />
         </div>

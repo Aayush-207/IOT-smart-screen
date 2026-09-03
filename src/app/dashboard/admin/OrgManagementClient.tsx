@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Users, LayoutDashboard, Plus } from 'lucide-react'
+import { Users, LayoutDashboard, Plus, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export function OrgManagementClient({
@@ -146,7 +146,17 @@ export function OrgManagementClient({
                 disabled={loading || !newDeptName.trim()}
                 className="px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                <Plus className="w-3.5 h-3.5" /> Add Department
+                {loading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Adding…</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Department</span>
+                  </>
+                )}
               </button>
             </form>
 

@@ -100,15 +100,15 @@ export function AppSidebar({
   const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User' }
 
   return (
-    <aside className="w-[260px] shrink-0 border-r border-[#212327] bg-[#0a0a0a] text-white flex flex-col h-screen sticky top-0 select-none z-30">
+    <aside className="w-[260px] shrink-0 border-r border-neutral-200 dark:border-[#212327] bg-[var(--canvas-inset)] dark:bg-[#0a0a0a] text-[var(--ink)] dark:text-white flex flex-col h-screen sticky top-0 select-none z-30">
       {/* Brand Header */}
-      <div className="p-5 border-b border-[#212327] flex items-center justify-between shrink-0">
+      <div className="p-5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between shrink-0">
         <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-8 h-8 rounded-full border border-white/20 bg-white/5 text-white flex items-center justify-center font-mono font-bold text-sm group-hover:border-white transition-colors">
+          <div className="w-8 h-8 rounded-full border border-neutral-300 dark:border-white/20 bg-neutral-200 dark:bg-white/5 text-[var(--ink)] dark:text-white flex items-center justify-center font-mono font-bold text-sm group-hover:border-neutral-400 dark:group-hover:border-white transition-colors">
             X
           </div>
           <div>
-            <div className="text-sm font-normal tracking-tight text-white flex items-center gap-1.5">
+            <div className="text-sm font-normal tracking-tight text-[var(--ink)] dark:text-white flex items-center gap-1.5">
               CampusCast
             </div>
             <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#7d8187]">Display Mesh</div>
@@ -117,12 +117,12 @@ export function AppSidebar({
       </div>
 
       {/* Role Pill Banner */}
-      <div className="px-5 py-3 border-b border-[#212327] bg-[#141414] flex items-center justify-between shrink-0">
+      <div className="px-5 py-3 border-b border-neutral-200 dark:border-[#212327] bg-neutral-100 dark:bg-[#141414] flex items-center justify-between shrink-0">
         <div>
-          <span className="font-normal text-xs text-white block leading-tight">{roleInfo.title}</span>
+          <span className="font-normal text-xs text-[var(--ink)] dark:text-white block leading-tight">{roleInfo.title}</span>
           <span className="text-[10px] text-[#7d8187] font-mono">{roleInfo.tag}</span>
         </div>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-white border border-white/20 px-2 py-0.5 rounded-full bg-white/5">
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-[var(--ink)] dark:text-white border border-neutral-300 dark:border-white/20 px-2 py-0.5 rounded-full bg-neutral-200 dark:bg-white/5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ACTIVE
         </span>
       </div>
@@ -142,19 +142,19 @@ export function AppSidebar({
               href={item.href}
               className={`flex items-center justify-between px-3.5 py-2 rounded-full text-xs transition-all ${
                 isActive
-                  ? 'bg-white text-[#0a0a0a] font-medium shadow-sm'
-                  : 'text-[#dadbdf] hover:text-white hover:bg-[#141414]'
+                  ? 'bg-neutral-800 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-sm'
+                  : 'text-neutral-500 dark:text-[#dadbdf] hover:text-[var(--ink)] dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-[#141414]'
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#0a0a0a]' : 'text-[#7d8187]'}`} />
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white dark:text-[#0a0a0a]' : 'text-neutral-400 dark:text-[#7d8187]'}`} />
                 <span className="truncate">{item.label}</span>
               </div>
 
               {!!item.badge && item.badge > 0 && (
                 <span
                   className={`text-[10px] font-mono px-2 py-0.2 rounded-full ${
-                    isActive ? 'bg-[#0a0a0a] text-white' : 'bg-white/10 text-white border border-white/20'
+                    isActive ? 'bg-white dark:bg-[#0a0a0a] text-[var(--ink)] dark:text-white' : 'bg-neutral-200 dark:bg-white/10 text-[var(--ink)] dark:text-white border border-neutral-300 dark:border-white/20'
                   }`}
                 >
                   {item.badge}
@@ -178,10 +178,10 @@ export function AppSidebar({
       </nav>
 
       {/* User Footer Profile */}
-      <div className="p-4 border-t border-[#212327] bg-[#141414] space-y-3 shrink-0">
+      <div className="p-4 border-t border-neutral-200 dark:border-[#212327] bg-neutral-100 dark:bg-[#141414] space-y-3 shrink-0">
         <div className="flex items-center justify-between text-xs">
           <div className="min-w-0 pr-2">
-            <p className="font-normal text-white truncate text-[11px]" title={userEmail}>
+            <p className="font-normal text-[var(--ink)] dark:text-white truncate text-[11px]" title={userEmail}>
               {userEmail}
             </p>
             <p className="text-[10px] text-[#7d8187] font-mono uppercase tracking-wider">{role}</p>
@@ -191,13 +191,13 @@ export function AppSidebar({
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            className="p-1.5 rounded-full border border-[#212327] bg-[#0a0a0a] text-[#7d8187] hover:text-white cursor-pointer transition-colors"
+            className="p-1.5 rounded-full border border-neutral-300 dark:border-[#212327] bg-white dark:bg-[#0a0a0a] text-neutral-500 dark:text-[#7d8187] hover:text-[var(--ink)] dark:hover:text-white cursor-pointer transition-colors"
           >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-white" /> : <Moon className="w-3.5 h-3.5" />}
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-white" /> : <Moon className="w-3.5 h-3.5 text-[var(--ink)]" />}
           </button>
         </div>
 
-        <div className="pt-1 border-t border-[#212327]">
+        <div className="pt-1 border-t border-neutral-200 dark:border-[#212327]">
           <LogoutButton />
         </div>
       </div>

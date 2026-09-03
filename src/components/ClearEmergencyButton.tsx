@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { ShieldCheck } from 'lucide-react'
+import { ShieldCheck, Loader2 } from 'lucide-react'
 import { logAudit } from '@/lib/audit'
 
 export function ClearEmergencyButton({
@@ -69,8 +69,12 @@ export function ClearEmergencyButton({
         'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-all disabled:opacity-50 cursor-pointer shadow-sm'
       }
     >
-      <ShieldCheck className="w-4 h-4" />
-      {busy ? 'Clearing…' : 'Clear Emergency & Resume'}
+      {busy ? (
+        <Loader2 className="w-4 h-4 animate-spin text-neutral-800" />
+      ) : (
+        <ShieldCheck className="w-4 h-4" />
+      )}
+      {busy ? 'Clearing Broadcast…' : 'Clear Emergency & Resume'}
     </button>
   )
 }
