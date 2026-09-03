@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { UploadCloud, Eye, Monitor, Smartphone, Loader2 } from 'lucide-react'
+import { UploadCloud, Eye, Monitor, Smartphone, Loader2, Building2, Clock } from 'lucide-react'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
 
@@ -543,6 +543,60 @@ export function NewAnnouncementForm({
                 </div>
               </>
             )}
+          </div>
+
+          {/* Live Configuration Details */}
+          <div className="mt-5 pt-4 border-t border-[var(--hairline)] dark:border-white/10 space-y-2.5">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--slate)] dark:text-neutral-400">
+              Dispatch Specifications
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 text-xs">
+              {/* Department */}
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--border-light)] dark:border-white/5">
+                <div className="flex items-center gap-2 text-[var(--slate)] dark:text-neutral-400">
+                  <Building2 className="w-3.5 h-3.5 text-[var(--link)]" />
+                  <span className="text-[11px] font-medium">Department</span>
+                </div>
+                <span className="text-[11px] font-mono font-medium text-[var(--ink)] dark:text-white truncate max-w-[150px]">
+                  {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'}
+                </span>
+              </div>
+
+              {/* Screens Selected */}
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--border-light)] dark:border-white/5">
+                <div className="flex items-center gap-2 text-[var(--slate)] dark:text-neutral-400">
+                  <Monitor className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-[11px] font-medium">Screens Selected</span>
+                </div>
+                <span className="text-[11px] font-mono font-medium text-[var(--ink)] dark:text-white text-right">
+                  {targetZones.length > 0 ? (
+                    <span className="text-emerald-600 dark:text-emerald-400">
+                      {targetZones.length} node{targetZones.length > 1 ? 's' : ''} ({targetZones.join(', ')})
+                    </span>
+                  ) : (
+                    <span className="text-amber-600 dark:text-amber-400">0 selected</span>
+                  )}
+                </span>
+              </div>
+
+              {/* Duration / Schedule */}
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--border-light)] dark:border-white/5">
+                <div className="flex items-center gap-2 text-[var(--slate)] dark:text-neutral-400">
+                  <Clock className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-[11px] font-medium">Duration</span>
+                </div>
+                <span className="text-[11px] font-mono font-medium text-[var(--ink)] dark:text-white text-right">
+                  {displayStart ? (
+                    <span>
+                      {displayStart.replace('T', ' ')} {displayEnd ? `→ ${displayEnd.replace('T', ' ')}` : '(Permanent)'}
+                    </span>
+                  ) : (
+                    <span className="text-neutral-500 dark:text-neutral-400">Immediate</span>
+                  )}
+                </span>
+              </div>
+            </div>
           </div>
 
           <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400 mt-4 leading-relaxed">
