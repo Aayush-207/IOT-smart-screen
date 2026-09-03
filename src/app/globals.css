@@ -414,3 +414,29 @@ body {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+@keyframes slideOutLeft {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.poster-slide-exit-left {
+  animation: slideOutLeft 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.poster-slide-enter-right {
+  animation: slideInRight 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

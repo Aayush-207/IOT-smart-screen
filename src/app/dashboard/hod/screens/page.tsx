@@ -32,15 +32,15 @@ export default async function HodScreensPage() {
     .select('id, title, body, priority, attachment_url, display_start, display_end, target_zones, target_all')
     .eq('department_id', profile.department_id)
     .eq('status', 'approved')
-    .neq('id', '56eac04b-54b5-4e0f-bc71-2c7c8fa90613') // Filter out SIH notice as requested
+    .neq('status', 'withdrawn')
     .or(`display_end.is.null,display_end.gt.${nowIso}`)
     .order('created_at', { ascending: false })
 
-  // Helper to determine if an announcement targets a specific screen
-  const getActiveContentForScreen = (screen: { name: string; zone: string }) => {
-    if (!announcements || announcements.length === 0) return null
+  // Helper to determine all announcements targeting a specific screen
+  const getActiveContentsForScreen = (screen: { name: string; zone: string }) => {
+    if (!announcements || announcements.length === 0) return []
 
-    const match = announcements.find((a) => {
+    const matches = announcements.filter((a) => {
       // If broadcasted to all screens
       if (a.target_all) return true
 
@@ -60,19 +60,18 @@ export default async function HodScreensPage() {
       return false
     })
 
-    if (!match) return null
-
-    return {
+    return matches.map((match) => ({
+      id: match.id,
       title: match.title,
       body: match.body,
       attachment_url: match.attachment_url,
       display_start: match.display_start,
       display_end: match.display_end,
       priority: match.priority,
-    }
+    }))
   }
 
-  // The 3 screens with their hardware specs and content strictly filtered by submitter selection
+  // The 3 screens with all matching announcements for 4-second timed rotation
   const screens = [
     {
       id: 'screen-1',
@@ -81,7 +80,7 @@ export default async function HodScreensPage() {
       zone: 'Engineering Wing',
       resolution: '1920x1080 (16:9)',
       orientation: 'landscape' as const,
-      activeContent: getActiveContentForScreen({ name: 'Main Lobby Screen 01', zone: 'Engineering Wing' }),
+      contents: getActiveContentsForScreen({ name: 'Main Lobby Screen 01', zone: 'Engineering Wing' }),
     },
     {
       id: 'screen-2',
@@ -90,7 +89,7 @@ export default async function HodScreensPage() {
       zone: 'Library Atrium',
       resolution: '1920x1080 (16:9)',
       orientation: 'landscape' as const,
-      activeContent: getActiveContentForScreen({ name: 'Library Entrance Node', zone: 'Library Atrium' }),
+      contents: getActiveContentsForScreen({ name: 'Library Entrance Node', zone: 'Library Atrium' }),
     },
     {
       id: 'screen-3',
@@ -99,7 +98,7 @@ export default async function HodScreensPage() {
       zone: 'Student Cafeteria',
       resolution: '1920x1080 (16:9)',
       orientation: 'landscape' as const,
-      activeContent: getActiveContentForScreen({ name: 'Cafeteria Kiosk Display', zone: 'Student Cafeteria' }),
+      contents: getActiveContentsForScreen({ name: 'Cafeteria Kiosk Display', zone: 'Student Cafeteria' }),
     },
   ]
 
