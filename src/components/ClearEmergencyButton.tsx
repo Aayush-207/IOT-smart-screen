@@ -6,10 +6,6 @@ import { useRouter } from 'next/navigation'
 import { ShieldCheck } from 'lucide-react'
 import { logAudit } from '@/lib/audit'
 
-// "Clear Emergency" (blueprint Part 15) — usable by the Emergency Authority who
-// triggered it OR a Campus Admin. Ends every still-active emergency broadcast
-// by setting its display_end to now, and logs the action. RLS
-// `campuscast_announcements_update_admin` already covers both roles.
 export function ClearEmergencyButton({
   actorId,
   className = '',
@@ -70,11 +66,11 @@ export function ClearEmergencyButton({
       disabled={busy}
       className={
         className ||
-        'inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50'
+        'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-all disabled:opacity-50 cursor-pointer shadow-sm'
       }
     >
       <ShieldCheck className="w-4 h-4" />
-      {busy ? 'Clearing…' : 'Clear Emergency'}
+      {busy ? 'Clearing…' : 'Clear Emergency & Resume'}
     </button>
   )
 }

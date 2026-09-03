@@ -21,7 +21,6 @@ export function ApprovalQueueClient({
   const [loading, setLoading] = useState(false)
   const [rejectTarget, setRejectTarget] = useState<any | null>(null)
   const [rejectReason, setRejectReason] = useState('')
-  const [viewTarget, setViewTarget] = useState<any | null>(null)
   const [previewTarget, setPreviewTarget] = useState<any | null>(null)
 
   const supabase = createClient()
@@ -93,120 +92,83 @@ export function ApprovalQueueClient({
   const REJECT_PRESETS = [
     'Missing exact date, time, or venue',
     'Low resolution poster / flier image',
-    'Inappropriate phrasing / needs sentence case',
-    'Event not approved by department dean',
+    'Inappropriate phrasing / formatting needed',
+    'Event not approved by department faculty',
     'Duplicate or outdated submission',
   ]
 
-  const [query, setQuery] = useState('')
-
-  const filtered = requests.filter((r) => {
-    if (!query) return true
-    const haystack = `${r.title} ${r.body || ''} ${r.profiles?.email || ''}`.toLowerCase()
-    return haystack.includes(query.toLowerCase())
-  })
-
   return (
-    <>
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--hairline)] mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-coral">Review Terminal</span>
-            <span className="text-xs font-mono text-[var(--mute)]">{requests.length} Awaiting Authorization</span>
-          </div>
-          <h1 className="cohere-display-product text-[var(--ink)]">
-            Department Approval Queue
-          </h1>
-          <p className="text-sm text-[var(--slate)] max-w-xl mt-1.5 leading-relaxed">
-            Verify announcements submitted by department members. Inspect automated AI policy advisories, verify target display windows, and approve or reject submissions.
-          </p>
-        </div>
-
-        {requests.length > 0 && (
-          <div className="w-full sm:w-64">
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search pending submissions..."
-              className="w-full px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
-            />
-          </div>
-        )}
-      </div>
-
+    <div className="space-y-6 text-white">
       {requests.length === 0 ? (
-        <div className="p-16 text-center border border-[var(--hairline)] rounded-2xl bg-[var(--canvas-stone)]/30 text-[var(--slate)]">
-          <CheckCircle className="w-8 h-8 mx-auto mb-3 text-[var(--cohere-deep-green)] opacity-70" />
-          <h3 className="text-sm font-semibold text-[var(--ink)]">All Submissions Reviewed</h3>
-          <p className="text-xs max-w-sm mx-auto mt-1">
-            No pending announcements awaiting authorization for your department.
+        <div className="p-12 text-center bg-[#141414] border border-[#212327] rounded-lg space-y-3">
+          <div className="w-10 h-10 rounded-full bg-white/5 border border-[#212327] flex items-center justify-center mx-auto text-white">
+            <CheckCircle className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-normal text-white">All Caught Up</h3>
+          <p className="text-xs text-[#7d8187] max-w-sm mx-auto">
+            There are no pending submissions in your department queue right now.
           </p>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="p-12 text-center border border-[var(--hairline)] rounded-2xl bg-[var(--canvas-stone)]/30 text-[var(--slate)]">
-          <p className="text-xs">No announcements match &ldquo;{query}&rdquo;.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filtered.map((req) => (
-            <div key={req.id} className="p-6 rounded-2xl border border-[var(--border-light)] bg-[var(--canvas)] space-y-4">
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <h3 className="font-semibold text-base text-[var(--ink)]">{req.title}</h3>
-                  <p className="text-xs text-[var(--mute)] font-mono mt-1">
-                    {req.profiles?.email} &middot; submitted {new Date(req.created_at).toLocaleString()}
-                  </p>
+        <div className="grid grid-cols-1 gap-4">
+          {requests.map((req) => (
+            <div
+              key={req.id}
+              className="bg-[#141414] border border-[#212327] rounded-lg p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-white/30 transition-colors"
+            >
+              <div className="space-y-3 flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+                    {priorityLabel(req.priority)}
+                  </span>
+                  <span className="text-xs font-mono text-[#7d8187]">
+                    By {req.profiles?.email || 'Student/Faculty'}
+                  </span>
+                  <span className="text-[10px] text-[#7d8187] font-mono">
+                    &bull; {new Date(req.created_at).toLocaleDateString()}
+                  </span>
                 </div>
-                <span className={`cohere-mono-label px-2.5 py-1 rounded-lg ${
-                  req.priority === 'timesensitive'
-                    ? 'cohere-chip-blue'
-                    : req.priority === 'critical'
-                    ? 'cohere-chip-coral'
-                    : 'border border-[var(--hairline)] bg-[var(--canvas-stone)] text-[var(--slate)]'
-                }`}>
-                  {priorityLabel(req.priority)}
-                </span>
-              </div>
 
-              <p className="text-xs text-[var(--body)] leading-relaxed">
-                {req.body || <em className="text-[var(--mute)]">No message body provided.</em>}
-              </p>
+                <div>
+                  <h3 className="text-base font-normal text-white truncate">{req.title}</h3>
+                  {req.body && (
+                    <p className="text-xs text-[#dadbdf] line-clamp-2 mt-1 leading-relaxed font-normal">
+                      {req.body}
+                    </p>
+                  )}
+                </div>
 
-              {req.ai_advisory && <div><AiAdvisoryPanel advisory={req.ai_advisory} /></div>}
-
-              <div className="text-xs text-[var(--slate)] bg-[var(--canvas-stone)]/50 border border-[var(--hairline)] rounded-lg p-3 flex flex-wrap items-center gap-3 font-mono text-[11px]">
-                <span><b>TARGETS:</b> {req.target_all ? 'All Campus Screens' : (req.target_zones || []).join(', ') || '—'}</span>
-                {req.display_start && (
-                  <>
-                    <span className="text-[var(--hairline)]">&bull;</span>
-                    <span>
-                      <b>WINDOW:</b> {new Date(req.display_start).toLocaleDateString()}
-                      {req.display_end && ` – ${new Date(req.display_end).toLocaleDateString()}`}
-                    </span>
-                  </>
+                {req.advisory_checks && (
+                  <div className="pt-1">
+                    <AiAdvisoryPanel advisory={req.advisory_checks} />
+                  </div>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-[var(--hairline)]">
+              {/* Actions & Simulator */}
+              <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch sm:items-center gap-2 shrink-0">
                 <button
+                  type="button"
+                  onClick={() => setPreviewTarget(req)}
+                  className="px-4 py-2 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <Eye className="w-3.5 h-3.5" /> Simulator
+                </button>
+                <button
+                  type="button"
                   disabled={loading}
                   onClick={() => handleApprove(req)}
-                  className="cohere-btn-primary text-xs"
+                  className="px-4 py-2 rounded-full bg-white text-[#0a0a0a] hover:bg-neutral-200 text-xs font-medium inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
                 >
-                  <CheckCircle className="w-3.5 h-3.5" /> Approve for Broadcast
+                  <CheckCircle className="w-3.5 h-3.5" /> Approve
                 </button>
                 <button
+                  type="button"
                   disabled={loading}
                   onClick={() => setRejectTarget(req)}
-                  className="cohere-btn-pill-outline border-rose-300 text-rose-700 dark:text-rose-400 hover:bg-rose-50 text-xs"
+                  className="px-4 py-2 rounded-full border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
                 >
-                  <XCircle className="w-3.5 h-3.5 text-rose-600" /> Reject Submission
-                </button>
-                <button
-                  onClick={() => setPreviewTarget(req)}
-                  className="cohere-btn-secondary text-xs ml-auto"
-                >
-                  <Eye className="w-3.5 h-3.5 text-[var(--cohere-action-blue)]" /> Billboard Simulator &rarr;
+                  <XCircle className="w-3.5 h-3.5" /> Reject
                 </button>
               </div>
             </div>
@@ -214,21 +176,37 @@ export function ApprovalQueueClient({
         </div>
       )}
 
+      {/* Reject Modal */}
       {rejectTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-[var(--canvas-elevated)] rounded-2xl border border-[var(--hairline)] p-6 w-full max-w-lg floating-shadow">
-            <h3 className="text-lg font-bold text-[var(--ink)] mb-1">Reject &ldquo;{rejectTarget.title}&rdquo;</h3>
-            <p className="text-xs text-[var(--mute)] mb-3">Provide feedback so the submitter can fix and resubmit.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#141414] rounded-xl border border-[#212327] p-6 w-full max-w-lg space-y-4 shadow-2xl text-white">
+            <div className="flex justify-between items-center border-b border-[#212327] pb-3">
+              <h3 className="text-sm font-normal text-white">Reject Announcement</h3>
+              <button
+                type="button"
+                onClick={() => setRejectTarget(null)}
+                className="p-1 rounded-full text-[#7d8187] hover:text-white hover:bg-white/10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            <div className="mb-3">
-              <span className="text-[10px] uppercase font-bold text-[var(--mute)] block mb-1.5">Quick Reason Presets:</span>
+            <p className="text-xs text-[#dadbdf]">
+              Provide feedback for <strong className="text-white">&ldquo;{rejectTarget.title}&rdquo;</strong>. The submitter will see this reason to revise their notice.
+            </p>
+
+            {/* Quick Reason Presets */}
+            <div>
+              <label className="text-[10px] uppercase font-mono tracking-wider text-[#7d8187] block mb-1.5">
+                Quick Reason Presets:
+              </label>
               <div className="flex flex-wrap gap-1.5">
                 {REJECT_PRESETS.map((preset) => (
                   <button
                     key={preset}
                     type="button"
                     onClick={() => setRejectReason(preset)}
-                    className="px-2.5 py-1 rounded-lg border border-[var(--hairline)] text-[11px] text-[var(--body)] hover:text-[var(--ink)] hover:bg-[var(--canvas-inset)] cursor-pointer text-left"
+                    className="px-2.5 py-1 rounded-full border border-[#212327] bg-[#0a0a0a] text-[10px] font-mono text-[#dadbdf] hover:border-white/40 cursor-pointer transition-colors"
                   >
                     {preset}
                   </button>
@@ -236,24 +214,32 @@ export function ApprovalQueueClient({
               </div>
             </div>
 
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              rows={3}
-              placeholder="e.g. missing exact venue or date — resubmit"
-              className="w-full p-3 bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-xl text-sm text-[var(--ink)] focus:outline-none focus:border-rose-500 mb-4"
-            />
-            <div className="flex gap-2.5 justify-end">
+            <div>
+              <label className="text-[10px] uppercase font-mono tracking-wider text-[#7d8187] block mb-1">
+                Custom Feedback Note <span className="text-rose-400">*</span>
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Explain what changes are needed before this can be approved..."
+                rows={3}
+                className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-white leading-relaxed"
+              />
+            </div>
+
+            <div className="flex gap-2.5 justify-end pt-2 border-t border-[#212327]">
               <button
-                onClick={() => { setRejectTarget(null); setRejectReason('') }}
-                className="px-4 py-2 text-xs font-semibold text-[var(--mute)] hover:text-[var(--ink)] cursor-pointer"
+                type="button"
+                onClick={() => setRejectTarget(null)}
+                className="px-4 py-1.5 rounded-full border border-white/20 text-white hover:bg-white/5 text-xs font-mono cursor-pointer"
               >
                 Cancel
               </button>
               <button
-                onClick={handleReject}
+                type="button"
                 disabled={loading || !rejectReason.trim()}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+                onClick={handleReject}
+                className="px-5 py-1.5 rounded-full bg-rose-600 text-white text-xs font-mono uppercase tracking-wider hover:bg-rose-500 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? 'Rejecting…' : 'Confirm Rejection'}
               </button>
@@ -262,35 +248,7 @@ export function ApprovalQueueClient({
         </div>
       )}
 
-      {viewTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setViewTarget(null)}>
-          <div className="bg-[var(--canvas-elevated)] rounded-xl border border-[var(--hairline)] p-6 w-full max-w-lg floating-shadow" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-semibold text-[var(--ink)]">{viewTarget.title}</h3>
-              <button onClick={() => setViewTarget(null)} className="text-[var(--mute)] hover:text-[var(--ink)]">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            {viewTarget.attachment_url && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={viewTarget.attachment_url} alt="Attachment" className="w-full max-h-64 object-contain rounded-lg border border-[var(--hairline)] mb-4" />
-            )}
-            <p className="text-sm text-[var(--body)] whitespace-pre-wrap mb-4">{viewTarget.body || 'No message body.'}</p>
-            <AiAdvisoryPanel advisory={viewTarget.ai_advisory} />
-            <div className="text-xs text-[var(--mute)] space-y-1 border-t border-[var(--hairline)] pt-3 mt-3">
-              <div>Submitted by: {viewTarget.profiles?.email}</div>
-              <div>Priority: {priorityLabel(viewTarget.priority)}</div>
-              <div>Targets: {viewTarget.target_all ? 'All Screens' : (viewTarget.target_zones || []).join(', ') || '—'}</div>
-              {viewTarget.display_start && (
-                <div>
-                  Window: {new Date(viewTarget.display_start).toLocaleString()} &ndash;{' '}
-                  {viewTarget.display_end ? new Date(viewTarget.display_end).toLocaleString() : 'open'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Billboard Simulator Modal */}
       {previewTarget && (
         <BillboardPreviewModal
           isOpen={!!previewTarget}
@@ -302,6 +260,6 @@ export function ApprovalQueueClient({
           attachmentUrl={previewTarget.attachment_url}
         />
       )}
-    </>
+    </div>
   )
 }

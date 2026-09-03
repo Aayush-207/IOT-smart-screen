@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, ScrollText } from 'lucide-react'
 
 export function AuditLogClient({ rows }: { rows: any[] }) {
   const [query, setQuery] = useState('')
@@ -50,121 +50,125 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
   }
 
   const getActionBadgeClass = (act: string) => {
-    if (act.includes('emergency')) return 'bg-rose-500/10 text-rose-600 border-rose-500/20 font-bold'
-    if (act.includes('reject') || act.includes('withdrew')) return 'bg-rose-500/10 text-rose-600 border-rose-500/20'
-    if (act.includes('approve')) return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-    if (act.includes('refresh') || act.includes('reboot')) return 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20'
-    return 'bg-[var(--canvas-inset)] text-[var(--mute)] border-[var(--hairline)]'
+    if (act.includes('emergency')) return 'border border-rose-500/50 bg-rose-950/30 text-rose-400'
+    if (act.includes('reject') || act.includes('withdrew')) return 'border border-rose-500/30 text-rose-400 bg-rose-950/20'
+    if (act.includes('approve')) return 'border border-emerald-500/40 text-emerald-400 bg-emerald-950/20'
+    if (act.includes('refresh') || act.includes('reboot')) return 'border border-white/20 text-white bg-white/5'
+    return 'border border-[#212327] bg-[#0a0a0a] text-[#7d8187]'
   }
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--hairline)]">
+    <div className="space-y-8 max-w-6xl pb-16 text-white">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#212327]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-green">Immutable Ledger</span>
-            <span className="text-xs font-mono text-[var(--mute)]">{filtered.length} Events Tracked</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+              Append-Only Ledger
+            </span>
+            <span className="text-xs font-mono text-[#7d8187]">{filtered.length} Events Tracked</span>
           </div>
-          <h1 className="cohere-display-product text-[var(--ink)]">
-            System Event &amp; Compliance Audit
+          <h1 className="xai-display-section text-white flex items-center gap-3">
+            <ScrollText className="w-5 h-5 text-white" /> System Activity &amp; Audit Log
           </h1>
-          <p className="text-sm text-[var(--slate)] max-w-xl mt-1.5 leading-relaxed">
-            Cryptographic, append-only operational record of all administrative authorizations, priority overrides, and hardware device mutations.
+          <p className="text-sm text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+            Append-only telemetry of all approvals, emergency overrides, and display configuration changes.
           </p>
         </div>
         <button
           type="button"
           onClick={exportCsv}
-          className="cohere-btn-pill-outline flex items-center gap-2 self-start md:self-auto shrink-0"
+          className="px-5 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center gap-2 self-start md:self-auto shrink-0 cursor-pointer"
         >
-          <Download className="w-3.5 h-3.5 text-[var(--cohere-action-blue)]" /> Export CSV ({filtered.length})
+          <Download className="w-3.5 h-3.5" /> Export CSV ({filtered.length})
         </button>
       </div>
 
       {/* Filter toolbar */}
-      <div className="p-4 rounded-xl border border-[var(--hairline)] bg-[var(--canvas-stone)]/30 space-y-3">
+      <div className="p-4 rounded-lg border border-[#212327] bg-[#141414] space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search keywords..."
-            className="px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
           />
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
           />
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
           />
           <select
             value={actor}
             onChange={(e) => setActor(e.target.value)}
-            className="px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
           >
             <option value="all">All Actors ({actors.length})</option>
-            {actors.map((a: string) => (
+            {actors.map((a) => (
               <option key={a} value={a}>{a}</option>
             ))}
           </select>
           <select
             value={action}
             onChange={(e) => setAction(e.target.value)}
-            className="px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)] capitalize"
+            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
           >
             <option value="all">All Actions ({actions.length})</option>
-            {actions.map((act: string) => (
+            {actions.map((act) => (
               <option key={act} value={act}>{act.replace(/_/g, ' ')}</option>
             ))}
           </select>
         </div>
       </div>
 
-      <div className="border-t border-[var(--hairline)]">
-        <table className="research-table text-left text-sm">
+      <div className="bg-[#141414] border border-[#212327] rounded-lg overflow-hidden">
+        <table className="xai-table text-left text-sm">
           <thead>
-            <tr className="border-b border-[var(--hairline)] text-[var(--mute)] font-mono text-[10px] uppercase tracking-wider">
-              <th className="py-3 px-2 font-semibold">Timestamp</th>
-              <th className="py-3 px-2 font-semibold">Actor</th>
-              <th className="py-3 px-2 font-semibold">Action</th>
-              <th className="py-3 px-2 font-semibold">Target Entity</th>
-              <th className="py-3 px-2 font-semibold">Details &amp; Metadata</th>
+            <tr>
+              <th>Timestamp</th>
+              <th>Actor</th>
+              <th>Action</th>
+              <th>Target Type</th>
+              <th>Target Identifier / Name</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--hairline)]">
+          <tbody className="divide-y divide-[#212327]">
             {filtered.map((r) => (
-              <tr key={r.id} className="hover:bg-[var(--canvas-stone)]/30 transition-colors">
-                <td className="py-4 px-2 text-xs text-[var(--mute)] font-mono whitespace-nowrap">
+              <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
+                <td className="px-5 py-3 text-xs text-[#7d8187] font-mono whitespace-nowrap">
                   {new Date(r.created_at).toLocaleString()}
                 </td>
-                <td className="py-4 px-2 text-xs font-mono text-[var(--ink)] font-medium">
-                  {r.profiles?.email || <span className="text-[var(--mute)]">System / Engine</span>}
+                <td className="px-5 py-3 text-xs text-white font-mono">
+                  {r.profiles?.email || <span className="text-[#7d8187]">System Daemon</span>}
                 </td>
-                <td className="py-4 px-2">
-                  <span className={`inline-flex px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-semibold uppercase tracking-wider border ${getActionBadgeClass(r.action)}`}>
+                <td className="px-5 py-3 text-xs font-mono">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-mono ${getActionBadgeClass(r.action)}`}>
                     {r.action.replace(/_/g, ' ')}
                   </span>
                 </td>
-                <td className="py-4 px-2 text-xs text-[var(--slate)] font-mono">
-                  {r.target_type && <span className="text-[10px] text-[var(--mute)] uppercase mr-1">{r.target_type}:</span>}
-                  <span className="font-semibold text-[var(--ink)]">{r.target_label || r.target_id || '—'}</span>
+                <td className="px-5 py-3 text-xs text-[#7d8187] font-mono uppercase">
+                  {r.target_type || '—'}
                 </td>
-                <td className="py-4 px-2 text-xs text-[var(--slate)] max-w-xs truncate font-mono text-[11px]">
-                  {r.metadata && Object.keys(r.metadata).length > 0
-                    ? JSON.stringify(r.metadata)
-                    : <span className="text-[var(--faint)]">—</span>}
+                <td className="px-5 py-3 text-xs font-normal text-white">
+                  <div>{r.target_label || r.target_id || '—'}</div>
+                  {r.metadata && typeof r.metadata === 'object' && 'reason' in r.metadata && (
+                    <div className="text-[10px] text-rose-400 font-mono mt-0.5">
+                      Reason: &ldquo;{String((r.metadata as any).reason)}&rdquo;
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-xs text-[var(--mute)]">
-                  No log records match the applied criteria.
+                <td colSpan={5} className="px-5 py-12 text-center text-xs text-[#7d8187] font-mono">
+                  No audit log records match the applied criteria.
                 </td>
               </tr>
             )}

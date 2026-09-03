@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Users, LayoutDashboard } from 'lucide-react'
+import { Users, LayoutDashboard, Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 export function OrgManagementClient({
@@ -59,24 +59,27 @@ export function OrgManagementClient({
         await supabase.from('profiles').update({ department_id: deptId }).eq('id', newHodId)
       }
       router.refresh()
-    } catch {
-      alert('Failed to update department')
+    } catch (err: any) {
+      console.error(err)
+      alert(err.message || 'Failed to update department')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleUpdateProfile = async (profileId: string, changes: { role?: string; department_id?: string }) => {
+  const handleUpdateProfile = async (profileId: string, updates: { role?: string; department_id?: string | null }) => {
     setLoading(true)
     try {
-      const payload: Record<string, string | null> = {}
-      if (changes.role !== undefined) payload.role = changes.role
-      if (changes.department_id !== undefined) payload.department_id = changes.department_id || null
+      const payload: any = {}
+      if (updates.role !== undefined) payload.role = updates.role
+      if (updates.department_id !== undefined) payload.department_id = updates.department_id || null
+
       const { error } = await supabase.from('profiles').update(payload).eq('id', profileId)
       if (error) throw error
       router.refresh()
-    } catch {
-      alert('Failed to update user')
+    } catch (err: any) {
+      console.error(err)
+      alert(err.message || 'Failed to update user profile')
     } finally {
       setLoading(false)
     }
@@ -85,44 +88,52 @@ export function OrgManagementClient({
   const hodUsers = initialProfiles.filter((p) => p.role === 'hod')
 
   return (
-    <div className="space-y-4">
-      <div className="flex space-x-2 border-b border-[var(--hairline)] pb-2">
+    <div className="space-y-4 text-white">
+      <div className="flex items-center gap-2 border-b border-[#212327] pb-3">
         <button
           onClick={() => setActiveTab('departments')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${activeTab === 'departments' ? 'bg-[var(--canvas-elevated)] text-[var(--ink)] border border-[var(--hairline)] whisper-shadow' : 'text-[var(--mute)] hover:bg-[var(--canvas-inset)]'}`}
+          className={`px-4 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 cursor-pointer transition-all ${
+            activeTab === 'departments'
+              ? 'bg-white text-[#0a0a0a] font-medium'
+              : 'text-[#7d8187] hover:text-white hover:bg-white/5'
+          }`}
         >
-          <LayoutDashboard className="w-4 h-4" /> Departments
+          <LayoutDashboard className="w-3.5 h-3.5" /> Departments ({initialDepartments.length})
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${activeTab === 'users' ? 'bg-[var(--canvas-elevated)] text-[var(--ink)] border border-[var(--hairline)] whisper-shadow' : 'text-[var(--mute)] hover:bg-[var(--canvas-inset)]'}`}
+          className={`px-4 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 cursor-pointer transition-all ${
+            activeTab === 'users'
+              ? 'bg-white text-[#0a0a0a] font-medium'
+              : 'text-[#7d8187] hover:text-white hover:bg-white/5'
+          }`}
         >
-          <Users className="w-4 h-4" /> Users
+          <Users className="w-3.5 h-3.5" /> Users &amp; Permissions ({initialProfiles.length})
         </button>
       </div>
 
-      <div className="geist-card p-6 whisper-shadow overflow-x-auto">
+      <div className="bg-[#141414] border border-[#212327] rounded-lg p-6 overflow-x-auto">
         {activeTab === 'departments' && (
           <div className="space-y-4">
             {/* Create Department Form */}
-            <form onSubmit={handleCreateDepartment} className="flex flex-wrap items-end gap-3 p-4 bg-[var(--canvas-inset)] rounded-xl border border-[var(--hairline)] mb-4">
+            <form onSubmit={handleCreateDepartment} className="flex flex-wrap items-end gap-3 p-4 bg-[#0a0a0a] rounded-lg border border-[#212327] mb-4">
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs font-semibold text-[var(--mute)] uppercase tracking-wider mb-1">New Department Name</label>
+                <label className="block text-xs font-mono text-[#7d8187] uppercase tracking-wider mb-1">New Department Name</label>
                 <input
                   required
                   type="text"
-                  placeholder="e.g. Computer Science"
+                  placeholder="e.g. Computer Science & Engineering"
                   value={newDeptName}
                   onChange={(e) => setNewDeptName(e.target.value)}
-                  className="w-full px-3 py-1.5 bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                  className="w-full bg-[#141414] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-[var(--mute)] uppercase tracking-wider mb-1">Assign Initial HOD (Optional)</label>
+                <label className="block text-xs font-mono text-[#7d8187] uppercase tracking-wider mb-1">Assign HOD (Optional)</label>
                 <select
                   value={newDeptHod}
                   onChange={(e) => setNewDeptHod(e.target.value)}
-                  className="w-full bg-[var(--canvas-elevated)] border border-[var(--hairline)] rounded-lg px-3 py-1.5 text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)] h-[34px]"
+                  className="bg-[#141414] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
                 >
                   <option value="">-- None --</option>
                   {hodUsers.map((u) => (
@@ -133,31 +144,31 @@ export function OrgManagementClient({
               <button
                 type="submit"
                 disabled={loading || !newDeptName.trim()}
-                className="cohere-btn-primary py-1.5 px-4 text-xs font-medium disabled:opacity-50 h-[34px] cursor-pointer"
+                className="px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                Create
+                <Plus className="w-3.5 h-3.5" /> Add Department
               </button>
             </form>
 
-            <table className="w-full text-left text-sm">
+            <table className="xai-table text-left text-sm">
               <thead>
-                <tr className="border-b border-[var(--hairline)] text-[var(--mute)]">
-                  <th className="pb-3 font-medium">Department Name</th>
-                  <th className="pb-3 font-medium">Assigned HOD</th>
-                  <th className="pb-3 font-medium w-64">Reassign HOD</th>
+                <tr>
+                  <th>Department Name</th>
+                  <th>Assigned Department Head</th>
+                  <th className="w-64">Reassign Head</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[#212327]">
                 {initialDepartments.map((dept) => (
-                  <tr key={dept.id} className="border-b border-[var(--hairline-soft)] last:border-0">
-                    <td className="py-4 font-medium text-[var(--ink)]">{dept.name}</td>
-                    <td className="py-4 text-[var(--slate)] font-mono text-xs">{dept.profiles?.email || 'Unassigned'}</td>
-                    <td className="py-4">
+                  <tr key={dept.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-5 py-4 font-normal text-white text-xs">{dept.name}</td>
+                    <td className="px-5 py-4 text-[#7d8187] font-mono text-xs">{dept.profiles?.email || 'Unassigned'}</td>
+                    <td className="px-5 py-4">
                       <select
                         disabled={loading}
                         value={dept.hod_id || ''}
                         onChange={(e) => handleUpdateDepartment(dept.id, e.target.value)}
-                        className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                        className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white font-mono"
                       >
                         <option value="">-- Unassign --</option>
                         {hodUsers.map((u) => (
@@ -173,39 +184,39 @@ export function OrgManagementClient({
         )}
 
         {activeTab === 'users' && (
-          <table className="w-full text-left text-sm">
+          <table className="xai-table text-left text-sm">
             <thead>
-              <tr className="border-b border-[var(--hairline)] text-[var(--mute)]">
-                <th className="pb-3 font-medium">Email</th>
-                <th className="pb-3 font-medium w-40">Role</th>
-                <th className="pb-3 font-medium w-64">Department</th>
+              <tr>
+                <th>User Email</th>
+                <th className="w-48">System Role</th>
+                <th className="w-64">Assigned Department</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[#212327]">
               {initialProfiles.map((p) => (
-                <tr key={p.id} className="border-b border-[var(--hairline-soft)] last:border-0">
-                  <td className="py-4 font-medium text-[var(--ink)]">{p.email}</td>
-                  <td className="py-4">
+                <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="px-5 py-4 font-normal text-white text-xs font-mono">{p.email}</td>
+                  <td className="px-5 py-4">
                     <select
                       disabled={loading}
                       value={p.role}
                       onChange={(e) => handleUpdateProfile(p.id, { role: e.target.value })}
-                      className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                      className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white font-mono"
                     >
                       <option value="submitter">Submitter</option>
-                      <option value="hod">HOD</option>
-                      <option value="admin">Admin</option>
+                      <option value="hod">Department Head (HOD)</option>
+                      <option value="admin">Central Admin</option>
                       <option value="emergency">Emergency Authority</option>
                     </select>
                   </td>
-                  <td className="py-4">
+                  <td className="px-5 py-4">
                     <select
                       disabled={loading}
                       value={p.department_id || ''}
                       onChange={(e) => handleUpdateProfile(p.id, { department_id: e.target.value })}
-                      className="w-full bg-[var(--canvas-inset)] border border-[var(--hairline)] rounded-md px-2 py-1.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                      className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white font-mono"
                     >
-                      <option value="">-- None --</option>
+                      <option value="">-- None / General --</option>
                       {initialDepartments.map((d) => (
                         <option key={d.id} value={d.id}>{d.name}</option>
                       ))}
