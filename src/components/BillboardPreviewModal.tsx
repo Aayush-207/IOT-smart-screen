@@ -72,7 +72,7 @@ export function BillboardPreviewModal({
                     : 'text-[#7d8187] hover:text-white'
                 }`}
               >
-                <Monitor className="w-3.5 h-3.5" /> 16:9 Horizontal
+                <Monitor className="w-3.5 h-3.5" /> 16:9
               </button>
               <button
                 type="button"
@@ -83,7 +83,7 @@ export function BillboardPreviewModal({
                     : 'text-[#7d8187] hover:text-white'
                 }`}
               >
-                <Smartphone className="w-3.5 h-3.5" /> 9:16 Vertical
+                <Smartphone className="w-3.5 h-3.5" /> 9:16
               </button>
             </div>
 
@@ -121,39 +121,38 @@ export function BillboardPreviewModal({
 
             {/* Billboard Screen Canvas */}
             <div
-              className={`flex-1 p-6 flex flex-col justify-center items-center text-center transition-colors relative ${
-                isEmergency ? 'bg-radial from-rose-950 to-black text-rose-100' : 'bg-black text-white'
+              className={`flex-1 flex flex-col justify-center items-center text-center transition-colors relative overflow-hidden ${
+                isEmergency ? 'bg-radial from-rose-950 to-black text-rose-100 p-6' : 'bg-black text-white p-6'
               }`}
             >
-              {isEmergency && (
-                <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-600/30 border border-rose-500 text-rose-200 text-xs font-mono uppercase tracking-wider mb-3 animate-pulse">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> Emergency Alert
-                </div>
-              )}
+              {displayImage ? (
+                <img
+                  src={displayImage}
+                  alt="Billboard Poster"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <>
+                  {isEmergency && (
+                    <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-rose-600/30 border border-rose-500 text-rose-200 text-xs font-mono uppercase tracking-wider mb-3 animate-pulse">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> Emergency Alert
+                    </div>
+                  )}
 
-              <div className="text-[10px] font-mono tracking-widest uppercase text-neutral-400 mb-2 px-3 py-0.5 rounded-full bg-neutral-900 border border-[#212327]">
-                {departmentName} &bull; {PRIORITY_LABEL[priority]}
-              </div>
+                  <div className="text-[10px] font-mono tracking-widest uppercase text-neutral-400 mb-2 px-3 py-0.5 rounded-full bg-neutral-900 border border-[#212327]">
+                    {departmentName} &bull; {PRIORITY_LABEL[priority]}
+                  </div>
 
-              {displayImage && (
-                <div className="mb-3 max-h-[45%] max-w-[85%] rounded-lg overflow-hidden border border-[#212327] shadow-xl">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={displayImage}
-                    alt="Billboard Poster"
-                    className="w-full h-full object-contain max-h-[160px]"
-                  />
-                </div>
-              )}
+                  <h1 className="text-lg sm:text-2xl font-normal tracking-tight mb-2 line-clamp-2 text-white px-2">
+                    {title.trim() || 'Untitled Announcement'}
+                  </h1>
 
-              <h1 className="text-lg sm:text-2xl font-normal tracking-tight mb-2 line-clamp-2 text-white px-2">
-                {title.trim() || 'Untitled Announcement'}
-              </h1>
-
-              {body.trim() && (
-                <p className="text-xs sm:text-sm text-neutral-300 max-w-md line-clamp-3 whitespace-pre-wrap leading-relaxed px-2 font-normal">
-                  {body}
-                </p>
+                  {body.trim() && (
+                    <p className="text-xs sm:text-sm text-neutral-300 max-w-md line-clamp-3 whitespace-pre-wrap leading-relaxed px-2 font-normal">
+                      {body}
+                    </p>
+                  )}
+                </>
               )}
             </div>
 

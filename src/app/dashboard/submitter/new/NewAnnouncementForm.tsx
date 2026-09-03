@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { UploadCloud, Eye } from 'lucide-react'
+import { UploadCloud, Eye, Monitor, Smartphone } from 'lucide-react'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
 
@@ -59,6 +59,7 @@ export function NewAnnouncementForm({
   const [submitting, setSubmitting] = useState<'draft' | 'approval' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [orientation, setOrientation] = useState<'landscape' | 'portrait'>('landscape')
 
   const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null)
 
@@ -117,7 +118,7 @@ export function NewAnnouncementForm({
       return
     }
     if (mode === 'approval' && !targetAll && targetZones.length === 0) {
-      setError('Select at least one target zone, or "All Screens".')
+      setError('Select at least one target screen.')
       return
     }
     if (mode === 'approval' && (!displayStart || !displayEnd)) {
@@ -317,22 +318,10 @@ export function NewAnnouncementForm({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <label
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-all ${
-                targetAll
-                  ? 'bg-[var(--cohere-near-black)] text-white border-[var(--cohere-near-black)]'
-                  : 'border-[var(--hairline)] text-[var(--ink)] hover:bg-[var(--canvas-stone)]'
-              }`}
-            >
-              <input type="checkbox" className="hidden" checked={targetAll} onChange={(e) => setTargetAll(e.target.checked)} />
-              All Campus Screens
-            </label>
             {zones.map((zone) => (
               <label
                 key={zone}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-all ${
-                  targetAll ? 'opacity-40 pointer-events-none' : ''
-                } ${
                   targetZones.includes(zone)
                     ? 'bg-[var(--cohere-near-black)] text-white border-[var(--cohere-near-black)]'
                     : 'border-[var(--hairline)] text-[var(--ink)] hover:bg-[var(--canvas-stone)]'
@@ -478,43 +467,68 @@ export function NewAnnouncementForm({
       {/* Live Mini Billboard Agent Console Card (Right Col) */}
       <div className="space-y-4">
         <div className="agent-console-card p-6">
-          <div className="flex items-center justify-between mb-4 border-b border-[var(--hairline)] dark:border-white/10 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-[var(--hairline)] dark:border-white/10 pb-3 gap-3">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--ink)] dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Display Output
             </span>
-            <span className="text-[10px] font-mono text-[var(--slate)] dark:text-neutral-400">16:9 Aspect</span>
+            <div className="flex bg-[#141414] p-1 rounded-full border border-[#212327] text-[10px]">
+              <button
+                type="button"
+                onClick={() => setOrientation('landscape')}
+                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  orientation === 'landscape'
+                    ? 'bg-white text-[#0a0a0a] font-medium'
+                    : 'text-[#7d8187] hover:text-white'
+                }`}
+              >
+                <Monitor className="w-3 h-3" /> 16:9
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrientation('portrait')}
+                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  orientation === 'portrait'
+                    ? 'bg-white text-[#0a0a0a] font-medium'
+                    : 'text-[#7d8187] hover:text-white'
+                }`}
+              >
+                <Smartphone className="w-3 h-3" /> 9:16
+              </button>
+            </div>
           </div>
 
-          <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 flex flex-col justify-between p-3.5 text-center text-white overflow-hidden relative">
-            <div className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 truncate">
-              {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'} &bull; {PRIORITY_LABEL[priority]}
-            </div>
-
-            <div className="my-auto">
-              {(attachmentPreview || existing?.attachment_url) && (
-                <div className="mb-2 max-h-14 flex justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={attachmentPreview || existing?.attachment_url}
-                    alt="Mini preview"
-                    className="max-h-14 object-contain rounded-md"
-                  />
+          <div className={`mx-auto rounded-xl bg-black border border-white/10 flex flex-col justify-between p-3.5 text-center text-white overflow-hidden relative transition-all duration-300 ${
+            orientation === 'landscape' ? 'w-full aspect-[16/9]' : 'w-[56.25%] aspect-[9/16]'
+          }`}>
+            {attachmentPreview || existing?.attachment_url ? (
+              <img
+                src={attachmentPreview || existing?.attachment_url}
+                alt="Mini preview"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <>
+                <div className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 truncate relative z-10">
+                  {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'} &bull; {PRIORITY_LABEL[priority]}
                 </div>
-              )}
-              <h4 className="text-xs font-semibold line-clamp-2 px-1 text-white">
-                {title.trim() || 'Announcement Title'}
-              </h4>
-              {body.trim() && (
-                <p className="text-[9px] text-neutral-300 line-clamp-2 mt-1 px-2">
-                  {body}
-                </p>
-              )}
-            </div>
 
-            <div className="text-[7px] font-mono text-neutral-500 flex justify-between border-t border-white/5 pt-1">
-              <span>CampusCast Engine</span>
-              <span>{targetAll ? 'All Screens' : `${targetZones.length} Target Zones`}</span>
-            </div>
+                <div className="my-auto relative z-10">
+                  <h4 className="text-xs font-semibold line-clamp-2 px-1 text-white">
+                    {title.trim() || 'Announcement Title'}
+                  </h4>
+                  {body.trim() && (
+                    <p className="text-[9px] text-neutral-300 line-clamp-2 mt-1 px-2">
+                      {body}
+                    </p>
+                  )}
+                </div>
+
+                <div className="text-[7px] font-mono text-neutral-500 flex justify-between border-t border-white/5 pt-1 mt-auto relative z-10">
+                  <span>CampusCast Engine</span>
+                  <span>{targetZones.length} Target Screens</span>
+                </div>
+              </>
+            )}
           </div>
 
           <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400 mt-4 leading-relaxed">

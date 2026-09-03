@@ -81,19 +81,19 @@ export function AppSidebar({
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   useEffect(() => {
-    const isLight = document.documentElement.classList.contains('light')
-    setTheme(isLight ? 'light' : 'dark')
+    const isDark = document.documentElement.classList.contains('dark')
+    setTheme(isDark ? 'dark' : 'light')
   }, [])
 
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(nextTheme)
-    if (nextTheme === 'light') {
-      document.documentElement.classList.add('light')
-      localStorage.setItem('theme', 'light')
-    } else {
-      document.documentElement.classList.remove('light')
+    if (nextTheme === 'dark') {
+      document.documentElement.classList.add('dark')
       localStorage.setItem('theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
     }
   }
 

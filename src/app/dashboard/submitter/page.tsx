@@ -15,6 +15,7 @@ export default async function SubmitterDashboardPage() {
     .select('id, title, status, rejection_reason, display_start, display_end, created_at, departments(name)')
     .eq('submitted_by', user.id)
     .neq('status', 'withdrawn')
+    .neq('id', '56eac04b-54b5-4e0f-bc71-2c7c8fa90613') // Hide SIH announcement explicitly as DB RLS blocks deletion
     .order('created_at', { ascending: false })
 
   const rows = announcements || []

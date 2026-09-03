@@ -21,7 +21,14 @@ export default async function NewAnnouncementPage({
   const { data: departments } = await supabase.from('departments').select('id, name').order('name')
 
   const { data: screens } = await supabase.from('screens').select('zone')
-  const zones = Array.from(new Set((screens || []).map((s: any) => s.zone).filter(Boolean))).sort()
+  let dbZones = Array.from(new Set((screens || []).map((s: any) => s.zone).filter(Boolean))).sort() as string[]
+  
+  // Use mock screens if DB is empty for demonstration
+  let zones = dbZones.length > 0 ? dbZones : [
+    'Main Lobby Screen 01',
+    'Library Entrance Node',
+    'Cafeteria Kiosk Display'
+  ]
 
   let existing = null
   if (edit) {
