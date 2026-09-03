@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Plus, AlertCircle } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 import { announcementDisplayStatus as displayStatus } from '@/lib/fleet'
+import { formatDate } from '@/lib/dateUtils'
 
 export default async function SubmitterDashboardPage() {
   const supabase = await createClient()
@@ -148,8 +149,8 @@ export default async function SubmitterDashboardPage() {
                       <td className="py-4 px-2">
                         <StatusBadge status={status} />
                       </td>
-                      <td className="py-4 px-2 text-[var(--mute)] text-xs font-mono">
-                        {new Date(a.created_at).toLocaleDateString()}
+                      <td suppressHydrationWarning className="py-4 px-2 text-[var(--mute)] text-xs font-mono">
+                        {formatDate(a.created_at)}
                       </td>
                       <td className="py-4 px-2 text-right">
                         {status === 'live' || status === 'archived' || status === 'scheduled' ? (

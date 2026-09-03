@@ -7,6 +7,7 @@ import { CheckCircle, XCircle, Eye, Loader2, Building2, Clock, Monitor } from 'l
 import { logAudit } from '@/lib/audit'
 import { AiAdvisoryPanel } from '@/components/AiAdvisoryPanel'
 import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
+import { formatDate, formatDuration } from '@/lib/dateUtils'
 
 export function AdminApprovalQueueClient({
   initialRequests,
@@ -111,8 +112,8 @@ export function AdminApprovalQueueClient({
                   <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">
                     {req.departments?.name || 'Campus Wide'} &bull; Submitted by {req.profiles?.email}
                   </span>
-                  <span className="text-[10px] text-neutral-400 dark:text-[#7d8187] font-mono">
-                    &bull; {new Date(req.created_at).toLocaleDateString()}
+                  <span suppressHydrationWarning className="text-[10px] text-neutral-400 dark:text-[#7d8187] font-mono">
+                    &bull; {formatDate(req.created_at)}
                   </span>
                 </div>
 
@@ -153,10 +154,8 @@ export function AdminApprovalQueueClient({
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
                     <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                     <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Duration:</span>
-                    <span className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
-                      {req.display_start
-                        ? `${new Date(req.display_start).toLocaleDateString()} ${req.display_end ? `→ ${new Date(req.display_end).toLocaleDateString()}` : '(Permanent)'}`
-                        : 'Immediate / Active'}
+                    <span suppressHydrationWarning className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
+                      {formatDuration(req.display_start, req.display_end)}
                     </span>
                   </div>
                 </div>

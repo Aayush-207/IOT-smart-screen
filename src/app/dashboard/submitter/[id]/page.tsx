@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { StatusBadge } from '@/components/StatusBadge'
 import { deliveryState, relativeTime, announcementDisplayStatus } from '@/lib/fleet'
-import { ArrowLeft, Monitor, Clock } from 'lucide-react'
+import { ArrowLeft, Monitor, Clock, Tv } from 'lucide-react'
 
 export default async function DeliveryDetailPage({
   params,
@@ -24,22 +24,19 @@ export default async function DeliveryDetailPage({
 
   if (!announcement) return notFound()
 
-  let targetScreens: any[] = []
-  if (announcement.target_all) {
-    const { data } = await supabase.from('screens').select('*').order('name')
-    targetScreens = data || []
-  } else if (announcement.target_zones?.length) {
-    const { data } = await supabase.from('screens').select('*').in('zone', announcement.target_zones).order('name')
-    targetScreens = data || []
-  }
-
-  // Inject 3 mock display nodes for demo/accesses
-  targetScreens = [
-    ...targetScreens,
+  const defaultNodes = [
     { id: 'mock-1', name: 'Main Lobby Screen 01', location: 'Engineering Block A', zone: 'Engineering Wing', last_seen_at: new Date().toISOString() },
     { id: 'mock-2', name: 'Library Entrance Node', location: 'Central Library', zone: 'Library Atrium', last_seen_at: new Date(Date.now() - 6000).toISOString() },
     { id: 'mock-3', name: 'Cafeteria Kiosk Display', location: 'Student Center', zone: 'Student Cafeteria', last_seen_at: new Date(Date.now() - 15000).toISOString() }
   ]
+
+  let targetScreens: any[] = []
+  const { data: dbScreens } = await supabase.from('screens').select('*').order('name')
+  if (dbScreens && dbScreens.length > 0) {
+    targetScreens = dbScreens
+  } else {
+    targetScreens = defaultNodes
+  }
 
   const { data: deliveries } = await supabase
     .from('announcement_deliveries')
@@ -117,36 +114,102 @@ export default async function DeliveryDetailPage({
           <div className="p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 bg-neutral-50 dark:bg-[#0a0a0a]">
             {targetScreens.map((screen) => {
               const delivery = deliveries?.find((d: any) => d.screen_id === screen.id)
-              const derived = deliveryState(screen.last_seen_at, delivery?.last_confirmed_at)
-              const state =
-                derived === 'failed'
+              
+              // Determine if this screen is specified for this announcement
+              const isSpecified = Boolean(
+                announcement.target_all ||
+                !announcement.target_zones ||
+                announcement.target_zones.length === 0 ||
+                announcement.target_zones.some((z: string) =>
+                  z === screen.name ||
+                  z === screen.zone ||
+                  z.toLowerCase() === screen.name.toLowerCase() ||
+                  z.toLowerCase() === screen.zone.toLowerCase()
+                )
+              )
+
+              const isApproved = announcement.status === 'approved'
+              const state = isApproved
+                ? isSpecified ? 'live' : 'standby'
+                : announcement.status === 'rejected'
                   ? 'failed'
-                  : delivery?.state && delivery.state !== 'dispatched'
-                    ? delivery.state
-                    : derived
+                  : 'pending'
+
+              const syncLabel = isApproved
+                ? isSpecified ? 'Sync: just now' : 'Not targeted'
+                : 'Sync: pending approval'
+
+              const hasImage = Boolean(announcement.attachment_url)
+
               return (
-                <div key={screen.id} className="aspect-[16/9] rounded-xl bg-[#0a0a0a] border border-neutral-300 dark:border-[#212327] flex flex-col justify-between p-4 text-white relative overflow-hidden shadow-md">
-                  {/* Screen Header */}
-                  <div className="flex items-center justify-between z-10">
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">{screen.zone || 'General'}</span>
+                <div
+                  key={screen.id}
+                  className="aspect-[16/9] rounded-xl bg-black border border-neutral-300 dark:border-[#212327] flex flex-col justify-between p-3.5 text-white relative overflow-hidden shadow-lg"
+                >
+                  {/* If image is present and screen is specified, show image covering full screen */}
+                  {isApproved && isSpecified && hasImage && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={announcement.attachment_url}
+                      alt={announcement.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
+
+                  {/* If not approved yet but specified with image, show preview */}
+                  {!isApproved && isSpecified && hasImage && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={announcement.attachment_url}
+                      alt={announcement.title}
+                      className="absolute inset-0 w-full h-full object-cover opacity-60"
+                    />
+                  )}
+
+                  {/* Screen Header in glass pill */}
+                  <div className="flex items-center justify-between z-10 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/10 shadow-sm">
+                    <span className="text-[10px] font-mono text-white/90 uppercase tracking-wider font-medium">
+                      {screen.zone || 'General'}
+                    </span>
                     <StatusBadge status={state} />
                   </div>
-                  
-                  {/* Screen Center (Title) */}
-                  <div className="flex-1 flex items-center justify-center z-10">
-                    <h3 className="text-sm font-semibold text-white px-2 text-center line-clamp-3">
-                      {announcement.title}
-                    </h3>
+
+                  {/* Screen Center (Only when text-only, or pending, or standby) */}
+                  {isApproved && isSpecified && !hasImage ? (
+                    <div className="flex-1 flex flex-col items-center justify-center z-10 text-center px-2">
+                      <h3 className="text-sm font-semibold text-white line-clamp-3">
+                        {announcement.title}
+                      </h3>
+                      {announcement.body && (
+                        <p className="text-[10px] text-neutral-300 line-clamp-2 mt-1">
+                          {announcement.body}
+                        </p>
+                      )}
+                    </div>
+                  ) : !isSpecified ? (
+                    <div className="flex-1 flex flex-col items-center justify-center z-10 text-center space-y-1">
+                      <Tv className="w-5 h-5 text-neutral-500 mx-auto" />
+                      <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">Standby Rotation</span>
+                      <span className="text-[8px] font-mono text-neutral-500">Not targeted for this notice</span>
+                    </div>
+                  ) : !isApproved && !hasImage ? (
+                    <div className="flex-1 flex items-center justify-center z-10">
+                      <h3 className="text-sm font-semibold text-white/80 px-2 text-center line-clamp-3">
+                        {announcement.title}
+                      </h3>
+                    </div>
+                  ) : null}
+
+                  {/* Screen Footer in glass pill */}
+                  <div className="flex items-center justify-between z-10 font-mono text-[9px] text-white/80 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full border border-white/10 shadow-sm">
+                    <span className="truncate max-w-[60%] font-medium">{screen.name}</span>
+                    <span className={`shrink-0 text-right ${isApproved && isSpecified ? 'text-emerald-400' : 'text-neutral-400'}`}>
+                      {syncLabel}
+                    </span>
                   </div>
 
-                  {/* Screen Footer */}
-                  <div className="flex items-center justify-between z-10 font-mono text-[9px] text-neutral-500">
-                    <span className="truncate max-w-[60%]">{screen.name}</span>
-                    <span className="shrink-0 text-right">Sync: {relativeTime(delivery?.last_confirmed_at)}</span>
-                  </div>
-
-                  {/* Gradient Overlay for realism */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+                  {/* Glass glare effect */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none" />
                 </div>
               )
             })}

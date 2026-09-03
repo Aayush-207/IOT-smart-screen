@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { CheckSquare } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 
+import { HodRecentSubmissionsClient } from './HodRecentSubmissionsClient'
+
 export default async function HodDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -13,15 +15,14 @@ export default async function HodDashboardPage() {
 
   if (!profile?.department_id) {
     return (
-      <div className="p-8 text-center text-white bg-[#141414] border border-[#212327] rounded-lg">
+      <div className="p-8 text-center text-neutral-900 dark:text-white bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl shadow-sm">
         <h2 className="text-base font-normal">You are not assigned to any department yet. Please contact an administrator.</h2>
       </div>
     )
   }
 
-  const { data: department } = await supabase.from('departments').select('name').eq('id', profile.department_id).single()
-
-  const [{ count: pending }, { count: approvedTotal }, { data: recentNotices }] = await Promise.all([
+  const [{ data: department }, { count: pending }, { count: approvedTotal }, { data: recentNotices }] = await Promise.all([
+    supabase.from('departments').select('name').eq('id', profile.department_id).single(),
     supabase
       .from('announcements')
       .select('id', { count: 'exact', head: true })
@@ -34,11 +35,11 @@ export default async function HodDashboardPage() {
       .eq('status', 'approved'),
     supabase
       .from('announcements')
-      .select('id, title, status, priority, created_at, profiles!announcements_submitted_by_fkey(email)')
+      .select('id, title, body, status, priority, display_start, display_end, attachment_url, target_zones, target_all, created_at, profiles!announcements_submitted_by_fkey(email)')
       .eq('department_id', profile.department_id)
       .neq('status', 'withdrawn')
       .order('created_at', { ascending: false })
-      .limit(5),
+      .limit(10),
   ])
 
   return (
@@ -89,51 +90,12 @@ export default async function HodDashboardPage() {
         </div>
       </div>
 
-      {/* Submissions Table */}
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-medium text-neutral-900 dark:text-white">
-              Recent Submissions
-            </h2>
-            <p className="text-xs text-neutral-500 dark:text-[#7d8187]">Notices submitted by students and faculty in your department</p>
-          </div>
-          <Link href="/dashboard/hod/approvals" className="px-3 py-1 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors">
-            Open Queue &rarr;
-          </Link>
-        </div>
-
-        {(!recentNotices || recentNotices.length === 0) ? (
-          <div className="p-12 text-center text-xs text-neutral-500 dark:text-[#7d8187]">
-            No announcements submitted to your department yet.
-          </div>
-        ) : (
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-neutral-200 dark:border-[#212327] text-neutral-400 dark:text-[#7d8187] text-[10px] uppercase tracking-wider font-mono">
-                <th className="py-3 px-4">Notice Title</th>
-                <th className="py-3 px-4">Submitted By</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
-              {recentNotices.map((n: any) => (
-                <tr key={n.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors">
-                  <td className="py-4 px-4 font-normal text-xs text-neutral-900 dark:text-white">{n.title}</td>
-                  <td className="py-4 px-4 text-xs text-neutral-500 dark:text-[#7d8187] font-mono">{n.profiles?.email}</td>
-                  <td className="py-4 px-4">
-                    <StatusBadge status={n.status} />
-                  </td>
-                  <td className="py-4 px-4 text-xs text-neutral-500 dark:text-[#7d8187] text-right font-mono">
-                    {new Date(n.created_at).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {/* Expanded Submissions Management Card */}
+      <HodRecentSubmissionsClient
+        initialNotices={recentNotices || []}
+        hodId={user.id}
+        departmentName={department?.name || 'Department'}
+      />
     </div>
   )
 }
