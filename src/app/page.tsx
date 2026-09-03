@@ -135,12 +135,12 @@ export default async function HomePage() {
         <div className="mt-14 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           {/* Wide Left Card: Dark Agent Console Mockup */}
           <div className="lg:col-span-8 agent-console-card p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+            <div className="flex items-center justify-between border-b border-[var(--hairline)] dark:border-white/10 pb-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-rose-500/80" />
                 <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                 <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                <span className="text-xs font-mono text-white/50 ml-2">node://cc-ai-moderator-dispatch</span>
+                <span className="text-xs font-mono text-[var(--slate)] dark:text-white/50 ml-2">node://cc-ai-moderator-dispatch</span>
               </div>
               <span className="cohere-mono-label text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-[10px]">
                 POLICY VERIFIED &bull; 99.4% CONFIDENCE
@@ -148,15 +148,15 @@ export default async function HomePage() {
             </div>
 
             <div className="space-y-4 my-auto">
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
+              <div className="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-[var(--hairline)] dark:border-white/10 space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/60 font-mono text-[11px]">SUBMISSION PAYLOAD</span>
-                  <span className="text-amber-400 font-mono text-[11px]">PRIORITY: URGENT</span>
+                  <span className="text-[var(--slate)] dark:text-white/60 font-mono text-[11px]">SUBMISSION PAYLOAD</span>
+                  <span className="text-amber-600 dark:text-amber-400 font-mono text-[11px]">PRIORITY: URGENT</span>
                 </div>
-                <div className="text-sm font-semibold text-white">
+                <div className="text-sm font-semibold text-[var(--ink)] dark:text-white">
                   &ldquo;Annual Robotics Symposium: Keynote in Main Auditorium at 14:00&rdquo;
                 </div>
-                <p className="text-xs text-white/70 font-mono">
+                <p className="text-xs text-[var(--slate)] dark:text-white/70 font-mono">
                   Target: Engineering Lobby &bull; Main Quad &bull; Library Wall
                 </p>
               </div>
@@ -173,12 +173,12 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="pt-6 mt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-white/60">
+            <div className="pt-6 mt-6 border-t border-[var(--hairline)] dark:border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-[var(--slate)] dark:text-white/60">
               <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-emerald-400" />
+                <Cpu className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Deterministic Slot Rotation: Active</span>
               </div>
-              <div className="text-emerald-400">
+              <div className="text-emerald-600 dark:text-emerald-400">
                 Avg. Review Latency: 1.2s
               </div>
             </div>

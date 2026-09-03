@@ -225,11 +225,17 @@ body {
 
 /* Dark Agent Console Mockup Card */
 .agent-console-card {
+  background-color: var(--canvas-stone);
+  color: var(--ink);
+  border: 1px solid var(--border-light);
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.dark .agent-console-card {
   background-color: var(--cohere-near-black);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 22px;
-  overflow: hidden;
 }
 
 /* Deep Green Hero / Capability Band */

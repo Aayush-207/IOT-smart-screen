@@ -478,11 +478,11 @@ export function NewAnnouncementForm({
       {/* Live Mini Billboard Agent Console Card (Right Col) */}
       <div className="space-y-4">
         <div className="agent-console-card p-6">
-          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
+          <div className="flex items-center justify-between mb-4 border-b border-[var(--hairline)] dark:border-white/10 pb-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--ink)] dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Display Output
             </span>
-            <span className="text-[10px] font-mono text-neutral-400">16:9 Aspect</span>
+            <span className="text-[10px] font-mono text-[var(--slate)] dark:text-neutral-400">16:9 Aspect</span>
           </div>
 
           <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 flex flex-col justify-between p-3.5 text-center text-white overflow-hidden relative">
@@ -517,7 +517,7 @@ export function NewAnnouncementForm({
             </div>
           </div>
 
-          <p className="text-[11px] text-neutral-400 mt-4 leading-relaxed">
+          <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400 mt-4 leading-relaxed">
             Content is vetted against automated safety policies before transmission to department HODs and admin consoles.
           </p>
         </div>

@@ -137,11 +137,11 @@ export function DeviceDetailClient({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Agent Console Screen Mirror */}
         <div className="lg:col-span-7 agent-console-card p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
+          <div className="flex items-center justify-between mb-4 border-b border-[var(--hairline)] dark:border-white/10 pb-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--ink)] dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Display Node Mirror
             </span>
-            <span className="text-[10px] font-mono text-neutral-400">Aspect: 16:9</span>
+            <span className="text-[10px] font-mono text-[var(--slate)] dark:text-neutral-400">Aspect: 16:9</span>
           </div>
 
           <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 overflow-hidden flex flex-col justify-center items-center text-center p-4 text-white relative">

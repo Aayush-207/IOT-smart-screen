@@ -58,39 +58,39 @@ export default async function SubmitterDashboardPage() {
 
       {/* Cohere Agent Console Mockup Card */}
       <div className="agent-console-card p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--hairline)] dark:border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
             <div>
-              <span className="font-mono text-xs text-neutral-400 uppercase tracking-wider">Screen Broadcast Agent</span>
-              <h3 className="text-sm font-semibold text-white">Active Dispatch Engine (5s Poll Cycle)</h3>
+              <span className="font-mono text-xs text-[var(--slate)] dark:text-neutral-400 uppercase tracking-wider">Screen Broadcast Agent</span>
+              <h3 className="text-sm font-semibold text-[var(--ink)] dark:text-white">Active Dispatch Engine (5s Poll Cycle)</h3>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/10 text-neutral-300">
+            <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-black/5 dark:bg-white/10 text-[var(--ink)] dark:text-neutral-300">
               {stats.live} Active Screens
             </span>
-            <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300">
+            <span className="font-mono text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
               100% Mesh Health
             </span>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 text-xs">
-          <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
-            <span className="font-mono text-[10px] text-neutral-500 uppercase">Total Notices</span>
-            <div className="text-2xl font-bold text-white">{stats.total}</div>
-            <p className="text-[11px] text-neutral-400">Authored by your account</p>
+          <div className="p-4 rounded-xl bg-black/5 dark:bg-black/40 border border-[var(--border-light)] dark:border-white/5 space-y-1">
+            <span className="font-mono text-[10px] text-[var(--slate)] dark:text-neutral-500 uppercase">Total Notices</span>
+            <div className="text-2xl font-bold text-[var(--ink)] dark:text-white">{stats.total}</div>
+            <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400">Authored by your account</p>
           </div>
-          <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
-            <span className="font-mono text-[10px] text-emerald-400 uppercase">Live Broadcasts</span>
-            <div className="text-2xl font-bold text-emerald-400">{stats.live}</div>
-            <p className="text-[11px] text-neutral-400">Displaying on targeted zones</p>
+          <div className="p-4 rounded-xl bg-black/5 dark:bg-black/40 border border-[var(--border-light)] dark:border-white/5 space-y-1">
+            <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 uppercase">Live Broadcasts</span>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.live}</div>
+            <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400">Displaying on targeted zones</p>
           </div>
-          <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
-            <span className="font-mono text-[10px] text-amber-400 uppercase">Awaiting Decision</span>
-            <div className="text-2xl font-bold text-amber-400">{stats.pending}</div>
-            <p className="text-[11px] text-neutral-400">Department review queue</p>
+          <div className="p-4 rounded-xl bg-black/5 dark:bg-black/40 border border-[var(--border-light)] dark:border-white/5 space-y-1">
+            <span className="font-mono text-[10px] text-amber-600 dark:text-amber-400 uppercase">Awaiting Decision</span>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.pending}</div>
+            <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400">Department review queue</p>
           </div>
         </div>
       </div>
