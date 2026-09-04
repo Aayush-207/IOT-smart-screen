@@ -182,9 +182,9 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                 return (
                   <tr key={r.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors">
                     {/* Timestamp */}
-                    <td className="px-5 py-3.5 text-xs text-neutral-500 dark:text-[#7d8187] font-mono whitespace-nowrap">
-                      <div>{new Date(r.created_at).toLocaleDateString()}</div>
-                      <div className="text-[10px] text-neutral-400 dark:text-[#5a5d63]">{new Date(r.created_at).toLocaleTimeString()}</div>
+                    <td className="px-5 py-3.5 text-xs text-neutral-500 dark:text-[#7d8187] font-mono whitespace-nowrap" suppressHydrationWarning>
+                      <div suppressHydrationWarning>{new Date(r.created_at).toLocaleDateString()}</div>
+                      <div className="text-[10px] text-neutral-400 dark:text-[#5a5d63]" suppressHydrationWarning>{new Date(r.created_at).toLocaleTimeString()}</div>
                     </td>
 
                     {/* Actor */}
