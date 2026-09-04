@@ -190,12 +190,12 @@ export function NewAnnouncementForm({
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-6xl">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-6xl animate-fade-in-up">
       {/* Main Form (Left 2 cols) */}
-      <div className="xl:col-span-2 p-6 md:p-8 rounded-2xl border border-[var(--border-light)] bg-[var(--canvas)] space-y-6">
+      <div className="xl:col-span-2 p-6 md:p-8 rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-sm space-y-6">
         <div>
-          <span className="cohere-mono-label text-[var(--mute)]">Submission Editor</span>
-          <h2 className="text-xl font-semibold tracking-tight text-[var(--ink)] mt-1">Compose Announcement</h2>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Submission Editor</span>
+          <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white mt-1">Compose Announcement</h2>
         </div>
 
         {error && (
@@ -207,10 +207,10 @@ export function NewAnnouncementForm({
         {/* Title Input */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ink)]">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
               Title <span className="text-rose-500">*</span>
             </label>
-            <span className="font-mono text-[11px] text-[var(--mute)]">
+            <span className="font-mono text-[11px] text-neutral-500 dark:text-[#7d8187]">
               {title.length}/100
             </span>
           </div>
@@ -220,17 +220,17 @@ export function NewAnnouncementForm({
             maxLength={100}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Annual Tech Fest Registrations Open"
-            className="w-full px-3.5 py-2.5 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)] focus:ring-1 focus:ring-[var(--focus-blue)] transition-all font-medium"
+            className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-all font-medium"
           />
         </div>
 
         {/* Body Textarea */}
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ink)]">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
               Message Content
             </label>
-            <span className="font-mono text-[11px] text-[var(--mute)]">
+            <span className="font-mono text-[11px] text-neutral-500 dark:text-[#7d8187]">
               {body.length}/500
             </span>
           </div>
@@ -240,20 +240,20 @@ export function NewAnnouncementForm({
             onChange={(e) => setBody(e.target.value)}
             rows={4}
             placeholder="Describe the details, dates, venue, or eligibility requirements for students and faculty..."
-            className="w-full px-3.5 py-2.5 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-sm text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)] focus:ring-1 focus:ring-[var(--focus-blue)] transition-all leading-relaxed"
+            className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-all leading-relaxed"
           />
         </div>
 
         {/* Department & Priority */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ink)] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white mb-1.5">
               Department
             </label>
             <select
               value={departmentId}
               onChange={(e) => setDepartmentId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+              className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white"
             >
               <option value="">General / Campus-Wide</option>
               {departments.map((d) => (
@@ -263,7 +263,7 @@ export function NewAnnouncementForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ink)] mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white mb-1.5">
               Priority Tier
             </label>
             <div className="grid grid-cols-3 gap-1.5">
@@ -274,14 +274,14 @@ export function NewAnnouncementForm({
                     key={p}
                     type="button"
                     onClick={() => setPriority(p)}
-                    className={`py-2 px-2 rounded-lg text-[11px] font-mono font-semibold uppercase tracking-wider border transition-all cursor-pointer truncate ${
+                    className={`py-2 px-2 rounded-xl text-[11px] font-mono font-semibold uppercase tracking-wider border transition-all cursor-pointer truncate ${
                       isSelected
                         ? p === 'critical'
-                          ? 'border-[#ff7759] bg-[#ff7759] text-white'
+                          ? 'border-rose-500 bg-rose-500 text-white shadow-xs'
                           : p === 'timesensitive'
-                          ? 'border-[#1863dc] bg-[#1863dc] text-white'
-                          : 'border-[var(--cohere-near-black)] bg-[var(--cohere-near-black)] text-white'
-                        : 'border-[var(--hairline)] text-[var(--slate)] hover:bg-[var(--canvas-stone)]'
+                          ? 'border-sky-500 bg-sky-500 text-white shadow-xs'
+                          : 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-[#0a0a0a] shadow-xs'
+                        : 'border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5'
                     }`}
                   >
                     {PRIORITY_LABEL[p]}
@@ -295,22 +295,22 @@ export function NewAnnouncementForm({
         {/* Target Screens & Zones */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ink)]">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
               Target Screens &amp; Zones
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={selectAllZones}
-                className="text-[11px] text-[var(--cohere-action-blue)] hover:underline font-medium cursor-pointer"
+                className="text-[11px] text-sky-600 dark:text-sky-400 hover:underline font-medium cursor-pointer"
               >
                 Select All
               </button>
-              <span className="text-[var(--hairline)]">&bull;</span>
+              <span className="text-neutral-300 dark:text-neutral-700">&bull;</span>
               <button
                 type="button"
                 onClick={clearAllZones}
-                className="text-[11px] text-[var(--slate)] hover:underline font-medium cursor-pointer"
+                className="text-[11px] text-neutral-500 dark:text-[#7d8187] hover:underline font-medium cursor-pointer"
               >
                 Clear
               </button>
@@ -323,8 +323,8 @@ export function NewAnnouncementForm({
                 key={zone}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-all ${
                   targetZones.includes(zone)
-                    ? 'bg-[var(--cohere-near-black)] text-white border-[var(--cohere-near-black)]'
-                    : 'border-[var(--hairline)] text-[var(--ink)] hover:bg-[var(--canvas-stone)]'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] border-neutral-900 dark:border-white shadow-xs'
+                    : 'border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
                 }`}
               >
                 <input type="checkbox" className="hidden" checked={targetZones.includes(zone)} onChange={() => toggleZone(zone)} />
@@ -337,29 +337,29 @@ export function NewAnnouncementForm({
         {/* Display Window & Presets */}
         <div>
           <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ink)]">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
               Display Duration
             </label>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-mono uppercase text-[var(--mute)]">Presets:</span>
+              <span className="text-[10px] font-mono uppercase text-neutral-500 dark:text-[#7d8187]">Presets:</span>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(24)}
-                className="px-2.5 py-0.5 rounded-full border border-[var(--hairline)] text-[10px] font-mono text-[var(--ink)] hover:bg-[var(--canvas-stone)] cursor-pointer"
+                className="px-2.5 py-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-[10px] font-mono text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 cursor-pointer transition-colors"
               >
                 24H
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(72)}
-                className="px-2.5 py-0.5 rounded-full border border-[var(--hairline)] text-[10px] font-mono text-[var(--ink)] hover:bg-[var(--canvas-stone)] cursor-pointer"
+                className="px-2.5 py-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-[10px] font-mono text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 cursor-pointer transition-colors"
               >
                 3D
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(168)}
-                className="px-2.5 py-0.5 rounded-full border border-[var(--hairline)] text-[10px] font-mono text-[var(--ink)] hover:bg-[var(--canvas-stone)] cursor-pointer"
+                className="px-2.5 py-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-[10px] font-mono text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 cursor-pointer transition-colors"
               >
                 7D
               </button>
@@ -368,21 +368,21 @@ export function NewAnnouncementForm({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <span className="text-[11px] text-[var(--slate)] block mb-1">Start Displaying</span>
+              <span className="text-[11px] text-neutral-500 dark:text-[#7d8187] block mb-1">Start Displaying</span>
               <input
                 type="datetime-local"
                 value={displayStart}
                 onChange={(e) => setDisplayStart(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                className="w-full px-3.5 py-2 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white"
               />
             </div>
             <div>
-              <span className="text-[11px] text-[var(--slate)] block mb-1">Stop Displaying (Auto-Expire)</span>
+              <span className="text-[11px] text-neutral-500 dark:text-[#7d8187] block mb-1">Stop Displaying (Auto-Expire)</span>
               <input
                 type="datetime-local"
                 value={displayEnd}
                 onChange={(e) => setDisplayEnd(e.target.value)}
-                className="w-full px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]"
+                className="w-full px-3.5 py-2 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white"
               />
             </div>
           </div>
@@ -390,23 +390,23 @@ export function NewAnnouncementForm({
 
         {/* Attachment Upload Zone */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--ink)] mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white mb-1.5">
             Slide Poster / Graphic (Optional)
           </label>
           
           {attachmentPreview || (existing?.attachment_url && !attachment) ? (
-            <div className="relative p-3 bg-[var(--canvas-stone)]/40 border border-[var(--hairline)] rounded-xl flex items-center gap-4">
+            <div className="relative p-3 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl flex items-center gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={attachmentPreview || existing.attachment_url}
                 alt="Poster preview"
-                className="w-20 h-20 rounded-lg object-cover border border-[var(--hairline)] shrink-0"
+                className="w-20 h-20 rounded-lg object-cover border border-neutral-200 dark:border-[#212327] shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-[var(--ink)] truncate">
+                <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate">
                   {attachment ? attachment.name : 'Current Attachment'}
                 </p>
-                <p className="text-[11px] text-[var(--mute)]">
+                <p className="text-[11px] text-neutral-500 dark:text-[#7d8187]">
                   {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored image'}
                 </p>
                 <button
@@ -419,10 +419,10 @@ export function NewAnnouncementForm({
               </div>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center p-6 border border-dashed border-[var(--hairline)] hover:border-[var(--cohere-near-black)] rounded-xl cursor-pointer transition-colors bg-[var(--canvas-stone)]/20 hover:bg-[var(--canvas-stone)]/40">
-              <UploadCloud className="w-6 h-6 text-[var(--mute)] mb-2" />
-              <p className="text-xs font-medium text-[var(--ink)]">Click to upload poster or drag and drop</p>
-              <p className="text-[10px] text-[var(--mute)] mt-0.5 font-mono">JPEG, PNG, or WebP up to 10MB</p>
+            <label className="flex flex-col items-center justify-center p-6 border border-dashed border-neutral-300 dark:border-[#212327] hover:border-neutral-400 dark:hover:border-white/30 rounded-xl cursor-pointer transition-colors bg-neutral-50/60 dark:bg-[#0a0a0a]/50 hover:bg-neutral-100/60 dark:hover:bg-white/[0.03]">
+              <UploadCloud className="w-6 h-6 text-neutral-400 dark:text-[#7d8187] mb-2" />
+              <p className="text-xs font-medium text-neutral-900 dark:text-white">Click to upload poster or drag and drop</p>
+              <p className="text-[10px] text-neutral-500 dark:text-[#7d8187] mt-0.5 font-mono">JPEG, PNG, or WebP up to 10MB</p>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -434,13 +434,13 @@ export function NewAnnouncementForm({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-[var(--hairline)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-neutral-200 dark:border-[#212327]">
           <div className="flex items-center gap-3">
             <button
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('approval')}
-              className="cohere-btn-primary inline-flex items-center gap-2"
+              className="px-5 py-2.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 active:scale-95 transition-all inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
             >
               {submitting === 'approval' ? (
                 <>
@@ -455,7 +455,7 @@ export function NewAnnouncementForm({
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('draft')}
-              className="cohere-btn-secondary inline-flex items-center gap-1.5"
+              className="px-4 py-2.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white text-xs font-medium hover:bg-neutral-100 dark:hover:bg-white/5 active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
               {submitting === 'draft' ? (
                 <>
@@ -471,28 +471,28 @@ export function NewAnnouncementForm({
           <button
             type="button"
             onClick={() => setPreviewOpen(true)}
-            className="cohere-btn-pill-outline flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white text-xs font-medium hover:bg-neutral-100 dark:hover:bg-white/5 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <Eye className="w-3.5 h-3.5 text-[var(--cohere-action-blue)]" /> Billboard Simulator
+            <Eye className="w-3.5 h-3.5 text-sky-500" /> Billboard Simulator
           </button>
         </div>
       </div>
 
       {/* Live Mini Billboard Agent Console Card (Right Col) */}
       <div className="space-y-4">
-        <div className="agent-console-card p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-[var(--hairline)] dark:border-white/10 pb-3 gap-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--ink)] dark:text-white flex items-center gap-2">
+        <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] p-6 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-neutral-200 dark:border-[#212327] pb-3 gap-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Display Output
             </span>
-            <div className="flex bg-[#141414] p-1 rounded-full border border-[#212327] text-[10px]">
+            <div className="flex bg-neutral-100 dark:bg-[#0a0a0a] p-1 rounded-full border border-neutral-200 dark:border-[#212327] text-[10px]">
               <button
                 type="button"
                 onClick={() => setOrientation('landscape')}
-                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
                   orientation === 'landscape'
-                    ? 'bg-white text-[#0a0a0a] font-medium'
-                    : 'text-[#7d8187] hover:text-white'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
+                    : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
                 }`}
               >
                 <Monitor className="w-3 h-3" /> 16:9
@@ -500,10 +500,10 @@ export function NewAnnouncementForm({
               <button
                 type="button"
                 onClick={() => setOrientation('portrait')}
-                className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
                   orientation === 'portrait'
-                    ? 'bg-white text-[#0a0a0a] font-medium'
-                    : 'text-[#7d8187] hover:text-white'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
+                    : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
                 }`}
               >
                 <Smartphone className="w-3 h-3" /> 9:16
@@ -546,30 +546,30 @@ export function NewAnnouncementForm({
           </div>
 
           {/* Live Configuration Details */}
-          <div className="mt-5 pt-4 border-t border-[var(--hairline)] dark:border-white/10 space-y-2.5">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--slate)] dark:text-neutral-400">
+          <div className="mt-5 pt-4 border-t border-neutral-200 dark:border-[#212327] space-y-2.5">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">
               Dispatch Specifications
             </div>
 
             <div className="grid grid-cols-1 gap-2 text-xs">
               {/* Department */}
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--border-light)] dark:border-white/5">
-                <div className="flex items-center gap-2 text-[var(--slate)] dark:text-neutral-400">
-                  <Building2 className="w-3.5 h-3.5 text-[var(--link)]" />
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
+                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
+                  <Building2 className="w-3.5 h-3.5 text-sky-500" />
                   <span className="text-[11px] font-medium">Department</span>
                 </div>
-                <span className="text-[11px] font-mono font-medium text-[var(--ink)] dark:text-white truncate max-w-[150px]">
+                <span className="text-[11px] font-mono font-medium text-neutral-900 dark:text-white truncate max-w-[150px]">
                   {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'}
                 </span>
               </div>
 
               {/* Screens Selected */}
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--border-light)] dark:border-white/5">
-                <div className="flex items-center gap-2 text-[var(--slate)] dark:text-neutral-400">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
+                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
                   <Monitor className="w-3.5 h-3.5 text-emerald-500" />
                   <span className="text-[11px] font-medium">Screens Selected</span>
                 </div>
-                <span className="text-[11px] font-mono font-medium text-[var(--ink)] dark:text-white text-right">
+                <span className="text-[11px] font-mono font-medium text-neutral-900 dark:text-white text-right">
                   {targetZones.length > 0 ? (
                     <span className="text-emerald-600 dark:text-emerald-400">
                       {targetZones.length} node{targetZones.length > 1 ? 's' : ''} ({targetZones.join(', ')})
@@ -581,29 +581,29 @@ export function NewAnnouncementForm({
               </div>
 
               {/* Duration / Schedule */}
-              <div className="flex items-center justify-between p-2.5 rounded-lg bg-black/5 dark:bg-white/5 border border-[var(--border-light)] dark:border-white/5">
-                <div className="flex items-center gap-2 text-[var(--slate)] dark:text-neutral-400">
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
+                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
                   <Clock className="w-3.5 h-3.5 text-amber-500" />
                   <span className="text-[11px] font-medium">Duration</span>
                 </div>
-                <span className="text-[11px] font-mono font-medium text-[var(--ink)] dark:text-white text-right">
+                <span className="text-[11px] font-mono font-medium text-neutral-900 dark:text-white text-right">
                   {displayStart ? (
                     <span>
                       {displayStart.replace('T', ' ')} {displayEnd ? `→ ${displayEnd.replace('T', ' ')}` : '(Permanent)'}
                     </span>
                   ) : (
-                    <span className="text-neutral-500 dark:text-neutral-400">Immediate</span>
+                    <span className="text-neutral-500 dark:text-[#7d8187]">Immediate</span>
                   )}
                 </span>
               </div>
             </div>
           </div>
+        </div>
 
           <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400 mt-4 leading-relaxed">
             Content is vetted against automated safety policies before transmission to department HODs and admin consoles.
           </p>
         </div>
-      </div>
 
       <BillboardPreviewModal
         isOpen={previewOpen}

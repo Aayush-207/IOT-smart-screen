@@ -2,8 +2,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CheckSquare } from 'lucide-react'
-import { StatusBadge } from '@/components/StatusBadge'
-
 import { HodRecentSubmissionsClient } from './HodRecentSubmissionsClient'
 
 export default async function HodDashboardPage() {
@@ -11,17 +9,27 @@ export default async function HodDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('department_id').eq('id', user.id).single()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('department_id')
+    .eq('id', user.id)
+    .single()
 
   if (!profile?.department_id) {
     return (
-      <div className="p-8 text-center text-neutral-900 dark:text-white bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl shadow-sm">
-        <h2 className="text-base font-normal">You are not assigned to any department yet. Please contact an administrator.</h2>
+      <div className="p-8 text-center text-neutral-900 dark:text-white bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl shadow-sm animate-fade-in-up">
+        <h2 className="text-lg font-medium">No Department Assigned</h2>
+        <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1">Please contact your administrator to assign your HOD account to a department.</p>
       </div>
     )
   }
 
-  const [{ data: department }, { count: pending }, { count: approvedTotal }, { data: recentNotices }] = await Promise.all([
+  const [
+    { data: department },
+    { count: pending },
+    { count: approvedTotal },
+    { data: recentNotices },
+  ] = await Promise.all([
     supabase.from('departments').select('name').eq('id', profile.department_id).single(),
     supabase
       .from('announcements')
@@ -43,7 +51,7 @@ export default async function HodDashboardPage() {
   ])
 
   return (
-    <div className="space-y-8 max-w-5xl pb-16 text-neutral-900 dark:text-white">
+    <div className="space-y-8 max-w-5xl pb-16 text-neutral-900 dark:text-white animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>
@@ -63,7 +71,7 @@ export default async function HodDashboardPage() {
 
         <Link
           href="/dashboard/hod/approvals"
-          className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 self-start sm:self-auto shrink-0 shadow-sm"
+          className="px-5 py-2.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 active:scale-95 transition-all flex items-center gap-2 self-start sm:self-auto shrink-0 shadow-sm"
         >
           <CheckSquare className="w-3.5 h-3.5" /> Pending Approvals ({pending || 0})
         </Link>
@@ -71,19 +79,19 @@ export default async function HodDashboardPage() {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm">
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm card-hover">
           <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400">Pending Decisions</span>
           <div className="text-3xl font-normal text-neutral-900 dark:text-white">{pending || 0}</div>
           <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">Awaiting your decision</p>
         </div>
 
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm">
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm card-hover">
           <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Authorized &amp; Live</span>
           <div className="text-3xl font-normal text-neutral-900 dark:text-white">{approvedTotal || 0}</div>
           <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">Active on screens</p>
         </div>
 
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm">
+        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm card-hover">
           <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Assigned Unit</span>
           <div className="text-xl font-normal text-neutral-900 dark:text-white truncate">{department?.name}</div>
           <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">HOD Access Tier</p>

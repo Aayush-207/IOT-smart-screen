@@ -89,7 +89,7 @@ export function AdminApprovalQueueClient({
   }
 
   return (
-    <div className="space-y-4 text-neutral-900 dark:text-white">
+    <div className="space-y-4 text-neutral-900 dark:text-white animate-fade-in-up">
       {requests.length === 0 ? (
         <div className="p-12 text-center bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-500 dark:text-[#7d8187] shadow-sm">
           No pending approvals require admin escalation.
@@ -102,7 +102,7 @@ export function AdminApprovalQueueClient({
           return (
             <div
               key={req.id}
-              className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-neutral-300 dark:hover:border-white/30 transition-all shadow-sm"
+              className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-neutral-300 dark:hover:border-white/30 transition-all shadow-sm card-hover"
             >
               <div className="space-y-3 flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -120,7 +120,7 @@ export function AdminApprovalQueueClient({
                 <div>
                   <h3 className="text-base font-medium text-neutral-900 dark:text-white truncate">{req.title}</h3>
                   {req.body && (
-                    <p className="text-xs text-neutral-600 dark:text-neutral-600 dark:text-[#dadbdf] line-clamp-2 mt-1 leading-relaxed font-normal">
+                    <p className="text-xs text-neutral-600 dark:text-[#dadbdf] line-clamp-2 mt-1 leading-relaxed font-normal">
                       {req.body}
                     </p>
                   )}
@@ -171,7 +171,7 @@ export function AdminApprovalQueueClient({
                 <button
                   type="button"
                   onClick={() => setPreviewTarget(req)}
-                  className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors btn-press"
                 >
                   <Eye className="w-3.5 h-3.5" /> Simulator
                 </button>
@@ -179,7 +179,7 @@ export function AdminApprovalQueueClient({
                   type="button"
                   disabled={!!processingAction}
                   onClick={() => handleApprove(req.id, req.title)}
-                  className="px-4 py-2 rounded-full bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] hover:opacity-90 text-xs font-medium inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all shadow-sm"
+                  className="px-4 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] hover:opacity-90 text-xs font-medium inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all shadow-sm btn-press"
                 >
                   {isApproving ? (
                     <>
@@ -197,15 +197,15 @@ export function AdminApprovalQueueClient({
                   type="button"
                   disabled={!!processingAction}
                   onClick={() => setRejectId(req.id)}
-                  className="px-4 py-2 rounded-full border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 rounded-full border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors btn-press"
                 >
                   <XCircle className="w-3.5 h-3.5" /> Reject
                 </button>
               </div>
 
               {rejectId === req.id && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                  <div className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] p-6 w-full max-w-md space-y-4 shadow-2xl text-neutral-900 dark:text-white">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                  <div className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] p-6 w-full max-w-md space-y-4 shadow-2xl text-neutral-900 dark:text-white animate-scale-in">
                     <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">Admin Rejection Feedback</h3>
                     <textarea
                       value={rejectReason}
@@ -218,7 +218,7 @@ export function AdminApprovalQueueClient({
                       <button
                         type="button"
                         onClick={() => setRejectId(null)}
-                        className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono cursor-pointer"
+                        className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono cursor-pointer btn-press"
                       >
                         Cancel
                       </button>
@@ -226,7 +226,7 @@ export function AdminApprovalQueueClient({
                         type="button"
                         disabled={!!processingAction || !rejectReason.trim()}
                         onClick={() => handleReject(req.id, req.title)}
-                        className="px-5 py-1.5 rounded-full bg-rose-600 text-white text-xs font-mono uppercase tracking-wider hover:bg-rose-500 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5"
+                        className="px-5 py-1.5 rounded-full bg-rose-600 text-white text-xs font-mono uppercase tracking-wider hover:bg-rose-500 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5 btn-press"
                       >
                         {isRejecting ? (
                           <>

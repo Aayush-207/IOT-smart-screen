@@ -62,7 +62,7 @@ export default async function AdminDashboardPage() {
   const totalScreens = (screens || []).length
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white">
+    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>

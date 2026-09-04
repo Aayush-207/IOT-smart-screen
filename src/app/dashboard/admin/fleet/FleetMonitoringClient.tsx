@@ -97,7 +97,7 @@ function FleetScreenCardComponent({
   const activeIndex = count > 0 ? slideIndex % count : 0
 
   return (
-    <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden shadow-sm flex flex-col justify-between hover:border-neutral-300 dark:hover:border-white/20 transition-all">
+    <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden shadow-sm flex flex-col justify-between hover:border-neutral-300 dark:hover:border-white/20 transition-all card-hover">
       {/* Screen Top Details & Name */}
       <div className="p-4 sm:p-5 border-b border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] space-y-1.5">
         <div className="flex items-start justify-between gap-2">
@@ -476,7 +476,7 @@ export function FleetMonitoringClient({
   const onlineRate = withStatus.length > 0 ? Math.round((counts.online / withStatus.length) * 100) : 100
 
   return (
-    <>
+    <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327] mb-6 text-neutral-900 dark:text-white">
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -654,6 +654,6 @@ export function FleetMonitoringClient({
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

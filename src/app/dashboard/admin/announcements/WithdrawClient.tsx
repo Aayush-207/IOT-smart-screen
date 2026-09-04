@@ -114,7 +114,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
   }
 
   return (
-    <div className="space-y-8 max-w-7xl pb-16 text-neutral-900 dark:text-white">
+    <div className="space-y-8 max-w-7xl pb-16 text-neutral-900 dark:text-white animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>
@@ -170,7 +170,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
       </div>
 
       {/* Structured, Spacious & Uncluttered Table */}
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-2xl overflow-hidden shadow-sm card-hover">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -354,7 +354,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
           onClick={() => setPreviewPoster(null)}
         >
           <div
-            className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col"
+            className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between">

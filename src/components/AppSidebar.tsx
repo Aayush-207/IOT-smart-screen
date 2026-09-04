@@ -87,6 +87,7 @@ export function AppSidebar({
   const toggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(nextTheme)
+    document.documentElement.classList.add('theme-transition')
     if (nextTheme === 'dark') {
       document.documentElement.classList.add('dark')
       localStorage.setItem('theme', 'dark')
@@ -94,6 +95,9 @@ export function AppSidebar({
       document.documentElement.classList.remove('dark')
       localStorage.setItem('theme', 'light')
     }
+    setTimeout(() => {
+      document.documentElement.classList.remove('theme-transition')
+    }, 400)
   }
 
   const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User' }
@@ -190,9 +194,11 @@ export function AppSidebar({
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            className="p-1.5 rounded-full border border-neutral-300 dark:border-[#212327] bg-white dark:bg-[#0a0a0a] text-neutral-500 dark:text-[#7d8187] hover:text-[var(--ink)] dark:hover:text-white cursor-pointer transition-colors"
+            className="p-1.5 rounded-full border border-neutral-300 dark:border-[#212327] bg-white dark:bg-[#141414] text-neutral-600 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer transition-all duration-200"
           >
-            {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-white" /> : <Moon className="w-3.5 h-3.5 text-[var(--ink)]" />}
+            <span className="inline-block transition-transform duration-300 hover:rotate-45">
+              {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-neutral-700" />}
+            </span>
           </button>
         </div>
 

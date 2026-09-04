@@ -99,7 +99,7 @@ export function ApprovalQueueClient({
   ]
 
   return (
-    <div className="space-y-6 text-neutral-900 dark:text-white">
+    <div className="space-y-6 text-neutral-900 dark:text-white animate-fade-in-up">
       {requests.length === 0 ? (
         <div className="p-12 text-center bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl space-y-3 shadow-sm">
           <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-white/5 border border-emerald-200 dark:border-[#212327] flex items-center justify-center mx-auto text-emerald-600 dark:text-white">
@@ -120,7 +120,7 @@ export function ApprovalQueueClient({
             return (
               <div
                 key={req.id}
-                className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-neutral-300 dark:hover:border-white/30 transition-all shadow-sm"
+                className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-neutral-300 dark:hover:border-white/30 transition-all shadow-sm card-hover"
               >
                 <div className="space-y-3 flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -229,8 +229,8 @@ export function ApprovalQueueClient({
 
       {/* Reject Modal */}
       {rejectTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] p-6 w-full max-w-lg space-y-4 shadow-2xl text-neutral-900 dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] p-6 w-full max-w-lg space-y-4 shadow-2xl text-neutral-900 dark:text-white animate-scale-in">
             <div className="flex justify-between items-center border-b border-neutral-200 dark:border-[#212327] pb-3">
               <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">Reject Announcement</h3>
               <button

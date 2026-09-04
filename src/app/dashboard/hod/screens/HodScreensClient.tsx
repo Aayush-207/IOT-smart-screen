@@ -71,7 +71,7 @@ function ScreenNodeCard({
   const currentContent = count > 0 ? contents[activeIndex] : null
 
   return (
-    <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden shadow-sm flex flex-col justify-between hover:border-neutral-300 dark:hover:border-white/20 transition-all">
+    <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden shadow-sm flex flex-col justify-between hover:border-neutral-300 dark:hover:border-white/20 transition-all card-hover">
       {/* Screen Top Details */}
       <div className="p-5 border-b border-neutral-100 dark:border-white/5 space-y-2">
         <div className="flex items-start justify-between gap-2">
@@ -242,7 +242,7 @@ export function HodScreensClient({
   }
 
   return (
-    <div className="space-y-8 text-neutral-900 dark:text-white">
+    <div className="space-y-8 text-neutral-900 dark:text-white animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>

@@ -55,7 +55,7 @@ export function HodRecentSubmissionsClient({
   }
 
   return (
-    <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-2xl overflow-hidden shadow-sm">
+    <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-2xl overflow-hidden shadow-sm card-hover">
       {/* Header */}
       <div className="p-6 border-b border-neutral-200 dark:border-[#212327] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

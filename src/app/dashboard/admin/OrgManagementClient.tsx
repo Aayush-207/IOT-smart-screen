@@ -88,14 +88,14 @@ export function OrgManagementClient({
   const hodUsers = initialProfiles.filter((p) => p.role === 'hod')
 
   return (
-    <div className="space-y-4 text-neutral-900 dark:text-white">
+    <div className="space-y-4 text-neutral-900 dark:text-white animate-fade-in-up">
       <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-[#212327] pb-3">
         <button
           onClick={() => setActiveTab('departments')}
           className={`px-4 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 cursor-pointer transition-all ${
             activeTab === 'departments'
-              ? 'bg-white text-[#0a0a0a] font-medium'
-              : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:text-white hover:bg-white/5'
+              ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
+              : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5'
           }`}
         >
           <LayoutDashboard className="w-3.5 h-3.5" /> Departments ({initialDepartments.length})
@@ -104,19 +104,19 @@ export function OrgManagementClient({
           onClick={() => setActiveTab('users')}
           className={`px-4 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 cursor-pointer transition-all ${
             activeTab === 'users'
-              ? 'bg-white text-[#0a0a0a] font-medium'
-              : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:text-white hover:bg-white/5'
+              ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
+              : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5'
           }`}
         >
           <Users className="w-3.5 h-3.5" /> Users &amp; Permissions ({initialProfiles.length})
         </button>
       </div>
 
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg p-6 overflow-x-auto">
+      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 overflow-x-auto shadow-sm">
         {activeTab === 'departments' && (
           <div className="space-y-4">
             {/* Create Department Form */}
-            <form onSubmit={handleCreateDepartment} className="flex flex-wrap items-end gap-3 p-4 bg-neutral-50 dark:bg-[#0a0a0a] rounded-lg border border-neutral-200 dark:border-[#212327] mb-4">
+            <form onSubmit={handleCreateDepartment} className="flex flex-wrap items-end gap-3 p-4 bg-neutral-50 dark:bg-[#0a0a0a] rounded-xl border border-neutral-200 dark:border-[#212327] mb-4">
               <div className="flex-1 min-w-[200px]">
                 <label className="block text-xs font-mono text-neutral-500 dark:text-[#7d8187] uppercase tracking-wider mb-1">New Department Name</label>
                 <input
@@ -125,7 +125,7 @@ export function OrgManagementClient({
                   placeholder="e.g. Computer Science & Engineering"
                   value={newDeptName}
                   onChange={(e) => setNewDeptName(e.target.value)}
-                  className="w-full bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
+                  className="w-full bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
                 />
               </div>
               <div>
@@ -133,7 +133,7 @@ export function OrgManagementClient({
                 <select
                   value={newDeptHod}
                   onChange={(e) => setNewDeptHod(e.target.value)}
-                  className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
+                  className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
                 >
                   <option value="">-- None --</option>
                   {hodUsers.map((u) => (
@@ -144,7 +144,7 @@ export function OrgManagementClient({
               <button
                 type="submit"
                 disabled={loading || !newDeptName.trim()}
-                className="px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm"
               >
                 {loading ? (
                   <>

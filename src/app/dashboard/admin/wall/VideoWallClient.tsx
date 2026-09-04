@@ -353,7 +353,7 @@ export function VideoWallClient({
   }
 
   return (
-    <div className={`space-y-6 text-neutral-900 dark:text-white ${isFullscreen ? 'p-6 bg-white dark:bg-neutral-50 dark:bg-[#0a0a0a] min-h-screen' : ''}`}>
+    <div className={`space-y-6 text-neutral-900 dark:text-white ${isFullscreen ? 'p-6 bg-white dark:bg-[#0a0a0a] min-h-screen' : ''}`}>
       {/* Top Video Wall Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>
@@ -470,7 +470,7 @@ export function VideoWallClient({
           <select
             value={selectedZone}
             onChange={(e) => setSelectedZone(e.target.value)}
-            className="bg-white dark:bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full px-4 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-white font-mono"
+            className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full px-4 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-white font-mono"
           >
             <option value="all">All Campus Zones ({zones.length})</option>
             {zones.map((z) => (
@@ -488,7 +488,7 @@ export function VideoWallClient({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search screens or notices…"
-            className="w-full bg-white dark:bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full pl-8 pr-3.5 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-white font-mono"
+            className="w-full bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full pl-8 pr-3.5 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-white font-mono"
           />
         </div>
       </div>

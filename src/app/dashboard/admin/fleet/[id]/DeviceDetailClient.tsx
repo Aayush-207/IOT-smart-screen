@@ -94,22 +94,22 @@ export function DeviceDetailClient({
   const currentAnnouncement = screen.announcements
 
   return (
-    <div className="space-y-8 max-w-5xl pb-16">
-      <Link href="/dashboard/admin/fleet" className="cohere-btn-secondary text-xs inline-flex items-center gap-1.5">
+    <div className="space-y-8 max-w-5xl pb-16 animate-fade-in-up">
+      <Link href="/dashboard/admin/fleet" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] text-xs font-mono text-neutral-700 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-white/30 transition-all btn-press">
         &larr; Back to Fleet Infrastructure
       </Link>
 
       {/* Hero Header */}
-      <div className="p-6 md:p-8 rounded-2xl border border-[var(--border-light)] bg-[var(--canvas)] flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 md:p-8 rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm card-hover">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="cohere-chip-green">{screen.zone || 'General Zone'}</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-semibold">{screen.zone || 'General Zone'}</span>
             <StatusBadge status={status} />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">
-            {screen.name} &mdash; <span className="text-[var(--slate)] font-normal">{screen.location}</span>
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
+            {screen.name} &mdash; <span className="text-neutral-500 dark:text-neutral-400 font-normal">{screen.location}</span>
           </h1>
-          <p className="text-xs text-[var(--mute)] font-mono mt-1.5">
+          <p className="text-xs text-neutral-400 dark:text-neutral-500 font-mono mt-1.5">
             Node UUID: {screen.id}
           </p>
         </div>
@@ -119,13 +119,13 @@ export function DeviceDetailClient({
             href={`/kiosk.html?id=${screen.id}`}
             target="_blank"
             rel="noreferrer"
-            className="cohere-btn-primary text-xs"
+            className="px-4 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium inline-flex items-center gap-1.5 hover:opacity-90 transition-all shadow-sm btn-press"
           >
             Launch Kiosk &rarr;
           </a>
           <button
             onClick={() => setEditOpen(true)}
-            className="cohere-btn-pill-outline text-xs flex items-center gap-1.5"
+            className="px-4 py-2 rounded-full border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-800 dark:text-neutral-200 text-xs flex items-center gap-1.5 hover:border-neutral-300 dark:hover:border-white/20 transition-all btn-press cursor-pointer"
             title="Edit Device Information"
           >
             <Pencil className="w-3.5 h-3.5" /> Edit Metadata
@@ -136,22 +136,22 @@ export function DeviceDetailClient({
       {/* Screen Mirror & Telemetry */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Agent Console Screen Mirror */}
-        <div className="lg:col-span-7 agent-console-card p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4 border-b border-[var(--hairline)] dark:border-white/10 pb-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--ink)] dark:text-neutral-900 dark:text-white flex items-center gap-2">
+        <div className="lg:col-span-7 rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] p-6 flex flex-col justify-between shadow-sm card-hover">
+          <div className="flex items-center justify-between mb-4 border-b border-neutral-200 dark:border-[#212327] pb-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Display Node Mirror
             </span>
-            <span className="text-[10px] font-mono text-[var(--slate)] dark:text-neutral-400">Aspect: 16:9</span>
+            <span className="text-[10px] font-mono text-neutral-500 dark:text-neutral-400">Aspect: 16:9</span>
           </div>
 
-          <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 overflow-hidden flex flex-col justify-center items-center text-center p-4 text-neutral-900 dark:text-white relative">
+          <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 overflow-hidden flex flex-col justify-center items-center text-center p-4 text-white relative shadow-inner">
             {currentAnnouncement?.attachment_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={currentAnnouncement.attachment_url} alt="Current content" className="max-h-36 object-contain rounded-lg mb-2" />
             ) : null}
             {currentAnnouncement ? (
               <div>
-                <h4 className="text-sm font-semibold text-neutral-900 dark:text-white line-clamp-2 px-2">{currentAnnouncement.title}</h4>
+                <h4 className="text-sm font-semibold text-white line-clamp-2 px-2">{currentAnnouncement.title}</h4>
                 {currentAnnouncement.body && (
                   <p className="text-[10px] text-neutral-300 line-clamp-2 mt-1 px-4">{currentAnnouncement.body}</p>
                 )}
@@ -168,28 +168,28 @@ export function DeviceDetailClient({
           </div>
         </div>
 
-        {/* Right: Telemetry & Remote Control */}
+        {/* Right: Telemetry & Remote Diagnostics */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="cohere-card-stone p-6 space-y-3">
-            <h3 className="cohere-mono-label text-[var(--mute)] border-b border-[var(--hairline)] pb-2">
+          <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] p-6 space-y-3 shadow-sm card-hover">
+            <h3 className="text-[10px] uppercase font-mono tracking-widest text-neutral-400 dark:text-neutral-500 border-b border-neutral-200 dark:border-[#212327] pb-2 font-bold">
               Hardware Telemetry
             </h3>
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between py-1 border-b border-[var(--hairline)]">
-                <span className="text-[var(--slate)]">Now Playing</span>
-                <span className="font-semibold text-[var(--ink)] truncate max-w-[180px]">{currentAnnouncement?.title || 'Idle Standby'}</span>
+              <div className="flex justify-between py-1 border-b border-neutral-200 dark:border-[#212327]">
+                <span className="text-neutral-500 dark:text-neutral-400">Now Playing</span>
+                <span className="font-semibold text-neutral-900 dark:text-white truncate max-w-[180px]">{currentAnnouncement?.title || 'Idle Standby'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[var(--hairline)]">
-                <span className="text-[var(--slate)]">Last Heartbeat</span>
-                <span className="font-mono text-[var(--ink)]" suppressHydrationWarning>{relativeTime(screen.last_seen_at)}</span>
+              <div className="flex justify-between py-1 border-b border-neutral-200 dark:border-[#212327]">
+                <span className="text-neutral-500 dark:text-neutral-400">Last Heartbeat</span>
+                <span className="font-mono text-neutral-900 dark:text-white" suppressHydrationWarning>{relativeTime(screen.last_seen_at)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-[var(--hairline)]">
-                <span className="text-[var(--slate)]">Firmware</span>
-                <span className="font-mono text-[var(--ink)]">{screen.firmware_version || 'v2.4.0-edge'}</span>
+              <div className="flex justify-between py-1 border-b border-neutral-200 dark:border-[#212327]">
+                <span className="text-neutral-500 dark:text-neutral-400">Firmware</span>
+                <span className="font-mono text-neutral-900 dark:text-white">{screen.firmware_version || 'v2.4.0-edge'}</span>
               </div>
               <div className="flex justify-between py-1">
-                <span className="text-[var(--slate)]">Location Zone</span>
-                <span className="font-semibold text-[var(--ink)]">{screen.zone || screen.location}</span>
+                <span className="text-neutral-500 dark:text-neutral-400">Location Zone</span>
+                <span className="font-semibold text-neutral-900 dark:text-white">{screen.zone || screen.location}</span>
               </div>
             </div>
 
@@ -205,8 +205,8 @@ export function DeviceDetailClient({
             )}
           </div>
 
-          <div className="cohere-card-stone p-6 space-y-3">
-            <h3 className="cohere-mono-label text-[var(--mute)]">
+          <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] p-6 space-y-3 shadow-sm card-hover">
+            <h3 className="text-[10px] uppercase font-mono tracking-widest text-neutral-400 dark:text-neutral-500 font-bold">
               Remote Diagnostics
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -214,23 +214,23 @@ export function DeviceDetailClient({
                 type="button"
                 onClick={handleSimulatePing}
                 disabled={!!loading}
-                className="cohere-btn-pill-outline col-span-2 text-xs flex items-center justify-center gap-1.5 border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 cursor-pointer"
+                className="col-span-2 px-3 py-2 rounded-xl border border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-500/10 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-all btn-press"
               >
-                <Radio className={`w-3.5 h-3.5 ${loading === 'ping' ? 'animate-ping text-emerald-500' : ''}`} /> Simulate Device Heartbeat (Ping)
+                <Radio className={`w-3.5 h-3.5 ${loading === 'ping' ? 'animate-ping text-emerald-500' : ''}`} /> Simulate Heartbeat (Ping)
               </button>
               <button
                 type="button"
                 onClick={handleForceRefresh}
                 disabled={!!loading}
-                className="cohere-btn-pill-outline text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 rounded-xl border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-800 dark:text-neutral-200 hover:border-neutral-300 dark:hover:border-white/20 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-all btn-press"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading === 'refresh' ? 'animate-spin text-[#1863dc]' : ''}`} /> Force Sync
+                <RefreshCw className={`w-3.5 h-3.5 ${loading === 'refresh' ? 'animate-spin text-sky-500' : ''}`} /> Force Sync
               </button>
               <button
                 type="button"
                 onClick={handleReboot}
                 disabled={!!loading}
-                className="cohere-btn-pill-outline border-rose-300 text-rose-700 dark:text-rose-400 hover:bg-rose-50 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 rounded-xl border border-rose-300 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/40 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-all btn-press"
               >
                 <Power className={`w-3.5 h-3.5 ${loading === 'reboot' ? 'animate-pulse' : ''}`} /> Reboot Node
               </button>
@@ -240,12 +240,12 @@ export function DeviceDetailClient({
       </div>
 
       {/* Activity Timeline */}
-      <div className="cohere-card-stone p-6">
-        <h3 className="font-semibold text-xs uppercase tracking-wider text-[var(--ink)] mb-4">Device Audit &amp; Delivery Log</h3>
+      <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] p-6 shadow-sm card-hover">
+        <h3 className="font-semibold text-xs uppercase tracking-wider text-neutral-900 dark:text-white mb-4">Device Audit &amp; Delivery Log</h3>
         {deliveries.length === 0 && auditRows.length === 0 ? (
-          <p className="text-xs text-[var(--mute)]">No activity recorded yet for this device.</p>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">No activity recorded yet for this device.</p>
         ) : (
-          <div className="space-y-3 text-xs text-[var(--slate)] font-mono text-[11px]">
+          <div className="space-y-3 text-xs text-neutral-600 dark:text-neutral-400 font-mono text-[11px]">
             {[...deliveries.map((d: any) => ({
               date: d.last_confirmed_at,
               text: `${d.announcements?.title || 'Announcement'} — ${d.state || 'delivered'}`,
@@ -255,9 +255,9 @@ export function DeviceDetailClient({
             }))]
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
               .map((entry, i) => (
-                <div key={i} className="flex flex-wrap items-center justify-between border-t border-[var(--hairline)] pt-2.5 first:border-0 first:pt-0">
-                  <span className="font-medium text-[var(--ink)]">{entry.text}</span>
-                  <span className="text-[10px] text-[var(--mute)]">{new Date(entry.date).toLocaleString()}</span>
+                <div key={i} className="flex flex-wrap items-center justify-between border-t border-neutral-200 dark:border-[#212327] pt-2.5 first:border-0 first:pt-0">
+                  <span className="font-medium text-neutral-900 dark:text-white">{entry.text}</span>
+                  <span className="text-[10px] text-neutral-400 dark:text-neutral-500">{new Date(entry.date).toLocaleString()}</span>
                 </div>
               ))}
           </div>
@@ -266,26 +266,26 @@ export function DeviceDetailClient({
 
       {/* Rename Modal */}
       {editOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-[var(--canvas)] rounded-2xl border border-[var(--hairline)] p-6 w-full max-w-md space-y-4">
-            <h3 className="text-base font-semibold text-[var(--ink)]">Update Screen Node Metadata</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] p-6 w-full max-w-md space-y-4 shadow-2xl animate-scale-in">
+            <h3 className="text-base font-semibold text-neutral-900 dark:text-white">Update Screen Node Metadata</h3>
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] uppercase font-bold text-[var(--mute)] block mb-1">Screen Name</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Device name" className="w-full px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs font-semibold text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]" />
+                <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block mb-1">Screen Name</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Device name" className="w-full px-3.5 py-2 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs font-semibold text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-all" />
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-[var(--mute)] block mb-1">Building Location</label>
-                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs font-semibold text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]" />
+                <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block mb-1">Building Location</label>
+                <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full px-3.5 py-2 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs font-semibold text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-all" />
               </div>
               <div>
-                <label className="text-[10px] uppercase font-bold text-[var(--mute)] block mb-1">Campus Zone</label>
-                <input value={zone} onChange={(e) => setZone(e.target.value)} placeholder="Zone" className="w-full px-3.5 py-2 bg-[var(--canvas)] border border-[var(--hairline)] rounded-lg text-xs font-semibold text-[var(--ink)] focus:outline-none focus:border-[var(--focus-blue)]" />
+                <label className="text-[10px] uppercase font-bold text-neutral-500 dark:text-neutral-400 block mb-1">Campus Zone</label>
+                <input value={zone} onChange={(e) => setZone(e.target.value)} placeholder="Zone" className="w-full px-3.5 py-2 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs font-semibold text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-all" />
               </div>
             </div>
             <div className="flex gap-2.5 justify-end pt-2">
-              <button onClick={() => setEditOpen(false)} className="cohere-btn-secondary text-xs">Cancel</button>
-              <button onClick={handleRename} disabled={!!loading} className="cohere-btn-primary text-xs">
+              <button onClick={() => setEditOpen(false)} className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono cursor-pointer btn-press">Cancel</button>
+              <button onClick={handleRename} disabled={!!loading} className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 disabled:opacity-50 cursor-pointer btn-press">
                 {loading === 'rename' ? 'Saving…' : 'Save Changes'}
               </button>
             </div>

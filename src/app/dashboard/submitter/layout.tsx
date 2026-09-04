@@ -8,7 +8,7 @@ export default async function SubmitterLayout({ children }: { children: React.Re
   if (!user) return redirect('/login')
 
   return (
-    <div className="h-screen flex overflow-hidden bg-[var(--canvas)] text-[var(--ink)] font-geist-sans">
+    <div className="h-screen flex overflow-hidden bg-neutral-100 dark:bg-[#0a0a0a] text-neutral-900 dark:text-white font-geist-sans transition-colors duration-200">
       <AppSidebar role="submitter" userEmail={user.email || ''} />
       <main className="flex-1 min-w-0 h-screen overflow-y-auto px-6 py-8 md:px-10">
         <div className="max-w-6xl mx-auto">{children}</div>
