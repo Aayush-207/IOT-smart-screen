@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Monitor, Eye, Tv, Signal, Clock, MapPin, RefreshCw, Layers } from 'lucide-react'
 import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
 import { formatDuration } from '@/lib/dateUtils'
@@ -13,6 +14,7 @@ export interface ScreenContent {
   display_start?: string | null
   display_end?: string | null
   priority?: string
+  department_name?: string
 }
 
 export interface ScreenNode {
@@ -27,6 +29,7 @@ export interface ScreenNode {
 
 /**
  * Self-contained Screen Node Card with hardware-accelerated GPU slide carousel
+ * and clean 16:9 / 9:16 aspect ratio switcher
  */
 function ScreenNodeCard({
   screen,
@@ -37,6 +40,7 @@ function ScreenNodeCard({
   departmentName: string
   onInspect: (content: ScreenContent) => void
 }) {
+  const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9')
   const contents = screen.contents || []
   const count = contents.length
   const hasMultiple = count > 1
@@ -73,11 +77,11 @@ function ScreenNodeCard({
   return (
     <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden shadow-sm flex flex-col justify-between hover:border-neutral-300 dark:hover:border-white/20 transition-all card-hover">
       {/* Screen Top Details */}
-      <div className="p-5 border-b border-neutral-100 dark:border-white/5 space-y-2">
+      <div className="p-4 sm:p-5 border-b border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] space-y-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-            <h3 className="font-semibold text-sm text-neutral-900 dark:text-white truncate" title={screen.name}>
+            <h3 className="font-semibold text-sm sm:text-base text-neutral-900 dark:text-white truncate" title={screen.name}>
               {screen.name}
             </h3>
           </div>
@@ -93,15 +97,51 @@ function ScreenNodeCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+        <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-[#7d8187] font-mono">
           <MapPin className="w-3 h-3 text-neutral-400 shrink-0" />
           <span className="truncate">{screen.location} &bull; {screen.zone}</span>
         </div>
       </div>
 
-      {/* Simulated 16:9 Display Screen Frame */}
-      <div className="p-5 bg-neutral-100/60 dark:bg-black/40 flex-1 flex flex-col justify-center">
-        <div className="aspect-[16/9] w-full rounded-xl bg-black border-2 border-neutral-800 shadow-xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none">
+      {/* Simulated Display Screen Frame with 16:9 / 9:16 Aspect Ratio Toggle */}
+      <div className="p-4 sm:p-5 bg-neutral-100/70 dark:bg-black/40 flex-1 flex flex-col justify-center">
+        {/* Aspect Ratio Switcher (clean 16:9 / 9:16 buttons) */}
+        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-[#7d8187] mb-2.5 px-1">
+          <span className="text-[10px]">Aspect Ratio</span>
+          <div className="flex items-center p-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-xs">
+            <button
+              type="button"
+              onClick={() => setAspectRatio('16:9')}
+              className={`px-2.5 py-1 text-[10px] rounded-full transition-all cursor-pointer ${
+                aspectRatio === '16:9'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-2xs'
+                  : 'text-neutral-500 hover:text-neutral-900 dark:text-[#7d8187] dark:hover:text-white'
+              }`}
+            >
+              16:9
+            </button>
+            <button
+              type="button"
+              onClick={() => setAspectRatio('9:16')}
+              className={`px-2.5 py-1 text-[10px] rounded-full transition-all cursor-pointer ${
+                aspectRatio === '9:16'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-2xs'
+                  : 'text-neutral-500 hover:text-neutral-900 dark:text-[#7d8187] dark:hover:text-white'
+              }`}
+            >
+              9:16
+            </button>
+          </div>
+        </div>
+
+        {/* Screen Display Frame */}
+        <div
+          className={`transition-all duration-300 relative rounded-xl bg-black border-2 border-neutral-800 shadow-xl overflow-hidden flex flex-col justify-between text-center text-white select-none mx-auto ${
+            aspectRatio === '16:9'
+              ? 'w-full aspect-[16/9]'
+              : 'w-[180px] sm:w-[200px] aspect-[9/16]'
+          }`}
+        >
           {count === 0 ? (
             /* Standby / Idle Broadcast Screen */
             <div className="my-auto text-center space-y-1 z-10 p-3">
@@ -127,19 +167,21 @@ function ScreenNodeCard({
               }}
             >
               {slides.map((item, idx) => (
-                <div key={idx} className="w-full h-full shrink-0 relative overflow-hidden">
+                <div key={idx} className="w-full h-full shrink-0 relative overflow-hidden bg-black flex items-center justify-center">
                   {item.attachment_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={item.attachment_url}
                       alt={item.title || screen.name}
-                      className="w-full h-full object-cover select-none pointer-events-none"
+                      className={`w-full h-full object-cover select-none pointer-events-none transition-all duration-300 ${
+                        aspectRatio === '9:16' ? 'object-cover' : 'object-cover'
+                      }`}
                       loading="eager"
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col justify-between p-3 text-center text-white">
                       <div className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 truncate">
-                        {departmentName} &bull; {item.priority?.toUpperCase() || 'ANNOUNCEMENT'}
+                        {item.department_name || departmentName} &bull; {item.priority?.toUpperCase() || 'ANNOUNCEMENT'}
                       </div>
                       <div className="my-auto px-2">
                         <h4 className="text-xs font-semibold line-clamp-2 text-white">{item.title}</h4>
@@ -147,7 +189,7 @@ function ScreenNodeCard({
                       </div>
                       <div className="text-[7px] font-mono text-neutral-500 flex justify-between border-t border-white/10 pt-1 mt-auto">
                         <span>CampusCast Engine</span>
-                        <span>{screen.resolution}</span>
+                        <span>{aspectRatio}</span>
                       </div>
                     </div>
                   )}
@@ -180,13 +222,13 @@ function ScreenNodeCard({
             </div>
           )}
 
-          {/* Realistic screen glare reflection */}
+          {/* Screen glare reflection */}
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-20" />
         </div>
       </div>
 
       {/* Screen Content Metadata & Action Footer */}
-      <div className="p-5 border-t border-neutral-100 dark:border-white/5 space-y-3 bg-white dark:bg-[#141414]">
+      <div className="p-4 sm:p-5 border-t border-neutral-200 dark:border-[#212327] space-y-3 bg-white dark:bg-[#141414]">
         <div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
@@ -198,17 +240,17 @@ function ScreenNodeCard({
               </span>
             )}
           </div>
-          <div className="text-xs font-medium text-neutral-900 dark:text-white truncate mt-0.5" title={currentContent?.title || 'No active notice'}>
+          <div className="text-xs sm:text-sm font-medium text-neutral-900 dark:text-white truncate mt-0.5" title={currentContent?.title || 'No active notice'}>
             {currentContent?.title || 'Standby Rotation'}
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-neutral-400 pt-1 border-t border-neutral-100 dark:border-white/5">
+        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-[#7d8187] pt-1 border-t border-neutral-100 dark:border-[#212327]">
           <span suppressHydrationWarning className="flex items-center gap-1 truncate">
             <Clock className="w-3 h-3 text-amber-500 shrink-0" />
             {formatDuration(currentContent?.display_start, currentContent?.display_end)}
           </span>
-          <span className="shrink-0 text-[10px] text-neutral-400">{screen.resolution}</span>
+          <span className="shrink-0 text-[10px]">{aspectRatio === '16:9' ? '1920x1080 (16:9)' : '1080x1920 (9:16)'}</span>
         </div>
 
         <button
@@ -216,7 +258,7 @@ function ScreenNodeCard({
           onClick={() =>
             onInspect(currentContent || { title: screen.name, body: 'Standby rotation' })
           }
-          className="w-full py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 border border-neutral-200 dark:border-white/10 text-xs font-mono text-neutral-800 dark:text-white inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+          className="w-full py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 border border-neutral-200 dark:border-white/10 text-xs font-mono text-neutral-800 dark:text-white inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer btn-press"
         >
           <Eye className="w-3.5 h-3.5" />
           <span>Inspect Current Poster</span>
@@ -233,12 +275,14 @@ export function HodScreensClient({
   screens: ScreenNode[]
   departmentName: string
 }) {
+  const router = useRouter()
   const [inspectContent, setInspectContent] = useState<ScreenContent | null>(null)
   const [refreshing, setRefreshing] = useState(false)
 
   const handleRefresh = () => {
     setRefreshing(true)
-    setTimeout(() => setRefreshing(false), 800)
+    router.refresh()
+    setTimeout(() => setRefreshing(false), 600)
   }
 
   return (
@@ -265,7 +309,7 @@ export function HodScreensClient({
         <button
           type="button"
           onClick={handleRefresh}
-          className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-800 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono inline-flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-auto shrink-0 shadow-sm"
+          className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-800 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono inline-flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-auto shrink-0 shadow-sm btn-press"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
           <span>Refresh Feed</span>
@@ -292,7 +336,7 @@ export function HodScreensClient({
           title={inspectContent.title}
           body={inspectContent.body || 'Standby rotation mode active.'}
           priority={(inspectContent.priority as any) || 'routine'}
-          departmentName={departmentName}
+          departmentName={inspectContent.department_name || departmentName}
           attachmentUrl={inspectContent.attachment_url}
         />
       )}
