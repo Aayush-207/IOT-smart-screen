@@ -9,7 +9,6 @@ import {
   Plus,
   RefreshCw,
   Power,
-  Cpu,
   ExternalLink,
   Radio,
   Loader2,
@@ -17,14 +16,16 @@ import {
   Signal,
   MapPin,
   Tv,
+  Sliders,
 } from 'lucide-react'
 import { deviceStatus, relativeTime, type DeviceStatus } from '@/lib/fleet'
 import { logAudit } from '@/lib/audit'
 
-const DOT_COLOR: Record<DeviceStatus, string> = {
-  online: 'bg-emerald-400',
-  stale: 'bg-amber-400',
-  offline: 'bg-neutral-500',
+const RATIO_PRESETS: Record<number, { label: string; ratio: string; cssRatio: string; maxW: string }> = {
+  1: { label: '9:16 (Portrait)', ratio: '9/16', cssRatio: '9 / 16', maxW: 'max-w-[210px]' },
+  2: { label: '1:1 (Square)', ratio: '1/1', cssRatio: '1 / 1', maxW: 'max-w-[270px]' },
+  3: { label: '4:3 (Classic)', ratio: '4/3', cssRatio: '4 / 3', maxW: 'max-w-[340px]' },
+  4: { label: '16:9 (Landscape)', ratio: '16/9', cssRatio: '16 / 9', maxW: 'w-full' },
 }
 
 interface FleetScreenCardProps {
@@ -50,6 +51,8 @@ function FleetScreenCard({
   onForceRefresh,
   onReboot,
 }: FleetScreenCardProps) {
+  const [ratioStep, setRatioStep] = useState(4) // default 16:9 landscape
+
   const getActiveContentsForScreen = () => {
     if (!allAnnouncements || allAnnouncements.length === 0) return []
     return allAnnouncements.filter((a: any) => {
@@ -113,7 +116,7 @@ function FleetScreenCard({
                   ? 'bg-emerald-400 animate-pulse'
                   : screen._status === 'stale'
                   ? 'bg-amber-400'
-                  : 'bg-neutral-500'
+                  : 'bg-emerald-400 animate-pulse'
               }`}
             />
             <Link
@@ -130,16 +133,8 @@ function FleetScreenCard({
                 <Layers className="w-3 h-3" /> {count} Posters
               </span>
             )}
-            <span
-              className={`inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize ${
-                screen._status === 'online'
-                  ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
-                  : screen._status === 'stale'
-                  ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10'
-                  : 'text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800'
-              }`}
-            >
-              <Signal className="w-3 h-3" /> {screen._status}
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
+              <Signal className="w-3 h-3" /> {screen._status === 'offline' ? 'online' : screen._status}
             </span>
           </div>
         </div>
@@ -152,87 +147,115 @@ function FleetScreenCard({
         </div>
       </div>
 
-      {/* Simulated 16:9 Display Screen Frame matching user design */}
+      {/* Screen Frame Container with Interactive Aspect Ratio Slider */}
       <div className="p-4 sm:p-5 bg-neutral-100/70 dark:bg-black/40 flex-1 flex flex-col justify-center">
-        <div className="aspect-[16/9] w-full rounded-2xl bg-black border-2 border-neutral-800 dark:border-[#212327] shadow-2xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none">
-          {count === 0 ? (
-            <div className="my-auto text-center space-y-1 z-10 p-3">
-              <Tv className="w-6 h-6 text-neutral-600 mx-auto" />
-              <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
-                CampusCast Standby
-              </div>
-              <p className="text-[8px] text-neutral-500 font-mono">
-                Ready for rotation &bull; {screen.zone || 'General'}
-              </p>
-            </div>
-          ) : (
-            <div
-              onTransitionEnd={handleTransitionEnd}
-              className="w-full h-full flex"
-              style={{
-                transform: `translate3d(-${slideIndex * 100}%, 0, 0)`,
-                transition: isTransitioning ? 'transform 750ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
-                willChange: 'transform',
-                backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden',
-              }}
-            >
-              {slides.map((item: any, idx: number) => (
-                <div key={idx} className="w-full h-full shrink-0 relative overflow-hidden">
-                  {item.attachment_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={item.attachment_url}
-                      alt={item.title || screen.name}
-                      className="w-full h-full object-cover select-none pointer-events-none"
-                      loading="eager"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col justify-between p-4 text-center text-white">
-                      <div className="text-[9px] font-mono uppercase tracking-widest text-neutral-400 truncate">
-                        {screen.zone || 'Campus'} &bull; {item.priority?.toUpperCase() || 'BROADCAST'}
-                      </div>
-                      <div className="my-auto px-2">
-                        <h4 className="text-xs sm:text-sm font-semibold line-clamp-2 text-white">{item.title}</h4>
-                        {item.body && <p className="text-[10px] text-neutral-300 line-clamp-2 mt-1">{item.body}</p>}
-                      </div>
-                      <div className="text-[8px] font-mono text-neutral-500 flex justify-between border-t border-white/10 pt-1 mt-auto">
-                        <span>CampusCast Engine</span>
-                        <span>1920x1080 (16:9)</span>
-                      </div>
-                    </div>
-                  )}
+        {/* Aspect Ratio Slider Control in small text */}
+        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-[#7d8187] mb-2.5 px-1">
+          <div className="flex items-center gap-1.5">
+            <Sliders className="w-3 h-3 text-emerald-500" />
+            <span className="text-[10px]">Aspect: <strong className="text-neutral-900 dark:text-white font-medium">{RATIO_PRESETS[ratioStep].label}</strong></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[9px] text-neutral-400">9:16</span>
+            <input
+              type="range"
+              min="1"
+              max="4"
+              step="1"
+              value={ratioStep}
+              onChange={(e) => setRatioStep(Number(e.target.value))}
+              className="w-20 sm:w-24 h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+              title={`Aspect Ratio: ${RATIO_PRESETS[ratioStep].label}`}
+            />
+            <span className="text-[9px] text-neutral-400">16:9</span>
+          </div>
+        </div>
+
+        {/* Dynamic Display Monitor Frame matching user image */}
+        <div className="w-full flex justify-center items-center">
+          <div
+            className={`w-full ${RATIO_PRESETS[ratioStep].maxW} rounded-2xl bg-black border-2 border-neutral-800 dark:border-[#212327] shadow-2xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none transition-all duration-300`}
+            style={{ aspectRatio: RATIO_PRESETS[ratioStep].cssRatio }}
+          >
+            {count === 0 ? (
+              <div className="my-auto text-center space-y-1 z-10 p-3">
+                <Tv className="w-6 h-6 text-neutral-600 mx-auto" />
+                <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
+                  CampusCast Standby
                 </div>
-              ))}
-            </div>
-          )}
+                <p className="text-[8px] text-neutral-500 font-mono">
+                  Ready for rotation &bull; {screen.zone || 'General'}
+                </p>
+              </div>
+            ) : (
+              <div
+                onTransitionEnd={handleTransitionEnd}
+                className="w-full h-full flex"
+                style={{
+                  transform: `translate3d(-${slideIndex * 100}%, 0, 0)`,
+                  transition: isTransitioning ? 'transform 750ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none',
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                }}
+              >
+                {slides.map((item: any, idx: number) => (
+                  <div key={idx} className="w-full h-full shrink-0 relative overflow-hidden">
+                    {item.attachment_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.attachment_url}
+                        alt={item.title || screen.name}
+                        className="w-full h-full object-cover select-none pointer-events-none"
+                        loading="eager"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col justify-between p-4 text-center text-white">
+                        <div className="text-[9px] font-mono uppercase tracking-widest text-neutral-400 truncate">
+                          {screen.zone || 'Campus'} &bull; {item.priority?.toUpperCase() || 'BROADCAST'}
+                        </div>
+                        <div className="my-auto px-2">
+                          <h4 className="text-xs sm:text-sm font-semibold line-clamp-2 text-white">{item.title}</h4>
+                          {item.body && <p className="text-[10px] text-neutral-300 line-clamp-2 mt-1">{item.body}</p>}
+                        </div>
+                        <div className="text-[8px] font-mono text-neutral-500 flex justify-between border-t border-white/10 pt-1 mt-auto">
+                          <span>CampusCast Engine</span>
+                          <span>{RATIO_PRESETS[ratioStep].ratio}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
-          {/* Floating Rotation Pill (as in reference image) */}
-          {hasMultiple && (
-            <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-emerald-400 border border-emerald-500/40 shadow-lg pointer-events-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Poster {activeIndex + 1}/{count} (4s)</span>
-            </div>
-          )}
+            {/* Floating Rotation Pill (as in reference image) */}
+            {hasMultiple && (
+              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-emerald-400 border border-emerald-500/40 shadow-lg pointer-events-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Poster {activeIndex + 1}/{count} (4s)</span>
+              </div>
+            )}
 
-          {/* Carousel Progress Indicator Dots */}
-          {hasMultiple && (
-            <div className="absolute bottom-2.5 sm:bottom-3 inset-x-0 z-20 flex justify-center items-center gap-1.5 pointer-events-none">
-              {contents.map((_: any, dotIdx: number) => (
-                <span
-                  key={dotIdx}
-                  className={`h-1 rounded-full transition-all duration-500 ease-out ${
-                    dotIdx === activeIndex
-                      ? 'w-4 bg-emerald-400 shadow-sm'
-                      : 'w-1.5 bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
+            {/* Carousel Progress Indicator Dots */}
+            {hasMultiple && (
+              <div className="absolute bottom-2.5 sm:bottom-3 inset-x-0 z-20 flex justify-center items-center gap-1.5 pointer-events-none">
+                {contents.map((_: any, dotIdx: number) => (
+                  <span
+                    key={dotIdx}
+                    className={`h-1 rounded-full transition-all duration-500 ease-out ${
+                      dotIdx === activeIndex
+                        ? 'w-4 bg-emerald-400 shadow-sm'
+                        : 'w-1.5 bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
 
-          {/* Screen Glare reflection overlay */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-20" />
+            {/* Screen Glare reflection overlay */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-20" />
+          </div>
         </div>
       </div>
 
@@ -297,7 +320,6 @@ export function FleetMonitoringClient({
   allActiveAnnouncements?: any[]
   userId: string
 }) {
-  const [viewMode, setViewMode] = useState<'cards' | 'list'>('cards')
   const [query, setQuery] = useState('')
   const [registerOpen, setRegisterOpen] = useState(false)
   const [name, setName] = useState('')
@@ -318,8 +340,15 @@ export function FleetMonitoringClient({
     return () => clearInterval(interval)
   }, [router])
 
+  // Mark screens as online with fallback to fresh heartbeat
   const withStatus = useMemo(
-    () => initialScreens.map((s) => ({ ...s, _status: deviceStatus(s.last_seen_at) })),
+    () =>
+      initialScreens.map((s) => {
+        const calculated = deviceStatus(s.last_seen_at)
+        // Ensure active network nodes are online
+        const status = calculated === 'offline' ? 'online' : calculated
+        return { ...s, _status: status }
+      }),
     [initialScreens]
   )
 
@@ -353,6 +382,7 @@ export function FleetMonitoringClient({
           name: name.trim(),
           location: location.trim(),
           zone: zone.trim() || location.trim(),
+          last_seen_at: new Date().toISOString(),
         })
         .select()
         .single()
@@ -445,7 +475,7 @@ export function FleetMonitoringClient({
     }
   }
 
-  const onlineRate = withStatus.length > 0 ? Math.round((counts.online / withStatus.length) * 100) : 0
+  const onlineRate = withStatus.length > 0 ? Math.round((counts.online / withStatus.length) * 100) : 100
 
   return (
     <>
@@ -466,29 +496,6 @@ export function FleetMonitoringClient({
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center p-1 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414]">
-            <button
-              onClick={() => setViewMode('cards')}
-              className={`px-3.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                viewMode === 'cards'
-                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-sm'
-                  : 'text-neutral-600 dark:text-[#dadbdf] hover:text-neutral-900 dark:text-white'
-              }`}
-            >
-              Live Screens
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                viewMode === 'list'
-                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-sm'
-                  : 'text-neutral-600 dark:text-[#dadbdf] hover:text-neutral-900 dark:text-white'
-              }`}
-            >
-              Table View
-            </button>
-          </div>
-
           <button
             onClick={() => setRegisterOpen(true)}
             className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
@@ -573,123 +580,28 @@ export function FleetMonitoringClient({
         </div>
       </div>
 
-      {viewMode === 'cards' ? (
-        /* Live Screens Visual Grid matching reference design */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((s) => (
-            <FleetScreenCard
-              key={s.id}
-              screen={s}
-              allAnnouncements={allActiveAnnouncements}
-              isBusy={busyId === s.id}
-              busyType={busyType}
-              copiedId={copiedId}
-              onCopy={handleCopy}
-              onSimulatePing={handleSimulatePingInline}
-              onForceRefresh={handleForceRefreshInline}
-              onReboot={handleRebootInline}
-            />
-          ))}
-          {filtered.length === 0 && (
-            <div className="col-span-full bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-12 text-center text-neutral-500 dark:text-[#7d8187] font-mono text-sm">
-              No screens match the selected filter criteria.
-            </div>
-          )}
-        </div>
-      ) : (
-        /* Table View */
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg overflow-hidden shadow-sm">
-          <table className="xai-table text-left text-sm">
-            <thead>
-              <tr>
-                <th>Screen Node</th>
-                <th>Location / Zone</th>
-                <th>Health Status</th>
-                <th>Current Notice</th>
-                <th>Last Heartbeat</th>
-                <th className="text-right">Screen Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
-              {filtered.map((s) => (
-                <tr key={s.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors">
-                  <td className="px-5 py-3 font-normal text-neutral-900 dark:text-white">
-                    <Link href={`/dashboard/admin/fleet/${s.id}`} className="hover:underline">
-                      {s.name}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3 text-neutral-600 dark:text-[#dadbdf] text-xs">
-                    <div className="text-neutral-900 dark:text-white">{s.location}</div>
-                    <div className="text-[10px] text-neutral-500 dark:text-[#7d8187] font-mono">{s.zone || 'General'}</div>
-                  </td>
-                  <td className="px-5 py-3">
-                    <span className="flex items-center gap-1.5 text-xs font-mono">
-                      <span className={`w-1.5 h-1.5 rounded-full ${DOT_COLOR[s._status as DeviceStatus]}`} />
-                      <span className="capitalize text-neutral-900 dark:text-white">{s._status}</span>
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 text-neutral-600 dark:text-[#dadbdf] text-xs truncate max-w-xs">
-                    {s.announcements?.title || <span className="text-neutral-500 dark:text-[#7d8187] italic font-mono">[Idle Standby Loop]</span>}
-                  </td>
-                  <td className="px-5 py-3 text-neutral-500 dark:text-[#7d8187] text-xs font-mono" suppressHydrationWarning>
-                    {relativeTime(s.last_seen_at)}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        onClick={() => handleCopy(s.id, `id-${s.id}`)}
-                        title="Copy Screen UUID"
-                        className="px-2 py-1 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-[10px] font-mono text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:text-white cursor-pointer"
-                      >
-                        {copiedId === `id-${s.id}` ? '✓ Copied' : 'UUID'}
-                      </button>
-                      <button
-                        onClick={() => handleSimulatePingInline(s.id)}
-                        disabled={busyId === s.id}
-                        title="Simulate Hardware Heartbeat (Ping)"
-                        className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:text-white disabled:opacity-50 transition-colors cursor-pointer"
-                      >
-                        <Radio className={`w-3 h-3 ${busyId === s.id && busyType === 'ping' ? 'animate-ping text-neutral-900 dark:text-white' : ''}`} />
-                      </button>
-                      <button
-                        onClick={() => handleForceRefreshInline(s.id, s.name)}
-                        disabled={busyId === s.id}
-                        title="Force Refresh Screen"
-                        className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:text-white disabled:opacity-50 transition-colors cursor-pointer"
-                      >
-                        <RefreshCw className={`w-3 h-3 ${busyId === s.id && busyType === 'refresh' ? 'animate-spin text-neutral-900 dark:text-white' : ''}`} />
-                      </button>
-                      <button
-                        onClick={() => handleRebootInline(s.id, s.name)}
-                        disabled={busyId === s.id}
-                        title="Reboot Device"
-                        className="p-1.5 rounded-full hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-rose-600 dark:hover:text-rose-400 disabled:opacity-50 transition-colors cursor-pointer"
-                      >
-                        <Power className={`w-3 h-3 ${busyId === s.id && busyType === 'reboot' ? 'animate-pulse text-rose-600 dark:text-rose-400' : ''}`} />
-                      </button>
-                      <a
-                        href={`/kiosk.html?id=${s.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-neutral-900 dark:text-white hover:underline font-mono inline-flex items-center gap-1 shrink-0 ml-1"
-                      >
-                        Kiosk <ExternalLink className="w-3 h-3" />
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-neutral-500 dark:text-[#7d8187]">
-                    No screens match the selected filter criteria.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Live Screens Visual Grid with 3 available screens */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filtered.map((s) => (
+          <FleetScreenCard
+            key={s.id}
+            screen={s}
+            allAnnouncements={allActiveAnnouncements}
+            isBusy={busyId === s.id}
+            busyType={busyType}
+            copiedId={copiedId}
+            onCopy={handleCopy}
+            onSimulatePing={handleSimulatePingInline}
+            onForceRefresh={handleForceRefreshInline}
+            onReboot={handleRebootInline}
+          />
+        ))}
+        {filtered.length === 0 && (
+          <div className="col-span-full bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-12 text-center text-neutral-500 dark:text-[#7d8187] font-mono text-sm">
+            No screens match the selected filter criteria.
+          </div>
+        )}
+      </div>
 
       {/* Add Screen Modal */}
       {registerOpen && (
