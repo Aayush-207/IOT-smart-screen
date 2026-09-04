@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
           <h1 className="text-2xl font-normal tracking-tight text-neutral-900 dark:text-white">
             System Overview &amp; Network
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-neutral-600 dark:text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
             Central orchestration console for digital screen nodes, authorization queues, live mirror wall, and emergency broadcast overrides.
           </p>
         </div>
@@ -71,7 +71,7 @@ export default async function AdminDashboardPage() {
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/admin/fleet"
-            className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
+            className="px-5 py-2 rounded-full bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
           >
             <Monitor className="w-3.5 h-3.5" /> Screens &amp; Fleet ({totalScreens})
           </Link>
@@ -145,38 +145,38 @@ export default async function AdminDashboardPage() {
         {!isEmergencyRole && (
           <Link
             href="/dashboard/admin/approvals"
-            className="px-4 py-1.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 shadow-sm"
+            className="px-4 py-1.5 rounded-full bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 shadow-sm"
           >
             <CheckSquare className="w-3.5 h-3.5" /> Urgent Approvals ({criticalApprovals || 0})
           </Link>
         )}
         <Link
           href="/dashboard/admin/wall"
-          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <Tv className="w-3.5 h-3.5" /> Live Screen Wall
         </Link>
         <Link
           href="/dashboard/admin/fleet"
-          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <Monitor className="w-3.5 h-3.5" /> Screen Fleet ({totalScreens})
         </Link>
         <Link
           href="/dashboard/admin/announcements"
-          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <ListOrdered className="w-3.5 h-3.5" /> Broadcast Catalog
         </Link>
         <Link
           href="/dashboard/admin/analytics"
-          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <BarChart3 className="w-3.5 h-3.5" /> Analytics &amp; Telemetry
         </Link>
         <Link
           href="/dashboard/admin/audit"
-          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <ScrollText className="w-3.5 h-3.5" /> Activity Audit Log
         </Link>

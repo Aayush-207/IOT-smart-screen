@@ -16,7 +16,7 @@ export default async function VideoWallPage() {
 
   const nowIso = new Date().toISOString()
 
-  const [{ data: screens }, { data: emergencies }] = await Promise.all([
+  const [{ data: screens }, { data: emergencies }, { data: allActiveAnnouncements }] = await Promise.all([
     supabase
       .from('screens')
       .select('*, announcements(id, title, body, attachment_url, is_emergency, severity, priority)')
@@ -28,12 +28,20 @@ export default async function VideoWallPage() {
       .eq('status', 'approved')
       .or(`display_end.is.null,display_end.gt.${nowIso}`)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('announcements')
+      .select('id, title, body, priority, attachment_url, display_start, display_end, target_zones, target_all')
+      .eq('status', 'approved')
+      .neq('status', 'withdrawn')
+      .or(`display_end.is.null,display_end.gt.${nowIso}`)
+      .order('created_at', { ascending: false }),
   ])
 
   return (
     <VideoWallClient
       initialScreens={screens || []}
       activeEmergencies={emergencies || []}
+      allActiveAnnouncements={allActiveAnnouncements || []}
       userId={user.id}
     />
   )

@@ -138,20 +138,20 @@ export function DeviceDetailClient({
         {/* Left: Agent Console Screen Mirror */}
         <div className="lg:col-span-7 agent-console-card p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4 border-b border-[var(--hairline)] dark:border-white/10 pb-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--ink)] dark:text-white flex items-center gap-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--ink)] dark:text-neutral-900 dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Display Node Mirror
             </span>
             <span className="text-[10px] font-mono text-[var(--slate)] dark:text-neutral-400">Aspect: 16:9</span>
           </div>
 
-          <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 overflow-hidden flex flex-col justify-center items-center text-center p-4 text-white relative">
+          <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 overflow-hidden flex flex-col justify-center items-center text-center p-4 text-neutral-900 dark:text-white relative">
             {currentAnnouncement?.attachment_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={currentAnnouncement.attachment_url} alt="Current content" className="max-h-36 object-contain rounded-lg mb-2" />
             ) : null}
             {currentAnnouncement ? (
               <div>
-                <h4 className="text-sm font-semibold text-white line-clamp-2 px-2">{currentAnnouncement.title}</h4>
+                <h4 className="text-sm font-semibold text-neutral-900 dark:text-white line-clamp-2 px-2">{currentAnnouncement.title}</h4>
                 {currentAnnouncement.body && (
                   <p className="text-[10px] text-neutral-300 line-clamp-2 mt-1 px-4">{currentAnnouncement.body}</p>
                 )}

@@ -112,7 +112,7 @@ export function AdminApprovalQueueClient({
                   <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">
                     {req.departments?.name || 'Campus Wide'} &bull; Submitted by {req.profiles?.email}
                   </span>
-                  <span suppressHydrationWarning className="text-[10px] text-neutral-400 dark:text-[#7d8187] font-mono">
+                  <span suppressHydrationWarning className="text-[10px] text-neutral-400 dark:text-neutral-500 dark:text-[#7d8187] font-mono">
                     &bull; {formatDate(req.created_at)}
                   </span>
                 </div>
@@ -120,7 +120,7 @@ export function AdminApprovalQueueClient({
                 <div>
                   <h3 className="text-base font-medium text-neutral-900 dark:text-white truncate">{req.title}</h3>
                   {req.body && (
-                    <p className="text-xs text-neutral-600 dark:text-[#dadbdf] line-clamp-2 mt-1 leading-relaxed font-normal">
+                    <p className="text-xs text-neutral-600 dark:text-neutral-600 dark:text-[#dadbdf] line-clamp-2 mt-1 leading-relaxed font-normal">
                       {req.body}
                     </p>
                   )}
@@ -179,7 +179,7 @@ export function AdminApprovalQueueClient({
                   type="button"
                   disabled={!!processingAction}
                   onClick={() => handleApprove(req.id, req.title)}
-                  className="px-4 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] hover:opacity-90 text-xs font-medium inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all shadow-sm"
+                  className="px-4 py-2 rounded-full bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] hover:opacity-90 text-xs font-medium inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all shadow-sm"
                 >
                   {isApproving ? (
                     <>
@@ -218,7 +218,7 @@ export function AdminApprovalQueueClient({
                       <button
                         type="button"
                         onClick={() => setRejectId(null)}
-                        className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono cursor-pointer"
+                        className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono cursor-pointer"
                       >
                         Cancel
                       </button>

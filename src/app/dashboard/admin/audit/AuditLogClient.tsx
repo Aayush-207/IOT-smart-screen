@@ -53,24 +53,24 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
     if (act.includes('emergency')) return 'border border-rose-500/50 bg-rose-950/30 text-rose-400'
     if (act.includes('reject') || act.includes('withdrew')) return 'border border-rose-500/30 text-rose-400 bg-rose-950/20'
     if (act.includes('approve')) return 'border border-emerald-500/40 text-emerald-400 bg-emerald-950/20'
-    if (act.includes('refresh') || act.includes('reboot')) return 'border border-white/20 text-white bg-white/5'
-    return 'border border-[#212327] bg-[#0a0a0a] text-[#7d8187]'
+    if (act.includes('refresh') || act.includes('reboot')) return 'border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5'
+    return 'border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-500 dark:text-[#7d8187]'
   }
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16 text-white">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#212327]">
+    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-white/20 text-white bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
               Append-Only Ledger
             </span>
-            <span className="text-xs font-mono text-[#7d8187]">{filtered.length} Events Tracked</span>
+            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">{filtered.length} Events Tracked</span>
           </div>
-          <h1 className="xai-display-section text-white flex items-center gap-3">
-            <ScrollText className="w-5 h-5 text-white" /> System Activity &amp; Audit Log
+          <h1 className="xai-display-section text-neutral-900 dark:text-white flex items-center gap-3">
+            <ScrollText className="w-5 h-5 text-neutral-900 dark:text-white" /> System Activity &amp; Audit Log
           </h1>
-          <p className="text-sm text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
             Append-only telemetry of all approvals, emergency overrides, and display configuration changes.
           </p>
         </div>
@@ -84,30 +84,30 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
       </div>
 
       {/* Filter toolbar */}
-      <div className="p-4 rounded-lg border border-[#212327] bg-[#141414] space-y-3">
+      <div className="p-4 rounded-lg border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search keywords..."
-            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
+            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
           />
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
+            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
           />
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
+            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
           />
           <select
             value={actor}
             onChange={(e) => setActor(e.target.value)}
-            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
+            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
           >
             <option value="all">All Actors ({actors.length})</option>
             {actors.map((a) => (
@@ -117,7 +117,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
           <select
             value={action}
             onChange={(e) => setAction(e.target.value)}
-            className="bg-[#0a0a0a] border border-[#212327] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white font-mono"
+            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
           >
             <option value="all">All Actions ({actions.length})</option>
             {actions.map((act) => (
@@ -127,7 +127,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
         </div>
       </div>
 
-      <div className="bg-[#141414] border border-[#212327] rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg overflow-hidden">
         <table className="xai-table text-left text-sm">
           <thead>
             <tr>
@@ -138,24 +138,24 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
               <th>Target Identifier / Name</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#212327]">
+          <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
             {filtered.map((r) => (
               <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
-                <td className="px-5 py-3 text-xs text-[#7d8187] font-mono whitespace-nowrap">
+                <td className="px-5 py-3 text-xs text-neutral-500 dark:text-[#7d8187] font-mono whitespace-nowrap">
                   {new Date(r.created_at).toLocaleString()}
                 </td>
-                <td className="px-5 py-3 text-xs text-white font-mono">
-                  {r.profiles?.email || <span className="text-[#7d8187]">System Daemon</span>}
+                <td className="px-5 py-3 text-xs text-neutral-900 dark:text-white font-mono">
+                  {r.profiles?.email || <span className="text-neutral-500 dark:text-[#7d8187]">System Daemon</span>}
                 </td>
                 <td className="px-5 py-3 text-xs font-mono">
                   <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-mono ${getActionBadgeClass(r.action)}`}>
                     {r.action.replace(/_/g, ' ')}
                   </span>
                 </td>
-                <td className="px-5 py-3 text-xs text-[#7d8187] font-mono uppercase">
+                <td className="px-5 py-3 text-xs text-neutral-500 dark:text-[#7d8187] font-mono uppercase">
                   {r.target_type || '—'}
                 </td>
-                <td className="px-5 py-3 text-xs font-normal text-white">
+                <td className="px-5 py-3 text-xs font-normal text-neutral-900 dark:text-white">
                   <div>{r.target_label || r.target_id || '—'}</div>
                   {r.metadata && typeof r.metadata === 'object' && 'reason' in r.metadata && (
                     <div className="text-[10px] text-rose-400 font-mono mt-0.5">
@@ -167,7 +167,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
             ))}
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-12 text-center text-xs text-[#7d8187] font-mono">
+                <td colSpan={5} className="px-5 py-12 text-center text-xs text-neutral-500 dark:text-[#7d8187] font-mono">
                   No audit log records match the applied criteria.
                 </td>
               </tr>

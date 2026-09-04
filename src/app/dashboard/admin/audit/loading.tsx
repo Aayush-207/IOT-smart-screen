@@ -11,7 +11,7 @@ export default function AuditLoading() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden divide-y divide-neutral-200 dark:divide-[#212327]">
+      <div className="rounded-xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden divide-y divide-neutral-200 dark:divide-neutral-200 dark:divide-[#212327]">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <div key={i} className="p-4 flex items-center justify-between gap-4">
             <div className="space-y-1.5 flex-1">
