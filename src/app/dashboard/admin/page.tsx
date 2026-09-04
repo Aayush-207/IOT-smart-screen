@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Monitor, ScrollText, CheckSquare, AlertTriangle, Tv, ListOrdered, BarChart3 } from 'lucide-react'
-import { deviceStatus } from '@/lib/fleet'
+import { Monitor, AlertTriangle } from 'lucide-react'
 import { OrgManagementClient } from './OrgManagementClient'
 import { ClearEmergencyButton } from '@/components/ClearEmergencyButton'
+import { AnalyticsClient } from './analytics/AnalyticsClient'
+
+export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -19,19 +21,35 @@ export default async function AdminDashboardPage() {
     { data: departments },
     { data: profiles },
     { data: screens },
-    { count: pendingApprovals },
-    { count: criticalApprovals },
+    { data: announcements },
+    { data: deliveries },
+    { data: auditRows },
     { data: activeEmergencies },
   ] = await Promise.all([
-    supabase.from('departments').select('*, profiles!departments_hod_id_fkey(email)'),
-    supabase.from('profiles').select('id, email, role, department_id'),
-    supabase.from('screens').select('id, last_seen_at'),
-    supabase.from('announcements').select('id', { count: 'exact', head: true }).eq('status', 'pending_approval'),
+    supabase
+      .from('departments')
+      .select('*, profiles!departments_hod_id_fkey(email)')
+      .order('name'),
+    supabase
+      .from('profiles')
+      .select('id, email, role, department_id'),
+    supabase
+      .from('screens')
+      .select('id, name, zone, location, last_seen_at')
+      .order('name'),
     supabase
       .from('announcements')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'pending_approval')
-      .or('priority.eq.critical,department_id.is.null'),
+      .select('id, title, status, priority, is_emergency, department_id, target_all, target_zones, created_at')
+      .neq('status', 'withdrawn')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('announcement_deliveries')
+      .select('id, state, announcement_id, screen_id, last_confirmed_at'),
+    supabase
+      .from('audit_log')
+      .select('id, action, created_at')
+      .order('created_at', { ascending: false })
+      .limit(200),
     supabase
       .from('announcements')
       .select('id, title, body, severity')
@@ -41,13 +59,7 @@ export default async function AdminDashboardPage() {
       .order('created_at', { ascending: false }),
   ])
 
-  const counts = { online: 0, stale: 0, offline: 0 }
-  ;(screens || []).forEach((s: any) => {
-    counts[deviceStatus(s.last_seen_at)]++
-  })
-
   const totalScreens = (screens || []).length
-  const healthRate = totalScreens > 0 ? Math.round((counts.online / totalScreens) * 100) : 0
 
   return (
     <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white">
@@ -58,20 +70,20 @@ export default async function AdminDashboardPage() {
             <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
               Command Mesh
             </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">Health Index: {healthRate}%</span>
+            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">{totalScreens} Display Nodes Active</span>
           </div>
           <h1 className="text-2xl font-normal tracking-tight text-neutral-900 dark:text-white">
             System Overview &amp; Network
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-600 dark:text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
-            Central orchestration console for digital screen nodes, authorization queues, live mirror wall, and emergency broadcast overrides.
+          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
+            Central orchestration console for digital screen nodes, authorization queues, live telemetry analytics, and emergency overrides.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/admin/fleet"
-            className="px-5 py-2 rounded-full bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
+            className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
           >
             <Monitor className="w-3.5 h-3.5" /> Screens &amp; Fleet ({totalScreens})
           </Link>
@@ -102,50 +114,22 @@ export default async function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Telemetry Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Online</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          </div>
-          <div className="text-3xl font-normal text-emerald-600 dark:text-emerald-400">{counts.online}</div>
-          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">Active ping</p>
-        </div>
-
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400">Delayed Sync</span>
-          <div className="text-3xl font-normal text-amber-600 dark:text-amber-400">{counts.stale}</div>
-          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">Slow ping</p>
-        </div>
-
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Offline</span>
-          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{counts.offline}</div>
-          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">Unreachable</p>
-        </div>
-
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Total Pending</span>
-          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{pendingApprovals || 0}</div>
-          <p className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">All Units</p>
-        </div>
-
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-5 space-y-1 shadow-sm">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400">Admin Reviews</span>
-          <div className="text-3xl font-normal text-amber-600 dark:text-amber-400">{criticalApprovals || 0}</div>
-          <Link href="/dashboard/admin/approvals" className="text-[10px] text-neutral-900 dark:text-white hover:underline font-mono block">
-            Review Now &rarr;
-          </Link>
-        </div>
-      </div>
+      {/* Analytics & Telemetry Embedded Section */}
+      <AnalyticsClient
+        announcements={announcements || []}
+        screens={screens || []}
+        departments={departments || []}
+        deliveries={deliveries || []}
+        auditRows={auditRows || []}
+        isEmbedded={true}
+      />
 
       {/* Organization Hierarchy Section */}
       {!isEmergencyRole && (
         <div className="pt-6 border-t border-neutral-200 dark:border-[#212327]">
           <div className="mb-4">
             <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Governance</span>
-            <h2 className="text-base font-medium text-neutral-900 dark:text-white">
+            <h2 className="text-base font-semibold text-neutral-900 dark:text-white">
               Departments &amp; Permissions
             </h2>
             <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-0.5">Assign department heads and manage system authorizations.</p>

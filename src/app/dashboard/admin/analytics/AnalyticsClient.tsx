@@ -34,12 +34,14 @@ export function AnalyticsClient({
   departments,
   deliveries,
   auditRows,
+  isEmbedded = false,
 }: {
   announcements: any[]
   screens: any[]
   departments: any[]
   deliveries: any[]
   auditRows: any[]
+  isEmbedded?: boolean
 }) {
   const [timeRange, setTimeRange] = useState<'all' | '30d' | '7d'>('all')
 
@@ -140,42 +142,78 @@ export function AnalyticsClient({
   }, [auditRows])
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
-              Mesh Telemetry
-            </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">5s Heartbeat Cycle</span>
+    <div className={`space-y-6 max-w-6xl text-neutral-900 dark:text-white ${isEmbedded ? '' : 'pb-16'}`}>
+      {/* Header */}
+      {isEmbedded ? (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200 dark:border-[#212327]">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+                Campus Telemetry
+              </span>
+              <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">Live Network Analytics</span>
+            </div>
+            <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-emerald-500" /> Analytics &amp; Hardware Telemetry
+            </h2>
           </div>
-          <h1 className="xai-display-section text-neutral-900 dark:text-white flex items-center gap-3">
-            <BarChart3 className="w-5 h-5 text-neutral-900 dark:text-white" /> Screen Analytics &amp; Telemetry
-          </h1>
-          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
-            Real-time display node availability, estimated daily campus reach, publication approval rates, and delivery verification.
-          </p>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex bg-white dark:bg-[#141414] p-1 rounded-full border border-neutral-200 dark:border-[#212327] text-xs font-mono">
-            {(['all', '30d', '7d'] as const).map((r) => (
-              <button
-                key={r}
-                onClick={() => setTimeRange(r)}
-                className={`px-3 py-1 rounded-full uppercase transition-all cursor-pointer ${
-                  timeRange === r
-                    ? 'bg-white text-[#0a0a0a] font-medium'
-                    : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:text-white'
-                }`}
-              >
-                {r === 'all' ? 'All Time' : r}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <div className="flex bg-white dark:bg-[#141414] p-1 rounded-full border border-neutral-200 dark:border-[#212327] text-xs font-mono shadow-xs">
+              {(['all', '30d', '7d'] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setTimeRange(r)}
+                  className={`px-3 py-1 rounded-full uppercase transition-all cursor-pointer ${
+                    timeRange === r
+                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
+                      : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
+                  }`}
+                >
+                  {r === 'all' ? 'All Time' : r}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+                Mesh Telemetry
+              </span>
+              <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">5s Heartbeat Cycle</span>
+            </div>
+            <h1 className="xai-display-section text-neutral-900 dark:text-white flex items-center gap-3">
+              <BarChart3 className="w-5 h-5 text-neutral-900 dark:text-white" /> Screen Analytics &amp; Telemetry
+            </h1>
+            <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+              Real-time display node availability, estimated daily campus reach, publication approval rates, and delivery verification.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex bg-white dark:bg-[#141414] p-1 rounded-full border border-neutral-200 dark:border-[#212327] text-xs font-mono">
+              {(['all', '30d', '7d'] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setTimeRange(r)}
+                  className={`px-3 py-1 rounded-full uppercase transition-all cursor-pointer ${
+                    timeRange === r
+                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium'
+                      : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
+                  }`}
+                >
+                  {r === 'all' ? 'All Time' : r}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Top 4 KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">

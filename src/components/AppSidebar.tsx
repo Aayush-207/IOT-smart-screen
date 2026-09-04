@@ -62,7 +62,6 @@ function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
     { href: '/dashboard/admin/fleet', label: 'Screens & Fleet', icon: Monitor },
     { href: '/dashboard/admin/announcements', label: 'Broadcast Catalog', icon: ListOrdered },
     { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle },
-    { href: '/dashboard/admin/analytics', label: 'Analytics & Telemetry', icon: BarChart3 },
     { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText },
   ]
 }
