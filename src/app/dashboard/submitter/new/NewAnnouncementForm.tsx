@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { UploadCloud, Eye, Monitor, Smartphone, Loader2, Building2, Clock } from 'lucide-react'
+import { UploadCloud, Eye, Monitor, Smartphone, Loader2, Building2, Clock, Sparkles, WifiOff } from 'lucide-react'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
 
@@ -101,9 +101,36 @@ export function NewAnnouncementForm({
     setTargetZones((prev) => (prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone]))
   }
 
+  // Target screen definitions with exact online / offline recognition
+  const targetScreens = React.useMemo(() => {
+    return zones.map((zone) => {
+      const zLower = zone.toLowerCase()
+      const isOnline =
+        zLower.includes('engineering') ||
+        zLower.includes('lobby') ||
+        zLower.includes('screen 01') ||
+        zone === 'Main Lobby Screen 01'
+
+      let label = zone
+      if (zLower.includes('engineering') || zLower.includes('lobby') || zLower.includes('screen 01')) {
+        label = 'Main Lobby Screen 01 (Engineering Wing)'
+      } else if (zLower.includes('library')) {
+        label = 'Library Entrance Node (Library Atrium)'
+      } else if (zLower.includes('cafeteria') || zLower.includes('student')) {
+        label = 'Cafeteria Kiosk Display (Student Cafeteria)'
+      }
+
+      return {
+        value: zone,
+        label,
+        isOnline,
+      }
+    })
+  }, [zones])
+
   const selectAllZones = () => {
     setTargetAll(false)
-    setTargetZones([...zones])
+    setTargetZones(targetScreens.map((s) => s.value))
   }
 
   const clearAllZones = () => {
@@ -118,14 +145,12 @@ export function NewAnnouncementForm({
       return
     }
     if (mode === 'approval' && !targetAll && targetZones.length === 0) {
-      setError('Select at least one target screen.')
+      setError('Select at least one target screen (e.g. Main Lobby Screen 01).')
       return
     }
-    if (mode === 'approval' && (!displayStart || !displayEnd)) {
-      setError('Display start and end are required to submit for approval.')
-      return
-    }
-    if (mode === 'approval' && displayStart && displayEnd && new Date(displayEnd).getTime() <= new Date(displayStart).getTime()) {
+    const effectiveStart = displayStart || new Date().toISOString()
+    const effectiveEnd = displayEnd || new Date(Date.now() + 72 * 3600 * 1000).toISOString()
+    if (mode === 'approval' && new Date(effectiveEnd).getTime() <= new Date(effectiveStart).getTime()) {
       setError('Display stop time must be later than the display start time.')
       return
     }
@@ -142,16 +167,36 @@ export function NewAnnouncementForm({
         attachmentUrl = publicUrl
       }
 
+      const normalizedTargetZones = targetAll
+        ? []
+        : Array.from(
+            new Set(
+              targetZones.flatMap((z) => {
+                const zLower = z.toLowerCase()
+                if (zLower.includes('engineering') || zLower.includes('lobby') || zLower.includes('screen 01')) {
+                  return ['Engineering Wing', 'Main Lobby Screen 01']
+                }
+                if (zLower.includes('library')) {
+                  return ['Library Atrium', 'Library Entrance Node']
+                }
+                if (zLower.includes('cafeteria') || zLower.includes('student')) {
+                  return ['Student Cafeteria', 'Cafeteria Kiosk Display']
+                }
+                return [z]
+              })
+            )
+          )
+
       const payload = {
         title: title.trim(),
         body: body.trim(),
         department_id: departmentId || null,
         priority,
         target_all: targetAll,
-        target_zones: targetAll ? [] : targetZones,
+        target_zones: normalizedTargetZones,
         attachment_url: attachmentUrl,
-        display_start: displayStart ? new Date(displayStart).toISOString() : null,
-        display_end: displayEnd ? new Date(displayEnd).toISOString() : null,
+        display_start: effectiveStart ? new Date(effectiveStart).toISOString() : null,
+        display_end: effectiveEnd ? new Date(effectiveEnd).toISOString() : null,
         status: mode === 'approval' ? 'pending_approval' : 'draft',
         rejection_reason: null,
       }
@@ -318,19 +363,45 @@ export function NewAnnouncementForm({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {zones.map((zone) => (
-              <label
-                key={zone}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-all ${
-                  targetZones.includes(zone)
-                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] border-neutral-900 dark:border-white shadow-xs'
-                    : 'border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
-                }`}
-              >
-                <input type="checkbox" className="hidden" checked={targetZones.includes(zone)} onChange={() => toggleZone(zone)} />
-                {zone}
-              </label>
-            ))}
+            {targetScreens.map((screen) => {
+              const isSelected = targetZones.includes(screen.value)
+              return (
+                <label
+                  key={screen.value}
+                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-all ${
+                    !screen.isOnline
+                      ? isSelected
+                        ? 'bg-neutral-800 text-neutral-300 border-neutral-700 opacity-60 shadow-xs'
+                        : 'border-neutral-200 dark:border-[#1a1b1e] bg-neutral-100/50 dark:bg-[#080808] text-neutral-400 dark:text-neutral-500 opacity-55 hover:opacity-75'
+                      : isSelected
+                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] border-neutral-900 dark:border-white shadow-xs ring-2 ring-emerald-500/20'
+                      : 'border-emerald-500/40 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 text-neutral-800 dark:text-emerald-300 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={isSelected}
+                    onChange={() => toggleZone(screen.value)}
+                  />
+                  {screen.isOnline ? (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  ) : (
+                    <span className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 shrink-0" />
+                  )}
+                  <span className="font-medium">{screen.label}</span>
+                  {screen.isOnline ? (
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 ml-0.5">
+                      Online
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 ml-0.5">
+                      Offline
+                    </span>
+                  )}
+                </label>
+              )
+            })}
           </div>
         </div>
 
@@ -390,9 +461,28 @@ export function NewAnnouncementForm({
 
         {/* Attachment Upload Zone */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white mb-1.5">
-            Slide Poster / Graphic (Optional)
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
+              Slide Poster / Graphic (Optional)
+            </label>
+            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+              1672 &times; 941 px (16:9)
+            </span>
+          </div>
+
+          {/* Required Dimension Callout */}
+          <div className="p-3.5 rounded-xl border border-sky-500/30 bg-sky-50 dark:bg-sky-950/20 text-sky-800 dark:text-sky-300 space-y-1 mb-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-300">
+              <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+              <span>Required Poster Dimensions</span>
+            </div>
+            <p className="text-xs font-mono font-medium text-neutral-900 dark:text-white">
+              Width: <strong>1672 px</strong> &bull; Height: <strong>941 px</strong> (Aspect Ratio: 16:9)
+            </p>
+            <p className="text-[11px] text-neutral-600 dark:text-neutral-400 leading-relaxed">
+              The uploaded poster should be in that dimension to fit the display screens pixel-perfect without distortion or black bars.
+            </p>
+          </div>
           
           {attachmentPreview || (existing?.attachment_url && !attachment) ? (
             <div className="relative p-3 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl flex items-center gap-4">
@@ -407,7 +497,7 @@ export function NewAnnouncementForm({
                   {attachment ? attachment.name : 'Current Attachment'}
                 </p>
                 <p className="text-[11px] text-neutral-500 dark:text-[#7d8187]">
-                  {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored image'}
+                  {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored image'} &bull; 1672 &times; 941 px recommended
                 </p>
                 <button
                   type="button"
@@ -422,6 +512,7 @@ export function NewAnnouncementForm({
             <label className="flex flex-col items-center justify-center p-6 border border-dashed border-neutral-300 dark:border-[#212327] hover:border-neutral-400 dark:hover:border-white/30 rounded-xl cursor-pointer transition-colors bg-neutral-50/60 dark:bg-[#0a0a0a]/50 hover:bg-neutral-100/60 dark:hover:bg-white/[0.03]">
               <UploadCloud className="w-6 h-6 text-neutral-400 dark:text-[#7d8187] mb-2" />
               <p className="text-xs font-medium text-neutral-900 dark:text-white">Click to upload poster or drag and drop</p>
+              <p className="text-[10px] text-sky-600 dark:text-sky-400 mt-1 font-mono font-medium">Required Dimension: Width: 1672 px &times; Height: 941 px</p>
               <p className="text-[10px] text-neutral-500 dark:text-[#7d8187] mt-0.5 font-mono">JPEG, PNG, or WebP up to 10MB</p>
               <input
                 type="file"
@@ -594,6 +685,17 @@ export function NewAnnouncementForm({
                   ) : (
                     <span className="text-neutral-500 dark:text-[#7d8187]">Immediate</span>
                   )}
+                </span>
+              </div>
+
+              {/* Screen Resolution */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
+                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
+                  <Monitor className="w-3.5 h-3.5 text-indigo-500" />
+                  <span className="text-[11px] font-medium">Screen Canvas Size</span>
+                </div>
+                <span className="text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400">
+                  1672 &times; 941 px (16:9)
                 </span>
               </div>
             </div>

@@ -105,15 +105,19 @@ export default async function HodScreensPage() {
 
   const activeScreensList = dbScreens && dbScreens.length > 0 ? dbScreens : defaultScreens
 
-  const screens = activeScreensList.map((s: any) => ({
-    id: s.id,
-    name: s.name,
-    location: s.location || 'Campus Location',
-    zone: s.zone || 'General Zone',
-    resolution: '1920x1080 (16:9)',
-    orientation: 'landscape' as const,
-    contents: getActiveContentsForScreen(s),
-  }))
+  const screens = activeScreensList.map((s: any) => {
+    const isOnline = s.name === 'Main Lobby Screen 01'
+    return {
+      id: s.id,
+      name: s.name,
+      location: s.location || 'Campus Location',
+      zone: s.zone || 'General Zone',
+      resolution: '1672x941 (16:9)',
+      orientation: 'landscape' as const,
+      isOnline,
+      contents: isOnline ? getActiveContentsForScreen(s) : [],
+    }
+  })
 
   return <HodScreensClient screens={screens} departmentName={departmentName} />
 }

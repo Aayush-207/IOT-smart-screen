@@ -16,6 +16,7 @@ import {
   Signal,
   MapPin,
   Tv,
+  WifiOff,
 } from 'lucide-react'
 import { deviceStatus, relativeTime, type DeviceStatus } from '@/lib/fleet'
 import { logAudit } from '@/lib/audit'
@@ -102,7 +103,11 @@ function FleetScreenCardComponent({
       <div className="p-4 sm:p-5 border-b border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] space-y-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-emerald-400 animate-pulse" />
+            {screen._status === 'online' ? (
+              <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-emerald-400 animate-pulse" />
+            ) : (
+              <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-neutral-400 dark:bg-neutral-600" />
+            )}
             <Link
               href={`/dashboard/admin/fleet/${screen.id}`}
               className="font-semibold text-sm sm:text-base text-neutral-900 dark:text-white truncate hover:underline"
@@ -112,14 +117,20 @@ function FleetScreenCardComponent({
             </Link>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            {hasMultiple && (
+            {screen._status === 'online' && hasMultiple && (
               <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium">
                 <Layers className="w-3 h-3" /> {count} Posters
               </span>
             )}
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
-              <Signal className="w-3 h-3" /> Online
-            </span>
+            {screen._status === 'online' ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
+                <Signal className="w-3 h-3" /> Online
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium text-neutral-500 dark:text-[#7d8187] bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10">
+                <WifiOff className="w-3 h-3 text-neutral-400" /> Offline
+              </span>
+            )}
           </div>
         </div>
 
@@ -135,7 +146,7 @@ function FleetScreenCardComponent({
       <div className="p-4 sm:p-5 bg-neutral-100/70 dark:bg-black/40 flex-1 flex flex-col justify-center">
         {/* Aspect Ratio Switcher (No slider, clean 16:9 / 9:16 buttons) */}
         <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-[#7d8187] mb-2.5 px-1">
-          <span className="text-[10px]">Aspect Ratio</span>
+          <span className="text-[10px] font-medium">{aspectRatio === '16:9' ? '1672×941 (16:9)' : '941×1672 (9:16)'}</span>
           <div className="flex items-center p-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-xs">
             <button
               type="button"
@@ -169,7 +180,17 @@ function FleetScreenCardComponent({
               aspectRatio === '16:9' ? 'aspect-[16/9] w-full' : 'aspect-[9/16] max-w-[210px]'
             } rounded-2xl bg-black border-2 border-neutral-800 dark:border-[#212327] shadow-2xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none transition-all duration-300`}
           >
-            {count === 0 ? (
+            {screen._status !== 'online' ? (
+              <div className="my-auto text-center space-y-1.5 z-10 p-4">
+                <Tv className="w-8 h-8 text-neutral-600 mx-auto opacity-50" />
+                <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
+                  Node Offline
+                </div>
+                <p className="text-[9px] text-neutral-500 font-mono">
+                  Hardware display disconnected &bull; {screen.zone || 'General'}
+                </p>
+              </div>
+            ) : count === 0 ? (
               <div className="my-auto text-center space-y-1 z-10 p-3">
                 <Tv className="w-6 h-6 text-neutral-600 mx-auto" />
                 <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
@@ -334,13 +355,16 @@ export function FleetMonitoringClient({
     setScreensList(initialScreens)
   }, [initialScreens])
 
-  // All 3 screens are verified Online in the network
+  // 1 screen functional & online (Main Lobby Screen 01), remaining screens offline
   const withStatus = useMemo(
     () =>
-      screensList.map((s) => ({
-        ...s,
-        _status: 'online' as DeviceStatus,
-      })),
+      screensList.map((s) => {
+        const isOnline = s.name === 'Main Lobby Screen 01' || (s.last_seen_at && Date.now() - new Date(s.last_seen_at).getTime() < 120000)
+        return {
+          ...s,
+          _status: (isOnline ? 'online' : 'offline') as DeviceStatus,
+        }
+      }),
     [screensList]
   )
 

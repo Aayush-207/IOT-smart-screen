@@ -16,7 +16,6 @@ export default async function AdminApprovalsPage() {
     .from('announcements')
     .select('*, profiles!announcements_submitted_by_fkey(email), departments(name)')
     .eq('status', 'pending_approval')
-    .or('priority.eq.critical,department_id.is.null')
     .order('created_at', { ascending: true })
 
   return <AdminApprovalQueueClient initialRequests={requests || []} adminId={user.id} />

@@ -259,7 +259,7 @@ export function VideoWallClient({
   const withStatus = useMemo(() => {
     return screens.map((s) => ({
       ...s,
-      _status: deviceStatus(s.last_seen_at),
+      _status: deviceStatus(s.last_seen_at, s.name),
     }))
   }, [screens])
 

@@ -28,7 +28,7 @@ export function DeviceDetailClient({
 
   const supabase = createClient()
   const router = useRouter()
-  const status = deviceStatus(screen.last_seen_at)
+  const status = deviceStatus(screen.last_seen_at, screen.name)
 
   const handleForceRefresh = async () => {
     setLoading('refresh')
@@ -141,7 +141,7 @@ export function DeviceDetailClient({
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Display Node Mirror
             </span>
-            <span className="text-[10px] font-mono text-neutral-500 dark:text-neutral-400">Aspect: 16:9</span>
+            <span className="text-[10px] font-mono text-neutral-500 dark:text-neutral-400">Aspect: 16:9 (1672×941)</span>
           </div>
 
           <div className="aspect-[16/9] rounded-xl bg-black border border-white/10 overflow-hidden flex flex-col justify-center items-center text-center p-4 text-white relative shadow-inner">
@@ -186,6 +186,10 @@ export function DeviceDetailClient({
               <div className="flex justify-between py-1 border-b border-neutral-200 dark:border-[#212327]">
                 <span className="text-neutral-500 dark:text-neutral-400">Firmware</span>
                 <span className="font-mono text-neutral-900 dark:text-white">{screen.firmware_version || 'v2.4.0-edge'}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-neutral-200 dark:border-[#212327]">
+                <span className="text-neutral-500 dark:text-neutral-400">Native Canvas</span>
+                <span className="font-mono text-neutral-900 dark:text-white">1672 × 941 px (16:9)</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-neutral-500 dark:text-neutral-400">Location Zone</span>

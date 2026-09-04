@@ -115,7 +115,7 @@ export function BillboardPreviewModal({
               </div>
               <div className="flex items-center gap-1.5 font-mono text-[10px] text-neutral-400">
                 <Clock className="w-3 h-3 text-white" />
-                <span>1080p &bull; 60 FPS</span>
+                <span>1672x941 &bull; 60 FPS</span>
               </div>
             </div>
 

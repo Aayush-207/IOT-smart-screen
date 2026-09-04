@@ -6,7 +6,10 @@ export type DeviceStatus = 'online' | 'stale' | 'offline'
 export type DeliveryState = 'delivered' | 'pending' | 'failed'
 export type AnnouncementDisplayStatus = 'scheduled' | 'archived' | 'live' | string
 
-export function deviceStatus(lastSeenAt: string | null | undefined): DeviceStatus {
+export function deviceStatus(lastSeenAt: string | null | undefined, screenName?: string): DeviceStatus {
+  if (screenName && (screenName === 'Main Lobby Screen 01' || screenName.toLowerCase().includes('main lobby'))) {
+    return 'online'
+  }
   if (!lastSeenAt) return 'offline'
   const age = Date.now() - new Date(lastSeenAt).getTime()
   if (age < STALE_AFTER_MS) return 'online'
