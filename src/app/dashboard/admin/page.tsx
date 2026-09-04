@@ -145,20 +145,14 @@ export default async function AdminDashboardPage() {
         {!isEmergencyRole && (
           <Link
             href="/dashboard/admin/approvals"
-            className="px-4 py-1.5 rounded-full bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 shadow-sm"
+            className="px-4 py-1.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 shadow-sm"
           >
             <CheckSquare className="w-3.5 h-3.5" /> Urgent Approvals ({criticalApprovals || 0})
           </Link>
         )}
         <Link
-          href="/dashboard/admin/wall"
-          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
-        >
-          <Tv className="w-3.5 h-3.5" /> Live Screen Wall
-        </Link>
-        <Link
           href="/dashboard/admin/fleet"
-          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono transition-colors inline-flex items-center gap-1.5"
         >
           <Monitor className="w-3.5 h-3.5" /> Screen Fleet ({totalScreens})
         </Link>

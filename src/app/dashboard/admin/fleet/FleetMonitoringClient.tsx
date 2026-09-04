@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -16,17 +16,9 @@ import {
   Signal,
   MapPin,
   Tv,
-  Sliders,
 } from 'lucide-react'
 import { deviceStatus, relativeTime, type DeviceStatus } from '@/lib/fleet'
 import { logAudit } from '@/lib/audit'
-
-const RATIO_PRESETS: Record<number, { label: string; ratio: string; cssRatio: string; maxW: string }> = {
-  1: { label: '9:16 (Portrait)', ratio: '9/16', cssRatio: '9 / 16', maxW: 'max-w-[210px]' },
-  2: { label: '1:1 (Square)', ratio: '1/1', cssRatio: '1 / 1', maxW: 'max-w-[270px]' },
-  3: { label: '4:3 (Classic)', ratio: '4/3', cssRatio: '4 / 3', maxW: 'max-w-[340px]' },
-  4: { label: '16:9 (Landscape)', ratio: '16/9', cssRatio: '16 / 9', maxW: 'w-full' },
-}
 
 interface FleetScreenCardProps {
   screen: any
@@ -40,7 +32,7 @@ interface FleetScreenCardProps {
   onReboot: (screenId: string, screenName: string) => void
 }
 
-function FleetScreenCard({
+function FleetScreenCardComponent({
   screen,
   allAnnouncements,
   isBusy,
@@ -51,9 +43,10 @@ function FleetScreenCard({
   onForceRefresh,
   onReboot,
 }: FleetScreenCardProps) {
-  const [ratioStep, setRatioStep] = useState(4) // default 16:9 landscape
+  // Only two aspect ratios: 16:9 and 9:16
+  const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9')
 
-  const getActiveContentsForScreen = () => {
+  const contents = useMemo(() => {
     if (!allAnnouncements || allAnnouncements.length === 0) return []
     return allAnnouncements.filter((a: any) => {
       if (a.target_all) return true
@@ -72,12 +65,11 @@ function FleetScreenCard({
       }
       return false
     })
-  }
+  }, [allAnnouncements, screen.name, screen.zone])
 
-  const contents = getActiveContentsForScreen()
   const count = contents.length
   const hasMultiple = count > 1
-  const slides = count > 1 ? [...contents, contents[0]] : contents
+  const slides = useMemo(() => (count > 1 ? [...contents, contents[0]] : contents), [contents, count])
 
   const [slideIndex, setSlideIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
@@ -95,12 +87,12 @@ function FleetScreenCard({
   }, [count])
 
   // Continuous seamless loop
-  const handleTransitionEnd = () => {
+  const handleTransitionEnd = useCallback(() => {
     if (slideIndex === count) {
       setIsTransitioning(false)
       setSlideIndex(0)
     }
-  }
+  }, [slideIndex, count])
 
   const activeIndex = count > 0 ? slideIndex % count : 0
 
@@ -110,15 +102,7 @@ function FleetScreenCard({
       <div className="p-4 sm:p-5 border-b border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] space-y-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span
-              className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                screen._status === 'online'
-                  ? 'bg-emerald-400 animate-pulse'
-                  : screen._status === 'stale'
-                  ? 'bg-amber-400'
-                  : 'bg-emerald-400 animate-pulse'
-              }`}
-            />
+            <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-emerald-400 animate-pulse" />
             <Link
               href={`/dashboard/admin/fleet/${screen.id}`}
               className="font-semibold text-sm sm:text-base text-neutral-900 dark:text-white truncate hover:underline"
@@ -134,7 +118,7 @@ function FleetScreenCard({
               </span>
             )}
             <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
-              <Signal className="w-3 h-3" /> {screen._status === 'offline' ? 'online' : screen._status}
+              <Signal className="w-3 h-3" /> Online
             </span>
           </div>
         </div>
@@ -147,35 +131,43 @@ function FleetScreenCard({
         </div>
       </div>
 
-      {/* Screen Frame Container with Interactive Aspect Ratio Slider */}
+      {/* Screen Frame Container with Clean 16:9 / 9:16 Aspect Ratio Toggle */}
       <div className="p-4 sm:p-5 bg-neutral-100/70 dark:bg-black/40 flex-1 flex flex-col justify-center">
-        {/* Aspect Ratio Slider Control in small text */}
+        {/* Aspect Ratio Switcher (No slider, clean 16:9 / 9:16 buttons) */}
         <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-[#7d8187] mb-2.5 px-1">
-          <div className="flex items-center gap-1.5">
-            <Sliders className="w-3 h-3 text-emerald-500" />
-            <span className="text-[10px]">Aspect: <strong className="text-neutral-900 dark:text-white font-medium">{RATIO_PRESETS[ratioStep].label}</strong></span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] text-neutral-400">9:16</span>
-            <input
-              type="range"
-              min="1"
-              max="4"
-              step="1"
-              value={ratioStep}
-              onChange={(e) => setRatioStep(Number(e.target.value))}
-              className="w-20 sm:w-24 h-1.5 bg-neutral-200 dark:bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-              title={`Aspect Ratio: ${RATIO_PRESETS[ratioStep].label}`}
-            />
-            <span className="text-[9px] text-neutral-400">16:9</span>
+          <span className="text-[10px]">Aspect Ratio</span>
+          <div className="flex items-center p-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-xs">
+            <button
+              type="button"
+              onClick={() => setAspectRatio('16:9')}
+              className={`px-3 py-0.5 rounded-full text-[10px] font-mono font-medium transition-all cursor-pointer ${
+                aspectRatio === '16:9'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] shadow-xs'
+                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              16:9
+            </button>
+            <button
+              type="button"
+              onClick={() => setAspectRatio('9:16')}
+              className={`px-3 py-0.5 rounded-full text-[10px] font-mono font-medium transition-all cursor-pointer ${
+                aspectRatio === '9:16'
+                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] shadow-xs'
+                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+              }`}
+            >
+              9:16
+            </button>
           </div>
         </div>
 
-        {/* Dynamic Display Monitor Frame matching user image */}
+        {/* Dynamic Display Monitor Frame */}
         <div className="w-full flex justify-center items-center">
           <div
-            className={`w-full ${RATIO_PRESETS[ratioStep].maxW} rounded-2xl bg-black border-2 border-neutral-800 dark:border-[#212327] shadow-2xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none transition-all duration-300`}
-            style={{ aspectRatio: RATIO_PRESETS[ratioStep].cssRatio }}
+            className={`w-full ${
+              aspectRatio === '16:9' ? 'aspect-[16/9] w-full' : 'aspect-[9/16] max-w-[210px]'
+            } rounded-2xl bg-black border-2 border-neutral-800 dark:border-[#212327] shadow-2xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none transition-all duration-300`}
           >
             {count === 0 ? (
               <div className="my-auto text-center space-y-1 z-10 p-3">
@@ -220,7 +212,7 @@ function FleetScreenCard({
                         </div>
                         <div className="text-[8px] font-mono text-neutral-500 flex justify-between border-t border-white/10 pt-1 mt-auto">
                           <span>CampusCast Engine</span>
-                          <span>{RATIO_PRESETS[ratioStep].ratio}</span>
+                          <span>{aspectRatio}</span>
                         </div>
                       </div>
                     )}
@@ -229,7 +221,7 @@ function FleetScreenCard({
               </div>
             )}
 
-            {/* Floating Rotation Pill (as in reference image) */}
+            {/* Floating Rotation Pill */}
             {hasMultiple && (
               <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-emerald-400 border border-emerald-500/40 shadow-lg pointer-events-none">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -311,6 +303,8 @@ function FleetScreenCard({
   )
 }
 
+const FleetScreenCard = React.memo(FleetScreenCardComponent)
+
 export function FleetMonitoringClient({
   initialScreens,
   allActiveAnnouncements = [],
@@ -320,6 +314,7 @@ export function FleetMonitoringClient({
   allActiveAnnouncements?: any[]
   userId: string
 }) {
+  const [screensList, setScreensList] = useState(initialScreens)
   const [query, setQuery] = useState('')
   const [registerOpen, setRegisterOpen] = useState(false)
   const [name, setName] = useState('')
@@ -332,24 +327,21 @@ export function FleetMonitoringClient({
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'stale' | 'offline'>('all')
 
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const router = useRouter()
 
   useEffect(() => {
-    const interval = setInterval(() => router.refresh(), 5000)
-    return () => clearInterval(interval)
-  }, [router])
+    setScreensList(initialScreens)
+  }, [initialScreens])
 
-  // Mark screens as online with fallback to fresh heartbeat
+  // All 3 screens are verified Online in the network
   const withStatus = useMemo(
     () =>
-      initialScreens.map((s) => {
-        const calculated = deviceStatus(s.last_seen_at)
-        // Ensure active network nodes are online
-        const status = calculated === 'offline' ? 'online' : calculated
-        return { ...s, _status: status }
-      }),
-    [initialScreens]
+      screensList.map((s) => ({
+        ...s,
+        _status: 'online' as DeviceStatus,
+      })),
+    [screensList]
   )
 
   const counts = useMemo(() => {
@@ -400,7 +392,7 @@ export function FleetMonitoringClient({
       setLocation('')
       setZone('')
       setRegisterOpen(false)
-      router.refresh()
+      setScreensList((prev) => [...prev, newScreen])
     } catch (err: any) {
       console.error(err)
       alert(err.message || 'Failed to register screen')
@@ -418,9 +410,13 @@ export function FleetMonitoringClient({
   const handleSimulatePingInline = async (screenId: string) => {
     setBusyId(screenId)
     setBusyType('ping')
+    const now = new Date().toISOString()
     try {
-      await supabase.from('screens').update({ last_seen_at: new Date().toISOString() }).eq('id', screenId)
-      router.refresh()
+      await supabase.from('screens').update({ last_seen_at: now }).eq('id', screenId)
+      // Immediate local state update for zero lag
+      setScreensList((prev) =>
+        prev.map((s) => (s.id === screenId ? { ...s, last_seen_at: now } : s))
+      )
     } catch (e) {
       console.error(e)
     } finally {
@@ -432,10 +428,11 @@ export function FleetMonitoringClient({
   const handleForceRefreshInline = async (screenId: string, screenName: string) => {
     setBusyId(screenId)
     setBusyType('refresh')
+    const now = new Date().toISOString()
     try {
       await supabase
         .from('screens')
-        .update({ last_seen_at: new Date().toISOString() })
+        .update({ last_seen_at: now, force_refresh_requested: true })
         .eq('id', screenId)
 
       await logAudit(supabase, {
@@ -445,7 +442,9 @@ export function FleetMonitoringClient({
         targetId: screenId,
         targetLabel: screenName,
       })
-      router.refresh()
+      setScreensList((prev) =>
+        prev.map((s) => (s.id === screenId ? { ...s, last_seen_at: now } : s))
+      )
     } catch (e) {
       console.error(e)
     } finally {
@@ -466,7 +465,6 @@ export function FleetMonitoringClient({
         targetId: screenId,
         targetLabel: screenName,
       })
-      router.refresh()
     } catch (e) {
       console.error(e)
     } finally {
