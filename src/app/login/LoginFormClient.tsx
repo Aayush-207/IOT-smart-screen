@@ -13,7 +13,7 @@ const DEMO_ACCOUNTS = [
     icon: Shield,
   },
   {
-    role: 'Department Head',
+    role: 'MIT-SOC',
     desc: 'Approver',
     email: 'campus.hod@gmail.com',
     icon: UserCheck,

@@ -40,6 +40,7 @@ function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
     return [
       { href: '/dashboard/submitter', label: 'My Announcements', icon: LayoutDashboard },
       { href: '/dashboard/submitter/new', label: 'Create Announcement', icon: PlusCircle },
+      { href: '/dashboard/submitter/events', label: 'Events Calendar', icon: Calendar },
     ]
   }
   if (role === 'hod') {
