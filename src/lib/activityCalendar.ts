@@ -291,10 +291,33 @@ function parseMonthSheet(rows: string[][], monthCfg: MonthConfig): MonthCalendar
         if (!dayObj) continue
         const cellText = (row[col] || '').trim()
         if (cellText) {
-          const items = cellText
+          const rawItems = cellText
             .split('\n')
             .map((s) => s.trim())
             .filter(Boolean)
+            
+          const items: string[] = []
+          for (let i = 0; i < rawItems.length; i++) {
+            const line = rawItems[i]
+            if (items.length === 0) {
+              items.push(line)
+            } else {
+              const prev = items[items.length - 1]
+              // Check if the line is a continuation of the previous event
+              // e.g., starts with '(', lowercase letter, or version number like '2.0'
+              const isContinuation = 
+                /^\(/.test(line) || 
+                /^[a-z]/.test(line) || 
+                /^\d+\.\d+/.test(line)
+                
+              if (isContinuation) {
+                items[items.length - 1] = prev + ' ' + line
+              } else {
+                items.push(line)
+              }
+            }
+          }
+
           for (const item of items) {
             let category = 'Academic & General'
             const lower = item.toLowerCase()
@@ -408,14 +431,20 @@ function parseMonthSheet(rows: string[][], monthCfg: MonthConfig): MonthCalendar
             }
 
             let club: string | null = null
-            const clubMatch = item.match(/\(([^)]+)\)$/)
-            if (clubMatch) {
-              const matchedInside = clubMatch[1].trim()
-              if (
-                !/^\d+\s*(to|-)\s*\d+$/i.test(matchedInside) &&
-                !/^holiday$/i.test(matchedInside)
-              ) {
-                club = matchedInside
+            const allMatches = [...item.matchAll(/\(([^)]+)\)/g)]
+            if (allMatches.length > 0) {
+              // Get the last set of parentheses that isn't a date/time/holiday
+              for (let i = allMatches.length - 1; i >= 0; i--) {
+                const matchedInside = allMatches[i][1].trim()
+                if (
+                  !/^\d+\s*(?:to|-)\s*\d+$/i.test(matchedInside) &&
+                  !/^holiday$/i.test(matchedInside) &&
+                  !/^\d{1,2}:\d{2}/.test(matchedInside) &&
+                  !/^\d{1,2}(st|nd|rd|th)/i.test(matchedInside)
+                ) {
+                  club = matchedInside
+                  break
+                }
               }
             }
 
