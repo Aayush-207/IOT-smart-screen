@@ -625,6 +625,11 @@ export function AdminActivityCalendarClient({
                                   Club: {ev.club}
                                 </span>
                               )}
+                              {ev.department && (
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/30 text-indigo-700 dark:text-indigo-300">
+                                  Dept: {ev.department}
+                                </span>
+                              )}
                             </div>
                           </div>
 
@@ -736,7 +741,12 @@ export function AdminActivityCalendarClient({
 
                         {ev.club && (
                           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300">
-                            Organizing Unit: <strong className="font-semibold">{ev.club}</strong>
+                            Club: <strong className="font-semibold">{ev.club}</strong>
+                          </span>
+                        )}
+                        {ev.department && (
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/30 text-indigo-700 dark:text-indigo-300">
+                            Department: <strong className="font-semibold">{ev.department}</strong>
                           </span>
                         )}
                       </div>

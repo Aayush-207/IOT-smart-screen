@@ -4,6 +4,7 @@ export interface CalendarEvent {
   title: string
   category: string
   club?: string | null
+  department?: string | null
   dateStr?: string
   dayNum?: number
   dayOfWeek?: string
@@ -431,6 +432,7 @@ function parseMonthSheet(rows: string[][], monthCfg: MonthConfig): MonthCalendar
             }
 
             let club: string | null = null
+            let department: string | null = null
             const allMatches = [...item.matchAll(/\(([^)]+)\)/g)]
             if (allMatches.length > 0) {
               // Get the last set of parentheses that isn't a date/time/holiday
@@ -442,7 +444,20 @@ function parseMonthSheet(rows: string[][], monthCfg: MonthConfig): MonthCalendar
                   !/^\d{1,2}:\d{2}/.test(matchedInside) &&
                   !/^\d{1,2}(st|nd|rd|th)/i.test(matchedInside)
                 ) {
-                  club = matchedInside
+                  const upper = matchedInside.toUpperCase()
+                  const isDept =
+                    upper.includes('SHD') || upper.includes('MANET') || upper.includes('SVS') ||
+                    upper.includes('MITCOM') || upper.includes('SAP') || upper.includes('SOC') ||
+                    upper.includes('SOFT') || upper.includes('SOH') || upper.includes('SOER') ||
+                    upper.includes('SOD') || upper.includes('SCIL') || upper.includes('SOES') ||
+                    upper.includes('SPES') || upper.includes('BIOENGINEERING') || upper.includes('PSYCHOLOGY') ||
+                    upper.includes('SICS')
+
+                  if (isDept && !upper.includes('CLUB')) {
+                    department = matchedInside
+                  } else {
+                    club = matchedInside
+                  }
                   break
                 }
               }
@@ -452,6 +467,7 @@ function parseMonthSheet(rows: string[][], monthCfg: MonthConfig): MonthCalendar
               title: item,
               category,
               club,
+              department,
             })
           }
         }
@@ -487,8 +503,103 @@ function parseMonthSheet(rows: string[][], monthCfg: MonthConfig): MonthCalendar
   }
 }
 
+export async function fetchClubsMapping(): Promise<Record<string, string>> {
+  const url = `https://docs.google.com/spreadsheets/d/1DUIFEJNlvkBvof1FB5jK4tF35tyD9Err8PF-ozT6SW8/export?format=csv&gid=380806459`
+  try {
+    const res = await fetch(url, { next: { revalidate: 3600 } })
+    if (!res.ok) return {}
+    const csvText = await res.text()
+    const rows = parseCSV(csvText)
+    const map: Record<string, string> = {}
+    let currentSchool = ''
+    for (let i = 2; i < rows.length; i++) {
+      const row = rows[i]
+      if (row.length < 4) continue
+      const schoolCol = row[1]?.trim()
+      const sForm = row[3]?.trim()
+      if (schoolCol) {
+        currentSchool = schoolCol
+      }
+      if (sForm && currentSchool) {
+        map[sForm.toUpperCase()] = currentSchool
+      }
+      const clubName = row[2]?.trim()
+      if (clubName && currentSchool) {
+        map[clubName.toUpperCase()] = currentSchool
+      }
+    }
+    return map
+  } catch (err) {
+    console.warn('[ActivityCalendar] Failed to fetch clubs mapping:', err)
+    return {}
+  }
+}
+
+function applyClubsMapping(data: MonthCalendarData, clubsMap: Record<string, string>) {
+  const MANUAL_OVERRIDES: Record<string, string> = {
+    'CYBERSHAKTI CELL': 'MIT-SOC',
+    'AWS': 'MIT-SOC',
+    'SAE CLUB': 'MIT-SOES',
+    'SAE & SPEEDTAIL RACING CLUB': 'MIT-SOES',
+    'SPEEDTAIL RACING & SAE CLUB': 'MIT-SOES',
+    'LFAC CLUB': 'MIT-SOES',
+    'INFUSION CLUB': 'MIT-SFT',
+    'ADVENTURE CLUB': 'MIT-ADTU',
+    'IIC': 'MIT-SOC',
+    '(IIC': 'MIT-SOC',
+    'IIC+AIC': 'MIT-SOC',
+    'AIC': 'MIT-SOC',
+    'IPR&TTO': 'MIT-SOC',
+    'IPR-TTO': 'MIT-SOC',
+    'SAP-HERITAGE CLUB': 'MIT-SOA',
+    'ASTRA': 'MIT-SOC',
+    'ACM_W': 'MIT-SOC',
+    'HR CLUB-MITCOM': 'MITCOM',
+    'LAVERIC': 'MITCOM',
+    'LAVERIC CLUB': 'MITCOM',
+    'OIA': 'MIT-ADTU',
+    'IEEE STD. CHAPTER': 'MIT-SOC',
+    'MACC CLUB': 'MIT-SOC',
+    'EV CLUB': 'MIT-SOES',
+    'EV & MESA CLUB': 'MIT-SOES',
+    'MESA & EV CLUB': 'MIT-SOES',
+    'EV, MESA CLUB&CESA': 'MIT-SOES',
+    'ASHRAE CLUB': 'MIT-SOES',
+    'ASHRAE & MESA CLUB': 'MIT-SOES',
+    'CODE VERSE': 'MIT-SOC',
+    'SWIFT CODING': 'MIT-SOC',
+    'PANCHAYATI & KALAKRITI': 'MIT-ADTU',
+    'NSS': 'MIT-ADTU',
+    'CRICKET': 'MIT-ADTU',
+  }
+
+  for (const ev of data.events) {
+    if (ev.club && !ev.department) {
+      const upper = ev.club.toUpperCase()
+      const mappedDept = MANUAL_OVERRIDES[upper] || clubsMap[upper]
+      if (mappedDept) ev.department = mappedDept
+    }
+  }
+  for (const week of data.weeks) {
+    if (week) {
+      for (const day of week) {
+        if (day) {
+          for (const ev of day.events) {
+            if (ev.club && !ev.department) {
+              const upper = ev.club.toUpperCase()
+              const mappedDept = MANUAL_OVERRIDES[upper] || clubsMap[upper]
+              if (mappedDept) ev.department = mappedDept
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 export async function fetchCalendarMonthData(
-  config: MonthConfig
+  config: MonthConfig,
+  clubsMap: Record<string, string> = {}
 ): Promise<MonthCalendarData> {
   const url = `https://docs.google.com/spreadsheets/d/1DUIFEJNlvkBvof1FB5jK4tF35tyD9Err8PF-ozT6SW8/export?format=csv&gid=${config.gid}`
   try {
@@ -498,12 +609,16 @@ export async function fetchCalendarMonthData(
     }
     const csvText = await res.text()
     const rows = parseCSV(csvText)
-    return parseMonthSheet(rows, config)
+    const parsedData = parseMonthSheet(rows, config)
+    applyClubsMapping(parsedData, clubsMap)
+    return parsedData
   } catch (err) {
     console.warn(`[ActivityCalendar] Live fetch failed for ${config.name}, using fallback:`, err)
     const found = fallbackData.months.find((m) => m.id === config.id)
     if (found?.data) {
-      return found.data as unknown as MonthCalendarData
+      const data = JSON.parse(JSON.stringify(found.data)) as MonthCalendarData
+      applyClubsMapping(data, clubsMap)
+      return data
     }
     return {
       id: config.id,
@@ -522,12 +637,16 @@ export async function fetchCalendarMonthData(
 export async function getAllMonthsCalendarData(): Promise<
   Record<string, MonthCalendarData>
 > {
-  // Pre-loaded fallback provides instantaneous sub-10ms response for all 9 months
+  const clubsMap = await fetchClubsMapping()
+
+  // Pre-loaded fallback provides instantaneous response for all 9 months
   const fallbackMap: Record<string, MonthCalendarData> = {}
   if (fallbackData?.months && Array.isArray(fallbackData.months)) {
     for (const item of fallbackData.months) {
       if (item?.id && item?.data) {
-        fallbackMap[item.id] = item.data as unknown as MonthCalendarData
+        const data = JSON.parse(JSON.stringify(item.data)) as MonthCalendarData
+        applyClubsMapping(data, clubsMap)
+        fallbackMap[item.id] = data
       }
     }
   }
@@ -539,7 +658,7 @@ export async function getAllMonthsCalendarData(): Promise<
 
   const entries = await Promise.all(
     MONTH_CONFIGS.map(async (cfg) => {
-      const data = await fetchCalendarMonthData(cfg)
+      const data = await fetchCalendarMonthData(cfg, clubsMap)
       return [cfg.id, data] as const
     })
   )
