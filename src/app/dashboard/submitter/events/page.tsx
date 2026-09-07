@@ -148,16 +148,16 @@ export default async function SubmitterEventsPage() {
                           {ev.title}
                         </div>
                         <div className="flex flex-wrap items-center gap-1.5 mt-auto">
-                          <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${style.badgeClass}`}>
+                          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md border font-medium ${style.badgeClass}`}>
                             {ev.category}
                           </span>
                           {ev.club && (
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neutral-200 dark:bg-white/10 border border-neutral-300 dark:border-white/20 text-neutral-800 dark:text-white font-medium shadow-sm">
                               Club: {ev.club}
                             </span>
                           )}
                           {ev.department && (
-                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/30 text-indigo-700 dark:text-indigo-300">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700/50 text-indigo-900 dark:text-indigo-200 font-medium shadow-sm">
                               Dept: {ev.department}
                             </span>
                           )}

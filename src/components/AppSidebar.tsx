@@ -48,6 +48,7 @@ function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
       { href: '/dashboard/hod', label: 'Department Overview', icon: LayoutDashboard },
       { href: '/dashboard/hod/approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingApprovals },
       { href: '/dashboard/hod/screens', label: 'Screens', icon: Monitor },
+      { href: '/dashboard/hod/events', label: 'Department Events', icon: Calendar },
     ]
   }
   if (role === 'emergency') {
