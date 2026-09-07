@@ -31,7 +31,7 @@ import {
   CATEGORY_STYLES,
 } from '@/lib/activityCalendar'
 
-interface HodActivityCalendarClientProps {
+interface AdminActivityCalendarClientProps {
   initialMonthsData: Record<string, MonthCalendarData>
 }
 
@@ -46,9 +46,9 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Academic & General': <Award className="w-3.5 h-3.5 text-neutral-400 shrink-0" />,
 }
 
-export function HodActivityCalendarClient({
+export function AdminActivityCalendarClient({
   initialMonthsData,
-}: HodActivityCalendarClientProps) {
+}: AdminActivityCalendarClientProps) {
   const [monthsData, setMonthsData] = useState<Record<string, MonthCalendarData>>(initialMonthsData)
   const [selectedMonthId, setSelectedMonthId] = useState<string>('2026-09')
   const [activeTerm, setActiveTerm] = useState<'All' | 'Odd Semester' | 'Even Semester'>('All')

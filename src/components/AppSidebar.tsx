@@ -47,7 +47,6 @@ function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
       { href: '/dashboard/hod', label: 'Department Overview', icon: LayoutDashboard },
       { href: '/dashboard/hod/approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingApprovals },
       { href: '/dashboard/hod/screens', label: 'Screens', icon: Monitor },
-      { href: '/dashboard/hod/calendar', label: 'Calendar', icon: Calendar },
     ]
   }
   if (role === 'emergency') {
@@ -63,6 +62,7 @@ function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
     { href: '/dashboard/admin/approvals', label: 'Admin Approvals', icon: CheckSquare },
     { href: '/dashboard/admin/fleet', label: 'Screens & Fleet', icon: Monitor },
     { href: '/dashboard/admin/announcements', label: 'Broadcast Catalog', icon: ListOrdered },
+    { href: '/dashboard/admin/calendar', label: 'Calendar', icon: Calendar },
     { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle },
     { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText },
   ]
