@@ -51,6 +51,7 @@ function ScreenNodeCard({
 
   const [slideIndex, setSlideIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
+  const [syncKey, setSyncKey] = useState(0)
 
   // 4-second timed rotation
   useEffect(() => {
@@ -62,7 +63,7 @@ function ScreenNodeCard({
     }, 4000)
 
     return () => clearInterval(timer)
-  }, [count, screen.isOnline])
+  }, [count, screen.isOnline, syncKey])
 
   // When transition to the cloned last slide finishes, jump back to index 0 with 0ms transition
   const handleTransitionEnd = () => {
@@ -70,6 +71,12 @@ function ScreenNodeCard({
       setIsTransitioning(false)
       setSlideIndex(0)
     }
+  }
+
+  const handleSync = () => {
+    setIsTransitioning(false)
+    setSlideIndex(0)
+    setSyncKey((prev) => prev + 1)
   }
 
   const activeIndex = count > 0 ? slideIndex % count : 0
@@ -273,17 +280,30 @@ function ScreenNodeCard({
           <span className="shrink-0 text-[10px]">{aspectRatio === '16:9' ? '1672x941 (16:9)' : '941x1672 (9:16)'}</span>
         </div>
 
-        <button
-          type="button"
-          disabled={!screen.isOnline}
-          onClick={() =>
-            onInspect(currentContent || { title: screen.name, body: 'Standby rotation' })
-          }
-          className="w-full py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 border border-neutral-200 dark:border-white/10 text-xs font-mono text-neutral-800 dark:text-white inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer btn-press disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          <span>{screen.isOnline ? 'Inspect Current Poster' : 'Screen Offline'}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={!screen.isOnline}
+            onClick={() =>
+              onInspect(currentContent || { title: screen.name, body: 'Standby rotation' })
+            }
+            className="flex-1 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 border border-neutral-200 dark:border-white/10 text-xs font-mono text-neutral-800 dark:text-white inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer btn-press disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>{screen.isOnline ? 'Inspect' : 'Offline'}</span>
+          </button>
+
+          <button
+            type="button"
+            disabled={!screen.isOnline || !hasMultiple}
+            onClick={handleSync}
+            className="px-3 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 border border-neutral-200 dark:border-white/10 text-xs font-mono text-neutral-800 dark:text-white inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer btn-press disabled:opacity-40 disabled:cursor-not-allowed"
+            title="Sync Rotation Timer"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Sync</span>
+          </button>
+        </div>
       </div>
     </div>
   )
