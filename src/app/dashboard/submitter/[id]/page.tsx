@@ -123,8 +123,10 @@ export default async function DeliveryDetailPage({
                 announcement.target_zones.some((z: string) =>
                   z === screen.name ||
                   z === screen.zone ||
+                  z === screen.location ||
                   z.toLowerCase() === screen.name.toLowerCase() ||
-                  z.toLowerCase() === screen.zone.toLowerCase()
+                  z.toLowerCase() === screen.zone.toLowerCase() ||
+                  z.toLowerCase() === screen.location.toLowerCase()
                 )
               )
 

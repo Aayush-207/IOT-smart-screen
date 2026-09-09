@@ -40,8 +40,10 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
           return (
             zoneStr === screen.name.toLowerCase() ||
             zoneStr === screen.zone?.toLowerCase() ||
+            zoneStr === screen.location?.toLowerCase() ||
             screen.name.toLowerCase().includes(zoneStr) ||
-            screen.zone?.toLowerCase().includes(zoneStr)
+            screen.zone?.toLowerCase().includes(zoneStr) ||
+            screen.location?.toLowerCase().includes(zoneStr)
           )
         })
       }

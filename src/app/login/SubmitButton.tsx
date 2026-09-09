@@ -2,7 +2,7 @@
 
 import { useFormStatus } from 'react-dom'
 import { useState, useEffect } from 'react'
-import { Loader2 } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export function SubmitButton() {
   const { pending } = useFormStatus()
@@ -18,9 +18,10 @@ export function SubmitButton() {
             clearInterval(interval)
             return 99
           }
-          return prev + Math.floor(Math.random() * 15) + 5
+          const increment = prev > 80 ? 0.5 : prev > 40 ? 2 : 6
+          return Math.min(prev + increment + Math.random() * 2, 99)
         })
-      }, 150)
+      }, 100)
     } else {
       setProgress(0)
     }
@@ -32,33 +33,21 @@ export function SubmitButton() {
       <button 
         type="submit"
         disabled={pending}
-        className="w-full py-2.5 px-6 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-colors flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50"
+        className="group relative w-full bg-[#EA580C] text-white border-2 border-neutral-900 px-6 py-4 font-bold transition-all outline-none flex justify-center items-center gap-3 cursor-pointer disabled:opacity-90 disabled:cursor-not-allowed hover:bg-[#C2410C] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#171717] active:translate-y-0 active:shadow-[0px_0px_0_0_#171717] disabled:hover:translate-y-0 disabled:hover:shadow-none"
       >
         {pending ? (
-          <>
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0a0a0a]" />
-            <span>Authenticating...</span>
-          </>
+          <span className="uppercase tracking-widest text-sm">Authenticating...</span>
         ) : (
-          <span>Sign In &rarr;</span>
+          <>
+            <span className="uppercase tracking-widest text-sm">Enter Dashboard</span>
+            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+          </>
         )}
       </button>
 
       {pending && (
-        <div className="w-full space-y-1.5 animate-in fade-in duration-300">
-          <div className="flex justify-between items-center text-[10px] font-mono text-[#7d8187]">
-            <span className="flex items-center gap-1.5">
-               <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-               Connecting
-            </span>
-            <span className="tabular-nums text-white">{progress}%</span>
-          </div>
-          <div className="w-full h-1 bg-[#141414] rounded-full overflow-hidden border border-[#212327]">
-            <div 
-              className="h-full bg-white transition-all duration-150 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+        <div className="w-full border-2 border-neutral-900 bg-neutral-100 p-1 flex items-center">
+          <div className="h-2 bg-neutral-900 transition-all duration-150 ease-out" style={{ width: `${progress}%` }} />
         </div>
       )}
     </div>

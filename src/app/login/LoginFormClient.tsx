@@ -6,30 +6,10 @@ import { login } from './actions'
 import { SubmitButton } from './SubmitButton'
 
 const DEMO_ACCOUNTS = [
-  {
-    role: 'Central Admin',
-    desc: 'Full Fleet',
-    email: 'campus.admin@gmail.com',
-    icon: Shield,
-  },
-  {
-    role: 'MIT-SOC',
-    desc: 'Approver',
-    email: 'campus.hod@gmail.com',
-    icon: UserCheck,
-  },
-  {
-    role: 'Club / Submitter',
-    desc: 'Submitter',
-    email: 'campus.submitter@gmail.com',
-    icon: Users,
-  },
-  {
-    role: 'Emergency Officer',
-    desc: 'Override',
-    email: 'campus.emergency@gmail.com',
-    icon: AlertTriangle,
-  },
+  { role: 'Admin', email: 'campus.admin@gmail.com', icon: Shield },
+  { role: 'HOD', email: 'campus.hod@gmail.com', icon: UserCheck },
+  { role: 'Submitter', email: 'campus.submitter@gmail.com', icon: Users },
+  { role: 'Emergency', email: 'campus.emergency@gmail.com', icon: AlertTriangle },
 ]
 
 export function LoginFormClient({ message }: { message?: string }) {
@@ -43,16 +23,16 @@ export function LoginFormClient({ message }: { message?: string }) {
   }
 
   return (
-    <div className="w-full space-y-6">
-      {/* Fast Demo Role Selector */}
-      <div>
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#7d8187]">
-            Demo Roles (1-Click)
+    <div className="w-full space-y-8">
+      {/* Demo Roles - Neo Brutalism style */}
+      <div className="space-y-4">
+        <div className="flex items-baseline justify-between border-b-2 border-neutral-900 pb-2">
+          <span className="font-mono text-xs font-bold uppercase tracking-widest text-neutral-900">
+            Demo Roles
           </span>
-          <span className="text-[10px] font-mono text-white">Instant auth</span>
+          <span className="text-[10px] font-bold text-neutral-500 uppercase">One-Click Test</span>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {DEMO_ACCOUNTS.map((acc) => {
             const Icon = acc.icon
             const isSelected = email === acc.email
@@ -61,37 +41,23 @@ export function LoginFormClient({ message }: { message?: string }) {
                 key={acc.role}
                 type="button"
                 onClick={() => handleQuickFill(acc.email)}
-                className={`p-3 rounded-lg border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`flex items-center gap-3 p-3 text-left transition-all outline-none border-2 ${
                   isSelected
-                    ? 'border-white bg-[#191919] shadow-sm'
-                    : 'border-[#212327] bg-[#0a0a0a] hover:border-white/30 hover:bg-[#141414]'
+                    ? 'border-neutral-900 bg-neutral-900 text-white shadow-[4px_4px_0_0_#A8A29E]'
+                    : 'border-neutral-200 bg-white text-neutral-900 hover:border-neutral-900 hover:shadow-[4px_4px_0_0_#E5E5E5]'
                 }`}
               >
-                <div className="flex items-center justify-between mb-1.5">
-                  <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#7d8187]'}`} />
-                  <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 rounded-full border border-white/20 text-white bg-white/5">
-                    {acc.desc}
-                  </span>
-                </div>
-                <div>
-                  <div className="text-xs font-normal text-white leading-tight">{acc.role}</div>
-                  <div className="text-[10px] text-[#7d8187] font-mono truncate mt-0.5">{acc.email.split('@')[0]}</div>
-                </div>
+                <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-neutral-900'}`} />
+                <span className="text-sm font-bold tracking-tight truncate">{acc.role}</span>
               </button>
             )
           })}
         </div>
       </div>
 
-      <div className="relative flex py-1 items-center">
-        <div className="flex-grow border-t border-[#212327]" />
-        <span className="flex-shrink mx-3 text-[10px] font-mono uppercase text-[#7d8187]">or credentials</span>
-        <div className="flex-grow border-t border-[#212327]" />
-      </div>
-
-      <form action={login} className="space-y-4">
-        <div>
-          <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf] mb-1.5" htmlFor="email">
+      <form action={login} className="space-y-6">
+        <div className="space-y-2">
+          <label className="block text-xs font-bold uppercase tracking-widest text-neutral-900" htmlFor="email">
             Email Address
           </label>
           <input
@@ -102,13 +68,13 @@ export function LoginFormClient({ message }: { message?: string }) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-white transition-colors"
+            className="w-full bg-white border-2 border-neutral-200 px-4 py-3.5 text-neutral-900 font-medium outline-none transition-all placeholder:text-neutral-400 placeholder:font-normal focus:border-neutral-900 focus:shadow-[4px_4px_0_0_#171717]"
             placeholder="you@university.edu"
           />
         </div>
 
-        <div>
-          <label className="block text-xs font-mono uppercase tracking-wider text-[#dadbdf] mb-1.5" htmlFor="password">
+        <div className="space-y-2">
+          <label className="block text-xs font-bold uppercase tracking-widest text-neutral-900" htmlFor="password">
             Password
           </label>
           <div className="relative">
@@ -120,16 +86,16 @@ export function LoginFormClient({ message }: { message?: string }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#0a0a0a] border border-[#212327] rounded-lg px-3.5 py-2 pr-10 text-xs text-white focus:outline-none focus:border-white transition-colors"
+              className="w-full bg-white border-2 border-neutral-200 px-4 py-3.5 pr-12 text-neutral-900 font-medium outline-none transition-all placeholder:text-neutral-400 placeholder:font-normal focus:border-neutral-900 focus:shadow-[4px_4px_0_0_#171717]"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7d8187] hover:text-white p-1 rounded-md transition-colors cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-900 transition-colors cursor-pointer outline-none focus-visible:text-neutral-900"
               title={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-white" />}
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -139,9 +105,11 @@ export function LoginFormClient({ message }: { message?: string }) {
         </div>
 
         {message && (
-          <p className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs rounded-lg text-center font-mono">
-            {message}
-          </p>
+          <div className="p-4 bg-red-50 border-2 border-red-900 text-red-900 mt-6 shadow-[4px_4px_0_0_#7F1D1D]">
+            <p className="text-sm font-bold">
+              {message}
+            </p>
+          </div>
         )}
       </form>
     </div>

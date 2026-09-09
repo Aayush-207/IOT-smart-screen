@@ -44,7 +44,7 @@ export default async function HodScreensPage() {
   ])
 
   // Helper to determine all announcements currently targeting a specific screen
-  const getActiveContentsForScreen = (screen: { name: string; zone?: string }) => {
+  const getActiveContentsForScreen = (screen: { name: string; zone?: string; location?: string }) => {
     if (!liveAnnouncements || liveAnnouncements.length === 0) return []
 
     const matches = liveAnnouncements.filter((a) => {
@@ -58,10 +58,13 @@ export default async function HodScreensPage() {
           return (
             zoneStr === screen.name.toLowerCase() ||
             (screen.zone && zoneStr === screen.zone.toLowerCase()) ||
+            (screen.location && zoneStr === screen.location.toLowerCase()) ||
             screen.name.toLowerCase().includes(zoneStr) ||
             (screen.zone && screen.zone.toLowerCase().includes(zoneStr)) ||
+            (screen.location && screen.location.toLowerCase().includes(zoneStr)) ||
             zoneStr.includes(screen.name.toLowerCase()) ||
-            (screen.zone && zoneStr.includes(screen.zone.toLowerCase()))
+            (screen.zone && zoneStr.includes(screen.zone.toLowerCase())) ||
+            (screen.location && zoneStr.includes(screen.location.toLowerCase()))
           )
         })
       }

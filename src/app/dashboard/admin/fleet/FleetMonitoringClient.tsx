@@ -57,10 +57,13 @@ function FleetScreenCardComponent({
           return (
             zoneStr === screen.name.toLowerCase() ||
             zoneStr === screen.zone?.toLowerCase() ||
+            zoneStr === screen.location?.toLowerCase() ||
             screen.name.toLowerCase().includes(zoneStr) ||
             screen.zone?.toLowerCase().includes(zoneStr) ||
+            screen.location?.toLowerCase().includes(zoneStr) ||
             zoneStr.includes(screen.name.toLowerCase()) ||
-            zoneStr.includes(screen.zone?.toLowerCase())
+            (screen.zone && zoneStr.includes(screen.zone?.toLowerCase())) ||
+            (screen.location && zoneStr.includes(screen.location?.toLowerCase()))
           )
         })
       }
