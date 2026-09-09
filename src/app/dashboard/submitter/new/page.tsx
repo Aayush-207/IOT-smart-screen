@@ -43,11 +43,16 @@ export default async function NewAnnouncementPage({
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-heading-lg text-[var(--ink)]">
+      <div className="mb-8 flex flex-col items-start animate-fade-in-up">
+        <span className="text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full px-3 py-1 inline-block mb-3">
+          Announcement Authoring
+        </span>
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
           {existing ? 'Edit Announcement' : 'New Announcement'}
         </h1>
-        <p className="text-sm text-[var(--mute)] mt-1">Create a text or image announcement to display on campus screens.</p>
+        <p className="text-sm text-slate-500 mt-2">
+          Create a text or image announcement to display on campus screens.
+        </p>
       </div>
 
       <NewAnnouncementForm

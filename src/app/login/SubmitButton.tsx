@@ -2,7 +2,7 @@
 
 import { useFormStatus } from 'react-dom'
 import { useState, useEffect } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
 
 export function SubmitButton() {
   const { pending } = useFormStatus()
@@ -33,21 +33,30 @@ export function SubmitButton() {
       <button 
         type="submit"
         disabled={pending}
-        className="group relative w-full bg-[#EA580C] text-white border-2 border-neutral-900 px-6 py-4 font-bold transition-all outline-none flex justify-center items-center gap-3 cursor-pointer disabled:opacity-90 disabled:cursor-not-allowed hover:bg-[#C2410C] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#171717] active:translate-y-0 active:shadow-[0px_0px_0_0_#171717] disabled:hover:translate-y-0 disabled:hover:shadow-none"
+        className="group relative w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent text-sm font-bold rounded-full text-white bg-gradient-to-br from-[#562a75] to-[#8a44b8] hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#562a75] transition-all shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed overflow-hidden"
       >
+        {/* Subtle shine effect */}
+        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-all duration-1000 ease-out group-hover:translate-x-full" />
+
         {pending ? (
-          <span className="uppercase tracking-widest text-sm">Authenticating...</span>
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span className="text-sm">Authenticating...</span>
+          </>
         ) : (
           <>
-            <span className="uppercase tracking-widest text-sm">Enter Dashboard</span>
+            <span className="text-sm">Enter Dashboard</span>
             <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
           </>
         )}
       </button>
 
       {pending && (
-        <div className="w-full border-2 border-neutral-900 bg-neutral-100 p-1 flex items-center">
-          <div className="h-2 bg-neutral-900 transition-all duration-150 ease-out" style={{ width: `${progress}%` }} />
+        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div 
+            className="h-full bg-[#3b82f6] transition-all duration-150 ease-out rounded-full" 
+            style={{ width: `${progress}%` }} 
+          />
         </div>
       )}
     </div>

@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { UploadCloud, Eye, Monitor, Smartphone, Loader2, Building2, Clock, Sparkles, WifiOff } from 'lucide-react'
+import { UploadCloud, Eye, Monitor, Smartphone, Building2, Clock, Sparkles } from 'lucide-react'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
 
@@ -12,8 +12,6 @@ interface Department {
   name: string
 }
 
-// Submitters and HODs pick from these three; Emergency broadcasts go through
-// the dedicated /dashboard/admin/emergency screen instead.
 const SUBMITTER_PRIORITIES: Priority[] = ['routine', 'timesensitive', 'critical']
 
 function toLocalDatetimeInput(isoStr?: string | null): string {
@@ -69,12 +67,10 @@ export function NewAnnouncementForm({
       setAttachmentPreview(null)
       return
     }
-    // Security validation: max 10MB
     if (file.size > 10 * 1024 * 1024) {
       setError('Attachment must be smaller than 10MB.')
       return
     }
-    // Security validation: image types only
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       setError('Only JPEG, PNG, and WebP images are allowed.')
       return
@@ -98,10 +94,10 @@ export function NewAnnouncementForm({
   }
 
   const toggleZone = (zone: string) => {
+    setTargetAll(false)
     setTargetZones((prev) => (prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone]))
   }
 
-  // Target screen definitions with exact online / offline recognition
   const targetScreens = React.useMemo(() => {
     return zones.map((zone) => {
       const zLower = zone.toLowerCase()
@@ -215,7 +211,6 @@ export function NewAnnouncementForm({
         announcementId = inserted?.id
       }
 
-      // Advisory moderation pass — non-blocking (blueprint Part 22).
       if (mode === 'approval' && announcementId) {
         fetch('/api/announcements/moderate', {
           method: 'POST',
@@ -235,27 +230,28 @@ export function NewAnnouncementForm({
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-6xl animate-fade-in-up">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl animate-fade-in-up">
       {/* Main Form (Left 2 cols) */}
-      <div className="xl:col-span-2 p-6 md:p-8 rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-sm space-y-6">
+      <div className="xl:col-span-2 p-8 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-8">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Submission Editor</span>
-          <h2 className="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white mt-1">Compose Announcement</h2>
+          <h2 className="text-xl font-bold text-slate-900">Compose Announcement</h2>
+          <p className="text-sm text-slate-500 mt-1">Fill in the details for your campus broadcast.</p>
         </div>
 
         {error && (
-          <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400 rounded-lg text-xs font-medium">
+          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm font-semibold flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
             {error}
           </div>
         )}
 
         {/* Title Input */}
         <div>
-          <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-semibold text-slate-700">
               Title <span className="text-rose-500">*</span>
             </label>
-            <span className="font-mono text-[11px] text-neutral-500 dark:text-[#7d8187]">
+            <span className="text-xs font-medium text-slate-400">
               {title.length}/100
             </span>
           </div>
@@ -265,17 +261,17 @@ export function NewAnnouncementForm({
             maxLength={100}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Annual Tech Fest Registrations Open"
-            className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-all font-medium"
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
           />
         </div>
 
         {/* Body Textarea */}
         <div>
-          <div className="flex justify-between items-center mb-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-semibold text-slate-700">
               Message Content
             </label>
-            <span className="font-mono text-[11px] text-neutral-500 dark:text-[#7d8187]">
+            <span className="text-xs font-medium text-slate-400">
               {body.length}/500
             </span>
           </div>
@@ -284,21 +280,21 @@ export function NewAnnouncementForm({
             maxLength={500}
             onChange={(e) => setBody(e.target.value)}
             rows={4}
-            placeholder="Describe the details, dates, venue, or eligibility requirements for students and faculty..."
-            className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white transition-all leading-relaxed"
+            placeholder="Describe the details, dates, venue, or eligibility requirements..."
+            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
           />
         </div>
 
         {/* Department & Priority */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white mb-1.5">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               Department
             </label>
             <select
               value={departmentId}
               onChange={(e) => setDepartmentId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white"
+              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer transition-all shadow-sm"
             >
               <option value="">General / Campus-Wide</option>
               {departments.map((d) => (
@@ -308,10 +304,10 @@ export function NewAnnouncementForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white mb-1.5">
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
               Priority Tier
             </label>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-3">
               {SUBMITTER_PRIORITIES.map((p) => {
                 const isSelected = priority === p
                 return (
@@ -319,14 +315,14 @@ export function NewAnnouncementForm({
                     key={p}
                     type="button"
                     onClick={() => setPriority(p)}
-                    className={`py-2 px-2 rounded-xl text-[11px] font-mono font-semibold uppercase tracking-wider border transition-all cursor-pointer truncate ${
+                    className={`py-2.5 px-2 text-xs font-bold rounded-xl border transition-all cursor-pointer truncate shadow-sm ${
                       isSelected
                         ? p === 'critical'
-                          ? 'border-rose-500 bg-rose-500 text-white shadow-xs'
+                          ? 'border-rose-500 bg-rose-500 text-white shadow-rose-500/20 shadow-md'
                           : p === 'timesensitive'
-                          ? 'border-sky-500 bg-sky-500 text-white shadow-xs'
-                          : 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-[#0a0a0a] shadow-xs'
-                        : 'border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5'
+                          ? 'border-amber-500 bg-amber-500 text-white shadow-amber-500/20 shadow-md'
+                          : 'border-slate-800 bg-slate-800 text-white shadow-slate-800/20 shadow-md'
+                        : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white'
                     }`}
                   >
                     {PRIORITY_LABEL[p]}
@@ -338,44 +334,43 @@ export function NewAnnouncementForm({
         </div>
 
         {/* Target Screens & Zones */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
+        <div className="pt-4">
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
+            <label className="block text-sm font-semibold text-slate-700">
               Target Screens &amp; Zones
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={selectAllZones}
-                className="text-[11px] text-sky-600 dark:text-sky-400 hover:underline font-medium cursor-pointer"
+                className="text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50 hover:text-indigo-600 transition-all cursor-pointer shadow-sm"
               >
                 Select All
               </button>
-              <span className="text-neutral-300 dark:text-neutral-700">&bull;</span>
               <button
                 type="button"
                 onClick={clearAllZones}
-                className="text-[11px] text-neutral-500 dark:text-[#7d8187] hover:underline font-medium cursor-pointer"
+                className="text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50 hover:text-rose-600 transition-all cursor-pointer shadow-sm"
               >
                 Clear
               </button>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {targetScreens.map((screen) => {
               const isSelected = targetZones.includes(screen.value)
               return (
                 <label
                   key={screen.value}
-                  className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium border cursor-pointer transition-all ${
+                  className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium border cursor-pointer transition-all shadow-sm ${
                     !screen.isOnline
                       ? isSelected
-                        ? 'bg-neutral-800 text-neutral-300 border-neutral-700 opacity-60 shadow-xs'
-                        : 'border-neutral-200 dark:border-[#1a1b1e] bg-neutral-100/50 dark:bg-[#080808] text-neutral-400 dark:text-neutral-500 opacity-55 hover:opacity-75'
+                        ? 'bg-slate-800 text-slate-300 border-slate-800'
+                        : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-slate-300 hover:bg-white'
                       : isSelected
-                      ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] border-neutral-900 dark:border-white shadow-xs ring-2 ring-emerald-500/20'
-                      : 'border-emerald-500/40 dark:border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 text-neutral-800 dark:text-emerald-300 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/30'
+                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-indigo-500/10'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
                   <input
@@ -385,20 +380,11 @@ export function NewAnnouncementForm({
                     onChange={() => toggleZone(screen.value)}
                   />
                   {screen.isOnline ? (
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isSelected ? 'bg-indigo-500 shadow-[0_0_0_2px_rgba(99,102,241,0.2)]' : 'bg-emerald-500'}`} />
                   ) : (
-                    <span className="w-2 h-2 rounded-full bg-neutral-400 dark:bg-neutral-600 shrink-0" />
+                    <span className="w-2.5 h-2.5 bg-slate-300 rounded-full shrink-0" />
                   )}
-                  <span className="font-medium">{screen.label}</span>
-                  {screen.isOnline ? (
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 ml-0.5">
-                      Online
-                    </span>
-                  ) : (
-                    <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-neutral-200 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 ml-0.5">
-                      Offline
-                    </span>
-                  )}
+                  <span>{screen.label}</span>
                 </label>
               )
             })}
@@ -406,114 +392,115 @@ export function NewAnnouncementForm({
         </div>
 
         {/* Display Window & Presets */}
-        <div>
-          <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
+        <div className="pt-4 border-t border-slate-100">
+          <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
+            <label className="block text-sm font-semibold text-slate-700">
               Display Duration
             </label>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-mono uppercase text-neutral-500 dark:text-[#7d8187]">Presets:</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500 px-2">Presets</span>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(24)}
-                className="px-2.5 py-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-[10px] font-mono text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                className="px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 cursor-pointer transition-all shadow-sm"
               >
                 24H
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(72)}
-                className="px-2.5 py-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-[10px] font-mono text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                className="px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 cursor-pointer transition-all shadow-sm"
               >
                 3D
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(168)}
-                className="px-2.5 py-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-[10px] font-mono text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                className="px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 cursor-pointer transition-all shadow-sm"
               >
                 7D
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <span className="text-[11px] text-neutral-500 dark:text-[#7d8187] block mb-1">Start Displaying</span>
+              <span className="text-xs font-semibold text-slate-500 block mb-2">Start Displaying</span>
               <input
                 type="datetime-local"
                 value={displayStart}
                 onChange={(e) => setDisplayStart(e.target.value)}
-                className="w-full px-3.5 py-2 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
               />
             </div>
             <div>
-              <span className="text-[11px] text-neutral-500 dark:text-[#7d8187] block mb-1">Stop Displaying (Auto-Expire)</span>
+              <span className="text-xs font-semibold text-slate-500 block mb-2">Stop Displaying (Auto-Expire)</span>
               <input
                 type="datetime-local"
                 value={displayEnd}
                 onChange={(e) => setDisplayEnd(e.target.value)}
-                className="w-full px-3.5 py-2 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white"
+                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Attachment Upload Zone */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-900 dark:text-white">
+        <div className="pt-4 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+            <label className="block text-sm font-semibold text-slate-700">
               Slide Poster / Graphic (Optional)
             </label>
-            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-medium">
-              1672 &times; 941 px (16:9)
+            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">
+              1672 &times; 941 PX (16:9)
             </span>
           </div>
 
           {/* Required Dimension Callout */}
-          <div className="p-3.5 rounded-xl border border-sky-500/30 bg-sky-50 dark:bg-sky-950/20 text-sky-800 dark:text-sky-300 space-y-1 mb-3">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-300">
-              <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 mb-6 shadow-sm">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
+              <Sparkles className="w-4 h-4 text-amber-500" />
               <span>Required Poster Dimensions</span>
             </div>
-            <p className="text-xs font-mono font-medium text-neutral-900 dark:text-white">
-              Width: <strong>1672 px</strong> &bull; Height: <strong>941 px</strong> (Aspect Ratio: 16:9)
+            <p className="text-sm font-semibold text-slate-700">
+              WIDTH: <strong>1672 PX</strong> &bull; HEIGHT: <strong>941 PX</strong>
             </p>
-            <p className="text-[11px] text-neutral-600 dark:text-neutral-400 leading-relaxed">
-              The uploaded poster should be in that dimension to fit the display screens pixel-perfect without distortion or black bars.
+            <p className="text-xs font-medium text-slate-500 mt-1 max-w-xl">
+              The uploaded poster should be in that exact dimension to fit the display screens perfectly without distortion or black bars.
             </p>
           </div>
           
           {attachmentPreview || (existing?.attachment_url && !attachment) ? (
-            <div className="relative p-3 bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl flex items-center gap-4">
+            <div className="relative p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-5 shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={attachmentPreview || existing.attachment_url}
                 alt="Poster preview"
-                className="w-20 h-20 rounded-lg object-cover border border-neutral-200 dark:border-[#212327] shrink-0"
+                className="w-32 h-20 object-cover rounded-xl shadow-sm border border-slate-100 shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-neutral-900 dark:text-white truncate">
+                <p className="text-sm font-bold text-slate-900 truncate">
                   {attachment ? attachment.name : 'Current Attachment'}
                 </p>
-                <p className="text-[11px] text-neutral-500 dark:text-[#7d8187]">
-                  {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored image'} &bull; 1672 &times; 941 px recommended
+                <p className="text-xs font-medium text-slate-500 mt-1">
+                  {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored image'} &bull; 16:9 Ratio
                 </p>
                 <button
                   type="button"
                   onClick={removeAttachment}
-                  className="mt-1 text-xs text-rose-600 hover:underline font-medium cursor-pointer"
+                  className="mt-2 text-rose-600 hover:text-rose-700 text-xs font-bold hover:underline cursor-pointer transition-colors"
                 >
                   Remove visual
                 </button>
               </div>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center p-6 border border-dashed border-neutral-300 dark:border-[#212327] hover:border-neutral-400 dark:hover:border-white/30 rounded-xl cursor-pointer transition-colors bg-neutral-50/60 dark:bg-[#0a0a0a]/50 hover:bg-neutral-100/60 dark:hover:bg-white/[0.03]">
-              <UploadCloud className="w-6 h-6 text-neutral-400 dark:text-[#7d8187] mb-2" />
-              <p className="text-xs font-medium text-neutral-900 dark:text-white">Click to upload poster or drag and drop</p>
-              <p className="text-[10px] text-sky-600 dark:text-sky-400 mt-1 font-mono font-medium">Required Dimension: Width: 1672 px &times; Height: 941 px</p>
-              <p className="text-[10px] text-neutral-500 dark:text-[#7d8187] mt-0.5 font-mono">JPEG, PNG, or WebP up to 10MB</p>
+            <label className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-300 cursor-pointer transition-all group shadow-sm">
+              <div className="w-14 h-14 bg-white rounded-2xl border border-slate-200 flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all">
+                <UploadCloud className="w-6 h-6 text-indigo-500" />
+              </div>
+              <p className="text-sm font-bold text-slate-700 text-center">Click to upload poster or drag and drop</p>
+              <p className="text-xs text-slate-500 mt-2 font-medium">JPEG, PNG, WEBP (Max 10MB)</p>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -525,19 +512,16 @@ export function NewAnnouncementForm({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-neutral-200 dark:border-[#212327]">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-slate-100">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <button
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('approval')}
-              className="px-5 py-2.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 active:scale-95 transition-all inline-flex items-center gap-2 cursor-pointer shadow-sm disabled:opacity-50"
+              className="px-6 py-3.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {submitting === 'approval' ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Submitting…</span>
-                </>
+                <span>Submitting...</span>
               ) : (
                 <span>Submit for Approval</span>
               )}
@@ -546,13 +530,10 @@ export function NewAnnouncementForm({
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('draft')}
-              className="px-4 py-2.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white text-xs font-medium hover:bg-neutral-100 dark:hover:bg-white/5 active:scale-95 transition-all inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="px-6 py-3.5 bg-white text-slate-700 border border-slate-300 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {submitting === 'draft' ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Saving…</span>
-                </>
+                <span>Saving...</span>
               ) : (
                 <span>Save Draft</span>
               )}
@@ -562,150 +543,145 @@ export function NewAnnouncementForm({
           <button
             type="button"
             onClick={() => setPreviewOpen(true)}
-            className="px-4 py-2.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white text-xs font-medium hover:bg-neutral-100 dark:hover:bg-white/5 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-6 py-3.5 bg-slate-800 text-white rounded-xl text-sm font-bold shadow-md shadow-slate-800/20 hover:bg-slate-900 transition-all w-full sm:w-auto justify-center flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
           >
-            <Eye className="w-3.5 h-3.5 text-sky-500" /> Billboard Simulator
+            <Eye className="w-4 h-4" /> Simulator
           </button>
         </div>
       </div>
 
       {/* Live Mini Billboard Agent Console Card (Right Col) */}
-      <div className="space-y-4">
-        <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] p-6 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-neutral-200 dark:border-[#212327] pb-3 gap-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Live Display Output
+      <div className="space-y-6">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
+          <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+            <span className="text-xs font-bold text-slate-700 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_0_2px_rgba(16,185,129,0.2)] animate-pulse" /> 
+              LIVE PREVIEW
             </span>
-            <div className="flex bg-neutral-100 dark:bg-[#0a0a0a] p-1 rounded-full border border-neutral-200 dark:border-[#212327] text-[10px]">
+            <div className="flex bg-slate-200/50 p-1 rounded-lg">
               <button
                 type="button"
                 onClick={() => setOrientation('landscape')}
-                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
                   orientation === 'landscape'
-                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
-                    : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <Monitor className="w-3 h-3" /> 16:9
+                <Monitor className="w-3.5 h-3.5" /> 16:9
               </button>
               <button
                 type="button"
                 onClick={() => setOrientation('portrait')}
-                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
                   orientation === 'portrait'
-                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
-                    : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <Smartphone className="w-3 h-3" /> 9:16
+                <Smartphone className="w-3.5 h-3.5" /> 9:16
               </button>
             </div>
           </div>
 
-          <div className={`mx-auto rounded-xl bg-black border border-white/10 flex flex-col justify-between p-3.5 text-center text-white overflow-hidden relative transition-all duration-300 ${
-            orientation === 'landscape' ? 'w-full aspect-[16/9]' : 'w-[56.25%] aspect-[9/16]'
-          }`}>
-            {attachmentPreview || existing?.attachment_url ? (
-              <img
-                src={attachmentPreview || existing?.attachment_url}
-                alt="Mini preview"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            ) : (
-              <>
-                <div className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 truncate relative z-10">
-                  {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'} &bull; {PRIORITY_LABEL[priority]}
-                </div>
+          <div className="flex-1 p-6 flex flex-col items-center justify-center bg-slate-100/50">
+            <div className={`bg-slate-900 rounded-xl flex flex-col justify-between p-4 text-center text-white overflow-hidden relative transition-all duration-300 shadow-xl border-4 border-slate-800 ${
+              orientation === 'landscape' ? 'w-full aspect-[16/9]' : 'w-[65%] aspect-[9/16]'
+            }`}>
+              {attachmentPreview || existing?.attachment_url ? (
+                <img
+                  src={attachmentPreview || existing?.attachment_url}
+                  alt="Mini preview"
+                  className="absolute inset-0 w-full h-full object-cover rounded-md"
+                />
+              ) : (
+                <>
+                  <div className="text-[9px] font-semibold bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-full uppercase tracking-wider truncate relative z-10 mx-auto border border-white/20">
+                    {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'} &bull; {PRIORITY_LABEL[priority]}
+                  </div>
 
-                <div className="my-auto relative z-10">
-                  <h4 className="text-xs font-semibold line-clamp-2 px-1 text-white">
-                    {title.trim() || 'Announcement Title'}
-                  </h4>
-                  {body.trim() && (
-                    <p className="text-[9px] text-neutral-300 line-clamp-2 mt-1 px-2">
-                      {body}
-                    </p>
-                  )}
-                </div>
+                  <div className="my-auto relative z-10 bg-slate-900/60 backdrop-blur-md rounded-xl m-2 p-4 border border-white/10 shadow-lg">
+                    <h4 className="text-sm font-bold text-white line-clamp-2">
+                      {title.trim() || 'Announcement Title'}
+                    </h4>
+                    {body.trim() && (
+                      <p className="text-[10px] font-medium text-slate-300 line-clamp-2 mt-2 leading-relaxed">
+                        {body}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="text-[7px] font-mono text-neutral-500 flex justify-between border-t border-white/5 pt-1 mt-auto relative z-10">
-                  <span>CampusCast Engine</span>
-                  <span>{targetZones.length} Target Screens</span>
-                </div>
-              </>
-            )}
+                  <div className="text-[9px] font-semibold text-slate-400 bg-slate-950/80 rounded-lg px-3 py-2 flex justify-between items-center relative z-10 border border-slate-800">
+                    <span>CC ENGINE</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      {targetZones.length} ZONES
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Live Configuration Details */}
-          <div className="mt-5 pt-4 border-t border-neutral-200 dark:border-[#212327] space-y-2.5">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">
-              Dispatch Specifications
+          <div className="p-6 border-t border-slate-100 bg-white space-y-4">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              Dispatch Manifest
             </div>
 
-            <div className="grid grid-cols-1 gap-2 text-xs">
+            <div className="grid grid-cols-1 gap-3 text-xs">
               {/* Department */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
-                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
-                  <Building2 className="w-3.5 h-3.5 text-sky-500" />
-                  <span className="text-[11px] font-medium">Department</span>
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex items-center gap-2 text-slate-600 font-semibold">
+                  <Building2 className="w-4 h-4" />
+                  <span>Dept</span>
                 </div>
-                <span className="text-[11px] font-mono font-medium text-neutral-900 dark:text-white truncate max-w-[150px]">
+                <span className="font-bold text-slate-900 truncate max-w-[150px]">
                   {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'}
                 </span>
               </div>
 
               {/* Screens Selected */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
-                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
-                  <Monitor className="w-3.5 h-3.5 text-emerald-500" />
-                  <span className="text-[11px] font-medium">Screens Selected</span>
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex items-center gap-2 text-slate-600 font-semibold">
+                  <Monitor className="w-4 h-4" />
+                  <span>Nodes</span>
                 </div>
-                <span className="text-[11px] font-mono font-medium text-neutral-900 dark:text-white text-right">
+                <span className="font-bold text-right">
                   {targetZones.length > 0 ? (
-                    <span className="text-emerald-600 dark:text-emerald-400">
-                      {targetZones.length} node{targetZones.length > 1 ? 's' : ''} ({targetZones.join(', ')})
+                    <span className="text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md">
+                      {targetZones.length} Selected
                     </span>
                   ) : (
-                    <span className="text-amber-600 dark:text-amber-400">0 selected</span>
+                    <span className="text-rose-700 bg-rose-100 px-2.5 py-1 rounded-md">0 Selected</span>
                   )}
                 </span>
               </div>
 
               {/* Duration / Schedule */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
-                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
-                  <Clock className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="text-[11px] font-medium">Duration</span>
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="flex items-center gap-2 text-slate-600 font-semibold">
+                  <Clock className="w-4 h-4" />
+                  <span>Time</span>
                 </div>
-                <span className="text-[11px] font-mono font-medium text-neutral-900 dark:text-white text-right">
+                <span className="font-bold text-slate-900 text-right text-[10px]">
                   {displayStart ? (
                     <span>
-                      {displayStart.replace('T', ' ')} {displayEnd ? `→ ${displayEnd.replace('T', ' ')}` : '(Permanent)'}
+                      {displayStart.replace('T', ' ')} <br/> {displayEnd ? `UNTIL ${displayEnd.replace('T', ' ')}` : '(PERMANENT)'}
                     </span>
                   ) : (
-                    <span className="text-neutral-500 dark:text-[#7d8187]">Immediate</span>
+                    <span className="text-slate-500">IMMEDIATE</span>
                   )}
-                </span>
-              </div>
-
-              {/* Screen Resolution */}
-              <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327]">
-                <div className="flex items-center gap-2 text-neutral-600 dark:text-[#dadbdf]">
-                  <Monitor className="w-3.5 h-3.5 text-indigo-500" />
-                  <span className="text-[11px] font-medium">Screen Canvas Size</span>
-                </div>
-                <span className="text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400">
-                  1672 &times; 941 px (16:9)
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-          <p className="text-[11px] text-[var(--slate)] dark:text-neutral-400 mt-4 leading-relaxed">
-            Content is vetted against automated safety policies before transmission to department HODs and admin consoles.
-          </p>
-        </div>
+        <p className="text-xs font-medium text-slate-500 leading-relaxed bg-indigo-50 border border-indigo-100 p-4 rounded-2xl text-center">
+          Content is vetted against automated safety policies before transmission to department HODs and admin consoles.
+        </p>
+      </div>
 
       <BillboardPreviewModal
         isOpen={previewOpen}

@@ -33,8 +33,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <Script id="theme-script" strategy="beforeInteractive">
-          {`
+        <script id="theme-script"
+          dangerouslySetInnerHTML={{
+            __html: `
             (function() {
               try {
                 const stored = localStorage.getItem('theme');
@@ -46,8 +47,9 @@ export default function RootLayout({
                 }
               } catch (_) {}
             })();
-          `}
-        </Script>
+          `
+          }}
+        />
       </head>
       <body
         suppressHydrationWarning

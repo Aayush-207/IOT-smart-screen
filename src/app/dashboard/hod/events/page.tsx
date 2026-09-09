@@ -1,8 +1,8 @@
 import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getAllMonthsCalendarData, CATEGORY_STYLES, CalendarEvent } from '@/lib/activityCalendar'
-import { Calendar as CalendarIcon, MapPin, Building2, Layers } from 'lucide-react'
+import { getAllMonthsCalendarData, CalendarEvent } from '@/lib/activityCalendar'
+import { Building2, Layers } from 'lucide-react'
 
 export default async function HodDepartmentEventsPage() {
   const supabase = await createClient()
@@ -19,7 +19,7 @@ export default async function HodDepartmentEventsPage() {
   
   if (!monthData) {
     return (
-      <div className="p-8 text-neutral-500 font-mono text-sm text-center">
+      <div className="p-8 text-neutral-500 font-mono font-bold uppercase tracking-widest text-sm text-center border-2 border-neutral-900 bg-white">
         Error loading calendar data for {targetMonthId}.
       </div>
     )
@@ -46,62 +46,62 @@ export default async function HodDepartmentEventsPage() {
   const totalEvents = deptDays.reduce((acc, curr) => acc + curr.events.length, 0)
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white animate-fade-in-up">
+    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b-4 border-neutral-900">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 font-medium flex items-center gap-1.5">
-              <Building2 className="w-3 h-3" /> Department Scope
+          <div className="flex items-center gap-3 mb-4">
+            <span className="px-3 py-1 font-mono text-[10px] font-black uppercase tracking-widest border-2 border-neutral-900 text-white bg-[#10B981] shadow-[2px_2px_0_0_#171717] flex items-center gap-2">
+              <Building2 className="w-4 h-4" /> Department Scope
             </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187] uppercase">
+            <span className="px-3 py-1 font-mono text-[10px] font-black uppercase tracking-widest border-2 border-neutral-900 text-neutral-900 bg-white shadow-[2px_2px_0_0_#171717]">
               {monthData.title}
             </span>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white">
+          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-neutral-900">
             {targetDepartment} Events
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+          <p className="text-xs font-bold text-neutral-600 uppercase tracking-widest mt-2 bg-white border-2 border-neutral-200 px-3 py-1.5 inline-block shadow-[4px_4px_0_0_#171717]">
             A filtered overview of all activities, workshops, and deadlines organized by {targetDepartment} for the month of September.
           </p>
         </div>
-        <div className="shrink-0 flex flex-col items-end">
-          <span className="text-3xl font-light text-indigo-600 dark:text-indigo-400">{totalEvents}</span>
-          <span className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187] uppercase tracking-wider">Total Events</span>
+        <div className="shrink-0 flex flex-col items-end border-4 border-neutral-900 bg-white p-4 shadow-[8px_8px_0_0_#171717]">
+          <span className="text-4xl font-black text-[#EA580C]">{totalEvents}</span>
+          <span className="text-[10px] font-black text-neutral-900 uppercase tracking-widest border-t-2 border-neutral-900 pt-1 mt-1 w-full text-right">Total Events</span>
         </div>
       </div>
 
       {/* Events Agenda List */}
       <div className="space-y-6">
         {deptDays.length === 0 ? (
-          <div className="p-16 text-center border border-neutral-200 dark:border-[#212327] rounded-2xl bg-white dark:bg-[#141414] text-neutral-500 dark:text-[#7d8187]">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-1">No events scheduled</h3>
-            <p className="text-xs max-w-sm mx-auto">
+          <div className="p-16 text-center border-2 border-neutral-900 bg-white shadow-[8px_8px_0_0_#171717]">
+            <h3 className="text-xl font-black uppercase text-neutral-900 mb-2">No events scheduled</h3>
+            <p className="text-sm font-bold max-w-sm mx-auto text-neutral-600 uppercase tracking-widest">
               There are no {targetDepartment} events scheduled for {monthData.title}.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {deptDays.map((day, idx) => {
               const dayDate = new Date(day.dateStr)
               const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
-              const formattedDate = dayDate.toLocaleDateString('en-US', options)
+              const formattedDate = dayDate.toLocaleDateString('en-US', options).toUpperCase()
               
               return (
-                <div key={idx} className="p-5 rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-sm flex flex-col hover:border-neutral-300 dark:hover:border-[#383b40] transition-colors">
+                <div key={idx} className="p-4 border-2 border-neutral-900 bg-white shadow-[6px_6px_0_0_#171717] flex flex-col hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#171717] transition-all">
                   
                   {/* Day Header */}
-                  <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-100 dark:border-[#212327]">
+                  <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-neutral-900">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 flex flex-col items-center justify-center">
-                        <span className="text-sm font-semibold text-neutral-900 dark:text-white leading-none">{dayDate.getDate()}</span>
+                      <div className="w-12 h-12 border-4 border-neutral-900 bg-[#E1D7D1] flex flex-col items-center justify-center shadow-[2px_2px_0_0_#171717]">
+                        <span className="text-lg font-black text-neutral-900 leading-none">{dayDate.getDate()}</span>
                       </div>
                       <div>
-                        <div className="text-xs font-mono font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">{day.dayOfWeek}</div>
-                        <div className="text-xs font-medium text-neutral-800 dark:text-neutral-200">{formattedDate}</div>
+                        <div className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.2em]">{day.dayOfWeek}</div>
+                        <div className="text-sm font-black uppercase text-neutral-900">{formattedDate}</div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono text-neutral-400 dark:text-[#7d8187] flex items-center gap-1 px-2 py-0.5 rounded-full bg-neutral-50 dark:bg-white/5">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-neutral-900 flex items-center gap-2 px-3 py-1 border-2 border-neutral-900 bg-[#F59E0B] shadow-[2px_2px_0_0_#171717]">
                       <Layers className="w-3 h-3" /> {day.events.length}
                     </span>
                   </div>
@@ -109,21 +109,20 @@ export default async function HodDepartmentEventsPage() {
                   {/* Events List */}
                   <div className="flex-1 space-y-3">
                     {day.events.map((ev, eIdx) => {
-                      const style = CATEGORY_STYLES[ev.category] || CATEGORY_STYLES['Academic & General']
                       return (
-                        <div key={eIdx} className={`p-3 rounded-xl border bg-neutral-50/50 dark:bg-[#18191c] border-neutral-200/70 dark:border-[#24262a] flex flex-col gap-2 ${style.borderClass} border-l-4`}>
-                          <h4 className="text-sm font-medium text-neutral-900 dark:text-white leading-snug">
+                        <div key={eIdx} className="p-3 border-2 border-neutral-900 bg-neutral-50 flex flex-col gap-2 shadow-[2px_2px_0_0_#171717]">
+                          <h4 className="text-xs font-black uppercase text-neutral-900 leading-snug">
                             {ev.title}
                           </h4>
                           
                           {/* Tags */}
-                          <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                            <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md border font-medium ${style.badgeClass}`}>
+                          <div className="flex flex-wrap items-center gap-2 mt-2 border-t-2 border-neutral-200 pt-2">
+                            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 border-2 border-neutral-900 bg-white">
                               {ev.category}
                             </span>
                             {ev.club && (
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neutral-200 dark:bg-white/10 border border-neutral-300 dark:border-white/20 text-neutral-800 dark:text-white font-medium shadow-sm">
-                                Club: {ev.club}
+                              <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 bg-[#10B981] border-2 border-neutral-900 text-neutral-900 shadow-[1px_1px_0_0_#171717]">
+                                C: {ev.club}
                               </span>
                             )}
                           </div>

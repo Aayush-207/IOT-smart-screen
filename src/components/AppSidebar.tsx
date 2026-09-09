@@ -16,6 +16,7 @@ import {
   Sun,
   Moon,
   Calendar,
+  Zap
 } from 'lucide-react'
 import { LogoutButton } from '@/components/LogoutButton'
 
@@ -26,47 +27,48 @@ interface NavItem {
   label: string
   icon: React.ElementType
   badge?: number
+  colorClass?: string
 }
 
-const ROLE_DISPLAY: Record<Role, { title: string; tag: string }> = {
-  submitter: { title: 'Submitter', tag: 'Club & Faculty' },
-  hod: { title: 'Department Head', tag: 'Approver' },
-  admin: { title: 'Central Admin', tag: 'Full Access' },
-  emergency: { title: 'Emergency Officer', tag: 'Override Auth' },
+const ROLE_DISPLAY: Record<Role, { title: string; tag: string; color: string }> = {
+  submitter: { title: 'Submitter', tag: 'Club & Faculty', color: 'bg-indigo-100 text-indigo-700' },
+  hod: { title: 'Department Head', tag: 'Approver', color: 'bg-emerald-100 text-emerald-700' },
+  admin: { title: 'Central Admin', tag: 'Full Access', color: 'bg-rose-100 text-rose-700' },
+  emergency: { title: 'Emergency Officer', tag: 'Override Auth', color: 'bg-amber-100 text-amber-700' },
 }
 
 function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
   if (role === 'submitter') {
     return [
-      { href: '/dashboard/submitter', label: 'My Announcements', icon: LayoutDashboard },
-      { href: '/dashboard/submitter/new', label: 'Create Announcement', icon: PlusCircle },
-      { href: '/dashboard/submitter/events', label: 'Events Calendar', icon: Calendar },
+      { href: '/dashboard/submitter', label: 'My Announcements', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
+      { href: '/dashboard/submitter/new', label: 'Create Announcement', icon: PlusCircle, colorClass: 'bg-rose-500' },
+      { href: '/dashboard/submitter/events', label: 'Events Calendar', icon: Calendar, colorClass: 'bg-emerald-500' },
     ]
   }
   if (role === 'hod') {
     return [
-      { href: '/dashboard/hod', label: 'Department Overview', icon: LayoutDashboard },
-      { href: '/dashboard/hod/approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingApprovals },
-      { href: '/dashboard/hod/screens', label: 'Screens', icon: Monitor },
-      { href: '/dashboard/hod/events', label: 'Department Events', icon: Calendar },
+      { href: '/dashboard/hod', label: 'Department Overview', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
+      { href: '/dashboard/hod/approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingApprovals, colorClass: 'bg-amber-500' },
+      { href: '/dashboard/hod/screens', label: 'Screens', icon: Monitor, colorClass: 'bg-blue-500' },
+      { href: '/dashboard/hod/events', label: 'Department Events', icon: Calendar, colorClass: 'bg-emerald-500' },
     ]
   }
   if (role === 'emergency') {
     return [
-      { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard },
-      { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle },
-      { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText },
+      { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
+      { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle, colorClass: 'bg-red-600' },
+      { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-slate-500' },
     ]
   }
   // Admin
   return [
-    { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard },
-    { href: '/dashboard/admin/approvals', label: 'Admin Approvals', icon: CheckSquare },
-    { href: '/dashboard/admin/fleet', label: 'Screens & Fleet', icon: Monitor },
-    { href: '/dashboard/admin/announcements', label: 'Broadcast Catalog', icon: ListOrdered },
-    { href: '/dashboard/admin/calendar', label: 'Calendar', icon: Calendar },
-    { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle },
-    { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText },
+    { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
+    { href: '/dashboard/admin/approvals', label: 'Admin Approvals', icon: CheckSquare, colorClass: 'bg-amber-500' },
+    { href: '/dashboard/admin/fleet', label: 'Screens & Fleet', icon: Monitor, colorClass: 'bg-blue-500' },
+    { href: '/dashboard/admin/announcements', label: 'Broadcast Catalog', icon: ListOrdered, colorClass: 'bg-purple-500' },
+    { href: '/dashboard/admin/calendar', label: 'Calendar', icon: Calendar, colorClass: 'bg-emerald-500' },
+    { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle, colorClass: 'bg-red-600' },
+    { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-slate-500' },
   ]
 }
 
@@ -81,87 +83,72 @@ export function AppSidebar({
 }) {
   const pathname = usePathname()
   const items = navItemsFor(role, pendingApprovals)
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
-
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark')
-    setTheme(isDark ? 'dark' : 'light')
-  }, [])
-
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(nextTheme)
-    document.documentElement.classList.add('theme-transition')
-    if (nextTheme === 'dark') {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-    }
-    setTimeout(() => {
-      document.documentElement.classList.remove('theme-transition')
-    }, 400)
-  }
-
-  const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User' }
+  const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User', color: 'bg-slate-100 text-slate-700' }
 
   return (
-    <aside className="w-[260px] shrink-0 border-r border-neutral-200 dark:border-[#212327] bg-[var(--canvas-inset)] dark:bg-[#0a0a0a] text-[var(--ink)] dark:text-white flex flex-col h-screen sticky top-0 select-none z-30">
+    <aside className="w-[260px] shrink-0 bg-white border-r border-slate-200 text-slate-900 flex flex-col h-screen sticky top-0 select-none z-30 font-sans shadow-sm">
       {/* Brand Header */}
-      <div className="p-5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between shrink-0">
-        <Link href="/" className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-8 h-8 rounded-full border border-neutral-300 dark:border-white/20 bg-neutral-200 dark:bg-white/5 text-[var(--ink)] dark:text-white flex items-center justify-center font-mono font-bold text-sm group-hover:border-neutral-400 dark:group-hover:border-white transition-colors">
-            X
+      <div className="h-16 flex items-center px-6 border-b border-slate-100 shrink-0">
+        <Link href="/" className="flex items-center gap-3 group w-full">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/logo.png" 
+            alt="Campus Cast" 
+            className="w-10 h-10 object-contain transition-transform group-hover:scale-105"
+          />
+          <div className="hidden fallback-logo w-8 h-8 bg-indigo-600 rounded-lg text-white items-center justify-center font-bold text-sm shadow-sm transition-transform group-hover:scale-105">
+            CC
           </div>
-          <div>
-            <div className="text-sm font-normal tracking-tight text-[var(--ink)] dark:text-white flex items-center gap-1.5">
-              CampusCast
-            </div>
-            <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-[#7d8187]">Display Mesh</div>
-          </div>
+          <span className="font-bold text-lg tracking-tight text-slate-900 truncate">
+            Campus Cast
+          </span>
         </Link>
       </div>
 
       {/* Role Pill Banner */}
-      <div className="px-5 py-3 border-b border-neutral-200 dark:border-[#212327] bg-neutral-100 dark:bg-[#141414] flex items-center justify-between shrink-0">
-        <div>
-          <span className="font-normal text-xs text-[var(--ink)] dark:text-white block leading-tight">{roleInfo.title}</span>
-          <span className="text-[10px] text-[#7d8187] font-mono">{roleInfo.tag}</span>
+      <div className="px-6 pb-6 shrink-0">
+        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+          <div className="flex items-center justify-between">
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${roleInfo.color}`}>
+              {roleInfo.title}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_0_3px_rgba(16,185,129,0.2)]" />
+            </div>
+          </div>
+          <span className="text-[11px] font-medium text-slate-500">{roleInfo.tag}</span>
         </div>
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] text-[var(--ink)] dark:text-white border border-neutral-300 dark:border-white/20 px-2 py-0.5 rounded-full bg-neutral-200 dark:bg-white/5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> ACTIVE
-        </span>
       </div>
 
       {/* Navigation Stack */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.12em] text-[#7d8187]">
-          Navigation
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+        <div className="px-2 pb-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          Menu
         </div>
 
         {items.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
+          
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center justify-between px-3.5 py-2 rounded-full text-xs transition-all ${
+              className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
                 isActive
-                  ? 'bg-neutral-800 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-sm'
-                  : 'text-neutral-500 dark:text-[#dadbdf] hover:text-[var(--ink)] dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-[#141414]'
+                  ? `${item.colorClass} text-white shadow-md shadow-slate-200/50`
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white dark:text-[#0a0a0a]' : 'text-neutral-400 dark:text-[#7d8187]'}`} />
+              <div className="flex items-center gap-3 min-w-0 font-medium text-sm">
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span className="truncate">{item.label}</span>
               </div>
 
               {!!item.badge && item.badge > 0 && (
                 <span
-                  className={`text-[10px] font-mono px-2 py-0.2 rounded-full ${
-                    isActive ? 'bg-white dark:bg-[#0a0a0a] text-[var(--ink)] dark:text-white' : 'bg-neutral-200 dark:bg-white/10 text-[var(--ink)] dark:text-white border border-neutral-300 dark:border-white/20'
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-600'
                   }`}
                 >
                   {item.badge}
@@ -172,12 +159,12 @@ export function AppSidebar({
         })}
 
         {role === 'emergency' && (
-          <div className="pt-4">
+          <div className="pt-6">
             <Link
               href="/dashboard/admin/emergency"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-rose-600 text-white text-xs uppercase tracking-wider hover:bg-rose-500 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-md shadow-red-500/20 transition-all"
             >
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0 animate-bounce" />
+              <AlertTriangle className="w-4 h-4 shrink-0 animate-pulse" />
               <span>Broadcast Alert</span>
             </Link>
           </div>
@@ -185,29 +172,17 @@ export function AppSidebar({
       </nav>
 
       {/* User Footer Profile */}
-      <div className="p-4 border-t border-neutral-200 dark:border-[#212327] bg-neutral-100 dark:bg-[#141414] space-y-3 shrink-0">
-        <div className="flex items-center justify-between text-xs">
-          <div className="min-w-0 pr-2">
-            <p className="font-normal text-[var(--ink)] dark:text-white truncate text-[11px]" title={userEmail}>
+      <div className="p-4 m-4 rounded-2xl bg-slate-50 border border-slate-100 shrink-0">
+        <div className="flex flex-col gap-3">
+          <div className="min-w-0">
+            <p className="font-semibold text-slate-900 text-xs truncate" title={userEmail}>
               {userEmail}
             </p>
-            <p className="text-[10px] text-[#7d8187] font-mono uppercase tracking-wider">{role}</p>
+            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Role: {role}</p>
           </div>
-
-          <button
-            onClick={toggleTheme}
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            className="p-1.5 rounded-full border border-neutral-300 dark:border-[#212327] bg-white dark:bg-[#141414] text-neutral-600 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white hover:scale-110 active:scale-95 cursor-pointer transition-all duration-200"
-          >
-            <span className="inline-block transition-transform duration-300 hover:rotate-45">
-              {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-neutral-700" />}
-            </span>
-          </button>
-        </div>
-
-        <div className="pt-1 border-t border-neutral-200 dark:border-[#212327]">
-          <LogoutButton />
+          <div className="pt-2 border-t border-slate-200">
+            <LogoutButton />
+          </div>
         </div>
       </div>
     </aside>

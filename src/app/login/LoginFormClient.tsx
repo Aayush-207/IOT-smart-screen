@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Eye, EyeOff, Shield, Users, UserCheck, AlertTriangle } from 'lucide-react'
+import { Eye, EyeOff, Shield, Users, UserCheck, AlertTriangle, AlertCircle } from 'lucide-react'
 import { login } from './actions'
 import { SubmitButton } from './SubmitButton'
 
@@ -9,7 +9,6 @@ const DEMO_ACCOUNTS = [
   { role: 'Admin', email: 'campus.admin@gmail.com', icon: Shield },
   { role: 'HOD', email: 'campus.hod@gmail.com', icon: UserCheck },
   { role: 'Submitter', email: 'campus.submitter@gmail.com', icon: Users },
-  { role: 'Emergency', email: 'campus.emergency@gmail.com', icon: AlertTriangle },
 ]
 
 export function LoginFormClient({ message }: { message?: string }) {
@@ -24,15 +23,17 @@ export function LoginFormClient({ message }: { message?: string }) {
 
   return (
     <div className="w-full space-y-8">
-      {/* Demo Roles - Neo Brutalism style */}
-      <div className="space-y-4">
-        <div className="flex items-baseline justify-between border-b-2 border-neutral-900 pb-2">
-          <span className="font-mono text-xs font-bold uppercase tracking-widest text-neutral-900">
-            Demo Roles
+      {/* Demo Roles - Modern Flat Bento style */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between pb-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            DEMO ROLES
           </span>
-          <span className="text-[10px] font-bold text-neutral-500 uppercase">One-Click Test</span>
+          <span className="text-[10px] font-bold text-[#562a75] bg-[#562a75]/10 px-3 py-1 rounded-full">
+            One-Click Test
+          </span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {DEMO_ACCOUNTS.map((acc) => {
             const Icon = acc.icon
             const isSelected = email === acc.email
@@ -41,23 +42,25 @@ export function LoginFormClient({ message }: { message?: string }) {
                 key={acc.role}
                 type="button"
                 onClick={() => handleQuickFill(acc.email)}
-                className={`flex items-center gap-3 p-3 text-left transition-all outline-none border-2 ${
+                className={`group flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-[16px] transition-all duration-200 outline-none border cursor-pointer ${
                   isSelected
-                    ? 'border-neutral-900 bg-neutral-900 text-white shadow-[4px_4px_0_0_#A8A29E]'
-                    : 'border-neutral-200 bg-white text-neutral-900 hover:border-neutral-900 hover:shadow-[4px_4px_0_0_#E5E5E5]'
+                    ? 'border-transparent bg-gradient-to-br from-[#562a75] to-[#8a44b8] text-white shadow-md shadow-[#562a75]/30 -translate-y-0.5'
+                    : 'border-slate-200 bg-[#F8FAFC]/50 text-slate-700 hover:border-slate-300 hover:bg-white hover:shadow-sm hover:-translate-y-0.5'
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-neutral-900'}`} />
-                <span className="text-sm font-bold tracking-tight truncate">{acc.role}</span>
+                <div className={`p-2 rounded-xl transition-colors ${isSelected ? 'bg-white/25' : 'bg-[#F1F5F9] text-slate-400 group-hover:bg-[#E2E8F0] group-hover:text-slate-600'}`}>
+                  <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'stroke-[1.5]'}`} />
+                </div>
+                <span className={`text-xs font-bold tracking-wide ${isSelected ? 'text-white' : 'text-slate-600'}`}>{acc.role}</span>
               </button>
             )
           })}
         </div>
       </div>
 
-      <form action={login} className="space-y-6">
+      <form action={login} className="space-y-5 pt-2">
         <div className="space-y-2">
-          <label className="block text-xs font-bold uppercase tracking-widest text-neutral-900" htmlFor="email">
+          <label className="block text-[15px] font-medium text-slate-800" htmlFor="email">
             Email Address
           </label>
           <input
@@ -68,13 +71,13 @@ export function LoginFormClient({ message }: { message?: string }) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-white border-2 border-neutral-200 px-4 py-3.5 text-neutral-900 font-medium outline-none transition-all placeholder:text-neutral-400 placeholder:font-normal focus:border-neutral-900 focus:shadow-[4px_4px_0_0_#171717]"
+            className="w-full bg-[#F8FAFC]/50 border border-slate-200 rounded-[16px] px-5 py-4 text-slate-900 font-medium outline-none transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:ring-4 focus:ring-[#562a75]/15 focus:border-[#562a75] shadow-sm"
             placeholder="you@university.edu"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-xs font-bold uppercase tracking-widest text-neutral-900" htmlFor="password">
+          <label className="block text-[15px] font-medium text-slate-800" htmlFor="password">
             Password
           </label>
           <div className="relative">
@@ -86,13 +89,13 @@ export function LoginFormClient({ message }: { message?: string }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white border-2 border-neutral-200 px-4 py-3.5 pr-12 text-neutral-900 font-medium outline-none transition-all placeholder:text-neutral-400 placeholder:font-normal focus:border-neutral-900 focus:shadow-[4px_4px_0_0_#171717]"
+              className="w-full bg-[#F8FAFC]/50 border border-slate-200 rounded-[16px] px-5 py-4 pr-12 text-slate-900 font-medium outline-none transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:ring-4 focus:ring-[#562a75]/15 focus:border-[#562a75] shadow-sm"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-900 transition-colors cursor-pointer outline-none focus-visible:text-neutral-900"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 transition-colors"
               title={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -100,13 +103,14 @@ export function LoginFormClient({ message }: { message?: string }) {
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="pt-4">
           <SubmitButton />
         </div>
 
         {message && (
-          <div className="p-4 bg-red-50 border-2 border-red-900 text-red-900 mt-6 shadow-[4px_4px_0_0_#7F1D1D]">
-            <p className="text-sm font-bold">
+          <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl mt-6 flex items-start gap-3 shadow-sm">
+            <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+            <p className="text-sm font-bold text-rose-700">
               {message}
             </p>
           </div>
