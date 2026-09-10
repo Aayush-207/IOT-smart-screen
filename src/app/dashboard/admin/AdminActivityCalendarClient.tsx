@@ -36,10 +36,10 @@ interface AdminActivityCalendarClientProps {
 }
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  'Holiday & Festival': <PartyPopper className="w-3.5 h-3.5 text-rose-500 shrink-0" />,
+  'Holiday & Festival': <PartyPopper className="w-3.5 h-3.5 text-[#ef2045] shrink-0" />,
   'Tech & Hackathons': <Laptop className="w-3.5 h-3.5 text-indigo-500 shrink-0" />,
-  'Sports & Athletics': <Trophy className="w-3.5 h-3.5 text-emerald-500 shrink-0" />,
-  'Workshops & Seminars': <BookOpen className="w-3.5 h-3.5 text-amber-500 shrink-0" />,
+  'Sports & Athletics': <Trophy className="w-3.5 h-3.5 text-[#00eaff] shrink-0" />,
+  'Workshops & Seminars': <BookOpen className="w-3.5 h-3.5 text-[#af1591] shrink-0" />,
   'Cultural & Campus Life': <Sparkles className="w-3.5 h-3.5 text-fuchsia-500 shrink-0" />,
   'Trek & Adventure': <Compass className="w-3.5 h-3.5 text-teal-500 shrink-0" />,
   'Alumni & Careers': <GraduationCap className="w-3.5 h-3.5 text-sky-500 shrink-0" />,
@@ -418,15 +418,15 @@ export function AdminActivityCalendarClient({
               <Laptop className="w-3 h-3 opacity-70" />
               <span>{stats.tech} Tech</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#00eaff]/10 dark:bg-emerald-950/20 border border-[#00eaff]/10 dark:border-emerald-900/30 text-[#00eaff] dark:text-[#00eaff]">
               <Trophy className="w-3 h-3 opacity-70" />
               <span>{stats.sports} Sports</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 text-amber-700 dark:text-amber-300">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#af1591]/10 dark:bg-amber-950/20 border border-[#af1591]/10 dark:border-amber-900/30 text-[#af1591] dark:text-[#af1591]">
               <BookOpen className="w-3 h-3 opacity-70" />
               <span>{stats.workshops} Workshop</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 text-rose-700 dark:text-rose-300">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#ffeaea] dark:bg-rose-950/20 border border-[#ffeaea] dark:border-rose-900/30 text-[#ef2045] dark:text-[#ef2045]">
               <PartyPopper className="w-3 h-3 opacity-70" />
               <span>{stats.holidays} Holiday</span>
             </div>
@@ -446,7 +446,7 @@ export function AdminActivityCalendarClient({
                   key={dayName}
                   className={`py-2 text-[11px] font-mono font-medium uppercase tracking-wider rounded-md ${
                     idx === 0
-                      ? 'text-rose-600 dark:text-rose-400 bg-rose-50/40 dark:bg-rose-950/10'
+                      ? 'text-[#ef2045] dark:text-[#ef2045] bg-[#ffeaea]/40 dark:bg-rose-950/10'
                       : 'text-neutral-500 dark:text-neutral-400 bg-neutral-50/70 dark:bg-white/5'
                   }`}
                 >
@@ -486,7 +486,7 @@ export function AdminActivityCalendarClient({
                             ? isToday
                               ? 'bg-blue-50/50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-500 shadow-[0_0_0_1px_rgba(59,130,246,0.5)] hover:border-blue-500'
                               : hasHoliday
-                                ? 'bg-rose-50/30 dark:bg-rose-950/10 border-rose-200 dark:border-rose-900/30 hover:border-rose-300 dark:hover:border-rose-700/50'
+                                ? 'bg-[#ffeaea]/30 dark:bg-rose-950/10 border-[#ef2045]/30 dark:border-rose-900/30 hover:border-[#ef2045] dark:hover:border-[#ef2045]/50'
                                 : 'bg-white dark:bg-[#18191c] border-neutral-200/80 dark:border-[#26282c] hover:border-neutral-300 dark:hover:border-[#383b40] hover:shadow-xs'
                             : 'bg-neutral-50/50 dark:bg-white/[0.02] border-neutral-100 dark:border-white/[0.04] opacity-40 hover:opacity-75'
                         }`}
@@ -498,9 +498,9 @@ export function AdminActivityCalendarClient({
                               isToday
                                 ? 'text-white bg-blue-600'
                                 : hasHoliday
-                                ? 'text-rose-700 dark:text-rose-400 bg-rose-100/70 dark:bg-rose-950/50'
+                                ? 'text-[#ef2045] dark:text-[#ef2045] bg-[#ffeaea]/70 dark:bg-rose-950/50'
                                 : dIdx === 0
-                                ? 'text-rose-600 dark:text-rose-400'
+                                ? 'text-[#ef2045] dark:text-[#ef2045]'
                                 : day.isCurrentMonth
                                 ? 'text-neutral-900 dark:text-neutral-100'
                                 : 'text-neutral-400 dark:text-neutral-600'
@@ -579,7 +579,7 @@ export function AdminActivityCalendarClient({
                         isToday
                           ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-500'
                           : hasHoliday
-                          ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/30'
+                          ? 'bg-[#ffeaea] dark:bg-rose-950/20 border-[#ef2045]/30 dark:border-rose-900/30'
                           : 'bg-neutral-50 dark:bg-[#18191c] border-neutral-200/80 dark:border-[#26282c]'
                       }`}
                     >

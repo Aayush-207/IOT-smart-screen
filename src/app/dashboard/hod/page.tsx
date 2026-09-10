@@ -80,13 +80,13 @@ export default async function HodDashboardPage() {
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm card-hover">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-600 dark:text-amber-400">Pending Decisions</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#af1591] dark:text-[#af1591]">Pending Decisions</span>
           <div className="text-3xl font-normal text-neutral-900 dark:text-white">{pending || 0}</div>
           <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">Awaiting your decision</p>
         </div>
 
         <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 space-y-1 shadow-sm card-hover">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Authorized &amp; Live</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#00eaff] dark:text-[#00eaff]">Authorized &amp; Live</span>
           <div className="text-3xl font-normal text-neutral-900 dark:text-white">{approvedTotal || 0}</div>
           <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-1 font-mono">Active on screens</p>
         </div>

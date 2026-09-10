@@ -55,43 +55,43 @@ export default async function DeliveryDetailPage({
   return (
     <div className="space-y-8 max-w-5xl pb-16 animate-fade-in-up">
       <div>
-        <Link href="/dashboard/submitter" className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold hover:bg-slate-50 hover:text-slate-900 transition-all inline-flex items-center gap-2 shadow-sm">
+        <Link href="/dashboard/submitter" className="px-4 py-2 bg-[#fdf4ff] border border-[#af1591]/20 text-[#9f2176] rounded-xl text-sm font-semibold hover:bg-[#9f2176]/10 transition-all inline-flex items-center gap-2 shadow-sm">
           <ArrowLeft className="w-4 h-4" /> Back to Dashboard
         </Link>
       </div>
 
       {/* Hero Header Card */}
-      <div className="p-8 md:p-10 bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between gap-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none" />
+      <div className="p-8 md:p-10 bg-[#fdf4ff] rounded-3xl border border-[#af1591]/20 shadow-[0_4px_20px_rgba(159,33,118,0.05)] flex flex-col md:flex-row justify-between gap-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#9f2176] rounded-full blur-3xl opacity-10 pointer-events-none" />
         
         <div className="flex-1 relative z-10">
           <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span className="px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-full">
+            <span className="px-3 py-1 text-xs font-semibold text-[#512a74] bg-[#512a74]/10 border border-[#512a74]/20 rounded-full">
               {announcement.departments?.name || 'General Notice'}
             </span>
             <StatusBadge status={status} />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#1e1e2e] mb-6 leading-tight">
             {announcement.title}
           </h1>
           
-          <div className="flex items-start gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 w-fit">
-            <Calendar className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
-            <div className="text-sm font-medium text-slate-700">
+          <div className="flex items-start gap-3 bg-[#fdf4ff] p-4 rounded-2xl border border-[#9f2176]/20 w-fit">
+            <Calendar className="w-5 h-5 text-[#9f2176] shrink-0 mt-0.5" />
+            <div className="text-sm font-medium text-[#1e1e2e]">
               {announcement.display_start ? (
                 <span>
-                  <span className="font-bold text-slate-900 block mb-1">Active Schedule</span>
+                  <span className="font-bold text-[#1e1e2e] block mb-1">Active Schedule</span>
                   {new Date(announcement.display_start).toLocaleString()} &ndash; {announcement.display_end ? new Date(announcement.display_end).toLocaleString() : 'Permanent'}
                 </span>
               ) : (
-                <span><span className="font-bold text-slate-900 block mb-1">Active Schedule</span>Immediate (Permanent)</span>
+                <span><span className="font-bold text-[#1e1e2e] block mb-1">Active Schedule</span>Immediate (Permanent)</span>
               )}
             </div>
           </div>
 
           {announcement.body && (
-            <div className="mt-8 pt-6 border-t border-slate-100">
-              <p className="text-base text-slate-600 leading-relaxed max-w-2xl whitespace-pre-wrap">
+            <div className="mt-8 pt-6 border-t border-[#cfa2f7]/20">
+              <p className="text-base text-[#7D7D7D] leading-relaxed max-w-2xl whitespace-pre-wrap">
                 {announcement.body}
               </p>
             </div>
@@ -104,30 +104,30 @@ export default async function DeliveryDetailPage({
             <img
               src={announcement.attachment_url}
               alt="Poster"
-              className="w-full md:w-64 aspect-video md:aspect-square object-cover rounded-2xl border border-slate-200 shadow-md"
+              className="w-full md:w-64 aspect-video md:aspect-square object-cover rounded-2xl border border-[#cfa2f7]/30 shadow-md"
             />
           </div>
         )}
       </div>
 
       {/* Screen Deliveries */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-[#fdf4ff] rounded-3xl border border-[#af1591]/20 shadow-[0_4px_20px_rgba(159,33,118,0.05)] overflow-hidden">
+        <div className="p-6 border-b border-[#af1591]/20 bg-[#9f2176]/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Monitor className="w-5 h-5 text-indigo-500" /> Target Display Nodes
+            <h2 className="text-lg font-bold text-[#1e1e2e] flex items-center gap-2">
+              <Monitor className="w-5 h-5 text-[#9f2176]" /> Target Display Nodes
             </h2>
-            <p className="text-sm font-medium text-slate-500 mt-1">Real-time screen hardware delivery and verification</p>
+            <p className="text-sm font-medium text-[#7D7D7D] mt-1">Real-time screen hardware delivery and verification</p>
           </div>
-          <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Sync: Active
+          <span className="text-xs font-semibold text-[#00eaff] bg-[#00eaff]/10 border border-[#00eaff]/10 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff] animate-pulse" /> Sync: Active
           </span>
         </div>
 
         {targetScreens.length === 0 ? (
           <div className="p-12 text-center flex flex-col items-center">
-            <Monitor className="w-12 h-12 text-slate-200 mb-4" />
-            <span className="text-slate-500 font-medium">No physical screens are assigned to this target zone yet.</span>
+            <Monitor className="w-12 h-12 text-[#cfa2f7] mb-4" />
+            <span className="text-[#7D7D7D] font-medium">No physical screens are assigned to this target zone yet.</span>
           </div>
         ) : (
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -164,7 +164,7 @@ export default async function DeliveryDetailPage({
               return (
                 <div
                   key={screen.id}
-                  className="aspect-[16/9] bg-slate-900 rounded-2xl flex flex-col justify-between p-3 text-white relative overflow-hidden shadow-md border-[6px] border-slate-800 group hover:shadow-xl hover:-translate-y-1 transition-all"
+                  className="aspect-[16/9] bg-slate-900 rounded-2xl flex flex-col justify-between p-3 text-[#ffffff] relative overflow-hidden shadow-md border-[6px] border-[#3D1165] group hover:shadow-xl hover:-translate-y-1 transition-all"
                 >
                   {isApproved && isSpecified && hasImage && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -184,7 +184,7 @@ export default async function DeliveryDetailPage({
                     />
                   )}
 
-                  <div className="flex items-center justify-between z-10 bg-white/10 backdrop-blur-md rounded-lg px-2.5 py-1.5 border border-white/20">
+                  <div className="flex items-center justify-between z-10 bg-[#ffffff]/10 backdrop-blur-md rounded-lg px-2.5 py-1.5 border border-white/20">
                     <span className="text-[10px] font-bold tracking-wider uppercase">
                       {screen.zone || 'General'}
                     </span>
@@ -192,33 +192,33 @@ export default async function DeliveryDetailPage({
                   </div>
 
                   {isApproved && isSpecified && !hasImage ? (
-                    <div className="flex-1 flex flex-col items-center justify-center z-10 text-center px-4 bg-white/95 m-2 rounded-xl shadow-lg p-3">
-                      <h3 className="text-xs font-bold text-slate-900 line-clamp-2">
+                    <div className="flex-1 flex flex-col items-center justify-center z-10 text-center px-4 bg-[#ffffff]/95 m-2 rounded-xl shadow-lg p-3">
+                      <h3 className="text-xs font-bold text-[#1e1e2e] line-clamp-2">
                         {announcement.title}
                       </h3>
                       {announcement.body && (
-                        <p className="text-[10px] font-medium text-slate-600 line-clamp-2 mt-1">
+                        <p className="text-[10px] font-medium text-[#7D7D7D] line-clamp-2 mt-1">
                           {announcement.body}
                         </p>
                       )}
                     </div>
                   ) : !isSpecified ? (
                     <div className="flex-1 flex flex-col items-center justify-center z-10 text-center space-y-2">
-                      <Tv className="w-8 h-8 text-slate-500 mx-auto" />
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-800/50 rounded-full px-3 py-1">Standby</span>
+                      <Tv className="w-8 h-8 text-[#7D7D7D] mx-auto" />
+                      <span className="text-[10px] font-bold text-[#7D7D7D] uppercase tracking-widest bg-[#1e1e2e]/50 rounded-full px-3 py-1">Standby</span>
                     </div>
                   ) : !isApproved && !hasImage ? (
                     <div className="flex-1 flex items-center justify-center z-10 bg-slate-900/60 m-2 rounded-xl border border-white/10 backdrop-blur-sm">
-                      <h3 className="text-xs font-bold text-white px-4 text-center line-clamp-3">
+                      <h3 className="text-xs font-bold text-[#ffffff] px-4 text-center line-clamp-3">
                         {announcement.title}
                       </h3>
                     </div>
                   ) : null}
 
-                  <div className="flex items-center justify-between z-10 text-[9px] font-semibold text-slate-300 bg-slate-950/80 rounded-lg px-2.5 py-1.5 mt-2">
+                  <div className="flex items-center justify-between z-10 text-[9px] font-semibold text-[#cfa2f7] bg-slate-950/80 rounded-lg px-2.5 py-1.5 mt-2">
                     <span className="truncate max-w-[50%] uppercase">{screen.name}</span>
-                    <span className={`shrink-0 text-right flex items-center gap-1 ${isApproved && isSpecified ? 'text-emerald-400' : 'text-slate-400'}`}>
-                      {isApproved && isSpecified && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                    <span className={`shrink-0 text-right flex items-center gap-1 ${isApproved && isSpecified ? 'text-[#00eaff]' : 'text-[#7D7D7D]'}`}>
+                      {isApproved && isSpecified && <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff]" />}
                       {syncLabel}
                     </span>
                   </div>
@@ -230,34 +230,34 @@ export default async function DeliveryDetailPage({
       </div>
 
       {/* Audit Activity Timeline */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
-        <div className="flex items-center gap-2 mb-8 pb-4 border-b border-slate-100">
-          <Clock className="w-5 h-5 text-indigo-500" />
-          <h2 className="text-lg font-bold text-slate-900">Approval &amp; Event Ledger</h2>
+      <div className="bg-[#fdf4ff] rounded-3xl border border-[#af1591]/20 shadow-[0_4px_20px_rgba(159,33,118,0.05)] p-8">
+        <div className="flex items-center gap-2 mb-8 pb-4 border-b border-[#af1591]/20">
+          <Clock className="w-5 h-5 text-[#9f2176]" />
+          <h2 className="text-lg font-bold text-[#1e1e2e]">Approval &amp; Event Ledger</h2>
         </div>
         {(!auditRows || auditRows.length === 0) ? (
           <div className="text-center py-8">
-            <p className="text-sm font-medium text-slate-500">No activity recorded yet.</p>
+            <p className="text-sm font-medium text-[#7D7D7D]">No activity recorded yet.</p>
           </div>
         ) : (
-          <div className="relative pl-6 border-l-2 border-slate-100 space-y-8 py-2">
+          <div className="relative pl-6 border-l-2 border-[#af1591]/20 space-y-8 py-2">
             {auditRows.map((row: any) => (
               <div key={row.id} className="relative">
-                <div className="absolute -left-[31px] top-1.5 w-4 h-4 bg-indigo-500 rounded-full shadow-[0_0_0_4px_white]" />
+                <div className="absolute -left-[31px] top-1.5 w-4 h-4 bg-[#9f2176] rounded-full shadow-[0_0_0_4px_white]" />
                 <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <span className="font-bold text-sm text-slate-900 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">
+                  <span className="font-bold text-sm text-[#1e1e2e] bg-[#fdf4ff] px-2.5 py-1 rounded-md border border-[#cfa2f7]/30">
                     {row.profiles?.email || 'System'}
                   </span>
-                  <span className="text-xs font-bold bg-slate-800 text-white px-2.5 py-1 rounded-md">
+                  <span className="text-xs font-bold bg-[#1e1e2e] text-[#ffffff] px-2.5 py-1 rounded-md">
                     {row.action.replace(/_/g, ' ')}
                   </span>
-                  <span className="text-xs font-medium text-slate-500 ml-auto bg-white px-2">
+                  <span className="text-xs font-medium text-[#7D7D7D] ml-auto bg-[#ffffff] px-2">
                     {new Date(row.created_at).toLocaleString()}
                   </span>
                 </div>
                 {row.metadata && typeof row.metadata === 'object' && 'reason' in row.metadata && (
-                  <div className="text-sm text-rose-700 bg-rose-50 p-4 mt-3 rounded-xl border border-rose-100 flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                  <div className="text-sm text-[#ef2045] bg-[#ffeaea] p-4 mt-3 rounded-xl border border-[#ffeaea] flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-[#ef2045] shrink-0 mt-0.5" />
                     <div>
                       <span className="font-bold block mb-1">Feedback reason</span>
                       {String((row.metadata as any).reason)}

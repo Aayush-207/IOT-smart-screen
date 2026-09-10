@@ -139,7 +139,7 @@ export function AdminApprovalQueueClient({
 
                   {/* Screens Selected */}
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
-                    <Monitor className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <Monitor className="w-3.5 h-3.5 text-[#00eaff] dark:text-[#00eaff]" />
                     <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Screens:</span>
                     <span className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
                       {req.target_all
@@ -152,7 +152,7 @@ export function AdminApprovalQueueClient({
 
                   {/* Duration */}
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
-                    <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <Clock className="w-3.5 h-3.5 text-[#af1591] dark:text-[#af1591]" />
                     <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Duration:</span>
                     <span suppressHydrationWarning className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
                       {formatDuration(req.display_start, req.display_end)}
@@ -197,7 +197,7 @@ export function AdminApprovalQueueClient({
                   type="button"
                   disabled={!!processingAction}
                   onClick={() => setRejectId(req.id)}
-                  className="px-4 py-2 rounded-full border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors btn-press"
+                  className="px-4 py-2 rounded-full border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors btn-press"
                 >
                   <XCircle className="w-3.5 h-3.5" /> Reject
                 </button>
@@ -226,7 +226,7 @@ export function AdminApprovalQueueClient({
                         type="button"
                         disabled={!!processingAction || !rejectReason.trim()}
                         onClick={() => handleReject(req.id, req.title)}
-                        className="px-5 py-1.5 rounded-full bg-rose-600 text-white text-xs font-mono uppercase tracking-wider hover:bg-rose-500 disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5 btn-press"
+                        className="px-5 py-1.5 rounded-full bg-[#ef2045] text-white text-xs font-mono uppercase tracking-wider hover:bg-[#ef2045] disabled:opacity-50 cursor-pointer inline-flex items-center gap-1.5 btn-press"
                       >
                         {isRejecting ? (
                           <>

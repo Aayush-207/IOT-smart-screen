@@ -31,44 +31,44 @@ interface NavItem {
 }
 
 const ROLE_DISPLAY: Record<Role, { title: string; tag: string; color: string }> = {
-  submitter: { title: 'Submitter', tag: 'Club & Faculty', color: 'bg-indigo-100 text-indigo-700' },
-  hod: { title: 'Department Head', tag: 'Approver', color: 'bg-emerald-100 text-emerald-700' },
-  admin: { title: 'Central Admin', tag: 'Full Access', color: 'bg-rose-100 text-rose-700' },
-  emergency: { title: 'Emergency Officer', tag: 'Override Auth', color: 'bg-amber-100 text-amber-700' },
+  submitter: { title: 'Submitter', tag: 'Club & Faculty', color: 'bg-[#cfa2f7]/10 text-[#cfa2f7] border border-[#cfa2f7]/30 relative overflow-hidden' },
+  hod: { title: 'Department Head', tag: 'Approver', color: 'bg-[#00eaff]/10 text-[#00eaff]' },
+  admin: { title: 'Central Admin', tag: 'Full Access', color: 'bg-[#ffeaea] text-[#ef2045]' },
+  emergency: { title: 'Emergency Officer', tag: 'Override Auth', color: 'bg-[#af1591]/10 text-[#af1591]' },
 }
 
 function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
   if (role === 'submitter') {
     return [
-      { href: '/dashboard/submitter', label: 'My Announcements', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
-      { href: '/dashboard/submitter/new', label: 'Create Announcement', icon: PlusCircle, colorClass: 'bg-rose-500' },
-      { href: '/dashboard/submitter/events', label: 'Events Calendar', icon: Calendar, colorClass: 'bg-emerald-500' },
+      { href: '/dashboard/submitter', label: 'My Announcements', icon: LayoutDashboard },
+      { href: '/dashboard/submitter/new', label: 'Create Announcement', icon: PlusCircle },
+      { href: '/dashboard/submitter/events', label: 'Events Calendar', icon: Calendar },
     ]
   }
   if (role === 'hod') {
     return [
       { href: '/dashboard/hod', label: 'Department Overview', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
-      { href: '/dashboard/hod/approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingApprovals, colorClass: 'bg-amber-500' },
+      { href: '/dashboard/hod/approvals', label: 'Pending Approvals', icon: CheckSquare, badge: pendingApprovals, colorClass: 'bg-[#af1591]' },
       { href: '/dashboard/hod/screens', label: 'Screens', icon: Monitor, colorClass: 'bg-blue-500' },
-      { href: '/dashboard/hod/events', label: 'Department Events', icon: Calendar, colorClass: 'bg-emerald-500' },
+      { href: '/dashboard/hod/events', label: 'Department Events', icon: Calendar, colorClass: 'bg-[#00eaff]' },
     ]
   }
   if (role === 'emergency') {
     return [
       { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
       { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle, colorClass: 'bg-red-600' },
-      { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-slate-500' },
+      { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-[#fdf4ff]0' },
     ]
   }
   // Admin
   return [
-    { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
-    { href: '/dashboard/admin/approvals', label: 'Admin Approvals', icon: CheckSquare, colorClass: 'bg-amber-500' },
-    { href: '/dashboard/admin/fleet', label: 'Screens & Fleet', icon: Monitor, colorClass: 'bg-blue-500' },
-    { href: '/dashboard/admin/announcements', label: 'Broadcast Catalog', icon: ListOrdered, colorClass: 'bg-purple-500' },
-    { href: '/dashboard/admin/calendar', label: 'Calendar', icon: Calendar, colorClass: 'bg-emerald-500' },
+    { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard, colorClass: 'bg-[#3D1165]' },
+    { href: '/dashboard/admin/approvals', label: 'Admin Approvals', icon: CheckSquare, colorClass: 'bg-[#af1591]' },
+    { href: '/dashboard/admin/fleet', label: 'Screens & Fleet', icon: Monitor, colorClass: 'bg-[#9f2176]' },
+    { href: '/dashboard/admin/announcements', label: 'Broadcast Catalog', icon: ListOrdered, colorClass: 'bg-[#512a74]' },
+    { href: '/dashboard/admin/calendar', label: 'Calendar', icon: Calendar, colorClass: 'bg-[#cfa2f7] text-[#3D1165]' },
     { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle, colorClass: 'bg-red-600' },
-    { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-slate-500' },
+    { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-[#fdf4ff]0' },
   ]
 }
 
@@ -83,47 +83,49 @@ export function AppSidebar({
 }) {
   const pathname = usePathname()
   const items = navItemsFor(role, pendingApprovals)
-  const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User', color: 'bg-slate-100 text-slate-700' }
+  const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User', color: 'bg-[#e5e7eb] text-[#1e1e2e]' }
 
   return (
-    <aside className="w-[260px] shrink-0 bg-white border-r border-slate-200 text-slate-900 flex flex-col h-screen sticky top-0 select-none z-30 font-sans shadow-sm">
+    <aside className="w-[260px] shrink-0 bg-gradient-to-b from-[#1c0836] via-[#3D1165] to-[#1c0836] border-r border-white/5 text-[#ffffff] flex flex-col h-screen sticky top-0 select-none z-30 shadow-[4px_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
+      {/* Background Glows Removed */}
+
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-100 shrink-0">
+      <div className="h-20 flex items-center px-6 border-b border-white/5 shrink-0 relative z-10 backdrop-blur-sm bg-black/10">
         <Link href="/" className="flex items-center gap-3 group w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             src="/logo.png" 
             alt="Campus Cast" 
-            className="w-10 h-10 object-contain transition-transform group-hover:scale-105"
+            className="w-10 h-10 object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
           />
-          <div className="hidden fallback-logo w-8 h-8 bg-indigo-600 rounded-lg text-white items-center justify-center font-bold text-sm shadow-sm transition-transform group-hover:scale-105">
+          <div className="hidden fallback-logo w-8 h-8 bg-gradient-to-br from-[#9f2176] to-[#af1591] rounded-lg text-[#ffffff] items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(175,21,145,0.5)] transition-transform group-hover:scale-110">
             CC
           </div>
-          <span className="font-bold text-lg tracking-tight text-slate-900 truncate">
+          <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-[#ffffff] via-[#e5e7eb] to-[#cfa2f7] bg-clip-text text-transparent group-hover:from-[#00eaff] group-hover:to-[#cfa2f7] transition-all duration-500 drop-shadow-sm">
             Campus Cast
           </span>
         </Link>
       </div>
 
       {/* Role Pill Banner */}
-      <div className="px-6 pb-6 shrink-0">
-        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+      <div className="px-5 pb-4 shrink-0 pt-6 relative z-10">
+        <div className="flex flex-col gap-2 p-4 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_4px_20px_rgba(0,0,0,0.2)] group hover:bg-white/[0.06] transition-all duration-300">
           <div className="flex items-center justify-between">
-            <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${roleInfo.color}`}>
+            <span className={`text-[11px] uppercase tracking-wider font-extrabold px-3 py-1.5 rounded-lg shadow-sm ${roleInfo.color}`}>
               {roleInfo.title}
             </span>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_0_3px_rgba(16,185,129,0.2)]" />
+            <div className="flex items-center gap-1.5 bg-black/20 p-1.5 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-[#af1591] animate-pulse shadow-[0_0_8px_rgba(175,21,145,0.8)]" />
             </div>
           </div>
-          <span className="text-[11px] font-medium text-slate-500">{roleInfo.tag}</span>
+          <span className="text-[12px] font-medium text-[#cfa2f7]/80 group-hover:text-[#cfa2f7] transition-colors pl-1">{roleInfo.tag}</span>
         </div>
       </div>
 
       {/* Navigation Stack */}
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-        <div className="px-2 pb-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-          Menu
+      <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto relative z-10 py-2 custom-scrollbar">
+        <div className="px-3 pb-2 pt-2 text-[10px] font-bold text-[#cfa2f7]/60 uppercase tracking-widest">
+          Navigation
         </div>
 
         {items.map((item) => {
@@ -134,21 +136,29 @@ export function AppSidebar({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+              className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-500 group relative overflow-hidden ${
                 isActive
-                  ? `${item.colorClass} text-white shadow-md shadow-slate-200/50`
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? `bg-gradient-to-r from-[#cfa2f7]/20 to-[#cfa2f7]/5 text-[#cfa2f7] border border-[#cfa2f7]/40 translate-x-2`
+                  : 'text-[#cfa2f7] hover:bg-gradient-to-r hover:from-transparent hover:to-[#e879f9]/15 hover:text-[#e879f9] border border-transparent hover:border-[#e879f9]/40'
               }`}
             >
-              <div className="flex items-center gap-3 min-w-0 font-medium text-sm">
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                <span className="truncate">{item.label}</span>
+              {isActive && (
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#cfa2f7]" />
+              )}
+              {/* Hover Left Indicator */}
+              {!isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-[#e879f9] rounded-r-full transition-all duration-300 group-hover:h-3/4" />
+              )}
+
+              <div className="flex items-center gap-3.5 min-w-0 font-bold text-[14px] relative z-10">
+                <Icon className={`w-[18px] h-[18px] shrink-0 transition-all duration-500 ${isActive ? 'text-[#cfa2f7] animate-pulse' : 'text-[#cfa2f7]/70 group-hover:scale-125 group-hover:rotate-12 group-hover:text-[#e879f9]'}`} />
+                <span className={`truncate tracking-wide transition-transform duration-300 ${!isActive && 'group-hover:translate-x-1.5'}`}>{item.label}</span>
               </div>
 
               {!!item.badge && item.badge > 0 && (
                 <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-600'
+                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full relative z-10 ${
+                    isActive ? 'bg-[#cfa2f7] text-[#1c0836]' : 'bg-[#ef2045] text-[#ffffff] shadow-[0_0_10px_rgba(239,32,69,0.5)]'
                   }`}
                 >
                   {item.badge}
@@ -159,31 +169,46 @@ export function AppSidebar({
         })}
 
         {role === 'emergency' && (
-          <div className="pt-6">
+          <div className="pt-6 px-1">
             <Link
               href="/dashboard/admin/emergency"
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-md shadow-red-500/20 transition-all"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-[#ffffff] rounded-xl text-sm font-extrabold shadow-[0_8px_25px_rgba(220,38,38,0.5),inset_0_1px_0_0_rgba(255,255,255,0.2)] border border-red-400/30 transition-all duration-300 hover:-translate-y-0.5 group"
             >
-              <AlertTriangle className="w-4 h-4 shrink-0 animate-pulse" />
-              <span>Broadcast Alert</span>
+              <AlertTriangle className="w-4 h-4 shrink-0 animate-pulse group-hover:scale-110 transition-transform" />
+              <span className="tracking-wide">Broadcast Alert</span>
             </Link>
           </div>
         )}
       </nav>
 
       {/* User Footer Profile */}
-      <div className="p-4 m-4 rounded-2xl bg-slate-50 border border-slate-100 shrink-0">
+      <div className="p-4 m-4 rounded-2xl bg-black/20 backdrop-blur-md border border-white/10 shrink-0 relative z-10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] hover:bg-black/30 transition-colors">
         <div className="flex flex-col gap-3">
           <div className="min-w-0">
-            <p className="font-semibold text-slate-900 text-xs truncate" title={userEmail}>
+            <p className="font-bold text-[#ffffff] text-xs truncate drop-shadow-sm" title={userEmail}>
               {userEmail}
             </p>
-            <p className="text-[10px] text-slate-500 font-medium mt-0.5">Role: {role}</p>
+            <p className="text-[10px] text-[#00eaff]/80 font-medium mt-1 uppercase tracking-wider">Role: {role}</p>
           </div>
-          <div className="pt-2 border-t border-slate-200">
+          <div className="pt-3 border-t border-white/10">
             <LogoutButton />
           </div>
         </div>
+      </div>
+
+      {/* Abstract Footer Graphic */}
+      <div 
+        className="absolute bottom-0 left-0 right-0 h-[65%] pointer-events-none z-0 overflow-hidden opacity-[0.4] mix-blend-screen"
+        style={{
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 40%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 40%)'
+        }}
+      >
+        <img 
+          src="/sidebar-bg.jpg" 
+          alt="" 
+          className="w-full h-full object-cover object-center"
+        />
       </div>
     </aside>
   )

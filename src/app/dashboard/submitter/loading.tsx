@@ -17,7 +17,7 @@ export default function SubmitterDashboardLoading() {
       </div>
 
       {/* Metrics Card Skeleton */}
-      <div className="rounded-2xl border border-neutral-200 dark:border-white/10 bg-white/50 dark:bg-black/40 p-6 md:p-8 space-y-6">
+      <div className="rounded-2xl border border-neutral-200 dark:border-white/10 bg-[#ffffff]/50 dark:bg-black/40 p-6 md:p-8 space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-white/10">
           <div className="flex items-center gap-3">
             <Skeleton className="w-3 h-3 rounded-full" />

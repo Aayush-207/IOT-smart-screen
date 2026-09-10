@@ -13,7 +13,7 @@ export default function NewAnnouncementLoading() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-neutral-200 dark:border-white/10 p-6 md:p-8 space-y-6 bg-white/50 dark:bg-black/30">
+          <div className="rounded-2xl border border-neutral-200 dark:border-white/10 p-6 md:p-8 space-y-6 bg-[#ffffff]/50 dark:bg-black/30">
             <div className="space-y-2">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-10 w-full rounded-lg" />
@@ -30,7 +30,7 @@ export default function NewAnnouncementLoading() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-neutral-200 dark:border-white/10 p-6 space-y-4 bg-white/50 dark:bg-black/30">
+          <div className="rounded-2xl border border-neutral-200 dark:border-white/10 p-6 space-y-4 bg-[#ffffff]/50 dark:bg-black/30">
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-6 w-24 rounded-full" />

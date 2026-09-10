@@ -197,7 +197,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                         {r.attachment_url ? (
                           <div
                             onClick={() => setPreviewPoster({ url: r.attachment_url, title: r.title })}
-                            className="relative group shrink-0 rounded-xl overflow-hidden border border-neutral-200 dark:border-[#212327] shadow-sm cursor-pointer hover:ring-2 hover:ring-emerald-500 transition-all bg-black"
+                            className="relative group shrink-0 rounded-xl overflow-hidden border border-neutral-200 dark:border-[#212327] shadow-sm cursor-pointer hover:ring-2 hover:ring-[#00eaff] transition-all bg-black"
                             title="Click to preview poster"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -224,7 +224,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                               {r.title}
                             </h3>
                             {r.is_emergency && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.2 rounded-full">
+                              <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-wider text-[#ef2045] dark:text-[#ef2045] bg-[#ef2045]/10 border border-[#ef2045]/20 px-2 py-0.2 rounded-full">
                                 <AlertTriangle className="w-3 h-3" /> Emergency
                               </span>
                             )}
@@ -255,7 +255,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                     <td className="px-6 py-5 text-xs">
                       {r.target_all ? (
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 font-mono text-neutral-700 dark:text-neutral-300">
-                          <Monitor className="w-3.5 h-3.5 text-emerald-500" />
+                          <Monitor className="w-3.5 h-3.5 text-[#00eaff]" />
                           <span>All Displays in Network</span>
                         </div>
                       ) : zones.length > 0 ? (
@@ -296,7 +296,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                     {/* Schedule & Duration */}
                     <td className="px-6 py-5 text-xs font-mono" suppressHydrationWarning>
                       <div className="space-y-1">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10 px-2 py-0.5 rounded-full">
                           <Clock className="w-3 h-3" /> {schedule.label}
                         </span>
                         <div className="text-[11px] text-neutral-500 dark:text-[#7d8187]" suppressHydrationWarning>
@@ -315,7 +315,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                         <button
                           onClick={() => withdraw(r)}
                           disabled={busy === r.id}
-                          className="px-3.5 py-1.5 rounded-full border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-mono inline-flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50 shadow-xs"
+                          className="px-3.5 py-1.5 rounded-full border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 text-xs font-mono inline-flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50 shadow-xs"
                         >
                           {busy === r.id ? (
                             <>
@@ -359,7 +359,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
           >
             <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-emerald-500" />
+                <ImageIcon className="w-4 h-4 text-[#00eaff]" />
                 <h3 className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
                   {previewPoster.title}
                 </h3>

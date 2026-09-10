@@ -89,7 +89,7 @@ function ScreenNodeCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {screen.isOnline ? (
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#00eaff] animate-pulse shrink-0" />
             ) : (
               <span className="w-2.5 h-2.5 rounded-full bg-neutral-400 dark:bg-neutral-600 shrink-0" />
             )}
@@ -104,7 +104,7 @@ function ScreenNodeCard({
               </span>
             )}
             {screen.isOnline ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium">
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium">
                 <Signal className="w-3 h-3" /> Online
               </span>
             ) : (
@@ -227,8 +227,8 @@ function ScreenNodeCard({
 
           {/* Floating Rotation Pill */}
           {screen.isOnline && hasMultiple && (
-            <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[9px] font-mono text-emerald-400 border border-emerald-500/40 shadow-md pointer-events-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[9px] font-mono text-[#00eaff] border border-[#00eaff]/40 shadow-md pointer-events-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff] animate-pulse" />
               <span>Poster {activeIndex + 1}/{count} (4s)</span>
             </div>
           )}
@@ -241,7 +241,7 @@ function ScreenNodeCard({
                   key={dotIdx}
                   className={`h-1 rounded-full transition-all duration-500 ease-out ${
                     dotIdx === activeIndex
-                      ? 'w-4 bg-emerald-400 shadow-sm'
+                      ? 'w-4 bg-[#00eaff] shadow-sm'
                       : 'w-1.5 bg-white/50'
                   }`}
                 />
@@ -262,7 +262,7 @@ function ScreenNodeCard({
               Live Broadcast Content:
             </span>
             {screen.isOnline && hasMultiple && (
-              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+              <span className="text-[10px] font-mono text-[#00eaff] dark:text-[#00eaff] font-medium">
                 Cycles every 4s
               </span>
             )}
@@ -274,7 +274,7 @@ function ScreenNodeCard({
 
         <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-[#7d8187] pt-1 border-t border-neutral-100 dark:border-[#212327]">
           <span suppressHydrationWarning className="flex items-center gap-1 truncate">
-            <Clock className="w-3 h-3 text-amber-500 shrink-0" />
+            <Clock className="w-3 h-3 text-[#af1591] shrink-0" />
             {screen.isOnline ? formatDuration(currentContent?.display_start, currentContent?.display_end) : 'Hardware Standby'}
           </span>
           <span className="shrink-0 text-[10px]">{aspectRatio === '16:9' ? '1672x941 (16:9)' : '941x1672 (9:16)'}</span>

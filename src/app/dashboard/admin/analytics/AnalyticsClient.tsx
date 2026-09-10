@@ -154,7 +154,7 @@ export function AnalyticsClient({
               <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">Live Network Analytics</span>
             </div>
             <h2 className="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-emerald-500" /> Analytics &amp; Hardware Telemetry
+              <BarChart3 className="w-4 h-4 text-[#00eaff]" /> Analytics &amp; Hardware Telemetry
             </h2>
           </div>
 
@@ -220,24 +220,24 @@ export function AnalyticsClient({
         {/* Screen Uptime */}
         <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg p-5">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-400">Node Availability</span>
-            <div className="p-1.5 rounded-full bg-white/5 border border-neutral-200 dark:border-[#212327] text-emerald-400">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-[#00eaff]">Node Availability</span>
+            <div className="p-1.5 rounded-full bg-white/5 border border-neutral-200 dark:border-[#212327] text-[#00eaff]">
               <Radio className="w-3.5 h-3.5" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-normal text-neutral-900 dark:text-white">{screenStats.uptime}%</span>
-            <span className="text-xs font-mono text-emerald-400">
+            <span className="text-xs font-mono text-[#00eaff]">
               {screenStats.counts.online}/{screenStats.total} Online
             </span>
           </div>
           <div className="mt-3 w-full bg-neutral-50 dark:bg-[#0a0a0a] h-1.5 rounded-full overflow-hidden flex border border-neutral-200 dark:border-[#212327]">
             <div
-              className="bg-emerald-400 h-full transition-all"
+              className="bg-[#00eaff] h-full transition-all"
               style={{ width: `${(screenStats.counts.online / (screenStats.total || 1)) * 100}%` }}
             />
             <div
-              className="bg-amber-400 h-full transition-all"
+              className="bg-[#af1591] h-full transition-all"
               style={{ width: `${(screenStats.counts.stale / (screenStats.total || 1)) * 100}%` }}
             />
             <div
@@ -247,10 +247,10 @@ export function AnalyticsClient({
           </div>
           <div className="mt-2.5 flex items-center justify-between text-[10px] font-mono text-neutral-500 dark:text-[#7d8187]">
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> {screenStats.counts.online} Active
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff]" /> {screenStats.counts.online} Active
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> {screenStats.counts.stale} Stale
+              <span className="w-1.5 h-1.5 rounded-full bg-[#af1591]" /> {screenStats.counts.stale} Stale
             </span>
             <span className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-neutral-600" /> {screenStats.counts.offline} Offline
@@ -306,12 +306,12 @@ export function AnalyticsClient({
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-normal text-neutral-900 dark:text-white">{announcements.length}</span>
-            <span className="text-xs font-mono text-emerald-400">
+            <span className="text-xs font-mono text-[#00eaff]">
               {statusStats.approved} Live
             </span>
           </div>
           <p className="mt-3 text-xs text-neutral-500 dark:text-[#7d8187] flex items-center gap-1 font-mono">
-            <ArrowUpRight className="w-3.5 h-3.5 text-amber-400" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#af1591]" />
             <span>{statusStats.pending} pending HOD</span>
           </p>
         </div>
@@ -333,8 +333,8 @@ export function AnalyticsClient({
             {/* Critical */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1 font-mono">
-                <span className="text-rose-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Critical ({priorityStats.counts.critical})
+                <span className="text-[#ef2045] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ef2045]" /> Critical ({priorityStats.counts.critical})
                 </span>
                 <span className="text-neutral-500 dark:text-[#7d8187]">
                   {announcements.length > 0
@@ -345,7 +345,7 @@ export function AnalyticsClient({
               </div>
               <div className="w-full bg-neutral-50 dark:bg-[#0a0a0a] h-1.5 rounded-full overflow-hidden border border-neutral-200 dark:border-[#212327]">
                 <div
-                  className="bg-rose-500 h-full rounded-full transition-all"
+                  className="bg-[#ef2045] h-full rounded-full transition-all"
                   style={{
                     width: `${
                       announcements.length > 0
@@ -360,8 +360,8 @@ export function AnalyticsClient({
             {/* Time-sensitive */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1 font-mono">
-                <span className="text-amber-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Time-Sensitive ({priorityStats.counts.timesensitive})
+                <span className="text-[#af1591] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#af1591]" /> Time-Sensitive ({priorityStats.counts.timesensitive})
                 </span>
                 <span className="text-neutral-500 dark:text-[#7d8187]">
                   {announcements.length > 0
@@ -372,7 +372,7 @@ export function AnalyticsClient({
               </div>
               <div className="w-full bg-neutral-50 dark:bg-[#0a0a0a] h-1.5 rounded-full overflow-hidden border border-neutral-200 dark:border-[#212327]">
                 <div
-                  className="bg-amber-400 h-full rounded-full transition-all"
+                  className="bg-[#af1591] h-full rounded-full transition-all"
                   style={{
                     width: `${
                       announcements.length > 0
@@ -387,8 +387,8 @@ export function AnalyticsClient({
             {/* Routine */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1 font-mono">
-                <span className="text-emerald-400 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Routine ({priorityStats.counts.routine})
+                <span className="text-[#00eaff] flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff]" /> Routine ({priorityStats.counts.routine})
                 </span>
                 <span className="text-neutral-500 dark:text-[#7d8187]">
                   {announcements.length > 0
@@ -399,7 +399,7 @@ export function AnalyticsClient({
               </div>
               <div className="w-full bg-neutral-50 dark:bg-[#0a0a0a] h-1.5 rounded-full overflow-hidden border border-neutral-200 dark:border-[#212327]">
                 <div
-                  className="bg-emerald-400 h-full rounded-full transition-all"
+                  className="bg-[#00eaff] h-full rounded-full transition-all"
                   style={{
                     width: `${
                       announcements.length > 0
@@ -480,7 +480,7 @@ export function AnalyticsClient({
                   <td className="py-3.5 px-4 text-center font-mono text-neutral-600 dark:text-[#dadbdf]">
                     {d.total}
                   </td>
-                  <td className="py-3.5 px-4 text-center font-mono text-emerald-400">
+                  <td className="py-3.5 px-4 text-center font-mono text-[#00eaff]">
                     {d.approved}
                   </td>
                   <td className="py-3.5 px-4 text-right font-mono text-neutral-900 dark:text-white">

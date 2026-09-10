@@ -16,7 +16,7 @@ export function LogoutButton() {
       <button 
         type="submit"
         disabled={signingOut}
-        className="w-full px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 dark:bg-[#0a0a0a] dark:hover:bg-white/10 border border-neutral-300 dark:border-[#212327] text-neutral-600 hover:text-neutral-900 dark:text-[#7d8187] dark:hover:text-white transition-all flex items-center justify-center gap-2 text-xs font-normal cursor-pointer disabled:opacity-60"
+        className="w-full px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 dark:bg-[#0a0a0a] dark:hover:bg-[#ffffff]/10 border border-neutral-300 dark:border-[#212327] text-neutral-600 hover:text-neutral-900 dark:text-[#7d8187] dark:hover:text-[#ffffff] transition-all flex items-center justify-center gap-2 text-xs font-normal cursor-pointer disabled:opacity-60"
         title="Sign Out of CampusCast"
       >
         {signingOut ? (

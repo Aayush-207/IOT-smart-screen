@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Plus, AlertCircle, LayoutDashboard, MonitorPlay, Clock, CheckCircle2 } from 'lucide-react'
+import { Plus, AlertCircle, LayoutDashboard, MonitorPlay, Clock, CheckCircle2, FileText, Radio } from 'lucide-react'
 import Link from 'next/link'
 import { StatusBadge } from '@/components/StatusBadge'
 import { announcementDisplayStatus as displayStatus } from '@/lib/fleet'
@@ -34,26 +34,18 @@ export default async function SubmitterDashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in-up">
       {/* Top Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6">
+      <div className="flex justify-between items-end mb-8 relative z-10">
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full flex items-center gap-1.5">
-              <LayoutDashboard className="w-3.5 h-3.5" />
-              Submitter Dashboard
-            </span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
-            Welcome back, {capitalizedName}
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-[#1e1e2e] mb-2">
+            Submitter Dashboard
           </h1>
-          <p className="text-slate-500 max-w-2xl mt-2 text-sm md:text-base">
-            Compose verified announcements, track screen node delivery across campus, and manage your publication lifecycle.
-          </p>
+          <p className="text-[#7D7D7D]">Manage your announcements and broadcast requests.</p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/submitter/new"
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 hover:-translate-y-0.5 transition-all flex items-center gap-2"
+            className="px-6 py-3 bg-gradient-to-br from-[#9f2176] to-[#af1591] hover:brightness-110 text-[#ffffff] rounded-xl text-sm font-bold shadow-lg shadow-[#9f2176]/30 hover:shadow-[#9f2176]/40 hover:-translate-y-0.5 transition-all flex items-center gap-2"
           >
             <Plus className="w-5 h-5" /> New Announcement
           </Link>
@@ -61,81 +53,82 @@ export default async function SubmitterDashboardPage() {
       </div>
 
       {/* Bento Box Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
-          <div className="flex items-center justify-between relative z-10">
-            <span className="text-sm font-semibold text-indigo-100">Total Notices</span>
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <LayoutDashboard className="w-4 h-4 text-white" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative z-10">
+        {/* Stat Card 1 */}
+        <div className="bg-white border-2 border-[#9f2176]/20 p-6 rounded-3xl text-[#1e1e2e] shadow-[0_0_15px_rgba(159,33,118,0.1)] hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(159,33,118,0.4)] hover:border-[#9f2176]/50 transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-[#9f2176]/5 pointer-events-none" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/50 to-transparent group-hover:animate-pulse opacity-0 group-hover:opacity-100 pointer-events-none" />
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <div className="w-12 h-12 bg-[#9f2176]/10 rounded-2xl flex items-center justify-center border border-[#9f2176]/20 group-hover:scale-110 transition-transform">
+              <FileText className="w-6 h-6 text-[#9f2176]" />
             </div>
           </div>
-          <div className="mt-6 relative z-10">
-            <div className="text-4xl font-bold">{stats.total}</div>
-            <p className="text-xs text-indigo-200 mt-1 font-medium">Authored by your account</p>
-          </div>
+          <div className="text-3xl font-bold mb-1 relative z-10 text-[#3D1165] group-hover:text-[#9f2176] transition-colors">{stats.total}</div>
+          <div className="text-[#7D7D7D] font-bold text-sm uppercase tracking-wider relative z-10">Total Notices</div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
-          <div className="flex items-center justify-between relative z-10">
-            <span className="text-sm font-semibold text-emerald-100">Live Broadcasts</span>
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <MonitorPlay className="w-4 h-4 text-white" />
+        {/* Stat Card 2 */}
+        <div className="bg-white border-2 border-[#af1591]/20 p-6 rounded-3xl text-[#1e1e2e] shadow-[0_0_15px_rgba(175,21,145,0.1)] hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(175,21,145,0.4)] hover:border-[#af1591]/50 transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-[#af1591]/5 pointer-events-none" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/50 to-transparent group-hover:animate-pulse opacity-0 group-hover:opacity-100 pointer-events-none" />
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <div className="w-12 h-12 bg-[#af1591]/10 rounded-2xl flex items-center justify-center border border-[#af1591]/20 group-hover:scale-110 transition-transform">
+              <Radio className="w-6 h-6 text-[#af1591]" />
             </div>
+            <span className="flex items-center gap-2 text-[10px] font-extrabold bg-[#af1591]/10 text-[#af1591] px-3 py-1.5 rounded-full border border-[#af1591]/20 shadow-[0_0_10px_rgba(175,21,145,0.2)]">
+              <span className="w-2 h-2 rounded-full bg-[#af1591] animate-pulse shadow-[0_0_5px_#af1591]" /> 
+              ON AIR
+            </span>
           </div>
-          <div className="mt-6 relative z-10">
-            <div className="text-4xl font-bold">{stats.live}</div>
-            <p className="text-xs text-emerald-200 mt-1 font-medium">Displaying on campus screens</p>
-          </div>
+          <div className="text-3xl font-bold mb-1 relative z-10 text-[#3D1165] group-hover:text-[#af1591] transition-colors">{stats.live}</div>
+          <div className="text-[#7D7D7D] font-bold text-sm uppercase tracking-wider relative z-10">Live Broadcasts</div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/20 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
-          <div className="flex items-center justify-between relative z-10">
-            <span className="text-sm font-semibold text-amber-100">Awaiting Decision</span>
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <Clock className="w-4 h-4 text-white" />
+        {/* Stat Card 3 */}
+        <div className="bg-white border-2 border-[#cfa2f7]/40 p-6 rounded-3xl text-[#1e1e2e] shadow-[0_0_15px_rgba(207,162,247,0.2)] hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(207,162,247,0.5)] hover:border-[#cfa2f7]/80 transition-all duration-300 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-[#cfa2f7]/10 pointer-events-none" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/50 to-transparent group-hover:animate-pulse opacity-0 group-hover:opacity-100 pointer-events-none" />
+          <div className="flex items-center justify-between mb-4 relative z-10">
+            <div className="w-12 h-12 bg-[#cfa2f7]/20 rounded-2xl flex items-center justify-center border border-[#cfa2f7]/40 group-hover:scale-110 transition-transform">
+              <Clock className="w-6 h-6 text-[#9f2176]" />
             </div>
           </div>
-          <div className="mt-6 relative z-10">
-            <div className="text-4xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-amber-200 mt-1 font-medium">Department review queue</p>
-          </div>
+          <div className="text-3xl font-bold mb-1 relative z-10 text-[#3D1165] group-hover:text-[#cfa2f7] transition-colors">{stats.pending}</div>
+          <div className="text-[#7D7D7D] font-bold text-sm uppercase tracking-wider relative z-10">Awaiting Decision</div>
         </div>
       </div>
 
       {/* Publications / Notice Table */}
       <div className="pt-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-[#1e1e2e]">
             Publication Ledger
           </h2>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-200/50 px-2.5 py-1 rounded-full">{rows.length} records</span>
+          <span className="text-xs font-semibold text-[#7D7D7D] bg-slate-200/50 px-2.5 py-1 rounded-full">{rows.length} records</span>
         </div>
 
         {rows.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-sm flex flex-col items-center justify-center min-h-[300px]">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <LayoutDashboard className="w-8 h-8 text-slate-300" />
+          <div className="p-12 text-center bg-[#fdf4ff] rounded-3xl border border-[#af1591]/20 shadow-[0_4px_20px_rgba(159,33,118,0.05)] flex flex-col items-center justify-center min-h-[300px]">
+            <div className="w-16 h-16 bg-[#9f2176]/10 rounded-full flex items-center justify-center mb-4">
+              <LayoutDashboard className="w-8 h-8 text-[#9f2176]" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">No announcements registered</h3>
-            <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">
-              Compose your first announcement to display events, seminars, or deadlines on campus screens.
+            <h3 className="text-lg font-bold text-[#1e1e2e] mb-2">No announcements registered</h3>
+            <p className="text-sm text-[#7D7D7D] max-w-sm mx-auto mb-6">
+              You haven&apos;t created any campus announcements yet. Start broadcasting to digital screens across the MIT campus.
             </p>
-            <Link
-              href="/dashboard/submitter/new"
-              className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/20 transition-all inline-flex items-center gap-2"
+            <Link 
+              href="/dashboard/submitter/new" 
+              className="px-6 py-3 bg-[#af1591] text-[#ffffff] rounded-xl font-bold shadow-lg shadow-[#af1591]/20 hover:bg-[#9f2176] transition-all hover:-translate-y-0.5 active:translate-y-0"
             >
               <Plus className="w-4 h-4" /> Create First Notice
             </Link>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="bg-[#fdf4ff] rounded-2xl border border-[#af1591]/20 overflow-hidden shadow-[0_4px_20px_rgba(159,33,118,0.05)]">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-[#9f2176]/10 border-b border-[#9f2176]/20 text-xs font-bold text-[#9f2176] uppercase tracking-wider">
                     <th className="py-4 px-6">Title &amp; Advisory</th>
                     <th className="py-4 px-6">Department</th>
                     <th className="py-4 px-6">Status</th>
@@ -143,46 +136,47 @@ export default async function SubmitterDashboardPage() {
                     <th className="py-4 px-6 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#9f2176]/10">
                   {rows.map((a: any) => {
                     const status = displayStatus(a)
                     return (
-                      <tr key={a.id} className="hover:bg-slate-50/80 transition-colors group">
+                      <tr key={a.id} className="hover:bg-[#9f2176]/5 transition-colors group">
                         <td className="py-4 px-6">
-                          <div className="font-semibold text-slate-900">{a.title}</div>
+                          <div className="font-semibold text-[#1e1e2e]">{a.title}</div>
                           {a.status === 'rejected' && a.rejection_reason && (
-                            <div className="mt-2 text-[11px] font-medium text-rose-700 bg-rose-50 border border-rose-100 rounded-lg p-2.5 flex items-start gap-2 max-w-sm whitespace-normal">
-                              <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-rose-500" />
-                              <span>Feedback: {a.rejection_reason}</span>
+                            <div className="text-xs text-[#dc3545] mt-1 font-medium bg-[#ffeaea] inline-block px-2 py-0.5 rounded">
+                              Reason: {a.rejection_reason}
                             </div>
                           )}
                         </td>
-                        <td className="py-4 px-6 text-slate-600 font-medium">
-                          {a.departments?.name || 'General'}
+                        <td className="py-4 px-6">
+                          <span className="text-sm text-[#7D7D7D] font-medium">
+                            {a.departments?.name || 'General Notice'}
+                          </span>
                         </td>
                         <td className="py-4 px-6">
                           <StatusBadge status={status} />
                         </td>
-                        <td suppressHydrationWarning className="py-4 px-6 text-slate-500 font-medium text-[13px]">
+                        <td suppressHydrationWarning className="py-4 px-6 text-[#7D7D7D] font-medium text-[13px]">
                           {formatDate(a.created_at)}
                         </td>
                         <td className="py-4 px-6 text-right">
                           {status === 'live' || status === 'archived' || status === 'scheduled' ? (
-                            <Link
+                            <Link 
                               href={`/dashboard/submitter/${a.id}`}
-                              className="px-4 py-2 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-xs font-bold transition-colors inline-block"
+                              className="inline-flex items-center gap-1 text-sm font-semibold text-[#af1591] hover:text-[#9f2176] opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                               Inspect Details
                             </Link>
                           ) : a.status === 'draft' || a.status === 'rejected' ? (
                             <Link
                               href={`/dashboard/submitter/new?edit=${a.id}`}
-                              className="px-4 py-2 text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold transition-colors inline-block"
+                              className="px-4 py-2 text-[#ffffff] bg-[#cfa2f7] hover:bg-[#9f2176] rounded-lg text-xs font-bold transition-colors inline-block"
                             >
                               Edit Draft
                             </Link>
                           ) : (
-                            <span className="px-4 py-2 text-slate-400 bg-slate-50 rounded-lg text-xs font-semibold inline-block">
+                            <span className="px-4 py-2 text-[#7D7D7D] bg-[#e5e7eb] rounded-lg text-xs font-semibold inline-block">
                               In Review
                             </span>
                           )}

@@ -143,7 +143,7 @@ export function HodRecentSubmissionsClient({
                     <div className="flex flex-wrap items-center gap-2 pt-1">
                       {/* Duration */}
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
-                        <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                        <Clock className="w-3.5 h-3.5 text-[#af1591] dark:text-[#af1591] shrink-0" />
                         <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Duration:</span>
                         <span suppressHydrationWarning className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
                           {formatDuration(n.display_start, n.display_end)}
@@ -160,7 +160,7 @@ export function HodRecentSubmissionsClient({
 
                       {/* Target Screens */}
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
-                        <Monitor className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <Monitor className="w-3.5 h-3.5 text-[#00eaff] dark:text-[#00eaff] shrink-0" />
                         <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Screens:</span>
                         <span className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
                           {n.target_all
@@ -197,7 +197,7 @@ export function HodRecentSubmissionsClient({
                     type="button"
                     disabled={isDeleting}
                     onClick={() => handleDelete(n.id, n.title)}
-                    className="w-full px-4 py-2 rounded-xl border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50"
+                    className="w-full px-4 py-2 rounded-xl border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50"
                   >
                     {isDeleting ? (
                       <>

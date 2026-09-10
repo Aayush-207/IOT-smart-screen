@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { UploadCloud, Eye, Monitor, Smartphone, Building2, Clock, Sparkles } from 'lucide-react'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
-import { BillboardPreviewModal } from '@/components/BillboardPreviewModal'
 
 interface Department {
   id: string
@@ -56,7 +55,6 @@ export function NewAnnouncementForm({
   const [attachment, setAttachment] = useState<File | null>(null)
   const [submitting, setSubmitting] = useState<'draft' | 'approval' | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [previewOpen, setPreviewOpen] = useState(false)
   const [orientation, setOrientation] = useState<'landscape' | 'portrait'>('landscape')
 
   const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null)
@@ -230,16 +228,148 @@ export function NewAnnouncementForm({
   }
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl animate-fade-in-up">
+    <div className="flex flex-col xl:flex-row gap-8 max-w-[1400px] w-full mx-auto animate-fade-in items-start relative">
+      {/* Live Mini Billboard Agent Console Card (Right Col) */}
+      <div className="w-full xl:w-[420px] shrink-0 space-y-6 order-1 xl:order-2 xl:sticky xl:top-24">
+        <div className="bg-[#fdf4ff] rounded-3xl border border-[#af1591]/20 shadow-[0_4px_20px_rgba(159,33,118,0.05)] overflow-hidden flex flex-col">
+          <div className="p-5 border-b border-[#af1591]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#9f2176]/5">
+            <span className="text-xs font-bold text-[#1e1e2e] flex items-center gap-2">
+              <span className="w-2.5 h-2.5 bg-[#af1591] rounded-full shadow-[0_0_0_2px_rgba(175,21,145,0.2)] animate-pulse" /> 
+              LIVE PREVIEW
+            </span>
+            <div className="flex bg-slate-200/50 p-1 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setOrientation('landscape')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+                  orientation === 'landscape'
+                    ? 'bg-[#ffffff] text-[#1e1e2e] shadow-sm'
+                    : 'text-[#7D7D7D] hover:text-[#1e1e2e]'
+                }`}
+              >
+                <Monitor className="w-3.5 h-3.5" /> 16:9
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrientation('portrait')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+                  orientation === 'portrait'
+                    ? 'bg-[#ffffff] text-[#1e1e2e] shadow-sm'
+                    : 'text-[#7D7D7D] hover:text-[#1e1e2e]'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" /> 9:16
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 p-6 flex flex-col items-center justify-center bg-[#e5e7eb]/50">
+            <div className={`@container bg-slate-900 rounded-xl flex flex-col justify-between p-[2cqw] text-center text-[#ffffff] overflow-hidden relative transition-all duration-500 ease-in-out shadow-xl border-4 border-[#3D1165] shrink-0 ${
+              orientation === 'landscape' ? 'w-full aspect-[16/9]' : 'w-[55%] aspect-[9/16]'
+            }`}>
+              {attachmentPreview || existing?.attachment_url ? (
+                <img
+                  src={attachmentPreview || existing?.attachment_url}
+                  alt="Mini preview"
+                  className="absolute inset-0 w-full h-full object-cover rounded-md"
+                />
+              ) : (
+                <>
+                  <div className="text-[2cqw] font-semibold bg-[#ffffff]/10 backdrop-blur-md text-[#ffffff] px-[2cqw] py-[1cqw] rounded-full uppercase tracking-wider truncate relative z-10 mx-auto border border-white/20">
+                    {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'} &bull; {PRIORITY_LABEL[priority]}
+                  </div>
+
+                  <div className="my-auto relative z-10 bg-slate-900/60 backdrop-blur-md rounded-xl m-[1cqw] p-[3cqw] border border-white/10 shadow-lg">
+                    <h4 className="text-[4cqw] leading-tight font-bold text-[#ffffff] line-clamp-2">
+                      {title.trim() || 'Announcement Title'}
+                    </h4>
+                    {body.trim() && (
+                      <p className="text-[2.5cqw] font-medium text-[#cfa2f7] line-clamp-2 mt-[1.5cqw] leading-relaxed">
+                        {body}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="text-[2cqw] font-semibold text-[#7D7D7D] bg-slate-950/80 rounded-lg px-[2cqw] py-[1cqw] flex justify-between items-center relative z-10 border border-[#3D1165]">
+                    <span>CC ENGINE</span>
+                    <span className="flex items-center gap-[1cqw]">
+                      <span className="w-[1.5cqw] h-[1.5cqw] rounded-full bg-[#af1591]" />
+                      {targetZones.length} ZONES
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Live Configuration Details */}
+          <div className="p-6 border-t border-[#af1591]/20 bg-[#fdf4ff] space-y-4">
+            <div className="text-xs font-bold text-[#7D7D7D] uppercase tracking-wider">
+              Dispatch Manifest
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 text-xs">
+              {/* Department */}
+              <div className="flex items-center justify-between p-3 bg-[#fdf4ff] rounded-xl border border-[#cfa2f7]/20">
+                <div className="flex items-center gap-2 text-[#7D7D7D] font-semibold">
+                  <Building2 className="w-4 h-4" />
+                  <span>Dept</span>
+                </div>
+                <span className="font-bold text-[#1e1e2e] truncate max-w-[150px]">
+                  {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'}
+                </span>
+              </div>
+
+              {/* Screens Selected */}
+              <div className="flex items-center justify-between p-3 bg-[#fdf4ff] rounded-xl border border-[#cfa2f7]/20">
+                <div className="flex items-center gap-2 text-[#7D7D7D] font-semibold">
+                  <Monitor className="w-4 h-4" />
+                  <span>Nodes</span>
+                </div>
+                <span className="font-bold text-right">
+                  {targetZones.length > 0 ? (
+                    <span className="text-[#00eaff] bg-[#00eaff]/10 px-2.5 py-1 rounded-md">
+                      {targetZones.length} Selected
+                    </span>
+                  ) : (
+                    <span className="text-[#ef2045] bg-[#ffeaea] px-2.5 py-1 rounded-md">0 Selected</span>
+                  )}
+                </span>
+              </div>
+
+              {/* Duration / Schedule */}
+              <div className="flex items-center justify-between p-3 bg-[#fdf4ff] rounded-xl border border-[#cfa2f7]/20">
+                <div className="flex items-center gap-2 text-[#7D7D7D] font-semibold">
+                  <Clock className="w-4 h-4" />
+                  <span>Time</span>
+                </div>
+                <span className="font-bold text-[#1e1e2e] text-right text-[10px]">
+                  {displayStart ? (
+                    <span>
+                      {displayStart.replace('T', ' ')} <br/> {displayEnd ? `UNTIL ${displayEnd.replace('T', ' ')}` : '(PERMANENT)'}
+                    </span>
+                  ) : (
+                    <span className="text-[#7D7D7D]">IMMEDIATE</span>
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs font-medium text-[#7D7D7D] leading-relaxed bg-[#512a74]/5 border border-[#512a74]/20 p-4 rounded-2xl text-center">
+          Content is vetted against automated safety policies before transmission to department HODs and admin consoles.
+        </p>
+      </div>
       {/* Main Form (Left 2 cols) */}
-      <div className="xl:col-span-2 p-8 bg-white rounded-3xl border border-slate-200 shadow-sm space-y-8">
+      <div className="flex-1 min-w-0 w-full p-8 bg-[#fdf4ff] rounded-3xl border border-[#af1591]/20 shadow-[0_4px_20px_rgba(159,33,118,0.05)] space-y-8 order-2 xl:order-1">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Compose Announcement</h2>
-          <p className="text-sm text-slate-500 mt-1">Fill in the details for your campus broadcast.</p>
+          <h2 className="text-xl font-bold text-[#1e1e2e]">Compose Announcement</h2>
+          <p className="text-sm text-[#7D7D7D] mt-1">Fill in the details for your campus broadcast.</p>
         </div>
 
         {error && (
-          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm font-semibold flex items-center gap-2">
+          <div className="p-4 bg-[#ffeaea] border border-[#ef2045]/30 text-[#ef2045] rounded-xl text-sm font-semibold flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
             {error}
           </div>
@@ -248,10 +378,10 @@ export function NewAnnouncementForm({
         {/* Title Input */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm font-semibold text-slate-700">
-              Title <span className="text-rose-500">*</span>
+            <label className="block text-sm font-semibold text-[#1e1e2e]">
+              Title <span className="text-[#ef2045]">*</span>
             </label>
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-[#7D7D7D]">
               {title.length}/100
             </span>
           </div>
@@ -261,17 +391,17 @@ export function NewAnnouncementForm({
             maxLength={100}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Annual Tech Fest Registrations Open"
-            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+            className="w-full px-4 py-3 bg-[#fdf4ff] border border-[#9f2176]/30 rounded-xl text-[#1e1e2e] font-medium placeholder:text-[#cfa2f7] focus:outline-none focus:ring-2 focus:ring-[#9f2176] focus:border-[#9f2176] transition-all shadow-sm"
           />
         </div>
 
         {/* Body Textarea */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="block text-sm font-semibold text-slate-700">
+            <label className="block text-sm font-semibold text-[#1e1e2e]">
               Message Content
             </label>
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-[#7D7D7D]">
               {body.length}/500
             </span>
           </div>
@@ -281,20 +411,20 @@ export function NewAnnouncementForm({
             onChange={(e) => setBody(e.target.value)}
             rows={4}
             placeholder="Describe the details, dates, venue, or eligibility requirements..."
-            className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+            className="w-full px-4 py-3 bg-[#fdf4ff] border border-[#9f2176]/30 rounded-xl text-[#1e1e2e] font-medium placeholder:text-[#cfa2f7] focus:outline-none focus:ring-2 focus:ring-[#9f2176] focus:border-[#9f2176] transition-all shadow-sm"
           />
         </div>
 
         {/* Department & Priority */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
+            <label className="block text-sm font-semibold text-[#1e1e2e] mb-2">
               Department
             </label>
             <select
               value={departmentId}
               onChange={(e) => setDepartmentId(e.target.value)}
-              className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer transition-all shadow-sm"
+              className="w-full px-4 py-3 bg-[#fdf4ff] border border-[#9f2176]/30 rounded-xl text-sm font-medium text-[#1e1e2e] focus:outline-none focus:ring-2 focus:ring-[#9f2176] focus:border-[#9f2176] cursor-pointer transition-all shadow-sm"
             >
               <option value="">General / Campus-Wide</option>
               {departments.map((d) => (
@@ -304,7 +434,7 @@ export function NewAnnouncementForm({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
+            <label className="block text-sm font-semibold text-[#1e1e2e] mb-2">
               Priority Tier
             </label>
             <div className="grid grid-cols-3 gap-3">
@@ -318,11 +448,11 @@ export function NewAnnouncementForm({
                     className={`py-2.5 px-2 text-xs font-bold rounded-xl border transition-all cursor-pointer truncate shadow-sm ${
                       isSelected
                         ? p === 'critical'
-                          ? 'border-rose-500 bg-rose-500 text-white shadow-rose-500/20 shadow-md'
+                          ? 'border-[#ef2045] bg-[#ef2045] text-[#ffffff] shadow-[#ef2045]/20 shadow-md'
                           : p === 'timesensitive'
-                          ? 'border-amber-500 bg-amber-500 text-white shadow-amber-500/20 shadow-md'
-                          : 'border-slate-800 bg-slate-800 text-white shadow-slate-800/20 shadow-md'
-                        : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white'
+                          ? 'border-[#af1591] bg-[#af1591] text-[#ffffff] shadow-[#af1591]/20 shadow-md'
+                          : 'border-[#3D1165] bg-[#1e1e2e] text-[#ffffff] shadow-slate-800/20 shadow-md'
+                        : 'border-[#cfa2f7]/30 bg-[#fdf4ff] text-[#7D7D7D] hover:border-[#cfa2f7]/50 hover:bg-[#ffffff]'
                     }`}
                   >
                     {PRIORITY_LABEL[p]}
@@ -336,21 +466,21 @@ export function NewAnnouncementForm({
         {/* Target Screens & Zones */}
         <div className="pt-4">
           <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
-            <label className="block text-sm font-semibold text-slate-700">
+            <label className="block text-sm font-semibold text-[#1e1e2e]">
               Target Screens &amp; Zones
             </label>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={selectAllZones}
-                className="text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50 hover:text-indigo-600 transition-all cursor-pointer shadow-sm"
+                className="text-xs font-semibold text-[#1e1e2e] bg-[#fdf4ff] border border-[#9f2176]/30 rounded-lg px-3 py-1.5 hover:bg-[#9f2176]/10 hover:text-[#9f2176] transition-all cursor-pointer shadow-sm"
               >
                 Select All
               </button>
               <button
                 type="button"
                 onClick={clearAllZones}
-                className="text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg px-3 py-1.5 hover:bg-slate-50 hover:text-rose-600 transition-all cursor-pointer shadow-sm"
+                className="text-xs font-semibold text-[#1e1e2e] bg-[#ffffff] border border-[#cfa2f7]/50 rounded-lg px-3 py-1.5 hover:bg-[#fdf4ff] hover:text-[#ef2045] transition-all cursor-pointer shadow-sm"
               >
                 Clear
               </button>
@@ -366,11 +496,11 @@ export function NewAnnouncementForm({
                   className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium border cursor-pointer transition-all shadow-sm ${
                     !screen.isOnline
                       ? isSelected
-                        ? 'bg-slate-800 text-slate-300 border-slate-800'
-                        : 'border-slate-200 bg-slate-50 text-slate-400 hover:border-slate-300 hover:bg-white'
+                        ? 'bg-[#1e1e2e] text-[#cfa2f7] border-[#3D1165]'
+                        : 'border-[#cfa2f7]/30 bg-[#fdf4ff] text-[#7D7D7D] hover:border-[#cfa2f7]/50 hover:bg-[#ffffff]'
                       : isSelected
-                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-indigo-500/10'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'bg-[#512a74]/10 border-[#512a74] text-[#512a74] shadow-[#512a74]/10'
+                      : 'border-[#9f2176]/30 bg-[#fdf4ff] text-[#7D7D7D] hover:border-[#9f2176] hover:bg-[#9f2176]/5'
                   }`}
                 >
                   <input
@@ -380,7 +510,7 @@ export function NewAnnouncementForm({
                     onChange={() => toggleZone(screen.value)}
                   />
                   {screen.isOnline ? (
-                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isSelected ? 'bg-indigo-500 shadow-[0_0_0_2px_rgba(99,102,241,0.2)]' : 'bg-emerald-500'}`} />
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isSelected ? 'bg-[#512a74] shadow-[0_0_0_2px_rgba(86,42,117,0.2)]' : 'bg-[#00eaff]'}`} />
                   ) : (
                     <span className="w-2.5 h-2.5 bg-slate-300 rounded-full shrink-0" />
                   )}
@@ -392,31 +522,31 @@ export function NewAnnouncementForm({
         </div>
 
         {/* Display Window & Presets */}
-        <div className="pt-4 border-t border-slate-100">
+        <div className="pt-4 border-t border-[#cfa2f7]/20">
           <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
-            <label className="block text-sm font-semibold text-slate-700">
+            <label className="block text-sm font-semibold text-[#1e1e2e]">
               Display Duration
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 px-2">Presets</span>
+              <span className="text-xs font-semibold text-[#7D7D7D] px-2">Presets</span>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(24)}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 cursor-pointer transition-all shadow-sm"
+                className="px-3 py-1.5 border border-[#9f2176]/30 rounded-lg bg-[#fdf4ff] text-xs font-bold text-[#7D7D7D] hover:bg-[#9f2176]/10 hover:text-[#9f2176] cursor-pointer transition-all shadow-sm"
               >
                 24H
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(72)}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 cursor-pointer transition-all shadow-sm"
+                className="px-3 py-1.5 border border-[#9f2176]/30 rounded-lg bg-[#fdf4ff] text-xs font-bold text-[#7D7D7D] hover:bg-[#9f2176]/10 hover:text-[#9f2176] cursor-pointer transition-all shadow-sm"
               >
                 3D
               </button>
               <button
                 type="button"
                 onClick={() => applyWindowPreset(168)}
-                className="px-3 py-1.5 border border-slate-300 rounded-lg bg-white text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 cursor-pointer transition-all shadow-sm"
+                className="px-3 py-1.5 border border-[#9f2176]/30 rounded-lg bg-[#fdf4ff] text-xs font-bold text-[#7D7D7D] hover:bg-[#9f2176]/10 hover:text-[#9f2176] cursor-pointer transition-all shadow-sm"
               >
                 7D
               </button>
@@ -425,82 +555,82 @@ export function NewAnnouncementForm({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
-              <span className="text-xs font-semibold text-slate-500 block mb-2">Start Displaying</span>
+              <span className="text-xs font-semibold text-[#7D7D7D] block mb-2">Start Displaying</span>
               <input
                 type="datetime-local"
                 value={displayStart}
                 onChange={(e) => setDisplayStart(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                className="w-full px-4 py-3 bg-[#fdf4ff] border border-[#9f2176]/30 rounded-xl text-sm font-medium text-[#1e1e2e] focus:outline-none focus:ring-2 focus:ring-[#9f2176] focus:border-[#9f2176] transition-all shadow-sm"
               />
             </div>
             <div>
-              <span className="text-xs font-semibold text-slate-500 block mb-2">Stop Displaying (Auto-Expire)</span>
+              <span className="text-xs font-semibold text-[#7D7D7D] block mb-2">Stop Displaying (Auto-Expire)</span>
               <input
                 type="datetime-local"
                 value={displayEnd}
                 onChange={(e) => setDisplayEnd(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm"
+                className="w-full px-4 py-3 bg-[#fdf4ff] border border-[#9f2176]/30 rounded-xl text-sm font-medium text-[#1e1e2e] focus:outline-none focus:ring-2 focus:ring-[#9f2176] focus:border-[#9f2176] transition-all shadow-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Attachment Upload Zone */}
-        <div className="pt-4 border-t border-slate-100">
+        <div className="pt-4 border-t border-[#cfa2f7]/20">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
-            <label className="block text-sm font-semibold text-slate-700">
+            <label className="block text-sm font-semibold text-[#1e1e2e]">
               Slide Poster / Graphic (Optional)
             </label>
-            <span className="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">
+            <span className="text-xs font-bold bg-[#512a74]/10 text-[#512a74] px-3 py-1 rounded-full border border-[#512a74]/20">
               1672 &times; 941 PX (16:9)
             </span>
           </div>
 
           {/* Required Dimension Callout */}
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 mb-6 shadow-sm">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-1">
-              <Sparkles className="w-4 h-4 text-amber-500" />
+          <div className="p-4 bg-[#fdf4ff] rounded-2xl border border-[#cfa2f7]/30 mb-6 shadow-sm">
+            <div className="flex items-center gap-2 text-sm font-bold text-[#1e1e2e] mb-1">
+              <Sparkles className="w-4 h-4 text-[#af1591]" />
               <span>Required Poster Dimensions</span>
             </div>
-            <p className="text-sm font-semibold text-slate-700">
+            <p className="text-sm font-semibold text-[#1e1e2e]">
               WIDTH: <strong>1672 PX</strong> &bull; HEIGHT: <strong>941 PX</strong>
             </p>
-            <p className="text-xs font-medium text-slate-500 mt-1 max-w-xl">
+            <p className="text-xs font-medium text-[#7D7D7D] mt-1 max-w-xl">
               The uploaded poster should be in that exact dimension to fit the display screens perfectly without distortion or black bars.
             </p>
           </div>
           
           {attachmentPreview || (existing?.attachment_url && !attachment) ? (
-            <div className="relative p-4 bg-white border border-slate-200 rounded-2xl flex items-center gap-5 shadow-sm">
+            <div className="relative p-4 bg-[#ffffff] border border-[#cfa2f7]/30 rounded-2xl flex items-center gap-5 shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={attachmentPreview || existing.attachment_url}
                 alt="Poster preview"
-                className="w-32 h-20 object-cover rounded-xl shadow-sm border border-slate-100 shrink-0"
+                className="w-32 h-20 object-cover rounded-xl shadow-sm border border-[#cfa2f7]/20 shrink-0"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-slate-900 truncate">
+                <p className="text-sm font-bold text-[#1e1e2e] truncate">
                   {attachment ? attachment.name : 'Current Attachment'}
                 </p>
-                <p className="text-xs font-medium text-slate-500 mt-1">
+                <p className="text-xs font-medium text-[#7D7D7D] mt-1">
                   {attachment ? `${(attachment.size / 1024 / 1024).toFixed(2)} MB` : 'Stored image'} &bull; 16:9 Ratio
                 </p>
                 <button
                   type="button"
                   onClick={removeAttachment}
-                  className="mt-2 text-rose-600 hover:text-rose-700 text-xs font-bold hover:underline cursor-pointer transition-colors"
+                  className="mt-2 text-[#ef2045] hover:text-[#ef2045] text-xs font-bold hover:underline cursor-pointer transition-colors"
                 >
                   Remove visual
                 </button>
               </div>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-slate-300 rounded-3xl bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-300 cursor-pointer transition-all group shadow-sm">
-              <div className="w-14 h-14 bg-white rounded-2xl border border-slate-200 flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all">
-                <UploadCloud className="w-6 h-6 text-indigo-500" />
+            <label className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-[#cfa2f7]/50 rounded-3xl bg-[#fdf4ff] hover:bg-[#512a74]/5 hover:border-[#512a74]/30 cursor-pointer transition-all group shadow-sm">
+              <div className="w-14 h-14 bg-[#ffffff] rounded-2xl border border-[#cfa2f7]/30 flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all">
+                <UploadCloud className="w-6 h-6 text-[#9f2176]" />
               </div>
-              <p className="text-sm font-bold text-slate-700 text-center">Click to upload poster or drag and drop</p>
-              <p className="text-xs text-slate-500 mt-2 font-medium">JPEG, PNG, WEBP (Max 10MB)</p>
+              <p className="text-sm font-bold text-[#1e1e2e] text-center">Click to upload poster or drag and drop</p>
+              <p className="text-xs text-[#7D7D7D] mt-2 font-medium">JPEG, PNG, WEBP (Max 10MB)</p>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -512,13 +642,13 @@ export function NewAnnouncementForm({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-[#cfa2f7]/20">
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <button
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('approval')}
-              className="px-6 py-3.5 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30 hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
+              className="px-6 py-3.5 bg-gradient-to-br from-[#9f2176] to-[#af1591] text-[#ffffff] rounded-xl text-sm font-bold shadow-lg shadow-[#9f2176]/30 hover:shadow-[#9f2176]/40 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {submitting === 'approval' ? (
                 <span>Submitting...</span>
@@ -530,7 +660,7 @@ export function NewAnnouncementForm({
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('draft')}
-              className="px-6 py-3.5 bg-white text-slate-700 border border-slate-300 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
+              className="px-6 py-3.5 bg-[#ffffff] text-[#1e1e2e] border border-[#cfa2f7]/50 rounded-xl text-sm font-bold shadow-sm hover:bg-[#fdf4ff] hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {submitting === 'draft' ? (
                 <span>Saving...</span>
@@ -539,160 +669,8 @@ export function NewAnnouncementForm({
               )}
             </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setPreviewOpen(true)}
-            className="px-6 py-3.5 bg-slate-800 text-white rounded-xl text-sm font-bold shadow-md shadow-slate-800/20 hover:bg-slate-900 transition-all w-full sm:w-auto justify-center flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
-          >
-            <Eye className="w-4 h-4" /> Simulator
-          </button>
         </div>
       </div>
-
-      {/* Live Mini Billboard Agent Console Card (Right Col) */}
-      <div className="space-y-6">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
-          <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-            <span className="text-xs font-bold text-slate-700 flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_0_2px_rgba(16,185,129,0.2)] animate-pulse" /> 
-              LIVE PREVIEW
-            </span>
-            <div className="flex bg-slate-200/50 p-1 rounded-lg">
-              <button
-                type="button"
-                onClick={() => setOrientation('landscape')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
-                  orientation === 'landscape'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                <Monitor className="w-3.5 h-3.5" /> 16:9
-              </button>
-              <button
-                type="button"
-                onClick={() => setOrientation('portrait')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
-                  orientation === 'portrait'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                <Smartphone className="w-3.5 h-3.5" /> 9:16
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 p-6 flex flex-col items-center justify-center bg-slate-100/50">
-            <div className={`bg-slate-900 rounded-xl flex flex-col justify-between p-4 text-center text-white overflow-hidden relative transition-all duration-300 shadow-xl border-4 border-slate-800 ${
-              orientation === 'landscape' ? 'w-full aspect-[16/9]' : 'w-[65%] aspect-[9/16]'
-            }`}>
-              {attachmentPreview || existing?.attachment_url ? (
-                <img
-                  src={attachmentPreview || existing?.attachment_url}
-                  alt="Mini preview"
-                  className="absolute inset-0 w-full h-full object-cover rounded-md"
-                />
-              ) : (
-                <>
-                  <div className="text-[9px] font-semibold bg-white/10 backdrop-blur-md text-white px-3 py-1.5 rounded-full uppercase tracking-wider truncate relative z-10 mx-auto border border-white/20">
-                    {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'} &bull; {PRIORITY_LABEL[priority]}
-                  </div>
-
-                  <div className="my-auto relative z-10 bg-slate-900/60 backdrop-blur-md rounded-xl m-2 p-4 border border-white/10 shadow-lg">
-                    <h4 className="text-sm font-bold text-white line-clamp-2">
-                      {title.trim() || 'Announcement Title'}
-                    </h4>
-                    {body.trim() && (
-                      <p className="text-[10px] font-medium text-slate-300 line-clamp-2 mt-2 leading-relaxed">
-                        {body}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="text-[9px] font-semibold text-slate-400 bg-slate-950/80 rounded-lg px-3 py-2 flex justify-between items-center relative z-10 border border-slate-800">
-                    <span>CC ENGINE</span>
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      {targetZones.length} ZONES
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Live Configuration Details */}
-          <div className="p-6 border-t border-slate-100 bg-white space-y-4">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Dispatch Manifest
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 text-xs">
-              {/* Department */}
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-2 text-slate-600 font-semibold">
-                  <Building2 className="w-4 h-4" />
-                  <span>Dept</span>
-                </div>
-                <span className="font-bold text-slate-900 truncate max-w-[150px]">
-                  {departments.find((d) => d.id === departmentId)?.name || 'Campus Wide'}
-                </span>
-              </div>
-
-              {/* Screens Selected */}
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-2 text-slate-600 font-semibold">
-                  <Monitor className="w-4 h-4" />
-                  <span>Nodes</span>
-                </div>
-                <span className="font-bold text-right">
-                  {targetZones.length > 0 ? (
-                    <span className="text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md">
-                      {targetZones.length} Selected
-                    </span>
-                  ) : (
-                    <span className="text-rose-700 bg-rose-100 px-2.5 py-1 rounded-md">0 Selected</span>
-                  )}
-                </span>
-              </div>
-
-              {/* Duration / Schedule */}
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                <div className="flex items-center gap-2 text-slate-600 font-semibold">
-                  <Clock className="w-4 h-4" />
-                  <span>Time</span>
-                </div>
-                <span className="font-bold text-slate-900 text-right text-[10px]">
-                  {displayStart ? (
-                    <span>
-                      {displayStart.replace('T', ' ')} <br/> {displayEnd ? `UNTIL ${displayEnd.replace('T', ' ')}` : '(PERMANENT)'}
-                    </span>
-                  ) : (
-                    <span className="text-slate-500">IMMEDIATE</span>
-                  )}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p className="text-xs font-medium text-slate-500 leading-relaxed bg-indigo-50 border border-indigo-100 p-4 rounded-2xl text-center">
-          Content is vetted against automated safety policies before transmission to department HODs and admin consoles.
-        </p>
-      </div>
-
-      <BillboardPreviewModal
-        isOpen={previewOpen}
-        onClose={() => setPreviewOpen(false)}
-        title={title}
-        body={body}
-        priority={priority}
-        departmentName={departments.find((d) => d.id === departmentId)?.name || 'Department Announcement'}
-        attachmentUrl={existing?.attachment_url}
-        attachmentFile={attachment}
-      />
     </div>
   )
 }

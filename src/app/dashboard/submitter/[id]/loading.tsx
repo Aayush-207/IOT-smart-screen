@@ -6,7 +6,7 @@ export default function SubmitterAnnouncementDetailLoading() {
       <Skeleton className="h-8 w-44 rounded-full" />
 
       {/* Hero Notice Skeleton */}
-      <div className="p-6 md:p-8 rounded-lg border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 md:p-8 rounded-lg border border-neutral-200 dark:border-[#212327] bg-[#ffffff] dark:bg-[#141414] flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 flex-1">
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-24 rounded-full" />
@@ -20,7 +20,7 @@ export default function SubmitterAnnouncementDetailLoading() {
       </div>
 
       {/* 3 Display Screens Skeleton */}
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg overflow-hidden p-5 space-y-4">
+      <div className="bg-[#ffffff] dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg overflow-hidden p-5 space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-[#212327]">
           <div className="space-y-1">
             <Skeleton className="h-4 w-40" />
@@ -37,7 +37,7 @@ export default function SubmitterAnnouncementDetailLoading() {
       </div>
 
       {/* Timeline Skeleton */}
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg p-6 space-y-4">
+      <div className="bg-[#ffffff] dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg p-6 space-y-4">
         <Skeleton className="h-4 w-44" />
         <div className="space-y-3 pl-4 border-l border-neutral-200 dark:border-[#212327]">
           {[1, 2].map((i) => (

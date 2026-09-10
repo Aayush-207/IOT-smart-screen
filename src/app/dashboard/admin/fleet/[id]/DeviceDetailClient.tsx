@@ -103,7 +103,7 @@ export function DeviceDetailClient({
       <div className="p-6 md:p-8 rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm card-hover">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-semibold">{screen.zone || 'General Zone'}</span>
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider bg-[#00eaff]/10 dark:bg-emerald-950/40 border border-[#00eaff]/30 dark:border-emerald-800 text-[#00eaff] dark:text-[#00eaff] font-semibold">{screen.zone || 'General Zone'}</span>
             <StatusBadge status={status} />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
@@ -139,7 +139,7 @@ export function DeviceDetailClient({
         <div className="lg:col-span-7 rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] p-6 flex flex-col justify-between shadow-sm card-hover">
           <div className="flex items-center justify-between mb-4 border-b border-neutral-200 dark:border-[#212327] pb-3">
             <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Display Node Mirror
+              <span className="w-2 h-2 rounded-full bg-[#00eaff] animate-pulse" /> Display Node Mirror
             </span>
             <span className="text-[10px] font-mono text-neutral-500 dark:text-neutral-400">Aspect: 16:9 (1672×941)</span>
           </div>
@@ -198,12 +198,12 @@ export function DeviceDetailClient({
             </div>
 
             {screen.force_refresh_requested && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-lg text-xs text-amber-700 dark:text-amber-400 font-mono">
+              <div className="p-3 bg-[#af1591]/10 dark:bg-amber-950/40 border border-[#af1591]/30 dark:border-amber-900 rounded-lg text-xs text-[#af1591] dark:text-[#af1591] font-mono">
                 Forced synchronization queued &mdash; executing on next ping.
               </div>
             )}
             {screen.reboot_requested && (
-              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-lg text-xs text-rose-700 dark:text-rose-400 font-mono">
+              <div className="p-3 bg-[#ffeaea] dark:bg-rose-950/40 border border-[#ef2045]/30 dark:border-rose-900 rounded-lg text-xs text-[#ef2045] dark:text-[#ef2045] font-mono">
                 Hardware reboot queued &mdash; executing on next sync.
               </div>
             )}
@@ -218,9 +218,9 @@ export function DeviceDetailClient({
                 type="button"
                 onClick={handleSimulatePing}
                 disabled={!!loading}
-                className="col-span-2 px-3 py-2 rounded-xl border border-emerald-500/40 text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-500/10 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-all btn-press"
+                className="col-span-2 px-3 py-2 rounded-xl border border-[#00eaff]/40 text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10/50 dark:bg-emerald-950/20 hover:bg-[#00eaff]/10 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-all btn-press"
               >
-                <Radio className={`w-3.5 h-3.5 ${loading === 'ping' ? 'animate-ping text-emerald-500' : ''}`} /> Simulate Heartbeat (Ping)
+                <Radio className={`w-3.5 h-3.5 ${loading === 'ping' ? 'animate-ping text-[#00eaff]' : ''}`} /> Simulate Heartbeat (Ping)
               </button>
               <button
                 type="button"
@@ -234,7 +234,7 @@ export function DeviceDetailClient({
                 type="button"
                 onClick={handleReboot}
                 disabled={!!loading}
-                className="px-3 py-2 rounded-xl border border-rose-300 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/40 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-all btn-press"
+                className="px-3 py-2 rounded-xl border border-[#ef2045] dark:border-rose-900/60 bg-[#ffeaea]/50 dark:bg-rose-950/20 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-rose-950/40 text-xs font-mono flex items-center justify-center gap-1.5 cursor-pointer transition-all btn-press"
               >
                 <Power className={`w-3.5 h-3.5 ${loading === 'reboot' ? 'animate-pulse' : ''}`} /> Reboot Node
               </button>

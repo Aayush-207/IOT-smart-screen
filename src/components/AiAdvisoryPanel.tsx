@@ -10,8 +10,8 @@ export function AiAdvisoryPanel({ advisory }: { advisory: any }) {
 
   return (
     <div className="rounded-lg border border-[#212327] bg-[#141414] p-3.5 text-xs text-[#dadbdf] space-y-2">
-      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-white">
-        <Sparkles className="w-3.5 h-3.5 text-white" />
+      <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-[#ffffff]">
+        <Sparkles className="w-3.5 h-3.5 text-[#ffffff]" />
         <span>Automated Policy &amp; Safety Checks</span>
       </div>
       {deterministic.length > 0 && (
@@ -22,7 +22,7 @@ export function AiAdvisoryPanel({ advisory }: { advisory: any }) {
         </ul>
       )}
       {ai && (
-        <div className="pt-1.5 border-t border-[#212327] text-xs text-white/90">
+        <div className="pt-1.5 border-t border-[#212327] text-xs text-[#ffffff]/90">
           <span className="font-mono text-[11px] uppercase tracking-wider text-[#dadbdf]">Model Analysis:</span> {ai}
         </div>
       )}

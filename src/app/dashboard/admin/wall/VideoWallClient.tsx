@@ -24,8 +24,8 @@ import { logAudit } from '@/lib/audit'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 
 const DOT_COLOR: Record<DeviceStatus, string> = {
-  online: 'bg-emerald-400',
-  stale: 'bg-amber-400',
+  online: 'bg-[#00eaff]',
+  stale: 'bg-[#af1591]',
   offline: 'bg-neutral-600',
 }
 
@@ -101,7 +101,7 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
       </div>
 
       <div className="p-3 bg-neutral-50 dark:bg-[#0a0a0a] flex-1 flex flex-col items-center justify-center">
-        <div className={`w-full relative rounded-lg border-2 ${isEmergency ? 'border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'border-neutral-200 dark:border-[#212327] shadow-xl'} bg-black overflow-hidden flex flex-col justify-between text-center transition-all select-none ${aspectMode === '16:9' ? 'aspect-[16/9]' : 'aspect-[9/16]'}`}>
+        <div className={`w-full relative rounded-lg border-2 ${isEmergency ? 'border-[#ef2045]/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'border-neutral-200 dark:border-[#212327] shadow-xl'} bg-black overflow-hidden flex flex-col justify-between text-center transition-all select-none ${aspectMode === '16:9' ? 'aspect-[16/9]' : 'aspect-[9/16]'}`}>
           
           {count === 0 ? (
             <div className="my-auto flex flex-col items-center p-2">
@@ -135,8 +135,8 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
                     <div className="w-full h-full flex flex-col justify-between p-3 text-center text-neutral-900 dark:text-white">
                       <div className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 flex items-center justify-between border-b border-white/10 pb-1">
                         <span className="flex items-center gap-1">
-                          <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-                          <span className="text-emerald-400">ONLINE</span>
+                          <span className="w-1 h-1 rounded-full bg-[#00eaff] animate-pulse" />
+                          <span className="text-[#00eaff]">ONLINE</span>
                         </span>
                         <span className="truncate max-w-[120px]">
                           {isEmergency ? 'EMERGENCY' : PRIORITY_LABEL[item.priority as Priority] || 'Routine'}
@@ -163,8 +163,8 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
           )}
 
           {hasMultiple && (
-            <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[9px] font-mono text-emerald-400 border border-emerald-500/40 shadow-md pointer-events-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[9px] font-mono text-[#00eaff] border border-[#00eaff]/40 shadow-md pointer-events-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff] animate-pulse" />
               <span>Poster {activeIndex + 1}/{count} (4s)</span>
             </div>
           )}
@@ -174,7 +174,7 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
                 <span
                   key={dotIdx}
                   className={`h-1 rounded-full transition-all duration-500 ease-out ${
-                    dotIdx === activeIndex ? 'w-4 bg-emerald-400 shadow-sm' : 'w-1.5 bg-white/50'
+                    dotIdx === activeIndex ? 'w-4 bg-[#00eaff] shadow-sm' : 'w-1.5 bg-white/50'
                   }`}
                 />
               ))}
@@ -196,8 +196,8 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
           <button type="button" onClick={() => onForceRefresh(screen.id, screen.name)} disabled={isBusy} title="Force Sync Screen" className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white disabled:opacity-50 cursor-pointer transition-colors">
             <RefreshCw className={`w-3 h-3 ${isBusy && busyType === 'refresh' ? 'animate-spin text-neutral-900 dark:text-white' : ''}`} />
           </button>
-          <button type="button" onClick={() => onReboot(screen.id, screen.name)} disabled={isBusy} title="Reboot Node" className="p-1.5 rounded-full hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-rose-600 dark:hover:text-rose-400 disabled:opacity-50 cursor-pointer transition-colors">
-            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-rose-600 dark:text-rose-400' : ''}`} />
+          <button type="button" onClick={() => onReboot(screen.id, screen.name)} disabled={isBusy} title="Reboot Node" className="p-1.5 rounded-full hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-[#ef2045] dark:hover:text-[#ef2045] disabled:opacity-50 cursor-pointer transition-colors">
+            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-[#ef2045] dark:text-[#ef2045]' : ''}`} />
           </button>
           <a href={`/kiosk.html?id=${screen.id}`} target="_blank" rel="noreferrer" title="Launch Kiosk Window" className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white cursor-pointer transition-colors">
             <ExternalLink className="w-3 h-3" />
@@ -410,19 +410,19 @@ export function VideoWallClient({
 
       {/* Active Global Override Banner */}
       {activeEmergencies.length > 0 && (
-        <div className="p-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/50 flex items-center justify-between gap-4 text-rose-600 dark:text-rose-300">
+        <div className="p-4 rounded-lg bg-[#ffeaea] dark:bg-rose-950/40 border border-[#ef2045]/30 dark:border-[#ef2045]/50 flex items-center justify-between gap-4 text-[#ef2045] dark:text-[#ef2045]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-rose-600 text-white shrink-0 animate-bounce">
+            <div className="p-2 rounded-full bg-[#ef2045] text-white shrink-0 animate-bounce">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-rose-500 dark:text-rose-400">Emergency Broadcast Active</span>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] dark:text-[#ef2045]">Emergency Broadcast Active</span>
               <p className="text-sm font-normal text-rose-900 dark:text-neutral-900 dark:text-white mt-0.5">
                 &ldquo;{activeEmergencies[0].body || activeEmergencies[0].title}&rdquo;
               </p>
             </div>
           </div>
-          <span className="text-[10px] font-mono uppercase tracking-wider bg-rose-600 text-white px-3 py-1 rounded-full shrink-0">
+          <span className="text-[10px] font-mono uppercase tracking-wider bg-[#ef2045] text-white px-3 py-1 rounded-full shrink-0">
             ALL SCREENS OVERRIDDEN
           </span>
         </div>
@@ -448,7 +448,7 @@ export function VideoWallClient({
                 statusFilter === 'online' ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium' : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Online ({counts.online})
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff]" /> Online ({counts.online})
             </button>
             <button
               onClick={() => setStatusFilter('stale')}
@@ -456,7 +456,7 @@ export function VideoWallClient({
                 statusFilter === 'stale' ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium' : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Stale ({counts.stale})
+              <span className="w-1.5 h-1.5 rounded-full bg-[#af1591]" /> Stale ({counts.stale})
             </button>
             <button
               onClick={() => setStatusFilter('offline')}

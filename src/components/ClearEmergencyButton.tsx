@@ -66,7 +66,7 @@ export function ClearEmergencyButton({
       disabled={busy}
       className={
         className ||
-        'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-all disabled:opacity-50 cursor-pointer shadow-sm'
+        'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#ffffff] text-[#0a0a0a] text-xs font-medium hover:bg-neutral-200 transition-all disabled:opacity-50 cursor-pointer shadow-sm'
       }
     >
       {busy ? (

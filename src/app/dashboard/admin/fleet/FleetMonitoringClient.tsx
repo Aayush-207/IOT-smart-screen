@@ -107,7 +107,7 @@ function FleetScreenCardComponent({
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {screen._status === 'online' ? (
-              <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-emerald-400 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-[#00eaff] animate-pulse" />
             ) : (
               <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-neutral-400 dark:bg-neutral-600" />
             )}
@@ -126,7 +126,7 @@ function FleetScreenCardComponent({
               </span>
             )}
             {screen._status === 'online' ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-emerald-600 dark:text-emerald-400 bg-emerald-500/10">
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10">
                 <Signal className="w-3 h-3" /> Online
               </span>
             ) : (
@@ -247,8 +247,8 @@ function FleetScreenCardComponent({
 
             {/* Floating Rotation Pill */}
             {hasMultiple && (
-              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-emerald-400 border border-emerald-500/40 shadow-lg pointer-events-none">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-md text-[9px] sm:text-[10px] font-mono text-[#00eaff] border border-[#00eaff]/40 shadow-lg pointer-events-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff] animate-pulse" />
                 <span>Poster {activeIndex + 1}/{count} (4s)</span>
               </div>
             )}
@@ -261,7 +261,7 @@ function FleetScreenCardComponent({
                     key={dotIdx}
                     className={`h-1 rounded-full transition-all duration-500 ease-out ${
                       dotIdx === activeIndex
-                        ? 'w-4 bg-emerald-400 shadow-sm'
+                        ? 'w-4 bg-[#00eaff] shadow-sm'
                         : 'w-1.5 bg-white/50'
                     }`}
                   />
@@ -308,9 +308,9 @@ function FleetScreenCardComponent({
             onClick={() => onReboot(screen.id, screen.name)}
             disabled={isBusy}
             title="Reboot Display Node"
-            className="p-1.5 rounded-full hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-rose-600 dark:hover:text-rose-400 disabled:opacity-50 cursor-pointer transition-colors"
+            className="p-1.5 rounded-full hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-[#ef2045] dark:hover:text-[#ef2045] disabled:opacity-50 cursor-pointer transition-colors"
           >
-            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-rose-600 dark:text-rose-400' : ''}`} />
+            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-[#ef2045] dark:text-[#ef2045]' : ''}`} />
           </button>
           <a
             href={`/kiosk.html?id=${screen.id}`}
@@ -542,11 +542,11 @@ export function FleetMonitoringClient({
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'online' ? 'all' : 'online')}
           className={`bg-white dark:bg-[#141414] border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
-            statusFilter === 'online' ? 'border-emerald-400 ring-1 ring-emerald-400' : 'border-neutral-200 dark:border-[#212327]'
+            statusFilter === 'online' ? 'border-[#00eaff] ring-1 ring-[#00eaff]' : 'border-neutral-200 dark:border-[#212327]'
           }`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-500 dark:text-emerald-400">Online</span>
-          <div className="text-3xl font-normal text-emerald-500 dark:text-emerald-400">{counts.online}</div>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#00eaff] dark:text-[#00eaff]">Online</span>
+          <div className="text-3xl font-normal text-[#00eaff] dark:text-[#00eaff]">{counts.online}</div>
           <p className="text-xs text-neutral-500 dark:text-[#7d8187] font-mono">Heartbeat &lt; 2m</p>
         </button>
 
@@ -554,11 +554,11 @@ export function FleetMonitoringClient({
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'stale' ? 'all' : 'stale')}
           className={`bg-white dark:bg-[#141414] border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
-            statusFilter === 'stale' ? 'border-amber-400 ring-1 ring-amber-400' : 'border-neutral-200 dark:border-[#212327]'
+            statusFilter === 'stale' ? 'border-[#af1591] ring-1 ring-[#af1591]' : 'border-neutral-200 dark:border-[#212327]'
           }`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-wider text-amber-500 dark:text-amber-400">Delayed Sync</span>
-          <div className="text-3xl font-normal text-amber-500 dark:text-amber-400">{counts.stale}</div>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#af1591] dark:text-[#af1591]">Delayed Sync</span>
+          <div className="text-3xl font-normal text-[#af1591] dark:text-[#af1591]">{counts.stale}</div>
           <p className="text-xs text-neutral-500 dark:text-[#7d8187] font-mono">Heartbeat &gt; 2m</p>
         </button>
 

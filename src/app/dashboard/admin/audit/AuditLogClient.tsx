@@ -56,11 +56,11 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
   }
 
   const getActionBadgeClass = (act: string) => {
-    if (act.includes('emergency')) return 'border border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+    if (act.includes('emergency')) return 'border border-[#ef2045]/40 bg-[#ef2045]/10 text-[#ef2045] dark:text-[#ef2045]'
     if (act.includes('reject') || act.includes('withdrew') || act.includes('delete'))
-      return 'border border-rose-500/30 text-rose-600 dark:text-rose-400 bg-rose-500/10'
+      return 'border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] bg-[#ef2045]/10'
     if (act.includes('approve'))
-      return 'border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10'
+      return 'border border-[#00eaff]/40 text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10'
     if (act.includes('refresh') || act.includes('reboot') || act.includes('registered'))
       return 'border border-sky-500/30 text-sky-600 dark:text-sky-400 bg-sky-500/10'
     return 'border border-neutral-200 dark:border-[#212327] bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-[#dadbdf]'
@@ -217,7 +217,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                         </span>
                       </div>
                       {r.metadata && typeof r.metadata === 'object' && 'reason' in r.metadata && (
-                        <div className="text-[10px] text-rose-500 dark:text-rose-400 font-mono mt-1">
+                        <div className="text-[10px] text-[#ef2045] dark:text-[#ef2045] font-mono mt-1">
                           Reason: &ldquo;{String((r.metadata as any).reason)}&rdquo;
                         </div>
                       )}
@@ -229,7 +229,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                         <button
                           type="button"
                           onClick={() => setPreviewPoster({ url: posterUrl, title: r.target_label || 'Poster Visual' })}
-                          className="relative group inline-block mx-auto rounded-lg overflow-hidden border border-neutral-200 dark:border-[#212327] shadow-sm hover:ring-2 hover:ring-emerald-500 transition-all cursor-pointer"
+                          className="relative group inline-block mx-auto rounded-lg overflow-hidden border border-neutral-200 dark:border-[#212327] shadow-sm hover:ring-2 hover:ring-[#00eaff] transition-all cursor-pointer"
                           title="Click to view full poster"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -254,7 +254,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                     <td className="px-5 py-3.5 text-xs font-mono">
                       {durationInfo ? (
                         <div className="space-y-0.5">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10 px-2 py-0.5 rounded-full">
                             <Clock className="w-3 h-3" /> {durationInfo.primary}
                           </span>
                           <div className="text-[10px] text-neutral-500 dark:text-[#7d8187]">
@@ -293,7 +293,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
           >
             <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-emerald-500" />
+                <ImageIcon className="w-4 h-4 text-[#00eaff]" />
                 <h3 className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
                   {previewPoster.title}
                 </h3>

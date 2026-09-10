@@ -89,7 +89,7 @@ export default async function AdminDashboardPage() {
           </Link>
           <Link
             href="/dashboard/admin/emergency"
-            className="px-4 py-2 rounded-full border border-rose-500/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 text-xs font-mono flex items-center gap-2 transition-colors"
+            className="px-4 py-2 rounded-full border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 text-xs font-mono flex items-center gap-2 transition-colors"
           >
             <AlertTriangle className="w-3.5 h-3.5" /> Emergency Alert
           </Link>
@@ -98,13 +98,13 @@ export default async function AdminDashboardPage() {
 
       {/* Active Emergency Alert Banner */}
       {(activeEmergencies || []).length > 0 && (
-        <div className="p-6 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+        <div className="p-6 rounded-xl bg-[#ffeaea] dark:bg-rose-950/40 border border-[#ef2045]/30 dark:border-[#ef2045]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-full bg-rose-600 text-white shrink-0 animate-bounce">
+            <div className="p-2 rounded-full bg-[#ef2045] text-white shrink-0 animate-bounce">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-rose-600 dark:text-rose-400">Active Campus Emergency Broadcast</span>
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] dark:text-[#ef2045]">Active Campus Emergency Broadcast</span>
               <p className="text-sm text-neutral-900 dark:text-white mt-0.5">
                 &ldquo;{activeEmergencies![0].body || activeEmergencies![0].title}&rdquo;
               </p>
