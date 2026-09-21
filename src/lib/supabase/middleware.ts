@@ -8,7 +8,20 @@ const DASHBOARD_BY_ROLE: Record<string, string> = {
   emergency: '/dashboard/admin',
 }
 
+/** How long to wait for Supabase auth before giving up (ms). */
+const AUTH_TIMEOUT_MS = 4_000
+
 export async function updateSession(request: NextRequest) {
+  const path = request.nextUrl.pathname
+
+  // Short-circuit: /login never needs a Supabase auth round-trip.
+  // Unauthenticated users are always heading here, so skip the fetch
+  // entirely to avoid a 25-second hang when the network is unreachable.
+  const isLoginRoute = path.startsWith('/login')
+  if (isLoginRoute) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -34,15 +47,21 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  // Race auth fetch against a timeout so a dead connection fails fast
+  // instead of blocking the page for 25+ seconds.
   let user = null
   try {
-    const { data } = await supabase.auth.getUser()
+    const authPromise = supabase.auth.getUser()
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Supabase auth timeout')), AUTH_TIMEOUT_MS)
+    )
+    const { data } = await Promise.race([authPromise, timeoutPromise])
     user = data?.user ?? null
   } catch (err) {
-    console.warn('Middleware auth error:', err)
+    console.warn('Middleware auth error (timed out or network failure):', err)
+    // Treat auth failure as "not logged in" — safe default.
   }
 
-  const path = request.nextUrl.pathname
   const isDashboardRoute = path.startsWith('/dashboard')
   const isSubmitterRoute = path.startsWith('/dashboard/submitter')
   const isHodRoute = path.startsWith('/dashboard/hod')
@@ -52,7 +71,6 @@ export async function updateSession(request: NextRequest) {
   // they don't manage devices and don't approve content).
   const isAdminOnlyArea =
     path.startsWith('/dashboard/admin/fleet') || path.startsWith('/dashboard/admin/approvals')
-  const isLoginRoute = path.startsWith('/login')
 
   // Not logged in and trying to access protected route or root
   if (!user && (isDashboardRoute || path === '/')) {
@@ -76,8 +94,8 @@ export async function updateSession(request: NextRequest) {
 
     const role = profile?.role
 
-    // Redirect authenticated users away from login / root
-    if (isLoginRoute || path === '/') {
+    // Redirect authenticated users away from root
+    if (path === '/') {
       const url = request.nextUrl.clone()
       url.pathname = (role && DASHBOARD_BY_ROLE[role]) || '/dashboard/submitter'
       return NextResponse.redirect(url)

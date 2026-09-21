@@ -20,7 +20,7 @@ export default async function HodLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-neutral-100 dark:bg-[#0a0a0a] text-neutral-900 dark:text-white font-geist-sans transition-colors duration-200">
+    <div className="h-screen flex overflow-hidden bg-white text-slate-900 font-[family-name:var(--font-inter)] transition-colors duration-200">
       <AppSidebar role="hod" userEmail={user.email || ''} pendingApprovals={pendingApprovals} />
       <main className="flex-1 min-w-0 h-screen overflow-y-auto px-6 py-8 md:px-10">
         <div className="max-w-6xl mx-auto">{children}</div>

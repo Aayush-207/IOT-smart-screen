@@ -109,7 +109,7 @@ export default async function HodScreensPage() {
   const activeScreensList = dbScreens && dbScreens.length > 0 ? dbScreens : defaultScreens
 
   const screens = activeScreensList.map((s: any) => {
-    const isOnline = s.name === 'Main Lobby Screen 01'
+    const isOnline = Boolean(s.last_seen_at)
     return {
       id: s.id,
       name: s.name,

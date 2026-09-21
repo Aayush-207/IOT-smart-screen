@@ -22,14 +22,14 @@ export function LoginFormClient({ message }: { message?: string }) {
   }
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-8 font-[family-name:var(--font-inter)]">
       {/* Demo Roles - Modern Flat Bento style */}
       <div className="space-y-3">
         <div className="flex items-center justify-between pb-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
             DEMO ROLES
           </span>
-          <span className="text-[10px] font-bold text-[#562a75] bg-[#562a75]/10 px-3 py-1 rounded-full">
+          <span className="text-[10px] font-bold text-[#562a75] bg-[#562a75]/10 px-3 py-1 rounded-full tracking-wide">
             One-Click Test
           </span>
         </div>
@@ -51,7 +51,8 @@ export function LoginFormClient({ message }: { message?: string }) {
                 <div className={`p-2 rounded-xl transition-colors ${isSelected ? 'bg-white/25' : 'bg-[#F1F5F9] text-slate-400 group-hover:bg-[#E2E8F0] group-hover:text-slate-600'}`}>
                   <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'stroke-[1.5]'}`} />
                 </div>
-                <span className={`text-xs font-bold tracking-wide ${isSelected ? 'text-white' : 'text-slate-600'}`}>{acc.role}</span>
+                {/* Inter Bold 12px — role labels (compact data label) */}
+                <span className={`text-[12px] font-bold tracking-wide ${isSelected ? 'text-white' : 'text-slate-600'}`}>{acc.role}</span>
               </button>
             )
           })}
@@ -60,9 +61,11 @@ export function LoginFormClient({ message }: { message?: string }) {
 
       <form action={login} className="space-y-5 pt-2">
         <div className="space-y-2">
-          <label className="block text-[15px] font-medium text-slate-800" htmlFor="email">
+          {/* Inter Medium 13px — field labels */}
+          <label className="block text-[13px] font-medium text-slate-800 tracking-wide" htmlFor="email">
             Email Address
           </label>
+          {/* Inter Medium 13px — input text; Regular for placeholder */}
           <input
             id="email"
             name="email"
@@ -71,16 +74,18 @@ export function LoginFormClient({ message }: { message?: string }) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-[#F8FAFC]/50 border border-slate-200 rounded-[16px] px-5 py-4 text-slate-900 font-medium outline-none transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:ring-4 focus:ring-[#562a75]/15 focus:border-[#562a75] shadow-sm"
+            className="w-full bg-[#F8FAFC]/50 border border-slate-200 rounded-[16px] px-5 py-4 text-[13px] font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 placeholder:font-normal hover:bg-white hover:border-slate-300 focus:bg-white focus:ring-4 focus:ring-[#562a75]/15 focus:border-[#562a75] shadow-sm"
             placeholder="you@university.edu"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="block text-[15px] font-medium text-slate-800" htmlFor="password">
+          {/* Inter Medium 13px — field labels */}
+          <label className="block text-[13px] font-medium text-slate-800 tracking-wide" htmlFor="password">
             Password
           </label>
           <div className="relative">
+            {/* Inter Medium 13px — input text; Regular for placeholder */}
             <input
               id="password"
               name="password"
@@ -89,7 +94,7 @@ export function LoginFormClient({ message }: { message?: string }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#F8FAFC]/50 border border-slate-200 rounded-[16px] px-5 py-4 pr-12 text-slate-900 font-medium outline-none transition-all placeholder:text-slate-400 hover:bg-white hover:border-slate-300 focus:bg-white focus:ring-4 focus:ring-[#562a75]/15 focus:border-[#562a75] shadow-sm"
+              className="w-full bg-[#F8FAFC]/50 border border-slate-200 rounded-[16px] px-5 py-4 pr-12 text-[13px] font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 placeholder:font-normal hover:bg-white hover:border-slate-300 focus:bg-white focus:ring-4 focus:ring-[#562a75]/15 focus:border-[#562a75] shadow-sm"
               placeholder="••••••••"
             />
             <button
@@ -110,7 +115,8 @@ export function LoginFormClient({ message }: { message?: string }) {
         {message && (
           <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl mt-6 flex items-start gap-3 shadow-sm">
             <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
-            <p className="text-sm font-bold text-rose-700">
+            {/* Inter Regular 12px — muted error subtext */}
+            <p className="text-[12px] font-normal text-rose-700 leading-relaxed">
               {message}
             </p>
           </div>
