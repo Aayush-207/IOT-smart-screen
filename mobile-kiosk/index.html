@@ -182,8 +182,8 @@
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
-  const SUPABASE_URL = 'https://hxgptdmgtpoqnnmfsrgk.supabase.co';
-  const SUPABASE_ANON = 'sb_publishable_aS5svlPGHey96h21VLcL5w_ieTmCwO2';
+  const SUPABASE_URL = 'https://dglhzjvlukuabdgjbmfk.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnbGh6anZsdWt1YWJkZ2pibWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Nzk5NzAsImV4cCI6MjEwNTU1NTk3MH0.uTv7LbLthkuKuGSmnETkmzOmhMaYSz9uRC344Vtg1EM';
 
   const slideTrack = document.getElementById('slide-track');
   const fsHint = document.getElementById('fs-hint');
@@ -270,7 +270,7 @@
 
   // Parse query params (optional screen id)
   const urlParams = new URLSearchParams(window.location.search);
-  const screenId = urlParams.get('id') || 'c1f2ab04-23d3-42c8-b670-a5f2d92034cb';
+  const screenId = urlParams.get('id') || '9bf9fb2e-0d18-456a-b20b-a9e5be9e9ecf';
 
   // Heartbeat ping: automatically marks Main Lobby Screen 01 as actively online in Supabase
   async function pingHeartbeat() {
@@ -342,7 +342,7 @@
     slideTrack.innerHTML = `
       <div class="slide-item">
         <div class="text-billboard">
-          <div class="tag">● Main Lobby Screen 01 &bull; Hardware Online</div>
+          <div class="tag">● Engineering Hall Atrium (Node 02) &bull; Hardware Online</div>
           <div class="title" style="font-size: clamp(2rem, 5vw, 3rem);">CampusCast Display</div>
           <div class="body" style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">
             Screen Canvas: <strong style="color: #fff;">1672 &times; 941 px (16:9)</strong><br>
