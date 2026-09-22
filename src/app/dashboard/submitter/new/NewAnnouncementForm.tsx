@@ -449,7 +449,7 @@ export function NewAnnouncementForm({
                       isSelected
                         ? p === 'critical'
                           ? 'border-rose-600 bg-rose-600 text-white shadow-md'
-                          : 'border-slate-900 bg-slate-900 text-white shadow-md'
+                          : 'border-[#121826] bg-[#121826] text-white shadow-md'
                         : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
@@ -494,10 +494,10 @@ export function NewAnnouncementForm({
                   className={`inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium border cursor-pointer transition-all shadow-sm ${
                     !screen.isOnline
                       ? isSelected
-                        ? 'bg-slate-900 text-white border-slate-900'
+                        ? 'bg-[#121826] text-white border-[#121826]'
                         : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
                       : isSelected
-                      ? 'bg-slate-900 text-white border-slate-900'
+                      ? 'bg-[#121826] text-white border-[#121826]'
                       : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
                   }`}
                 >
@@ -646,7 +646,7 @@ export function NewAnnouncementForm({
               type="button"
               disabled={!!submitting}
               onClick={() => handleSubmit('approval')}
-              className="px-6 py-3.5 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
+              className="px-6 py-3.5 bg-[#121826] text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg hover:bg-[#121826]/90 hover:-translate-y-0.5 active:translate-y-0 transition-all flex-1 sm:flex-none justify-center inline-flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {submitting === 'approval' ? (
                 <span>Submitting...</span>

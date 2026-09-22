@@ -45,7 +45,7 @@ export default async function SubmitterDashboardPage() {
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/submitter/new"
-            className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2"
+            className="px-6 py-3 bg-[#121826] hover:bg-[#121826]/90 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2"
           >
             <Plus className="w-5 h-5" /> New Announcement
           </Link>
@@ -112,7 +112,7 @@ export default async function SubmitterDashboardPage() {
             </p>
             <Link 
               href="/dashboard/submitter/new" 
-              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 inline-flex items-center gap-2"
+              className="px-6 py-3 bg-[#121826] hover:bg-[#121826]/90 text-white rounded-xl font-bold shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0 inline-flex items-center gap-2"
             >
               <Plus className="w-4 h-4" /> Create First Notice
             </Link>
