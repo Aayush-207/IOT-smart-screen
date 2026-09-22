@@ -16,8 +16,11 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "CampusCast — Smart Digital Billboard Platform",
+  title: "MIT ADTU Intelligent Broadcasts",
   description: "Campus-wide digital signage: submit announcements, route them through HOD approval, and broadcast to a monitored screen fleet with emergency override.",
+  icons: {
+    icon: '/MIT_circular.png',
+  },
 };
 
 export default function RootLayout({

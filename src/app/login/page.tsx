@@ -22,17 +22,27 @@ export default async function LoginPage({
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#512a74] rounded-full blur-[100px] pointer-events-none opacity-40" />
         <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#3b82f6] rounded-full blur-[120px] pointer-events-none opacity-30" />
 
-        <div className="relative z-10 flex flex-col items-start gap-0">
-          <Link href="/" className="inline-block group cursor-pointer relative z-20">
+        <div className="relative z-10 flex flex-row items-center gap-4">
+          <Link href="/" className="inline-block group cursor-pointer relative z-20 shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
-              alt="Campus Cast Logo"
-              className="w-28 h-28 object-contain group-hover:scale-105 transition-all duration-300"
+              src="/MIT_circular.png"
+              alt="MIT ADT University Logo"
+              className="w-24 h-24 xl:w-28 xl:h-28 object-contain group-hover:scale-105 transition-all duration-300"
             />
           </Link>
-          <div className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-[#00eaff] to-[#3b82f6] bg-clip-text text-transparent -mt-3 relative z-10 font-[family-name:var(--font-inter)]">
-            Campus Cast
+          <div className="flex flex-col items-center text-center pt-1">
+            <div className="text-[2.2rem] xl:text-[2.6rem] font-extrabold tracking-tight text-white font-[family-name:var(--font-inter)] leading-none pb-1">
+              MIT-ADT
+            </div>
+            <div className="flex w-full h-[3px] mb-1">
+              <div className="h-full flex-1 bg-[#a855f7]"></div>
+              <div className="h-full flex-1 bg-[#f97316]"></div>
+              <div className="h-full flex-1 bg-[#10b981]"></div>
+            </div>
+            <div className="text-[1.4rem] xl:text-[1.7rem] font-medium tracking-widest text-white font-[family-name:var(--font-inter)] leading-none pt-0.5">
+              UNIVERSITY
+            </div>
           </div>
         </div>
 
@@ -67,18 +77,30 @@ export default async function LoginPage({
           {/* Inner Content Padding */}
           <div className="px-6 py-10 sm:px-10 sm:py-14 w-full h-full flex flex-col justify-center">
             {/* Mobile Header */}
-            <div className="lg:hidden mb-10 flex flex-col items-center text-center gap-0">
-              <Link href="/" className="group cursor-pointer relative z-20">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/logo.png"
-                  alt="Campus Cast Logo"
-                  className="w-24 h-24 object-contain group-hover:scale-105 transition-all"
-                />
-              </Link>
-              <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-[#512a74] to-[#3b82f6] bg-clip-text text-transparent -mt-3 mb-2 relative z-10 pb-1 font-[family-name:var(--font-inter)]">
-                Campus Cast.
-              </h1>
+            <div className="lg:hidden mb-10 flex flex-col items-center text-center gap-4">
+              <div className="flex flex-row items-center justify-center gap-3">
+                <Link href="/" className="group cursor-pointer relative z-20 shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/MIT_circular.png"
+                    alt="MIT ADT University Logo"
+                    className="w-20 h-20 object-contain group-hover:scale-105 transition-all"
+                  />
+                </Link>
+                <div className="flex flex-col items-center text-center pt-1">
+                  <div className="text-[1.8rem] font-extrabold tracking-tight text-[#512a74] font-[family-name:var(--font-inter)] leading-none pb-1">
+                    MIT-ADT
+                  </div>
+                  <div className="flex w-full h-[3px] mb-1">
+                    <div className="h-full flex-1 bg-[#a855f7]"></div>
+                    <div className="h-full flex-1 bg-[#f97316]"></div>
+                    <div className="h-full flex-1 bg-[#10b981]"></div>
+                  </div>
+                  <div className="text-[1.15rem] font-medium tracking-widest text-[#512a74] font-[family-name:var(--font-inter)] leading-none pt-0.5">
+                    UNIVERSITY
+                  </div>
+                </div>
+              </div>
               <p className="text-sm font-normal text-slate-500 max-w-xs font-[family-name:var(--font-inter)]">
                 Centralized digital fleet management.
               </p>

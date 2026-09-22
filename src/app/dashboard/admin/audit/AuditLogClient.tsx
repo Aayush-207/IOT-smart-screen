@@ -56,14 +56,14 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
   }
 
   const getActionBadgeClass = (act: string) => {
-    if (act.includes('emergency')) return 'border border-[#ef2045]/40 bg-[#ef2045]/10 text-[#ef2045] dark:text-[#ef2045]'
+    if (act.includes('emergency')) return 'border border-[#ef2045]/40 bg-[#ef2045]/10 text-[#ef2045] '
     if (act.includes('reject') || act.includes('withdrew') || act.includes('delete'))
-      return 'border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] bg-[#ef2045]/10'
+      return 'border border-[#ef2045]/30 text-[#ef2045]  bg-[#ef2045]/10'
     if (act.includes('approve'))
-      return 'border border-[#00eaff]/40 text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10'
+      return 'border border-[#00eaff]/40 text-[#00eaff]  bg-[#00eaff]/10'
     if (act.includes('refresh') || act.includes('reboot') || act.includes('registered'))
-      return 'border border-sky-500/30 text-sky-600 dark:text-sky-400 bg-sky-500/10'
-    return 'border border-neutral-200 dark:border-[#212327] bg-neutral-100 dark:bg-white/5 text-neutral-600 dark:text-[#dadbdf]'
+      return 'border border-sky-500/30 text-sky-600  bg-sky-500/10'
+    return 'border border-slate-200  bg-slate-100  text-slate-600 '
   }
 
   const formatDuration = (start?: string | null, end?: string | null) => {
@@ -90,57 +90,57 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl pb-16 text-neutral-900 dark:text-white animate-fade-in-up">
+    <div className="space-y-6 max-w-7xl pb-16 text-slate-900  animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
               Append-Only Ledger
             </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">{filtered.length} Events Tracked</span>
+            <span className="text-xs font-mono text-slate-500 ">{filtered.length} Events Tracked</span>
           </div>
-          <h1 className="xai-display-section text-neutral-900 dark:text-white flex items-center gap-3">
-            <ScrollText className="w-5 h-5 text-neutral-900 dark:text-white" /> System Activity &amp; Audit Log
+          <h1 className="xai-display-section text-slate-900  flex items-center gap-3">
+            <ScrollText className="w-5 h-5 text-slate-900 " /> System Activity &amp; Audit Log
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-slate-600  max-w-xl mt-1.5 leading-relaxed">
             Append-only telemetry of all approvals, emergency overrides, display changes, and poster broadcast records.
           </p>
         </div>
         <button
           type="button"
           onClick={exportCsv}
-          className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors flex items-center gap-2 self-start md:self-auto shrink-0 cursor-pointer shadow-sm"
+          className="px-5 py-2 rounded-full bg-[#121826] text-white   text-xs font-medium hover:bg-[#121826]/90  transition-colors flex items-center gap-2 self-start md:self-auto shrink-0 cursor-pointer shadow-sm"
         >
           <Download className="w-3.5 h-3.5" /> Export CSV ({filtered.length})
         </button>
       </div>
 
       {/* Filter toolbar */}
-      <div className="p-4 rounded-xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-sm space-y-3">
+      <div className="p-4 rounded-xl border border-slate-200  bg-white  shadow-sm space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search keywords..."
-            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+            className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
           />
           <input
             type="date"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+            className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
           />
           <input
             type="date"
             value={to}
             onChange={(e) => setTo(e.target.value)}
-            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+            className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
           />
           <select
             value={actor}
             onChange={(e) => setActor(e.target.value)}
-            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+            className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
           >
             <option value="all">All Actors ({actors.length})</option>
             {actors.map((a) => (
@@ -150,7 +150,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
           <select
             value={action}
             onChange={(e) => setAction(e.target.value)}
-            className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+            className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
           >
             <option value="all">All Actions ({actions.length})</option>
             {actions.map((act) => (
@@ -161,11 +161,11 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
       </div>
 
       {/* Well-Structured and Fully-Aligned Audit Log Table */}
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white  border border-slate-200  rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] text-[11px] font-mono uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">
+              <tr className="border-b border-slate-200  bg-slate-50  text-[11px] font-mono uppercase tracking-wider text-slate-500 ">
                 <th className="px-5 py-3.5 font-medium w-[17%]">Timestamp</th>
                 <th className="px-5 py-3.5 font-medium w-[18%]">Actor</th>
                 <th className="px-5 py-3.5 font-medium w-[14%]">Action</th>
@@ -174,26 +174,26 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                 <th className="px-5 py-3.5 font-medium w-[15%]">Duration</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
+            <tbody className="divide-y divide-slate-200 ">
               {filtered.map((r) => {
                 const durationInfo = formatDuration(r.announcement?.display_start, r.announcement?.display_end)
                 const posterUrl = r.announcement?.attachment_url
 
                 return (
-                  <tr key={r.id} className="hover:bg-neutral-50 dark:hover:bg-white/[0.02] transition-colors">
+                  <tr key={r.id} className="hover:bg-slate-50  transition-colors">
                     {/* Timestamp */}
-                    <td className="px-5 py-3.5 text-xs text-neutral-500 dark:text-[#7d8187] font-mono whitespace-nowrap" suppressHydrationWarning>
+                    <td className="px-5 py-3.5 text-xs text-slate-500  font-mono whitespace-nowrap" suppressHydrationWarning>
                       <div suppressHydrationWarning>{new Date(r.created_at).toLocaleDateString()}</div>
-                      <div className="text-[10px] text-neutral-400 dark:text-[#5a5d63]" suppressHydrationWarning>{new Date(r.created_at).toLocaleTimeString()}</div>
+                      <div className="text-[10px] text-slate-400 " suppressHydrationWarning>{new Date(r.created_at).toLocaleTimeString()}</div>
                     </td>
 
                     {/* Actor */}
-                    <td className="px-5 py-3.5 text-xs font-mono text-neutral-900 dark:text-white truncate max-w-[180px]">
+                    <td className="px-5 py-3.5 text-xs font-mono text-slate-900  truncate max-w-[180px]">
                       <div className="truncate" title={r.profiles?.email || 'system'}>
-                        {r.profiles?.email || <span className="text-neutral-500 dark:text-[#7d8187] italic">System Daemon</span>}
+                        {r.profiles?.email || <span className="text-slate-500  italic">System Daemon</span>}
                       </div>
                       {r.profiles?.role && (
-                        <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono">
+                        <span className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">
                           Role: {r.profiles.role}
                         </span>
                       )}
@@ -208,16 +208,16 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
 
                     {/* Target / Identifier */}
                     <td className="px-5 py-3.5 text-xs">
-                      <div className="font-medium text-neutral-900 dark:text-white truncate max-w-[200px]" title={r.target_label || r.target_id || ''}>
+                      <div className="font-medium text-slate-900  truncate max-w-[200px]" title={r.target_label || r.target_id || ''}>
                         {r.target_label || r.target_id || '—'}
                       </div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187] uppercase tracking-wider">
+                        <span className="text-[10px] font-mono text-slate-500  uppercase tracking-wider">
                           {r.target_type || 'Unknown'}
                         </span>
                       </div>
                       {r.metadata && typeof r.metadata === 'object' && 'reason' in r.metadata && (
-                        <div className="text-[10px] text-[#ef2045] dark:text-[#ef2045] font-mono mt-1">
+                        <div className="text-[10px] text-[#ef2045]  font-mono mt-1">
                           Reason: &ldquo;{String((r.metadata as any).reason)}&rdquo;
                         </div>
                       )}
@@ -229,7 +229,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                         <button
                           type="button"
                           onClick={() => setPreviewPoster({ url: posterUrl, title: r.target_label || 'Poster Visual' })}
-                          className="relative group inline-block mx-auto rounded-lg overflow-hidden border border-neutral-200 dark:border-[#212327] shadow-sm hover:ring-2 hover:ring-[#00eaff] transition-all cursor-pointer"
+                          className="relative group inline-block mx-auto rounded-lg overflow-hidden border border-slate-200  shadow-sm hover:ring-2 hover:ring-[#00eaff] transition-all cursor-pointer"
                           title="Click to view full poster"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -244,7 +244,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                           </div>
                         </button>
                       ) : (
-                        <span className="text-[10px] text-neutral-400 dark:text-[#5a5d63] font-mono italic">
+                        <span className="text-[10px] text-slate-400  font-mono italic">
                           No Poster
                         </span>
                       )}
@@ -254,15 +254,15 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
                     <td className="px-5 py-3.5 text-xs font-mono">
                       {durationInfo ? (
                         <div className="space-y-0.5">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10 px-2 py-0.5 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#00eaff]  bg-[#00eaff]/10 px-2 py-0.5 rounded-full">
                             <Clock className="w-3 h-3" /> {durationInfo.primary}
                           </span>
-                          <div className="text-[10px] text-neutral-500 dark:text-[#7d8187]">
+                          <div className="text-[10px] text-slate-500 ">
                             {durationInfo.secondary}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-neutral-400 dark:text-[#5a5d63] text-xs">—</span>
+                        <span className="text-slate-400  text-xs">—</span>
                       )}
                     </td>
                   </tr>
@@ -271,7 +271,7 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-xs text-neutral-500 dark:text-[#7d8187] font-mono">
+                  <td colSpan={6} className="px-5 py-12 text-center text-xs text-slate-500  font-mono">
                     No audit log records match the applied criteria.
                   </td>
                 </tr>
@@ -288,20 +288,20 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
           onClick={() => setPreviewPoster(null)}
         >
           <div
-            className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col"
+            className="bg-white  rounded-2xl border border-slate-200  overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between">
+            <div className="px-5 py-3.5 border-b border-slate-200  flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-[#00eaff]" />
-                <h3 className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
+                <h3 className="font-semibold text-sm text-slate-900  truncate">
                   {previewPoster.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setPreviewPoster(null)}
-                className="p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="p-1 rounded-full hover:bg-slate-100  text-slate-500 hover:text-slate-900  transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>

@@ -88,14 +88,14 @@ export function OrgManagementClient({
   const hodUsers = initialProfiles.filter((p) => p.role === 'hod')
 
   return (
-    <div className="space-y-4 text-neutral-900 dark:text-white animate-fade-in-up">
-      <div className="flex items-center gap-2 border-b border-neutral-200 dark:border-[#212327] pb-3">
+    <div className="space-y-4 text-slate-900  animate-fade-in-up">
+      <div className="flex items-center gap-2 border-b border-slate-200  pb-3">
         <button
           onClick={() => setActiveTab('departments')}
           className={`px-4 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 cursor-pointer transition-all ${
             activeTab === 'departments'
-              ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
-              : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5'
+              ? 'bg-[#121826] text-white   font-medium shadow-xs'
+              : 'text-slate-500  hover:text-slate-900  hover:bg-slate-100 '
           }`}
         >
           <LayoutDashboard className="w-3.5 h-3.5" /> Departments ({initialDepartments.length})
@@ -104,36 +104,36 @@ export function OrgManagementClient({
           onClick={() => setActiveTab('users')}
           className={`px-4 py-1.5 rounded-full text-xs font-mono flex items-center gap-2 cursor-pointer transition-all ${
             activeTab === 'users'
-              ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
-              : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5'
+              ? 'bg-[#121826] text-white   font-medium shadow-xs'
+              : 'text-slate-500  hover:text-slate-900  hover:bg-slate-100 '
           }`}
         >
           <Users className="w-3.5 h-3.5" /> Users &amp; Permissions ({initialProfiles.length})
         </button>
       </div>
 
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 overflow-x-auto shadow-sm">
+      <div className="bg-white  border border-slate-200  rounded-xl p-6 overflow-x-auto shadow-sm">
         {activeTab === 'departments' && (
           <div className="space-y-4">
             {/* Create Department Form */}
-            <form onSubmit={handleCreateDepartment} className="flex flex-wrap items-end gap-3 p-4 bg-neutral-50 dark:bg-[#0a0a0a] rounded-xl border border-neutral-200 dark:border-[#212327] mb-4">
+            <form onSubmit={handleCreateDepartment} className="flex flex-wrap items-end gap-3 p-4 bg-slate-50  rounded-xl border border-slate-200  mb-4">
               <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs font-mono text-neutral-500 dark:text-[#7d8187] uppercase tracking-wider mb-1">New Department Name</label>
+                <label className="block text-xs font-mono text-slate-500  uppercase tracking-wider mb-1">New Department Name</label>
                 <input
                   required
                   type="text"
                   placeholder="e.g. Computer Science & Engineering"
                   value={newDeptName}
                   onChange={(e) => setNewDeptName(e.target.value)}
-                  className="w-full bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+                  className="w-full bg-white  border border-slate-200  rounded-lg px-3 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
                 />
               </div>
               <div>
-                <label className="block text-xs font-mono text-neutral-500 dark:text-[#7d8187] uppercase tracking-wider mb-1">Assign HOD (Optional)</label>
+                <label className="block text-xs font-mono text-slate-500  uppercase tracking-wider mb-1">Assign HOD (Optional)</label>
                 <select
                   value={newDeptHod}
                   onChange={(e) => setNewDeptHod(e.target.value)}
-                  className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+                  className="bg-white  border border-slate-200  rounded-lg px-3 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
                 >
                   <option value="">-- None --</option>
                   {hodUsers.map((u) => (
@@ -144,7 +144,7 @@ export function OrgManagementClient({
               <button
                 type="submit"
                 disabled={loading || !newDeptName.trim()}
-                className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm"
+                className="px-5 py-2 rounded-full bg-[#121826] text-white   text-xs font-medium hover:bg-[#121826]/90  transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm"
               >
                 {loading ? (
                   <>
@@ -168,17 +168,17 @@ export function OrgManagementClient({
                   <th className="w-64">Reassign Head</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
+              <tbody className="divide-y divide-slate-200 ">
                 {initialDepartments.map((dept) => (
                   <tr key={dept.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-5 py-4 font-normal text-neutral-900 dark:text-white text-xs">{dept.name}</td>
-                    <td className="px-5 py-4 text-neutral-500 dark:text-[#7d8187] font-mono text-xs">{dept.profiles?.email || 'Unassigned'}</td>
+                    <td className="px-5 py-4 font-normal text-slate-900  text-xs">{dept.name}</td>
+                    <td className="px-5 py-4 text-slate-500  font-mono text-xs">{dept.profiles?.email || 'Unassigned'}</td>
                     <td className="px-5 py-4">
                       <select
                         disabled={loading}
                         value={dept.hod_id || ''}
                         onChange={(e) => handleUpdateDepartment(dept.id, e.target.value)}
-                        className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
+                        className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-1.5 text-xs text-slate-900  focus:outline-none focus:border-white font-mono"
                       >
                         <option value="">-- Unassign --</option>
                         {hodUsers.map((u) => (
@@ -202,16 +202,16 @@ export function OrgManagementClient({
                 <th className="w-64">Assigned Department</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
+            <tbody className="divide-y divide-slate-200 ">
               {initialProfiles.map((p) => (
                 <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-5 py-4 font-normal text-neutral-900 dark:text-white text-xs font-mono">{p.email}</td>
+                  <td className="px-5 py-4 font-normal text-slate-900  text-xs font-mono">{p.email}</td>
                   <td className="px-5 py-4">
                     <select
                       disabled={loading}
                       value={p.role}
                       onChange={(e) => handleUpdateProfile(p.id, { role: e.target.value })}
-                      className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
+                      className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-1.5 text-xs text-slate-900  focus:outline-none focus:border-white font-mono"
                     >
                       <option value="submitter">Submitter</option>
                       <option value="hod">Department Head (HOD)</option>
@@ -224,7 +224,7 @@ export function OrgManagementClient({
                       disabled={loading}
                       value={p.department_id || ''}
                       onChange={(e) => handleUpdateProfile(p.id, { department_id: e.target.value })}
-                      className="bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-white font-mono"
+                      className="bg-slate-50  border border-slate-200  rounded-lg px-3 py-1.5 text-xs text-slate-900  focus:outline-none focus:border-white font-mono"
                     >
                       <option value="">-- None / General --</option>
                       {initialDepartments.map((d) => (

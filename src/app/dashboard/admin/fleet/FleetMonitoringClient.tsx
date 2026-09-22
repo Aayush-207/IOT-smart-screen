@@ -101,19 +101,19 @@ function FleetScreenCardComponent({
   const activeIndex = count > 0 ? slideIndex % count : 0
 
   return (
-    <div className="rounded-2xl border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] overflow-hidden shadow-sm flex flex-col justify-between hover:border-neutral-300 dark:hover:border-white/20 transition-all card-hover">
+    <div className="rounded-2xl border border-slate-200  bg-white  overflow-hidden shadow-sm flex flex-col justify-between hover:border-slate-300  transition-all card-hover">
       {/* Screen Top Details & Name */}
-      <div className="p-4 sm:p-5 border-b border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] space-y-1.5">
+      <div className="p-4 sm:p-5 border-b border-slate-200  bg-white  space-y-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {screen._status === 'online' ? (
               <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-[#00eaff] animate-pulse" />
             ) : (
-              <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-neutral-400 dark:bg-neutral-600" />
+              <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-slate-400 " />
             )}
             <Link
               href={`/dashboard/admin/fleet/${screen.id}`}
-              className="font-semibold text-sm sm:text-base text-neutral-900 dark:text-white truncate hover:underline"
+              className="font-semibold text-sm sm:text-base text-slate-900  truncate hover:underline"
               title={screen.name}
             >
               {screen.name}
@@ -121,24 +121,24 @@ function FleetScreenCardComponent({
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {screen._status === 'online' && hasMultiple && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium">
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-600  bg-sky-500/10 px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium">
                 <Layers className="w-3 h-3" /> {count} Posters
               </span>
             )}
             {screen._status === 'online' ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10">
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium capitalize text-[#00eaff]  bg-[#00eaff]/10">
                 <Signal className="w-3 h-3" /> Online
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium text-neutral-500 dark:text-[#7d8187] bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10">
-                <WifiOff className="w-3 h-3 text-neutral-400" /> Offline
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium text-slate-500  bg-slate-100  border border-slate-200 ">
+                <WifiOff className="w-3 h-3 text-slate-400" /> Offline
               </span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-[#7d8187] font-mono">
-          <MapPin className="w-3 h-3 text-neutral-400 shrink-0" />
+        <div className="flex items-center gap-1.5 text-xs text-slate-500  font-mono">
+          <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
           <span className="truncate">
             {screen.location} &bull; {screen.zone || 'General'}
           </span>
@@ -146,18 +146,18 @@ function FleetScreenCardComponent({
       </div>
 
       {/* Screen Frame Container with Clean 16:9 / 9:16 Aspect Ratio Toggle */}
-      <div className="p-4 sm:p-5 bg-neutral-100/70 dark:bg-black/40 flex-1 flex flex-col justify-center">
+      <div className="p-4 sm:p-5 bg-slate-100/70  flex-1 flex flex-col justify-center">
         {/* Aspect Ratio Switcher (No slider, clean 16:9 / 9:16 buttons) */}
-        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 dark:text-[#7d8187] mb-2.5 px-1">
+        <div className="flex items-center justify-between text-[11px] font-mono text-slate-500  mb-2.5 px-1">
           <span className="text-[10px] font-medium">{aspectRatio === '16:9' ? '1672×941 (16:9)' : '941×1672 (9:16)'}</span>
-          <div className="flex items-center p-0.5 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] shadow-xs">
+          <div className="flex items-center p-0.5 rounded-full border border-slate-200  bg-white  shadow-xs">
             <button
               type="button"
               onClick={() => setAspectRatio('16:9')}
               className={`px-3 py-0.5 rounded-full text-[10px] font-mono font-medium transition-all cursor-pointer ${
                 aspectRatio === '16:9'
-                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] shadow-xs'
-                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                  ? 'bg-[#121826] text-white   shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900 '
               }`}
             >
               16:9
@@ -167,8 +167,8 @@ function FleetScreenCardComponent({
               onClick={() => setAspectRatio('9:16')}
               className={`px-3 py-0.5 rounded-full text-[10px] font-mono font-medium transition-all cursor-pointer ${
                 aspectRatio === '9:16'
-                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] shadow-xs'
-                  : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                  ? 'bg-[#121826] text-white   shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900 '
               }`}
             >
               9:16
@@ -181,25 +181,25 @@ function FleetScreenCardComponent({
           <div
             className={`w-full ${
               aspectRatio === '16:9' ? 'aspect-[16/9] w-full' : 'aspect-[9/16] max-w-[210px]'
-            } rounded-2xl bg-black border-2 border-neutral-800 dark:border-[#212327] shadow-2xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none transition-all duration-300`}
+            } rounded-2xl bg-black border-2 border-slate-800  shadow-2xl overflow-hidden relative flex flex-col justify-between text-center text-white select-none transition-all duration-300`}
           >
             {screen._status !== 'online' ? (
               <div className="my-auto text-center space-y-1.5 z-10 p-4">
-                <Tv className="w-8 h-8 text-neutral-600 mx-auto opacity-50" />
-                <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
+                <Tv className="w-8 h-8 text-slate-600 mx-auto opacity-50" />
+                <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
                   Node Offline
                 </div>
-                <p className="text-[9px] text-neutral-500 font-mono">
+                <p className="text-[9px] text-slate-500 font-mono">
                   Hardware display disconnected &bull; {screen.zone || 'General'}
                 </p>
               </div>
             ) : count === 0 ? (
               <div className="my-auto text-center space-y-1 z-10 p-3">
-                <Tv className="w-6 h-6 text-neutral-600 mx-auto" />
-                <div className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest">
+                <Tv className="w-6 h-6 text-slate-600 mx-auto" />
+                <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
                   CampusCast Standby
                 </div>
-                <p className="text-[8px] text-neutral-500 font-mono">
+                <p className="text-[8px] text-slate-500 font-mono">
                   Ready for rotation &bull; {screen.zone || 'General'}
                 </p>
               </div>
@@ -227,14 +227,14 @@ function FleetScreenCardComponent({
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col justify-between p-4 text-center text-white">
-                        <div className="text-[9px] font-mono uppercase tracking-widest text-neutral-400 truncate">
+                        <div className="text-[9px] font-mono uppercase tracking-widest text-slate-400 truncate">
                           {screen.zone || 'Campus'} &bull; {item.priority?.toUpperCase() || 'BROADCAST'}
                         </div>
                         <div className="my-auto px-2">
                           <h4 className="text-xs sm:text-sm font-semibold line-clamp-2 text-white">{item.title}</h4>
-                          {item.body && <p className="text-[10px] text-neutral-300 line-clamp-2 mt-1">{item.body}</p>}
+                          {item.body && <p className="text-[10px] text-slate-300 line-clamp-2 mt-1">{item.body}</p>}
                         </div>
-                        <div className="text-[8px] font-mono text-neutral-500 flex justify-between border-t border-white/10 pt-1 mt-auto">
+                        <div className="text-[8px] font-mono text-slate-500 flex justify-between border-t border-white/10 pt-1 mt-auto">
                           <span>CampusCast Engine</span>
                           <span>{aspectRatio}</span>
                         </div>
@@ -276,15 +276,15 @@ function FleetScreenCardComponent({
       </div>
 
       {/* Screen Controls & Telemetry Footer */}
-      <div className="p-3.5 sm:p-4 border-t border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] flex items-center justify-between text-xs gap-2">
-        <div className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187] truncate" suppressHydrationWarning>
+      <div className="p-3.5 sm:p-4 border-t border-slate-200  bg-white  flex items-center justify-between text-xs gap-2">
+        <div className="text-[10px] font-mono text-slate-500  truncate" suppressHydrationWarning>
           Ping: {relativeTime(screen.last_seen_at)}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => onCopy(screen.id, `id-${screen.id}`)}
             title="Copy Screen UUID"
-            className="px-2 py-1 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-[10px] font-mono text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white cursor-pointer transition-colors"
+            className="px-2 py-1 rounded-full hover:bg-slate-100  border border-slate-200  text-[10px] font-mono text-slate-500  hover:text-slate-900  cursor-pointer transition-colors"
           >
             {copiedId === `id-${screen.id}` ? '✓ Copied' : 'UUID'}
           </button>
@@ -292,31 +292,31 @@ function FleetScreenCardComponent({
             onClick={() => onSimulatePing(screen.id)}
             disabled={isBusy}
             title="Simulate Heartbeat (Ping)"
-            className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
+            className="p-1.5 rounded-full hover:bg-slate-100  border border-slate-200  text-slate-500  hover:text-slate-900  disabled:opacity-50 cursor-pointer transition-colors"
           >
-            <Radio className={`w-3 h-3 ${isBusy && busyType === 'ping' ? 'animate-ping text-neutral-900 dark:text-white' : ''}`} />
+            <Radio className={`w-3 h-3 ${isBusy && busyType === 'ping' ? 'animate-ping text-slate-900 ' : ''}`} />
           </button>
           <button
             onClick={() => onForceRefresh(screen.id, screen.name)}
             disabled={isBusy}
             title="Force Refresh Screen"
-            className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white disabled:opacity-50 cursor-pointer transition-colors"
+            className="p-1.5 rounded-full hover:bg-slate-100  border border-slate-200  text-slate-500  hover:text-slate-900  disabled:opacity-50 cursor-pointer transition-colors"
           >
-            <RefreshCw className={`w-3 h-3 ${isBusy && busyType === 'refresh' ? 'animate-spin text-neutral-900 dark:text-white' : ''}`} />
+            <RefreshCw className={`w-3 h-3 ${isBusy && busyType === 'refresh' ? 'animate-spin text-slate-900 ' : ''}`} />
           </button>
           <button
             onClick={() => onReboot(screen.id, screen.name)}
             disabled={isBusy}
             title="Reboot Display Node"
-            className="p-1.5 rounded-full hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-[#ef2045] dark:hover:text-[#ef2045] disabled:opacity-50 cursor-pointer transition-colors"
+            className="p-1.5 rounded-full hover:bg-[#ffeaea]  border border-slate-200  text-slate-500  hover:text-[#ef2045]  disabled:opacity-50 cursor-pointer transition-colors"
           >
-            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-[#ef2045] dark:text-[#ef2045]' : ''}`} />
+            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-[#ef2045] ' : ''}`} />
           </button>
           <a
             href={`/kiosk.html?id=${screen.id}`}
             target="_blank"
             rel="noreferrer"
-            className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white cursor-pointer transition-colors"
+            className="p-1.5 rounded-full hover:bg-slate-100  border border-slate-200  text-slate-500  hover:text-slate-900  cursor-pointer transition-colors"
             title="Open Live Kiosk"
           >
             <ExternalLink className="w-3 h-3" />
@@ -504,18 +504,18 @@ export function FleetMonitoringClient({
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327] mb-6 text-neutral-900 dark:text-white">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200  mb-6 text-slate-900 ">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
               Display Nodes
             </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">{withStatus.length} Active in Network</span>
+            <span className="text-xs font-mono text-slate-500 ">{withStatus.length} Active in Network</span>
           </div>
-          <h1 className="xai-display-section text-neutral-900 dark:text-white">
+          <h1 className="xai-display-section text-slate-900 ">
             Screens &amp; Hardware Fleet
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-slate-600  max-w-xl mt-1.5 leading-relaxed">
             Monitor real-time heartbeats, verify active rotation loops, and trigger remote sync across campus displays.
           </p>
         </div>
@@ -523,7 +523,7 @@ export function FleetMonitoringClient({
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setRegisterOpen(true)}
-            className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+            className="px-5 py-2 rounded-full bg-[#121826] text-white   text-xs font-medium hover:bg-[#121826]/90  transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
           >
             <Plus className="w-3.5 h-3.5" /> Add Screen
           </button>
@@ -531,53 +531,53 @@ export function FleetMonitoringClient({
       </div>
 
       {/* Telemetry Stats Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 text-neutral-900 dark:text-white">
-        <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg p-5 space-y-1 shadow-sm">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Fleet Health</span>
-          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{onlineRate}%</div>
-          <p className="text-xs text-neutral-500 dark:text-[#7d8187] font-mono">Ping success rate</p>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 text-slate-900 ">
+        <div className="bg-white  border border-slate-200  rounded-lg p-5 space-y-1 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 ">Fleet Health</span>
+          <div className="text-3xl font-normal text-slate-900 ">{onlineRate}%</div>
+          <p className="text-xs text-slate-500  font-mono">Ping success rate</p>
         </div>
 
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'online' ? 'all' : 'online')}
-          className={`bg-white dark:bg-[#141414] border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
-            statusFilter === 'online' ? 'border-[#00eaff] ring-1 ring-[#00eaff]' : 'border-neutral-200 dark:border-[#212327]'
+          className={`bg-white  border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
+            statusFilter === 'online' ? 'border-[#00eaff] ring-1 ring-[#00eaff]' : 'border-slate-200 '
           }`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#00eaff] dark:text-[#00eaff]">Online</span>
-          <div className="text-3xl font-normal text-[#00eaff] dark:text-[#00eaff]">{counts.online}</div>
-          <p className="text-xs text-neutral-500 dark:text-[#7d8187] font-mono">Heartbeat &lt; 2m</p>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#00eaff] ">Online</span>
+          <div className="text-3xl font-normal text-[#00eaff] ">{counts.online}</div>
+          <p className="text-xs text-slate-500  font-mono">Heartbeat &lt; 2m</p>
         </button>
 
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'stale' ? 'all' : 'stale')}
-          className={`bg-white dark:bg-[#141414] border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
-            statusFilter === 'stale' ? 'border-[#af1591] ring-1 ring-[#af1591]' : 'border-neutral-200 dark:border-[#212327]'
+          className={`bg-white  border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
+            statusFilter === 'stale' ? 'border-[#af1591] ring-1 ring-[#af1591]' : 'border-slate-200 '
           }`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#af1591] dark:text-[#af1591]">Delayed Sync</span>
-          <div className="text-3xl font-normal text-[#af1591] dark:text-[#af1591]">{counts.stale}</div>
-          <p className="text-xs text-neutral-500 dark:text-[#7d8187] font-mono">Heartbeat &gt; 2m</p>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[#af1591] ">Delayed Sync</span>
+          <div className="text-3xl font-normal text-[#af1591] ">{counts.stale}</div>
+          <p className="text-xs text-slate-500  font-mono">Heartbeat &gt; 2m</p>
         </button>
 
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === 'offline' ? 'all' : 'offline')}
-          className={`bg-white dark:bg-[#141414] border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
-            statusFilter === 'offline' ? 'border-neutral-900 dark:border-white ring-1 ring-neutral-900 dark:ring-white' : 'border-neutral-200 dark:border-[#212327]'
+          className={`bg-white  border rounded-lg p-5 text-left transition-all cursor-pointer space-y-1 shadow-sm ${
+            statusFilter === 'offline' ? 'border-[#121826]  ring-1 ring-slate-900 ' : 'border-slate-200 '
           }`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Offline</span>
-          <div className="text-3xl font-normal text-neutral-900 dark:text-white">{counts.offline}</div>
-          <p className="text-xs text-neutral-500 dark:text-[#7d8187] font-mono">Heartbeat &gt; 10m</p>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 ">Offline</span>
+          <div className="text-3xl font-normal text-slate-900 ">{counts.offline}</div>
+          <p className="text-xs text-slate-500  font-mono">Heartbeat &gt; 10m</p>
         </button>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         {/* Status Filter Buttons */}
-        <div className="flex flex-wrap items-center gap-1 bg-white dark:bg-[#141414] p-1 rounded-full border border-neutral-200 dark:border-[#212327] shadow-sm">
+        <div className="flex flex-wrap items-center gap-1 bg-white  p-1 rounded-full border border-slate-200  shadow-sm">
           {(['all', 'online', 'stale', 'offline'] as const).map((st) => (
             <button
               key={st}
@@ -585,8 +585,8 @@ export function FleetMonitoringClient({
               onClick={() => setStatusFilter(st)}
               className={`px-3 py-1 rounded-full text-xs font-mono capitalize transition-all cursor-pointer ${
                 statusFilter === st
-                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-sm'
-                  : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
+                  ? 'bg-[#121826] text-white   font-medium shadow-sm'
+                  : 'text-slate-500  hover:text-slate-900 '
               }`}
             >
               {st}
@@ -595,12 +595,12 @@ export function FleetMonitoringClient({
         </div>
 
         <div className="sm:ml-auto relative w-full sm:w-64">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-[#7d8187]" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 " />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search screens or zones..."
-            className="w-full bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full pl-8 pr-3.5 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono shadow-sm"
+            className="w-full bg-white  border border-slate-200  rounded-full pl-8 pr-3.5 py-1.5 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono shadow-sm"
           />
         </div>
       </div>
@@ -622,7 +622,7 @@ export function FleetMonitoringClient({
           />
         ))}
         {filtered.length === 0 && (
-          <div className="col-span-full bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-12 text-center text-neutral-500 dark:text-[#7d8187] font-mono text-sm">
+          <div className="col-span-full bg-white  border border-slate-200  rounded-xl p-12 text-center text-slate-500  font-mono text-sm">
             No screens match the selected filter criteria.
           </div>
         )}
@@ -631,41 +631,41 @@ export function FleetMonitoringClient({
       {/* Add Screen Modal */}
       {registerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-white dark:bg-[#141414] rounded-xl border border-neutral-200 dark:border-[#212327] p-6 w-full max-w-md shadow-2xl text-neutral-900 dark:text-white">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-4">Register Display Node</h3>
+          <div className="bg-white  rounded-xl border border-slate-200  p-6 w-full max-w-md shadow-2xl text-slate-900 ">
+            <h3 className="text-sm font-semibold text-slate-900  mb-4">Register Display Node</h3>
             <form onSubmit={handleRegister} className="space-y-3">
               <input
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Screen name (e.g. SCR-ENG-03)"
-                className="w-full bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3.5 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+                className="w-full bg-slate-50  border border-slate-200  rounded-lg px-3.5 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
               />
               <input
                 required
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Location (e.g. Engineering Lobby)"
-                className="w-full bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3.5 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+                className="w-full bg-slate-50  border border-slate-200  rounded-lg px-3.5 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
               />
               <input
                 value={zone}
                 onChange={(e) => setZone(e.target.value)}
                 placeholder="Zone (e.g. Engineering Wing)"
-                className="w-full bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-lg px-3.5 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono"
+                className="w-full bg-slate-50  border border-slate-200  rounded-lg px-3.5 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono"
               />
               <div className="flex gap-2.5 justify-end pt-2">
                 <button
                   type="button"
                   onClick={() => setRegisterOpen(false)}
-                  className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono cursor-pointer"
+                  className="px-4 py-1.5 rounded-full border border-slate-200  text-slate-700  hover:bg-slate-100  text-xs font-mono cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-1.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 cursor-pointer disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
+                  className="px-5 py-1.5 rounded-full bg-[#121826] text-white   text-xs font-medium hover:bg-[#121826]/90  cursor-pointer disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
                 >
                   {saving ? (
                     <>

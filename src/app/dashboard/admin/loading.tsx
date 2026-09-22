@@ -4,7 +4,7 @@ export default function AdminDashboardLoading() {
   return (
     <div className="space-y-8 max-w-6xl pb-16">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Skeleton className="h-5 w-28 rounded-full" />
@@ -22,7 +22,7 @@ export default function AdminDashboardLoading() {
       {/* Telemetry Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg p-5 space-y-2">
+          <div key={i} className="bg-white  border border-slate-200  rounded-lg p-5 space-y-2">
             <Skeleton className="h-3 w-16" />
             <Skeleton className="h-8 w-12" />
             <Skeleton className="h-3 w-20" />
@@ -38,10 +38,10 @@ export default function AdminDashboardLoading() {
       </div>
 
       {/* Governance Section */}
-      <div className="pt-6 border-t border-neutral-200 dark:border-[#212327] space-y-4">
+      <div className="pt-6 border-t border-slate-200  space-y-4">
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-6 w-60" />
-        <div className="border border-neutral-200 dark:border-[#212327] rounded-lg p-6 space-y-4 bg-white dark:bg-[#141414]">
+        <div className="border border-slate-200  rounded-lg p-6 space-y-4 bg-white ">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Skeleton className="h-36 rounded-lg" />
             <Skeleton className="h-36 rounded-lg" />

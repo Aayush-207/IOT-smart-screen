@@ -114,53 +114,53 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
   }
 
   return (
-    <div className="space-y-8 max-w-7xl pb-16 text-neutral-900 dark:text-white animate-fade-in-up">
+    <div className="space-y-8 max-w-7xl pb-16 text-slate-900  animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
               Broadcast Directory
             </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">{rows.length} Total Notices</span>
+            <span className="text-xs font-mono text-slate-500 ">{rows.length} Total Notices</span>
           </div>
-          <h1 className="xai-display-section text-neutral-900 dark:text-white">
+          <h1 className="xai-display-section text-slate-900 ">
             Broadcast Catalog &amp; Content Registry
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-slate-600  max-w-2xl mt-1.5 leading-relaxed">
             Manage scheduled, live, and historical notices across campus screens. Review targeting, inspect visual media, and trigger instantaneous takedowns.
           </p>
         </div>
 
         <div className="w-full sm:w-80 relative">
-          <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-[#7d8187]" />
+          <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 " />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by title, department, or zone..."
-            className="w-full bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full pl-9 pr-4 py-2 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-900 dark:focus:border-white font-mono shadow-sm"
+            className="w-full bg-white  border border-slate-200  rounded-full pl-9 pr-4 py-2 text-xs text-slate-900  focus:outline-none focus:border-[#121826]  font-mono shadow-sm"
           />
         </div>
       </div>
 
       {/* Filter Tabs with Counters */}
-      <div className="flex flex-wrap items-center gap-1.5 bg-white dark:bg-[#141414] p-1.5 rounded-full border border-neutral-200 dark:border-[#212327] w-fit shadow-sm">
+      <div className="flex flex-wrap items-center gap-1.5 bg-white  p-1.5 rounded-full border border-slate-200  w-fit shadow-sm">
         {(['all', 'live', 'scheduled', 'expired', 'withdrawn'] as const).map((st) => (
           <button
             key={st}
             onClick={() => setStatusFilter(st)}
             className={`px-3.5 py-1 rounded-full text-xs font-mono capitalize transition-all cursor-pointer inline-flex items-center gap-1.5 ${
               statusFilter === st
-                ? 'bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] font-medium shadow-xs'
-                : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-white'
+                ? 'bg-[#121826] text-white   font-medium shadow-xs'
+                : 'text-slate-500  hover:text-slate-900 '
             }`}
           >
             <span>{st}</span>
             <span
               className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                 statusFilter === st
-                  ? 'bg-neutral-700 text-white dark:bg-neutral-200 dark:text-black'
-                  : 'bg-neutral-100 dark:bg-white/10 text-neutral-600 dark:text-neutral-400'
+                  ? 'bg-slate-700 text-white  '
+                  : 'bg-slate-100  text-slate-600 '
               }`}
             >
               {statusCounts[st]}
@@ -170,11 +170,11 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
       </div>
 
       {/* Structured, Spacious & Uncluttered Table */}
-      <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-2xl overflow-hidden shadow-sm card-hover">
+      <div className="bg-white  border border-slate-200  rounded-2xl overflow-hidden shadow-sm card-hover">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-neutral-200 dark:border-[#212327] bg-neutral-50/80 dark:bg-[#0a0a0a] text-[11px] font-mono uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">
+              <tr className="border-b border-slate-200  bg-slate-50/80  text-[11px] font-mono uppercase tracking-wider text-slate-500 ">
                 <th className="px-6 py-4 font-medium w-[30%]">Notice &amp; Visual Poster</th>
                 <th className="px-6 py-4 font-medium w-[22%]">Target Screens / Zones</th>
                 <th className="px-6 py-4 font-medium w-[16%]">Status &amp; Priority</th>
@@ -182,7 +182,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                 <th className="px-6 py-4 font-medium w-[14%] text-right">Moderation</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-[#212327]">
+            <tbody className="divide-y divide-slate-200 ">
               {filtered.map((r) => {
                 const disp = r.status === 'approved' ? announcementDisplayStatus(r) : r.status
                 const isWithdrawn = r.status === 'withdrawn'
@@ -190,14 +190,14 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                 const zones = Array.isArray(r.target_zones) ? r.target_zones : []
 
                 return (
-                  <tr key={r.id} className="hover:bg-neutral-50/60 dark:hover:bg-white/[0.02] transition-colors">
+                  <tr key={r.id} className="hover:bg-slate-50/60  transition-colors">
                     {/* Notice & Visual Poster */}
                     <td className="px-6 py-5">
                       <div className="flex items-start gap-4">
                         {r.attachment_url ? (
                           <div
                             onClick={() => setPreviewPoster({ url: r.attachment_url, title: r.title })}
-                            className="relative group shrink-0 rounded-xl overflow-hidden border border-neutral-200 dark:border-[#212327] shadow-sm cursor-pointer hover:ring-2 hover:ring-[#00eaff] transition-all bg-black"
+                            className="relative group shrink-0 rounded-xl overflow-hidden border border-slate-200  shadow-sm cursor-pointer hover:ring-2 hover:ring-[#00eaff] transition-all bg-black"
                             title="Click to preview poster"
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -212,7 +212,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                             </div>
                           </div>
                         ) : (
-                          <div className="w-20 h-12 sm:w-24 sm:h-14 shrink-0 rounded-xl border border-neutral-200 dark:border-[#212327] bg-neutral-100 dark:bg-white/5 flex flex-col items-center justify-center text-neutral-400 dark:text-[#7d8187] p-1 text-center">
+                          <div className="w-20 h-12 sm:w-24 sm:h-14 shrink-0 rounded-xl border border-slate-200  bg-slate-100  flex flex-col items-center justify-center text-slate-400  p-1 text-center">
                             <ImageIcon className="w-4 h-4 mb-0.5 opacity-50" />
                             <span className="text-[9px] font-mono">Text Notice</span>
                           </div>
@@ -220,23 +220,23 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
 
                         <div className="min-w-0 space-y-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-sm text-neutral-900 dark:text-white truncate" title={r.title}>
+                            <h3 className="font-semibold text-sm text-slate-900  truncate" title={r.title}>
                               {r.title}
                             </h3>
                             {r.is_emergency && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-wider text-[#ef2045] dark:text-[#ef2045] bg-[#ef2045]/10 border border-[#ef2045]/20 px-2 py-0.2 rounded-full">
+                              <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold uppercase tracking-wider text-[#ef2045]  bg-[#ef2045]/10 border border-[#ef2045]/20 px-2 py-0.2 rounded-full">
                                 <AlertTriangle className="w-3 h-3" /> Emergency
                               </span>
                             )}
                           </div>
 
                           {r.body && (
-                            <p className="text-xs text-neutral-600 dark:text-[#dadbdf] line-clamp-1 leading-relaxed">
+                            <p className="text-xs text-slate-600  line-clamp-1 leading-relaxed">
                               {r.body}
                             </p>
                           )}
 
-                          <div className="flex items-center gap-2 text-[11px] font-mono text-neutral-500 dark:text-[#7d8187]">
+                          <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 ">
                             <span className="truncate">{r.departments?.name || 'Campus Wide'}</span>
                             {r.profiles?.email && (
                               <>
@@ -254,7 +254,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                     {/* Target Screens & Zones */}
                     <td className="px-6 py-5 text-xs">
                       {r.target_all ? (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 font-mono text-neutral-700 dark:text-neutral-300">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100  border border-slate-200  font-mono text-slate-700 ">
                           <Monitor className="w-3.5 h-3.5 text-[#00eaff]" />
                           <span>All Displays in Network</span>
                         </div>
@@ -264,16 +264,16 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                             {zones.map((z: string, zIdx: number) => (
                               <span
                                 key={zIdx}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-[#212327] text-[10px] font-mono text-neutral-700 dark:text-neutral-300"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100  border border-slate-200  text-[10px] font-mono text-slate-700 "
                               >
-                                <MapPin className="w-2.5 h-2.5 text-neutral-400" />
+                                <MapPin className="w-2.5 h-2.5 text-slate-400" />
                                 {z}
                               </span>
                             ))}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-neutral-400 dark:text-[#7d8187] font-mono text-xs italic">
+                        <span className="text-slate-400  font-mono text-xs italic">
                           Default Rotation
                         </span>
                       )}
@@ -286,7 +286,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                           <StatusBadge status={disp} />
                         </div>
                         <div>
-                          <span className="inline-block px-2 py-0.5 rounded-full border border-neutral-200 dark:border-white/15 text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-white/5 text-[10px] uppercase font-mono">
+                          <span className="inline-block px-2 py-0.5 rounded-full border border-slate-200  text-slate-600  bg-slate-100  text-[10px] uppercase font-mono">
                             {priorityLabel(r.priority)} Priority
                           </span>
                         </div>
@@ -296,10 +296,10 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                     {/* Schedule & Duration */}
                     <td className="px-6 py-5 text-xs font-mono" suppressHydrationWarning>
                       <div className="space-y-1">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#00eaff] dark:text-[#00eaff] bg-[#00eaff]/10 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#00eaff]  bg-[#00eaff]/10 px-2 py-0.5 rounded-full">
                           <Clock className="w-3 h-3" /> {schedule.label}
                         </span>
-                        <div className="text-[11px] text-neutral-500 dark:text-[#7d8187]" suppressHydrationWarning>
+                        <div className="text-[11px] text-slate-500 " suppressHydrationWarning>
                           {schedule.dates}
                         </div>
                       </div>
@@ -308,14 +308,14 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
                     {/* Action / Moderation */}
                     <td className="px-6 py-5 text-right">
                       {isWithdrawn ? (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] text-neutral-500 dark:text-[#7d8187] font-mono bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] text-slate-500  font-mono bg-slate-100  border border-slate-200 ">
                           Withdrawn
                         </span>
                       ) : (
                         <button
                           onClick={() => withdraw(r)}
                           disabled={busy === r.id}
-                          className="px-3.5 py-1.5 rounded-full border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 text-xs font-mono inline-flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50 shadow-xs"
+                          className="px-3.5 py-1.5 rounded-full border border-[#ef2045]/30 text-[#ef2045]  hover:bg-[#ffeaea]  text-xs font-mono inline-flex items-center gap-1.5 cursor-pointer transition-colors disabled:opacity-50 shadow-xs"
                         >
                           {busy === r.id ? (
                             <>
@@ -337,7 +337,7 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-16 text-center text-xs text-neutral-500 dark:text-[#7d8187] font-mono">
+                  <td colSpan={5} className="px-6 py-16 text-center text-xs text-slate-500  font-mono">
                     No announcements match the selected filter criteria.
                   </td>
                 </tr>
@@ -354,20 +354,20 @@ export function WithdrawClient({ initialRows, actorId }: { initialRows: any[]; a
           onClick={() => setPreviewPoster(null)}
         >
           <div
-            className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col animate-scale-in"
+            className="bg-white  rounded-2xl border border-slate-200  overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-5 py-3.5 border-b border-neutral-200 dark:border-[#212327] flex items-center justify-between">
+            <div className="px-5 py-3.5 border-b border-slate-200  flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-[#00eaff]" />
-                <h3 className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
+                <h3 className="font-semibold text-sm text-slate-900  truncate">
                   {previewPoster.title}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setPreviewPoster(null)}
-                className="p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="p-1 rounded-full hover:bg-slate-100  text-slate-500 hover:text-slate-900  transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>

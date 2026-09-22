@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 export default function AnalyticsLoading() {
   return (
     <div className="space-y-8 max-w-6xl pb-16">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200 ">
         <div className="space-y-2">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-8 w-64" />

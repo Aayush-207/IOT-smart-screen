@@ -62,20 +62,20 @@ export default async function AdminDashboardPage() {
   const totalScreens = (screens || []).length
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16 text-neutral-900 dark:text-white animate-fade-in-up">
+    <div className="space-y-8 max-w-6xl pb-16 text-slate-900  animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
               Command Mesh
             </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">{totalScreens} Display Nodes Active</span>
+            <span className="text-xs font-mono text-slate-500 ">{totalScreens} Display Nodes Active</span>
           </div>
-          <h1 className="text-2xl font-normal tracking-tight text-neutral-900 dark:text-white">
+          <h1 className="text-2xl font-normal tracking-tight text-slate-900 ">
             System Overview &amp; Network
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-[#dadbdf] max-w-2xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-slate-600  max-w-2xl mt-1.5 leading-relaxed">
             Central orchestration console for digital screen nodes, authorization queues, live telemetry analytics, and emergency overrides.
           </p>
         </div>
@@ -83,13 +83,13 @@ export default async function AdminDashboardPage() {
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/admin/fleet"
-            className="px-5 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
+            className="px-5 py-2 rounded-full bg-[#121826] text-white   text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
           >
             <Monitor className="w-3.5 h-3.5" /> Screens &amp; Fleet ({totalScreens})
           </Link>
           <Link
             href="/dashboard/admin/emergency"
-            className="px-4 py-2 rounded-full border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 text-xs font-mono flex items-center gap-2 transition-colors"
+            className="px-4 py-2 rounded-full border border-[#ef2045]/30 text-[#ef2045]  hover:bg-[#ffeaea]  text-xs font-mono flex items-center gap-2 transition-colors"
           >
             <AlertTriangle className="w-3.5 h-3.5" /> Emergency Alert
           </Link>
@@ -98,14 +98,14 @@ export default async function AdminDashboardPage() {
 
       {/* Active Emergency Alert Banner */}
       {(activeEmergencies || []).length > 0 && (
-        <div className="p-6 rounded-xl bg-[#ffeaea] dark:bg-rose-950/40 border border-[#ef2045]/30 dark:border-[#ef2045]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+        <div className="p-6 rounded-xl bg-[#ffeaea]  border border-[#ef2045]/30  flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-full bg-[#ef2045] text-white shrink-0 animate-bounce">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] dark:text-[#ef2045]">Active Campus Emergency Broadcast</span>
-              <p className="text-sm text-neutral-900 dark:text-white mt-0.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] ">Active Campus Emergency Broadcast</span>
+              <p className="text-sm text-slate-900  mt-0.5">
                 &ldquo;{activeEmergencies![0].body || activeEmergencies![0].title}&rdquo;
               </p>
             </div>
@@ -126,13 +126,13 @@ export default async function AdminDashboardPage() {
 
       {/* Organization Hierarchy Section */}
       {!isEmergencyRole && (
-        <div className="pt-6 border-t border-neutral-200 dark:border-[#212327]">
+        <div className="pt-6 border-t border-slate-200 ">
           <div className="mb-4">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 dark:text-[#7d8187]">Governance</span>
-            <h2 className="text-base font-semibold text-neutral-900 dark:text-white">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 ">Governance</span>
+            <h2 className="text-base font-semibold text-slate-900 ">
               Departments &amp; Permissions
             </h2>
-            <p className="text-xs text-neutral-500 dark:text-[#7d8187] mt-0.5">Assign department heads and manage system authorizations.</p>
+            <p className="text-xs text-slate-500  mt-0.5">Assign department heads and manage system authorizations.</p>
           </div>
           <OrgManagementClient initialDepartments={departments || []} initialProfiles={profiles || []} />
         </div>

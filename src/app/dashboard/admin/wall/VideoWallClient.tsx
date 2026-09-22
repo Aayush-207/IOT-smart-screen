@@ -26,7 +26,7 @@ import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 const DOT_COLOR: Record<DeviceStatus, string> = {
   online: 'bg-[#00eaff]',
   stale: 'bg-[#af1591]',
-  offline: 'bg-neutral-600',
+  offline: 'bg-slate-600',
 }
 
 function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyData, aspectMode, isBusy, busyType, onSimulatePing, onForceRefresh, onReboot }: any) {
@@ -80,32 +80,32 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
   const currentItem = count > 0 ? contents[activeIndex] : null
 
   return (
-    <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-lg overflow-hidden flex flex-col hover:border-neutral-300 dark:hover:border-white/30 transition-colors">
-      <div className="px-4 py-2.5 border-b border-neutral-200 dark:border-[#212327] bg-neutral-50 dark:bg-[#0a0a0a] flex items-center justify-between text-xs">
+    <div className="bg-white  border border-slate-200  rounded-lg overflow-hidden flex flex-col hover:border-slate-300  transition-colors">
+      <div className="px-4 py-2.5 border-b border-slate-200  bg-slate-50  flex items-center justify-between text-xs">
         <div className="flex items-center gap-2 min-w-0">
           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${DOT_COLOR[screen._status as DeviceStatus]}`} />
-          <Link href={`/dashboard/admin/fleet/${screen.id}`} className="font-normal text-neutral-900 dark:text-white hover:underline truncate" title={screen.name}>
+          <Link href={`/dashboard/admin/fleet/${screen.id}`} className="font-normal text-slate-900  hover:underline truncate" title={screen.name}>
             {screen.name}
           </Link>
         </div>
         <div className="flex items-center gap-2 shrink-0 ml-2">
           {hasMultiple && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium">
+            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-600  bg-sky-500/10 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 font-medium">
               <Layers className="w-3 h-3" /> {count}
             </span>
           )}
-          <span className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187] truncate">
+          <span className="text-[10px] font-mono text-slate-500  truncate">
             {screen.zone || screen.location || 'General'}
           </span>
         </div>
       </div>
 
-      <div className="p-3 bg-neutral-50 dark:bg-[#0a0a0a] flex-1 flex flex-col items-center justify-center">
-        <div className={`w-full relative rounded-lg border-2 ${isEmergency ? 'border-[#ef2045]/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'border-neutral-200 dark:border-[#212327] shadow-xl'} bg-black overflow-hidden flex flex-col justify-between text-center transition-all select-none ${aspectMode === '16:9' ? 'aspect-[16/9]' : 'aspect-[9/16]'}`}>
+      <div className="p-3 bg-slate-50  flex-1 flex flex-col items-center justify-center">
+        <div className={`w-full relative rounded-lg border-2 ${isEmergency ? 'border-[#ef2045]/50 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'border-slate-200  shadow-xl'} bg-black overflow-hidden flex flex-col justify-between text-center transition-all select-none ${aspectMode === '16:9' ? 'aspect-[16/9]' : 'aspect-[9/16]'}`}>
           
           {count === 0 ? (
             <div className="my-auto flex flex-col items-center p-2">
-              <div className="text-[10px] text-neutral-500 dark:text-[#7d8187] font-mono italic">
+              <div className="text-[10px] text-slate-500  font-mono italic">
                 [Idle Standby Loop]
               </div>
             </div>
@@ -132,8 +132,8 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
                       loading="eager"
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col justify-between p-3 text-center text-neutral-900 dark:text-white">
-                      <div className="text-[8px] font-mono uppercase tracking-widest text-neutral-400 flex items-center justify-between border-b border-white/10 pb-1">
+                    <div className="w-full h-full flex flex-col justify-between p-3 text-center text-slate-900 ">
+                      <div className="text-[8px] font-mono uppercase tracking-widest text-slate-400 flex items-center justify-between border-b border-white/10 pb-1">
                         <span className="flex items-center gap-1">
                           <span className="w-1 h-1 rounded-full bg-[#00eaff] animate-pulse" />
                           <span className="text-[#00eaff]">ONLINE</span>
@@ -143,16 +143,16 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
                         </span>
                       </div>
                       <div className="my-auto py-2">
-                        <h4 className="text-xs font-normal line-clamp-2 px-1 text-neutral-900 dark:text-white leading-snug">
+                        <h4 className="text-xs font-normal line-clamp-2 px-1 text-slate-900  leading-snug">
                           {item.title}
                         </h4>
                         {item.body && (
-                          <p className="text-[9px] text-neutral-600 dark:text-[#dadbdf] line-clamp-2 mt-1 px-2 font-normal leading-tight">
+                          <p className="text-[9px] text-slate-600  line-clamp-2 mt-1 px-2 font-normal leading-tight">
                             {item.body}
                           </p>
                         )}
                       </div>
-                      <div className="text-[7px] font-mono text-neutral-500 dark:text-[#7d8187] flex justify-between border-t border-white/5 pt-1">
+                      <div className="text-[7px] font-mono text-slate-500  flex justify-between border-t border-white/5 pt-1">
                         <span>CampusCast Engine</span>
                       </div>
                     </div>
@@ -185,21 +185,21 @@ function VideoWallScreenCard({ screen, allAnnouncements, isEmergency, emergencyD
         </div>
       </div>
 
-      <div className="px-3.5 py-2.5 border-t border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] flex items-center justify-between text-xs gap-1">
-        <div className="text-[10px] font-mono text-neutral-500 dark:text-[#7d8187] truncate" suppressHydrationWarning>
+      <div className="px-3.5 py-2.5 border-t border-slate-200  bg-white  flex items-center justify-between text-xs gap-1">
+        <div className="text-[10px] font-mono text-slate-500  truncate" suppressHydrationWarning>
           Ping: {relativeTime(screen.last_seen_at)}
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <button type="button" onClick={() => onSimulatePing(screen.id)} disabled={isBusy} title="Simulate Hardware Ping" className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white disabled:opacity-50 cursor-pointer transition-colors">
-            <Radio className={`w-3 h-3 ${isBusy && busyType === 'ping' ? 'animate-ping text-neutral-900 dark:text-white' : ''}`} />
+          <button type="button" onClick={() => onSimulatePing(screen.id)} disabled={isBusy} title="Simulate Hardware Ping" className="p-1.5 rounded-full hover:bg-slate-100  border border-slate-200  text-slate-500  hover:text-slate-900   disabled:opacity-50 cursor-pointer transition-colors">
+            <Radio className={`w-3 h-3 ${isBusy && busyType === 'ping' ? 'animate-ping text-slate-900 ' : ''}`} />
           </button>
-          <button type="button" onClick={() => onForceRefresh(screen.id, screen.name)} disabled={isBusy} title="Force Sync Screen" className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white disabled:opacity-50 cursor-pointer transition-colors">
-            <RefreshCw className={`w-3 h-3 ${isBusy && busyType === 'refresh' ? 'animate-spin text-neutral-900 dark:text-white' : ''}`} />
+          <button type="button" onClick={() => onForceRefresh(screen.id, screen.name)} disabled={isBusy} title="Force Sync Screen" className="p-1.5 rounded-full hover:bg-slate-100  border border-slate-200  text-slate-500  hover:text-slate-900   disabled:opacity-50 cursor-pointer transition-colors">
+            <RefreshCw className={`w-3 h-3 ${isBusy && busyType === 'refresh' ? 'animate-spin text-slate-900 ' : ''}`} />
           </button>
-          <button type="button" onClick={() => onReboot(screen.id, screen.name)} disabled={isBusy} title="Reboot Node" className="p-1.5 rounded-full hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-[#ef2045] dark:hover:text-[#ef2045] disabled:opacity-50 cursor-pointer transition-colors">
-            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-[#ef2045] dark:text-[#ef2045]' : ''}`} />
+          <button type="button" onClick={() => onReboot(screen.id, screen.name)} disabled={isBusy} title="Reboot Node" className="p-1.5 rounded-full hover:bg-[#ffeaea]  border border-slate-200  text-slate-500  hover:text-[#ef2045]  disabled:opacity-50 cursor-pointer transition-colors">
+            <Power className={`w-3 h-3 ${isBusy && busyType === 'reboot' ? 'animate-pulse text-[#ef2045] ' : ''}`} />
           </button>
-          <a href={`/kiosk.html?id=${screen.id}`} target="_blank" rel="noreferrer" title="Launch Kiosk Window" className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-white/10 border border-neutral-200 dark:border-[#212327] text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white cursor-pointer transition-colors">
+          <a href={`/kiosk.html?id=${screen.id}`} target="_blank" rel="noreferrer" title="Launch Kiosk Window" className="p-1.5 rounded-full hover:bg-slate-100  border border-slate-200  text-slate-500  hover:text-slate-900   cursor-pointer transition-colors">
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -355,32 +355,32 @@ export function VideoWallClient({
   }
 
   return (
-    <div className={`space-y-6 text-neutral-900 dark:text-white ${isFullscreen ? 'p-6 bg-white dark:bg-[#0a0a0a] min-h-screen' : ''}`}>
+    <div className={`space-y-6 text-slate-900  ${isFullscreen ? 'p-6 bg-white  min-h-screen' : ''}`}>
       {/* Top Video Wall Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-neutral-200 dark:border-[#212327]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
               Live Mesh Mirror
             </span>
-            <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">{counts.online} Nodes Broadcasting</span>
+            <span className="text-xs font-mono text-slate-500 ">{counts.online} Nodes Broadcasting</span>
           </div>
-          <h1 className="xai-display-section text-neutral-900 dark:text-white flex items-center gap-3">
-            <Tv className="w-5 h-5 text-neutral-900 dark:text-white" /> Visual Screen Wall
+          <h1 className="xai-display-section text-slate-900  flex items-center gap-3">
+            <Tv className="w-5 h-5 text-slate-900 " /> Visual Screen Wall
           </h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-600 dark:text-[#dadbdf] max-w-xl mt-1.5 leading-relaxed">
+          <p className="text-sm text-slate-600   max-w-xl mt-1.5 leading-relaxed">
             Multi-display mirror grid. View real-time output across all campus screen hardware simultaneously.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center p-1 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414]">
+          <div className="flex items-center p-1 rounded-full border border-slate-200  bg-white ">
             <button
               onClick={() => setAspectMode('16:9')}
               className={`px-3.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
                 aspectMode === '16:9'
-                  ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium'
-                  : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
+                  ? 'bg-[#121826] text-slate-900    font-medium'
+                  : 'text-slate-500  hover:text-slate-900  '
               }`}
             >
               <Monitor className="w-3.5 h-3.5" /> 16:9
@@ -389,8 +389,8 @@ export function VideoWallClient({
               onClick={() => setAspectMode('9:16')}
               className={`px-3.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
                 aspectMode === '9:16'
-                  ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium'
-                  : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
+                  ? 'bg-[#121826] text-slate-900    font-medium'
+                  : 'text-slate-500  hover:text-slate-900  '
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" /> 9:16
@@ -399,10 +399,10 @@ export function VideoWallClient({
 
           <button
             onClick={toggleFullscreen}
-            className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-full border border-slate-200  text-slate-700   hover:bg-slate-100  text-xs font-mono flex items-center gap-1.5 cursor-pointer transition-colors"
             title="Toggle NOC Fullscreen Mode"
           >
-            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-900 dark:text-white" />}
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-slate-700  " />}
             <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Wall'}</span>
           </button>
         </div>
@@ -410,14 +410,14 @@ export function VideoWallClient({
 
       {/* Active Global Override Banner */}
       {activeEmergencies.length > 0 && (
-        <div className="p-4 rounded-lg bg-[#ffeaea] dark:bg-rose-950/40 border border-[#ef2045]/30 dark:border-[#ef2045]/50 flex items-center justify-between gap-4 text-[#ef2045] dark:text-[#ef2045]">
+        <div className="p-4 rounded-lg bg-[#ffeaea]  border border-[#ef2045]/30  flex items-center justify-between gap-4 text-[#ef2045] ">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-full bg-[#ef2045] text-white shrink-0 animate-bounce">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] dark:text-[#ef2045]">Emergency Broadcast Active</span>
-              <p className="text-sm font-normal text-rose-900 dark:text-neutral-900 dark:text-white mt-0.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] ">Emergency Broadcast Active</span>
+              <p className="text-sm font-normal text-rose-900   mt-0.5">
                 &ldquo;{activeEmergencies[0].body || activeEmergencies[0].title}&rdquo;
               </p>
             </div>
@@ -433,11 +433,11 @@ export function VideoWallClient({
         {/* Status and Zone Filters */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Badges */}
-          <div className="flex items-center p-1 rounded-full border border-neutral-200 dark:border-[#212327] bg-white dark:bg-[#141414] text-xs font-mono">
+          <div className="flex items-center p-1 rounded-full border border-slate-200  bg-white  text-xs font-mono">
             <button
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1 rounded-full cursor-pointer transition-all ${
-                statusFilter === 'all' ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium' : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
+                statusFilter === 'all' ? 'bg-[#121826] text-slate-900    font-medium' : 'text-slate-500  hover:text-slate-900  '
               }`}
             >
               All ({screens.length})
@@ -445,7 +445,7 @@ export function VideoWallClient({
             <button
               onClick={() => setStatusFilter('online')}
               className={`px-3 py-1 rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
-                statusFilter === 'online' ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium' : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
+                statusFilter === 'online' ? 'bg-[#121826] text-slate-900    font-medium' : 'text-slate-500  hover:text-slate-900  '
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#00eaff]" /> Online ({counts.online})
@@ -453,7 +453,7 @@ export function VideoWallClient({
             <button
               onClick={() => setStatusFilter('stale')}
               className={`px-3 py-1 rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
-                statusFilter === 'stale' ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium' : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
+                statusFilter === 'stale' ? 'bg-[#121826] text-slate-900    font-medium' : 'text-slate-500  hover:text-slate-900  '
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#af1591]" /> Stale ({counts.stale})
@@ -461,10 +461,10 @@ export function VideoWallClient({
             <button
               onClick={() => setStatusFilter('offline')}
               className={`px-3 py-1 rounded-full cursor-pointer transition-all flex items-center gap-1.5 ${
-                statusFilter === 'offline' ? 'bg-neutral-900 text-neutral-900 dark:text-white dark:bg-white dark:text-[#0a0a0a] font-medium' : 'text-neutral-500 dark:text-[#7d8187] hover:text-neutral-900 dark:hover:text-neutral-900 dark:text-white'
+                statusFilter === 'offline' ? 'bg-[#121826] text-slate-900    font-medium' : 'text-slate-500  hover:text-slate-900  '
               }`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-neutral-600" /> Offline ({counts.offline})
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-600" /> Offline ({counts.offline})
             </button>
           </div>
 
@@ -472,7 +472,7 @@ export function VideoWallClient({
           <select
             value={selectedZone}
             onChange={(e) => setSelectedZone(e.target.value)}
-            className="bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full px-4 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-white font-mono"
+            className="bg-white  border border-slate-200  rounded-full px-4 py-1.5 text-xs text-slate-900  focus:outline-none focus:border-slate-400  font-mono"
           >
             <option value="all">All Campus Zones ({zones.length})</option>
             {zones.map((z) => (
@@ -485,21 +485,21 @@ export function VideoWallClient({
 
         {/* Search */}
         <div className="relative w-full sm:w-72">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 dark:text-[#7d8187]" />
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400  " />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search screens or notices…"
-            className="w-full bg-white dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-full pl-8 pr-3.5 py-1.5 text-xs text-neutral-900 dark:text-white focus:outline-none focus:border-neutral-400 dark:focus:border-white font-mono"
+            className="w-full bg-white  border border-slate-200  rounded-full pl-8 pr-3.5 py-1.5 text-xs text-slate-900  focus:outline-none focus:border-slate-400  font-mono"
           />
         </div>
       </div>
 
       {/* Live Video Wall Grid */}
       {filtered.length === 0 ? (
-        <div className="p-16 text-center border border-neutral-200 dark:border-[#212327] rounded-lg bg-white dark:bg-[#141414] text-neutral-500 dark:text-[#7d8187]">
-          <Monitor className="w-8 h-8 mx-auto mb-3 opacity-50 text-neutral-400 dark:text-neutral-500 dark:text-[#7d8187]" />
-          <h3 className="text-sm font-normal text-neutral-900 dark:text-white">No Display Screens Found</h3>
+        <div className="p-16 text-center border border-slate-200  rounded-lg bg-white  text-slate-500 ">
+          <Monitor className="w-8 h-8 mx-auto mb-3 opacity-50 text-slate-400  " />
+          <h3 className="text-sm font-normal text-slate-900 ">No Display Screens Found</h3>
           <p className="text-xs max-w-sm mx-auto mt-1 font-mono">
             No screens match the applied zone or status filter.
           </p>

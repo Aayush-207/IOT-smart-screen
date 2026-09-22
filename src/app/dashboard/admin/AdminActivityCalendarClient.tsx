@@ -43,7 +43,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   'Cultural & Campus Life': <Sparkles className="w-3.5 h-3.5 text-fuchsia-500 shrink-0" />,
   'Trek & Adventure': <Compass className="w-3.5 h-3.5 text-teal-500 shrink-0" />,
   'Alumni & Careers': <GraduationCap className="w-3.5 h-3.5 text-sky-500 shrink-0" />,
-  'Academic & General': <Award className="w-3.5 h-3.5 text-neutral-400 shrink-0" />,
+  'Academic & General': <Award className="w-3.5 h-3.5 text-slate-400 shrink-0" />,
 }
 
 export function AdminActivityCalendarClient({
@@ -171,23 +171,23 @@ export function AdminActivityCalendarClient({
   const sheetUrl = `https://docs.google.com/spreadsheets/d/1DUIFEJNlvkBvof1FB5jK4tF35tyD9Err8PF-ozT6SW8/edit?gid=${activeMonthConfig.gid}#gid=${activeMonthConfig.gid}`
 
   return (
-    <div className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl shadow-sm overflow-hidden animate-fade-in-up">
+    <div className="bg-white  border border-slate-200  rounded-xl shadow-sm overflow-hidden animate-fade-in-up">
       {/* Top Header & Structured Navigation */}
-      <div className="p-4 sm:p-5 border-b border-neutral-200 dark:border-[#212327] space-y-4">
+      <div className="p-4 sm:p-5 border-b border-slate-200  space-y-4">
         {/* ROW 1: Title & Main Actions */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="p-2 rounded-xl bg-neutral-100 dark:bg-white/5 text-neutral-800 dark:text-white">
+            <span className="p-2 rounded-xl bg-slate-100  text-slate-800 ">
               <CalendarIcon className="w-5 h-5" />
             </span>
             <div>
-              <h2 className="text-lg font-medium text-neutral-900 dark:text-white flex items-center gap-2">
+              <h2 className="text-lg font-medium text-slate-900  flex items-center gap-2">
                 <span>{activeMonthConfig.name}</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-neutral-200 dark:border-[#2b2d31] bg-neutral-50 dark:bg-[#18191c] text-neutral-600 dark:text-neutral-400">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-200  bg-slate-50  text-slate-600 ">
                   {activeMonthConfig.term}
                 </span>
               </h2>
-              <div className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 dark:text-[#7d8187] mt-0.5">
+              <div className="text-[11px] font-mono uppercase tracking-wider text-slate-500  mt-0.5">
                 Academic Year 2026&ndash;2027
               </div>
             </div>
@@ -196,18 +196,18 @@ export function AdminActivityCalendarClient({
           <div className="flex flex-wrap items-center gap-2">
             {/* Search Bar */}
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search events, clubs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-7 py-1.5 rounded-lg text-xs bg-neutral-50 dark:bg-[#18191c] border border-neutral-200 dark:border-[#2b2d31] text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-hidden focus:border-neutral-400 dark:focus:border-[#42454b] transition-colors"
+                className="w-full pl-8 pr-7 py-1.5 rounded-lg text-xs bg-slate-50  border border-slate-200  text-slate-900  placeholder-slate-400 focus:outline-hidden focus:border-slate-400  transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-white"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 "
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -218,7 +218,7 @@ export function AdminActivityCalendarClient({
               onClick={handleRefresh}
               disabled={isRefreshing}
               title="Sync latest entries"
-              className="p-1.5 rounded-lg border border-neutral-200 dark:border-[#2b2d31] hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors text-neutral-700 dark:text-neutral-300"
+              className="p-1.5 rounded-lg border border-slate-200  hover:bg-slate-100  transition-colors text-slate-700 "
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-blue-500' : ''}`} />
             </button>
@@ -227,7 +227,7 @@ export function AdminActivityCalendarClient({
               target="_blank"
               rel="noopener noreferrer"
               title="Open Google Sheet"
-              className="p-1.5 rounded-lg border border-neutral-200 dark:border-[#2b2d31] hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors text-neutral-700 dark:text-neutral-300"
+              className="p-1.5 rounded-lg border border-slate-200  hover:bg-slate-100  transition-colors text-slate-700 "
             >
               <ExternalLink className="w-4 h-4 opacity-70" />
             </a>
@@ -238,15 +238,15 @@ export function AdminActivityCalendarClient({
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
             {/* Term Tabs */}
-            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-neutral-100 dark:bg-[#1c1d20] border border-neutral-200 dark:border-[#2b2d31] shrink-0 text-xs">
+            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100  border border-slate-200  shrink-0 text-xs">
               {(['All', 'Odd Semester', 'Even Semester'] as const).map((term) => (
                 <button
                   key={term}
                   onClick={() => setActiveTerm(term)}
                   className={`px-2 py-1 rounded-md transition-all font-mono text-[10px] ${
                     activeTerm === term
-                      ? 'bg-white dark:bg-[#282a2e] text-neutral-900 dark:text-white font-semibold shadow-2xs'
-                      : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                      ? 'bg-white  text-slate-900  font-semibold shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900 '
                   }`}
                 >
                   {term === 'All' ? 'All' : term.split(' ')[0]}
@@ -254,14 +254,14 @@ export function AdminActivityCalendarClient({
               ))}
             </div>
 
-            <div className="w-px h-5 bg-neutral-200 dark:bg-[#2b2d31] mx-1 shrink-0" />
+            <div className="w-px h-5 bg-slate-200  mx-1 shrink-0" />
 
             {/* Steppers & Month Pills */}
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={handlePrevMonth}
                 disabled={MONTH_CONFIGS[0].id === selectedMonthId}
-                className="p-1 rounded-md border border-neutral-200 dark:border-[#2b2d31] hover:bg-neutral-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-neutral-700 dark:text-neutral-300"
+                className="p-1 rounded-md border border-slate-200  hover:bg-slate-100  disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-700 "
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
@@ -275,16 +275,16 @@ export function AdminActivityCalendarClient({
                     onClick={() => setSelectedMonthId(month.id)}
                     className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 border ${
                       isActive
-                        ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border-neutral-900 dark:border-white shadow-xs font-semibold'
-                        : 'bg-neutral-50 dark:bg-[#18191c] text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-[#2b2d31] hover:text-neutral-900 dark:hover:text-white'
+                        ? 'bg-[#121826] text-white   border-[#121826]  shadow-xs font-semibold'
+                        : 'bg-slate-50  text-slate-600  border-slate-200  hover:text-slate-900 '
                     }`}
                   >
                     <span>{month.shortName.split(' ')[0]}</span>
                     <span
                       className={`font-mono text-[9px] px-1 py-0.5 rounded-sm ${
                         isActive
-                          ? 'bg-white/20 text-white dark:bg-neutral-900/20 dark:text-neutral-900'
-                          : 'bg-neutral-200/70 dark:bg-white/10 text-neutral-500 dark:text-neutral-400'
+                          ? 'bg-white/20 text-white  '
+                          : 'bg-slate-200/70  text-slate-500 '
                       }`}
                     >
                       {mData?.totalEvents ?? '...'}
@@ -296,7 +296,7 @@ export function AdminActivityCalendarClient({
               <button
                 onClick={handleNextMonth}
                 disabled={MONTH_CONFIGS[MONTH_CONFIGS.length - 1].id === selectedMonthId}
-                className="p-1 rounded-md border border-neutral-200 dark:border-[#2b2d31] hover:bg-neutral-100 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-neutral-700 dark:text-neutral-300"
+                className="p-1 rounded-md border border-slate-200  hover:bg-slate-100  disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-700 "
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -308,7 +308,7 @@ export function AdminActivityCalendarClient({
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-[#2b2d31] bg-neutral-50 dark:bg-[#18191c] hover:bg-neutral-100 dark:hover:bg-white/5 text-[11px] text-neutral-900 dark:text-white font-medium flex items-center gap-1.5 transition-colors"
+                className="px-2.5 py-1.5 rounded-lg border border-slate-200  bg-slate-50  hover:bg-slate-100  text-[11px] text-slate-900  font-medium flex items-center gap-1.5 transition-colors"
               >
                 <span>Jump</span>
                 <ChevronDown className="w-3 h-3 opacity-60" />
@@ -316,7 +316,7 @@ export function AdminActivityCalendarClient({
 
               {isDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-1 z-30 w-48 rounded-xl bg-white dark:bg-[#18191c] border border-neutral-200 dark:border-[#2b2d31] shadow-xl py-1 divide-y divide-neutral-100 dark:divide-[#24262a] animate-scale-up"
+                  className="absolute right-0 mt-1 z-30 w-48 rounded-xl bg-white  border border-slate-200  shadow-xl py-1 divide-y divide-slate-100  animate-scale-up"
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   <div className="p-1 max-h-64 overflow-y-auto scrollbar-none">
@@ -332,8 +332,8 @@ export function AdminActivityCalendarClient({
                           }}
                           className={`w-full text-left px-2 py-1.5 rounded-md text-[11px] flex items-center justify-between transition-colors ${
                             isSelected
-                              ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold'
-                              : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-white/5'
+                              ? 'bg-[#121826] text-white   font-semibold'
+                              : 'text-slate-700  hover:bg-slate-100 '
                           }`}
                         >
                           <span>{m.name}</span>
@@ -347,13 +347,13 @@ export function AdminActivityCalendarClient({
             </div>
 
             {/* View mode toggle */}
-            <div className="flex items-center p-0.5 bg-neutral-100 dark:bg-[#1c1d20] border border-neutral-200 dark:border-[#2b2d31] rounded-lg text-xs">
+            <div className="flex items-center p-0.5 bg-slate-100  border border-slate-200  rounded-lg text-xs">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all text-[11px] ${
                   viewMode === 'grid'
-                    ? 'bg-white dark:bg-[#282a2e] text-neutral-900 dark:text-white shadow-xs'
-                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'bg-white  text-slate-900  shadow-xs'
+                    : 'text-slate-600  hover:text-slate-900 '
                 }`}
               >
                 <LayoutGrid className="w-3 h-3" />
@@ -363,8 +363,8 @@ export function AdminActivityCalendarClient({
                 onClick={() => setViewMode('agenda')}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all text-[11px] ${
                   viewMode === 'agenda'
-                    ? 'bg-white dark:bg-[#282a2e] text-neutral-900 dark:text-white shadow-xs'
-                    : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                    ? 'bg-white  text-slate-900  shadow-xs'
+                    : 'text-slate-600  hover:text-slate-900 '
                 }`}
               >
                 <List className="w-3 h-3" />
@@ -375,15 +375,15 @@ export function AdminActivityCalendarClient({
         </div>
 
         {/* ROW 3: Categories & Compact Stats */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 border-t border-neutral-100 dark:border-[#1e2023] pt-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 border-t border-slate-100  pt-3">
           {/* Category Pill Filters */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
             <button
               onClick={() => setSelectedCategory('ALL')}
               className={`px-2 py-1 rounded-full text-[10px] font-mono shrink-0 transition-all border ${
                 selectedCategory === 'ALL'
-                  ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border-neutral-900 dark:border-white font-medium'
-                  : 'bg-neutral-50 dark:bg-[#18191c] text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-[#2b2d31] hover:text-neutral-900 dark:hover:text-white'
+                  ? 'bg-[#121826] text-white   border-[#121826]  font-medium'
+                  : 'bg-slate-50  text-slate-600  border-slate-200  hover:text-slate-900 '
               }`}
             >
               All
@@ -398,7 +398,7 @@ export function AdminActivityCalendarClient({
                   className={`px-2 py-1 rounded-full text-[10px] font-mono shrink-0 transition-all border flex items-center gap-1 ${
                     isSelected
                       ? `${style.badgeClass} border-current font-medium shadow-2xs`
-                      : 'bg-neutral-50 dark:bg-[#18191c] text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-[#2b2d31] hover:text-neutral-900 dark:hover:text-white'
+                      : 'bg-slate-50  text-slate-600  border-slate-200  hover:text-slate-900 '
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${style.dotClass}`} />
@@ -410,23 +410,23 @@ export function AdminActivityCalendarClient({
 
           {/* Compact Stats */}
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono shrink-0">
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-[#18191c] border border-neutral-200 dark:border-[#2b2d31] text-neutral-700 dark:text-neutral-300">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100  border border-slate-200  text-slate-700 ">
               <CalendarDays className="w-3 h-3 opacity-70" />
               <span>{stats.total} Total</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50  border border-indigo-100  text-indigo-700 ">
               <Laptop className="w-3 h-3 opacity-70" />
               <span>{stats.tech} Tech</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#00eaff]/10 dark:bg-emerald-950/20 border border-[#00eaff]/10 dark:border-emerald-900/30 text-[#00eaff] dark:text-[#00eaff]">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#00eaff]/10  border border-[#00eaff]/10  text-[#00eaff] ">
               <Trophy className="w-3 h-3 opacity-70" />
               <span>{stats.sports} Sports</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#af1591]/10 dark:bg-amber-950/20 border border-[#af1591]/10 dark:border-amber-900/30 text-[#af1591] dark:text-[#af1591]">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#af1591]/10  border border-[#af1591]/10  text-[#af1591] ">
               <BookOpen className="w-3 h-3 opacity-70" />
               <span>{stats.workshops} Workshop</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#ffeaea] dark:bg-rose-950/20 border border-[#ffeaea] dark:border-rose-900/30 text-[#ef2045] dark:text-[#ef2045]">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#ffeaea]  border border-[#ffeaea]  text-[#ef2045] ">
               <PartyPopper className="w-3 h-3 opacity-70" />
               <span>{stats.holidays} Holiday</span>
             </div>
@@ -446,8 +446,8 @@ export function AdminActivityCalendarClient({
                   key={dayName}
                   className={`py-2 text-[11px] font-mono font-medium uppercase tracking-wider rounded-md ${
                     idx === 0
-                      ? 'text-[#ef2045] dark:text-[#ef2045] bg-[#ffeaea]/40 dark:bg-rose-950/10'
-                      : 'text-neutral-500 dark:text-neutral-400 bg-neutral-50/70 dark:bg-white/5'
+                      ? 'text-[#ef2045]  bg-[#ffeaea]/40 '
+                      : 'text-slate-500  bg-slate-50/70 '
                   }`}
                 >
                   {dayName}
@@ -464,7 +464,7 @@ export function AdminActivityCalendarClient({
                       return (
                         <div
                           key={`empty-${wIdx}-${dIdx}`}
-                          className="min-h-[105px] rounded-lg bg-neutral-50/40 dark:bg-white/[0.02] border border-neutral-100 dark:border-white/[0.03]"
+                          className="min-h-[105px] rounded-lg bg-slate-50/40  border border-slate-100 "
                         />
                       )
                     }
@@ -484,11 +484,11 @@ export function AdminActivityCalendarClient({
                         className={`min-h-[110px] p-2 rounded-lg border transition-all cursor-pointer flex flex-col justify-between group ${
                           day.isCurrentMonth
                             ? isToday
-                              ? 'bg-blue-50/50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-500 shadow-[0_0_0_1px_rgba(59,130,246,0.5)] hover:border-blue-500'
+                              ? 'bg-blue-50/50  border-blue-400  shadow-[0_0_0_1px_rgba(59,130,246,0.5)] hover:border-blue-500'
                               : hasHoliday
-                                ? 'bg-[#ffeaea]/30 dark:bg-rose-950/10 border-[#ef2045]/30 dark:border-rose-900/30 hover:border-[#ef2045] dark:hover:border-[#ef2045]/50'
-                                : 'bg-white dark:bg-[#18191c] border-neutral-200/80 dark:border-[#26282c] hover:border-neutral-300 dark:hover:border-[#383b40] hover:shadow-xs'
-                            : 'bg-neutral-50/50 dark:bg-white/[0.02] border-neutral-100 dark:border-white/[0.04] opacity-40 hover:opacity-75'
+                                ? 'bg-[#ffeaea]/30  border-[#ef2045]/30  hover:border-[#ef2045] '
+                                : 'bg-white  border-slate-200/80  hover:border-slate-300  hover:shadow-xs'
+                            : 'bg-slate-50/50  border-slate-100  opacity-40 hover:opacity-75'
                         }`}
                       >
                         {/* Day header */}
@@ -498,12 +498,12 @@ export function AdminActivityCalendarClient({
                               isToday
                                 ? 'text-white bg-blue-600'
                                 : hasHoliday
-                                ? 'text-[#ef2045] dark:text-[#ef2045] bg-[#ffeaea]/70 dark:bg-rose-950/50'
+                                ? 'text-[#ef2045]  bg-[#ffeaea]/70 '
                                 : dIdx === 0
-                                ? 'text-[#ef2045] dark:text-[#ef2045]'
+                                ? 'text-[#ef2045] '
                                 : day.isCurrentMonth
-                                ? 'text-neutral-900 dark:text-neutral-100'
-                                : 'text-neutral-400 dark:text-neutral-600'
+                                ? 'text-slate-900 '
+                                : 'text-slate-400 '
                             }`}
                           >
                             {day.dayNum}
@@ -513,8 +513,8 @@ export function AdminActivityCalendarClient({
                             <span
                               className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
                                 hasActiveFilter
-                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 font-medium'
-                                  : 'bg-neutral-100 dark:bg-white/10 text-neutral-600 dark:text-neutral-300'
+                                  ? 'bg-blue-100 text-blue-800   font-medium'
+                                  : 'bg-slate-100  text-slate-600 '
                               }`}
                             >
                               {matchingEvents.length}
@@ -541,14 +541,14 @@ export function AdminActivityCalendarClient({
                           })}
 
                           {matchingEvents.length > 2 && (
-                            <div className="text-[9px] font-mono text-neutral-500 dark:text-[#7d8187] pl-1 font-medium group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
+                            <div className="text-[9px] font-mono text-slate-500  pl-1 font-medium group-hover:text-slate-900  transition-colors">
                               +{matchingEvents.length - 2} more
                             </div>
                           )}
                         </div>
 
                         {/* Footer hover indicator */}
-                        <div className="text-[9px] font-mono text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity flex justify-end">
+                        <div className="text-[9px] font-mono text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex justify-end">
                           <span>View Details &rarr;</span>
                         </div>
                       </div>
@@ -561,9 +561,9 @@ export function AdminActivityCalendarClient({
         </div>
       ) : (
         /* Agenda / List View */
-        <div className="p-4 sm:p-6 divide-y divide-neutral-100 dark:divide-[#1e2023] max-h-[640px] overflow-y-auto">
+        <div className="p-4 sm:p-6 divide-y divide-slate-100  max-h-[640px] overflow-y-auto">
           {agendaDays.length === 0 ? (
-            <div className="py-12 text-center text-neutral-400 dark:text-neutral-500 font-mono text-xs">
+            <div className="py-12 text-center text-slate-400  font-mono text-xs">
               No campus events match your current search and category filters.
             </div>
           ) : (
@@ -577,21 +577,21 @@ export function AdminActivityCalendarClient({
                     <div
                       className={`inline-flex sm:flex flex-col p-2.5 rounded-lg border text-left ${
                         isToday
-                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-500'
+                          ? 'bg-blue-50  border-blue-400 '
                           : hasHoliday
-                          ? 'bg-[#ffeaea] dark:bg-rose-950/20 border-[#ef2045]/30 dark:border-rose-900/30'
-                          : 'bg-neutral-50 dark:bg-[#18191c] border-neutral-200/80 dark:border-[#26282c]'
+                          ? 'bg-[#ffeaea]  border-[#ef2045]/30 '
+                          : 'bg-slate-50  border-slate-200/80 '
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-xl font-bold font-mono leading-none ${isToday ? 'text-blue-700 dark:text-blue-400' : 'text-neutral-900 dark:text-white'}`}>
+                        <span className={`text-xl font-bold font-mono leading-none ${isToday ? 'text-blue-700 ' : 'text-slate-900 '}`}>
                           {day.dayNum}
                         </span>
-                        <span className={`text-[10px] font-mono uppercase tracking-wider ${isToday ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                        <span className={`text-[10px] font-mono uppercase tracking-wider ${isToday ? 'text-blue-600  font-semibold' : 'text-slate-500 '}`}>
                           {day.dayOfWeek.slice(0, 3)}
                         </span>
                       </div>
-                      <span className="text-[10px] font-mono text-neutral-500 dark:text-neutral-400 mt-1">
+                      <span className="text-[10px] font-mono text-slate-500  mt-1">
                         {activeMonthConfig.name}
                       </span>
                     </div>
@@ -607,11 +607,11 @@ export function AdminActivityCalendarClient({
                         <div
                           key={eIdx}
                           onClick={() => setActiveDetailDay(day)}
-                          className={`p-3 rounded-lg border transition-all cursor-pointer hover:shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-[#18191c] border-neutral-200/70 dark:border-[#24262a] hover:border-neutral-300 dark:hover:border-[#383b40] ${style.borderClass} border-l-4`}
+                          className={`p-3 rounded-lg border transition-all cursor-pointer hover:shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white  border-slate-200/70  hover:border-slate-300  ${style.borderClass} border-l-4`}
                         >
                           <div className="space-y-1">
-                            <div className="text-xs font-medium text-neutral-900 dark:text-white flex items-center gap-1.5">
-                              {CATEGORY_ICONS[ev.category] || <Award className="w-3.5 h-3.5 text-neutral-400" />}
+                            <div className="text-xs font-medium text-slate-900  flex items-center gap-1.5">
+                              {CATEGORY_ICONS[ev.category] || <Award className="w-3.5 h-3.5 text-slate-400" />}
                               <span>{ev.title}</span>
                             </div>
                             <div className="flex flex-wrap items-center gap-1.5">
@@ -621,19 +621,19 @@ export function AdminActivityCalendarClient({
                                 {ev.category}
                               </span>
                               {ev.club && (
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300">
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100  border border-slate-200  text-slate-600 ">
                                   Club: {ev.club}
                                 </span>
                               )}
                               {ev.department && (
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/30 text-indigo-700 dark:text-indigo-300">
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50  border border-indigo-200  text-indigo-700 ">
                                   Dept: {ev.department}
                                 </span>
                               )}
                             </div>
                           </div>
 
-                          <div className="text-[10px] font-mono text-neutral-400 shrink-0 self-end sm:self-center">
+                          <div className="text-[10px] font-mono text-slate-400 shrink-0 self-end sm:self-center">
                             Inspect &rarr;
                           </div>
                         </div>
@@ -648,16 +648,16 @@ export function AdminActivityCalendarClient({
       )}
 
       {/* Category Legend & Sheet Info Footer */}
-      <div className="p-4 sm:p-5 bg-neutral-50/70 dark:bg-[#18191c]/70 border-t border-neutral-200 dark:border-[#212327]">
+      <div className="p-4 sm:p-5 bg-slate-50/70  border-t border-slate-200 ">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400 dark:text-[#7d8187]">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 ">
               Legend:
             </span>
             {categoriesList.map((catKey) => {
               const style = CATEGORY_STYLES[catKey]
               return (
-                <div key={catKey} className="flex items-center gap-1.5 text-[11px] text-neutral-600 dark:text-neutral-300">
+                <div key={catKey} className="flex items-center gap-1.5 text-[11px] text-slate-600 ">
                   <span className={`w-2 h-2 rounded-full ${style.dotClass}`} />
                   <span>{catKey}</span>
                 </div>
@@ -665,7 +665,7 @@ export function AdminActivityCalendarClient({
             })}
           </div>
 
-          <div className="text-[11px] font-mono text-neutral-400 dark:text-[#7d8187] flex items-center gap-2">
+          <div className="text-[11px] font-mono text-slate-400  flex items-center gap-2">
             <span>Month GID: {activeMonthConfig.gid}</span>
           </div>
         </div>
@@ -678,22 +678,22 @@ export function AdminActivityCalendarClient({
           onClick={() => setActiveDetailDay(null)}
         >
           <div
-            className="bg-white dark:bg-[#18191c] border border-neutral-200 dark:border-[#282a2e] rounded-xl max-w-lg w-full max-h-[85vh] shadow-2xl overflow-hidden flex flex-col animate-scale-up"
+            className="bg-white  border border-slate-200  rounded-xl max-w-lg w-full max-h-[85vh] shadow-2xl overflow-hidden flex flex-col animate-scale-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-5 border-b border-neutral-200 dark:border-[#24262a] flex items-center justify-between">
+            <div className="p-5 border-b border-slate-200  flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-blue-600 ">
                     Day Schedule Details
                   </span>
-                  <span className="text-neutral-400">&bull;</span>
-                  <span className="font-mono text-[10px] text-neutral-500">
+                  <span className="text-slate-400">&bull;</span>
+                  <span className="font-mono text-[10px] text-slate-500">
                     {activeDetailDay.dayOfWeek}
                   </span>
                 </div>
-                <h3 className="text-lg font-normal text-neutral-900 dark:text-white">
+                <h3 className="text-lg font-normal text-slate-900 ">
                   {new Date(activeDetailDay.dateStr).toLocaleDateString('en-US', {
                     weekday: 'long',
                     month: 'long',
@@ -704,16 +704,16 @@ export function AdminActivityCalendarClient({
               </div>
               <button
                 onClick={() => setActiveDetailDay(null)}
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900  hover:bg-slate-100  transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Events Content */}
-            <div className="p-5 overflow-y-auto space-y-3 divide-y divide-neutral-100 dark:divide-[#212327]">
+            <div className="p-5 overflow-y-auto space-y-3 divide-y divide-slate-100 ">
               {activeDetailDay.events.length === 0 ? (
-                <div className="py-8 text-center text-neutral-400 dark:text-neutral-500 font-mono text-xs">
+                <div className="py-8 text-center text-slate-400  font-mono text-xs">
                   No campus activities or holidays scheduled on this date.
                 </div>
               ) : (
@@ -726,7 +726,7 @@ export function AdminActivityCalendarClient({
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-2">
                           <span className="mt-0.5">{CATEGORY_ICONS[ev.category]}</span>
-                          <h4 className="text-sm font-medium text-neutral-900 dark:text-white leading-snug">
+                          <h4 className="text-sm font-medium text-slate-900  leading-snug">
                             {ev.title}
                           </h4>
                         </div>
@@ -740,12 +740,12 @@ export function AdminActivityCalendarClient({
                         </span>
 
                         {ev.club && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-600 dark:text-neutral-300">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100  border border-slate-200  text-slate-600 ">
                             Club: <strong className="font-semibold">{ev.club}</strong>
                           </span>
                         )}
                         {ev.department && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/30 text-indigo-700 dark:text-indigo-300">
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50  border border-indigo-200  text-indigo-700 ">
                             Department: <strong className="font-semibold">{ev.department}</strong>
                           </span>
                         )}
@@ -757,13 +757,13 @@ export function AdminActivityCalendarClient({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-neutral-50 dark:bg-[#141414] border-t border-neutral-200 dark:border-[#24262a] flex items-center justify-between">
-              <span className="text-xs font-mono text-neutral-500 dark:text-neutral-400">
+            <div className="p-4 bg-slate-50  border-t border-slate-200  flex items-center justify-between">
+              <span className="text-xs font-mono text-slate-500 ">
                 {activeDetailDay.events.length} {activeDetailDay.events.length === 1 ? 'event' : 'events'} recorded
               </span>
               <button
                 onClick={() => setActiveDetailDay(null)}
-                className="px-4 py-1.5 text-xs font-medium rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 transition-opacity"
+                className="px-4 py-1.5 text-xs font-medium rounded-lg bg-[#121826] text-white   hover:opacity-90 transition-opacity"
               >
                 Close
               </button>

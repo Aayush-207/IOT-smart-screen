@@ -89,9 +89,9 @@ export function AdminApprovalQueueClient({
   }
 
   return (
-    <div className="space-y-4 text-neutral-900 dark:text-white animate-fade-in-up">
+    <div className="space-y-4 text-slate-900  animate-fade-in-up">
       {requests.length === 0 ? (
-        <div className="p-12 text-center bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl text-xs text-neutral-500 dark:text-[#7d8187] shadow-sm">
+        <div className="p-12 text-center bg-white  border border-slate-200  rounded-xl text-xs text-slate-500  shadow-sm">
           No pending approvals require admin escalation.
         </div>
       ) : (
@@ -102,25 +102,25 @@ export function AdminApprovalQueueClient({
           return (
             <div
               key={req.id}
-              className="bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#212327] rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-neutral-300 dark:hover:border-white/30 transition-all shadow-sm card-hover"
+              className="bg-white  border border-slate-200  rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-slate-300  transition-all shadow-sm card-hover"
             >
               <div className="space-y-3 flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white bg-neutral-100 dark:bg-white/5">
+                  <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
                     {req.priority.toUpperCase()}
                   </span>
-                  <span className="text-xs font-mono text-neutral-500 dark:text-[#7d8187]">
+                  <span className="text-xs font-mono text-slate-500 ">
                     {req.departments?.name || 'Campus Wide'} &bull; Submitted by {req.profiles?.email}
                   </span>
-                  <span suppressHydrationWarning className="text-[10px] text-neutral-400 dark:text-neutral-500 dark:text-[#7d8187] font-mono">
+                  <span suppressHydrationWarning className="text-[10px] text-slate-400   font-mono">
                     &bull; {formatDate(req.created_at)}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-base font-medium text-neutral-900 dark:text-white truncate">{req.title}</h3>
+                  <h3 className="text-base font-medium text-slate-900  truncate">{req.title}</h3>
                   {req.body && (
-                    <p className="text-xs text-neutral-600 dark:text-[#dadbdf] line-clamp-2 mt-1 leading-relaxed font-normal">
+                    <p className="text-xs text-slate-600  line-clamp-2 mt-1 leading-relaxed font-normal">
                       {req.body}
                     </p>
                   )}
@@ -129,19 +129,19 @@ export function AdminApprovalQueueClient({
                 {/* Visual Details Bar: Duration, Screens, Department */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   {/* Department */}
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
-                    <Building2 className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                    <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Dept:</span>
-                    <span className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100  border border-slate-200  text-xs">
+                    <Building2 className="w-3.5 h-3.5 text-sky-600 " />
+                    <span className="text-[10px] uppercase font-mono text-slate-400 ">Dept:</span>
+                    <span className="font-medium text-slate-800  font-mono text-[11px]">
                       {req.departments?.name || 'Campus Wide'}
                     </span>
                   </div>
 
                   {/* Screens Selected */}
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
-                    <Monitor className="w-3.5 h-3.5 text-[#00eaff] dark:text-[#00eaff]" />
-                    <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Screens:</span>
-                    <span className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100  border border-slate-200  text-xs">
+                    <Monitor className="w-3.5 h-3.5 text-[#00eaff] " />
+                    <span className="text-[10px] uppercase font-mono text-slate-400 ">Screens:</span>
+                    <span className="font-medium text-slate-800  font-mono text-[11px]">
                       {req.target_all
                         ? 'All Campus Screens'
                         : req.target_zones && req.target_zones.length > 0
@@ -151,10 +151,10 @@ export function AdminApprovalQueueClient({
                   </div>
 
                   {/* Duration */}
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 text-xs">
-                    <Clock className="w-3.5 h-3.5 text-[#af1591] dark:text-[#af1591]" />
-                    <span className="text-[10px] uppercase font-mono text-neutral-400 dark:text-neutral-500">Duration:</span>
-                    <span suppressHydrationWarning className="font-medium text-neutral-800 dark:text-neutral-200 font-mono text-[11px]">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100  border border-slate-200  text-xs">
+                    <Clock className="w-3.5 h-3.5 text-[#af1591] " />
+                    <span className="text-[10px] uppercase font-mono text-slate-400 ">Duration:</span>
+                    <span suppressHydrationWarning className="font-medium text-slate-800  font-mono text-[11px]">
                       {formatDuration(req.display_start, req.display_end)}
                     </span>
                   </div>
@@ -171,7 +171,7 @@ export function AdminApprovalQueueClient({
                 <button
                   type="button"
                   onClick={() => setPreviewTarget(req)}
-                  className="px-4 py-2 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-900 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors btn-press"
+                  className="px-4 py-2 rounded-full border border-slate-200  text-slate-900  hover:bg-slate-100  text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer transition-colors btn-press"
                 >
                   <Eye className="w-3.5 h-3.5" /> Simulator
                 </button>
@@ -179,7 +179,7 @@ export function AdminApprovalQueueClient({
                   type="button"
                   disabled={!!processingAction}
                   onClick={() => handleApprove(req.id, req.title)}
-                  className="px-4 py-2 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-[#0a0a0a] hover:opacity-90 text-xs font-medium inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all shadow-sm btn-press"
+                  className="px-4 py-2 rounded-full bg-[#121826] text-white   hover:opacity-90 text-xs font-medium inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all shadow-sm btn-press"
                 >
                   {isApproving ? (
                     <>
@@ -197,7 +197,7 @@ export function AdminApprovalQueueClient({
                   type="button"
                   disabled={!!processingAction}
                   onClick={() => setRejectId(req.id)}
-                  className="px-4 py-2 rounded-full border border-[#ef2045]/30 text-[#ef2045] dark:text-[#ef2045] hover:bg-[#ffeaea] dark:hover:bg-[#ef2045]/10 text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors btn-press"
+                  className="px-4 py-2 rounded-full border border-[#ef2045]/30 text-[#ef2045]  hover:bg-[#ffeaea]  text-xs font-mono inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors btn-press"
                 >
                   <XCircle className="w-3.5 h-3.5" /> Reject
                 </button>
@@ -205,20 +205,20 @@ export function AdminApprovalQueueClient({
 
               {rejectId === req.id && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                  <div className="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#212327] p-6 w-full max-w-md space-y-4 shadow-2xl text-neutral-900 dark:text-white animate-scale-in">
-                    <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">Admin Rejection Feedback</h3>
+                  <div className="bg-white  rounded-2xl border border-slate-200  p-6 w-full max-w-md space-y-4 shadow-2xl text-slate-900  animate-scale-in">
+                    <h3 className="text-sm font-semibold text-slate-900 ">Admin Rejection Feedback</h3>
                     <textarea
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       placeholder="State the reason for rejecting this announcement..."
                       rows={3}
-                      className="w-full bg-neutral-50 dark:bg-[#0a0a0a] border border-neutral-200 dark:border-[#212327] rounded-xl px-3.5 py-2 text-xs text-neutral-900 dark:text-white placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 dark:focus:border-white leading-relaxed"
+                      className="w-full bg-slate-50  border border-slate-200  rounded-xl px-3.5 py-2 text-xs text-slate-900  placeholder:text-slate-400 focus:outline-none focus:border-[#121826]  leading-relaxed"
                     />
                     <div className="flex gap-2 justify-end pt-2">
                       <button
                         type="button"
                         onClick={() => setRejectId(null)}
-                        className="px-4 py-1.5 rounded-full border border-neutral-200 dark:border-white/20 text-neutral-700 dark:text-white hover:bg-neutral-100 dark:hover:bg-white/5 text-xs font-mono cursor-pointer btn-press"
+                        className="px-4 py-1.5 rounded-full border border-slate-200  text-slate-700  hover:bg-slate-100  text-xs font-mono cursor-pointer btn-press"
                       >
                         Cancel
                       </button>
