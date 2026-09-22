@@ -90,21 +90,33 @@ export function AppSidebar({
       {/* Background Glows Removed */}
 
       {/* Brand Header */}
-      <div className="h-20 flex items-center px-6 border-b border-white/5 shrink-0 relative z-10 backdrop-blur-sm bg-black/10">
-        <Link href="/" className="flex items-center gap-3 group w-full">
+      <div className="py-5 flex flex-col items-center px-4 border-b border-white/5 shrink-0 relative z-10 backdrop-blur-sm bg-black/10">
+        <Link href="/" className="flex flex-row items-center gap-2 group w-full justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src="/logo.png" 
-            alt="Campus Cast" 
-            className="w-10 h-10 object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+          <img
+            src="/MIT_circular.png"
+            alt="MIT ADT University Logo"
+            className="w-16 h-16 object-contain group-hover:scale-105 transition-all duration-300 shrink-0"
           />
-          <div className="hidden fallback-logo w-8 h-8 bg-gradient-to-br from-[#9f2176] to-[#af1591] rounded-lg text-[#ffffff] items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(175,21,145,0.5)] transition-transform group-hover:scale-110">
-            CC
+          <div className="flex flex-col items-center text-center pt-0.5">
+            <div className="text-[1.15rem] font-extrabold tracking-tight text-white font-[family-name:var(--font-inter)] leading-none pb-0.5">
+              MIT-ADT
+            </div>
+            <div className="flex w-full h-[2.5px] mb-0.5">
+              <div className="h-full flex-1 bg-[#a855f7]"></div>
+              <div className="h-full flex-1 bg-[#f97316]"></div>
+              <div className="h-full flex-1 bg-[#10b981]"></div>
+            </div>
+            <div className="text-[0.75rem] font-medium tracking-widest text-white font-[family-name:var(--font-inter)] leading-none">
+              UNIVERSITY
+            </div>
           </div>
-          <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-[#ffffff] via-[#e5e7eb] to-[#cfa2f7] bg-clip-text text-transparent group-hover:from-[#00eaff] group-hover:to-[#cfa2f7] transition-all duration-500 drop-shadow-sm">
-            Campus Cast
-          </span>
         </Link>
+        <div className="w-4/5 flex flex-col items-center mt-0 pt-1 border-t border-white/90">
+          <div className="text-[9px] uppercase tracking-widest font-extrabold bg-gradient-to-r from-purple-100 via-[#cfa2f7] to-purple-100 bg-clip-text text-transparent text-center">
+            Intelligent Broadcasts
+          </div>
+        </div>
       </div>
 
       {/* Role Pill Banner */}

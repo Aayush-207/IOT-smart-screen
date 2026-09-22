@@ -5,6 +5,7 @@ import { Monitor, AlertTriangle } from 'lucide-react'
 import { OrgManagementClient } from './OrgManagementClient'
 import { ClearEmergencyButton } from '@/components/ClearEmergencyButton'
 import { AnalyticsClient } from './analytics/AnalyticsClient'
+import { AdminOverviewDashboard } from './AdminOverviewDashboard'
 
 export const dynamic = 'force-dynamic'
 
@@ -113,6 +114,9 @@ export default async function AdminDashboardPage() {
           <ClearEmergencyButton actorId={user.id} />
         </div>
       )}
+
+      {/* New Organizational Dashboard Overview */}
+      <AdminOverviewDashboard totalDepartments={(departments || []).length} />
 
       {/* Analytics & Telemetry Embedded Section */}
       <AnalyticsClient
