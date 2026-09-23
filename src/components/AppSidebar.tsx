@@ -90,11 +90,13 @@ export function AppSidebar({
       <div className="py-5 flex flex-col items-center px-4 border-b border-white/5 shrink-0 relative z-10 backdrop-blur-sm bg-black/10">
         <Link href="/" className="flex flex-row items-center gap-2 group w-full justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/MIT_circular.png"
-            alt="MIT ADT University Logo"
-            className="w-16 h-16 object-contain group-hover:scale-105 transition-all duration-300 shrink-0"
-          />
+          <div className="w-[64px] h-[64px] shrink-0 flex items-center justify-center">
+            <img
+              src="/MIT_circular.png"
+              alt="MIT ADT University Logo"
+              className="w-full h-full object-contain group-hover:scale-105 transition-all duration-300 rounded-full"
+            />
+          </div>
           <div className="flex flex-col items-center text-center pt-0.5">
             <div className="text-[1.15rem] font-extrabold tracking-tight text-white font-[family-name:var(--font-inter)] leading-none pb-0.5">
               MIT-ADT
