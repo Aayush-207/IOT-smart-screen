@@ -88,12 +88,6 @@ export default async function AdminDashboardPage() {
           >
             <Monitor className="w-3.5 h-3.5" /> Screens &amp; Fleet ({totalScreens})
           </Link>
-          <Link
-            href="/dashboard/admin/emergency"
-            className="px-4 py-2 rounded-full border border-[#ef2045]/30 text-[#ef2045]  hover:bg-[#ffeaea]  text-xs font-mono flex items-center gap-2 transition-colors"
-          >
-            <AlertTriangle className="w-3.5 h-3.5" /> Emergency Alert
-          </Link>
         </div>
       </div>
 

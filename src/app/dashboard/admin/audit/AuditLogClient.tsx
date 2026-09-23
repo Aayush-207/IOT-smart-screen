@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react'
 import { Download, ScrollText, Eye, X, Image as ImageIcon, Clock, Calendar } from 'lucide-react'
 
-export function AuditLogClient({ rows }: { rows: any[] }) {
+export function AuditLogClient({ rows, hideHeader = false }: { rows: any[], hideHeader?: boolean }) {
   const [query, setQuery] = useState('')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
@@ -90,31 +90,45 @@ export function AuditLogClient({ rows }: { rows: any[] }) {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl pb-16 text-slate-900  animate-fade-in-up">
+    <div className={`text-slate-900 animate-fade-in-up ${hideHeader ? '' : 'space-y-6 max-w-7xl pb-16'}`}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
-              Append-Only Ledger
-            </span>
-            <span className="text-xs font-mono text-slate-500 ">{filtered.length} Events Tracked</span>
+      {!hideHeader && (
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
+                Append-Only Ledger
+              </span>
+              <span className="text-xs font-mono text-slate-500 ">{filtered.length} Events Tracked</span>
+            </div>
+            <h1 className="xai-display-section text-slate-900  flex items-center gap-3">
+              <ScrollText className="w-5 h-5 text-slate-900 " /> System Activity &amp; Audit Log
+            </h1>
+            <p className="text-sm text-slate-600  max-w-xl mt-1.5 leading-relaxed">
+              Append-only telemetry of all approvals, emergency overrides, display changes, and poster broadcast records.
+            </p>
           </div>
-          <h1 className="xai-display-section text-slate-900  flex items-center gap-3">
-            <ScrollText className="w-5 h-5 text-slate-900 " /> System Activity &amp; Audit Log
-          </h1>
-          <p className="text-sm text-slate-600  max-w-xl mt-1.5 leading-relaxed">
-            Append-only telemetry of all approvals, emergency overrides, display changes, and poster broadcast records.
-          </p>
+          <button
+            type="button"
+            onClick={exportCsv}
+            className="px-5 py-2 rounded-full bg-[#121826] text-white   text-xs font-medium hover:bg-[#121826]/90  transition-colors flex items-center gap-2 self-start md:self-auto shrink-0 cursor-pointer shadow-sm"
+          >
+            <Download className="w-3.5 h-3.5" /> Export CSV ({filtered.length})
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={exportCsv}
-          className="px-5 py-2 rounded-full bg-[#121826] text-white   text-xs font-medium hover:bg-[#121826]/90  transition-colors flex items-center gap-2 self-start md:self-auto shrink-0 cursor-pointer shadow-sm"
-        >
-          <Download className="w-3.5 h-3.5" /> Export CSV ({filtered.length})
-        </button>
-      </div>
+      )}
+
+      {hideHeader && (
+        <div className="flex justify-end mb-4">
+          <button
+            type="button"
+            onClick={exportCsv}
+            className="px-5 py-2 rounded-full bg-[#121826] text-white text-xs font-medium hover:bg-[#121826]/90 transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
+          >
+            <Download className="w-3.5 h-3.5" /> Export CSV ({filtered.length})
+          </button>
+        </div>
+      )}
 
       {/* Filter toolbar */}
       <div className="p-4 rounded-xl border border-slate-200  bg-white  shadow-sm space-y-3">

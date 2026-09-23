@@ -28,7 +28,7 @@ export function AdminOverviewDashboard({ totalDepartments }: { totalDepartments:
     <div className="space-y-8 animate-fade-in-up">
       {/* KPI Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+        <div className="bg-white border border-[#4c1d76] p-6 rounded-3xl shadow-sm hover:shadow-[0_0_20px_rgba(76,29,118,0.4)] transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-center justify-between mb-4 relative z-10">
             <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200 group-hover:scale-110 transition-transform">
               <Building2 className="w-6 h-6 text-slate-700" />
@@ -41,7 +41,7 @@ export function AdminOverviewDashboard({ totalDepartments }: { totalDepartments:
           <div className="text-slate-500 font-bold text-xs uppercase tracking-wider">Total Schools / Institutes</div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+        <div className="bg-white border border-[#4c1d76] p-6 rounded-3xl shadow-sm hover:shadow-[0_0_20px_rgba(76,29,118,0.4)] transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-center justify-between mb-4 relative z-10">
             <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200 group-hover:scale-110 transition-transform">
               <Network className="w-6 h-6 text-slate-700" />
@@ -51,7 +51,7 @@ export function AdminOverviewDashboard({ totalDepartments }: { totalDepartments:
           <div className="text-slate-500 font-bold text-xs uppercase tracking-wider">Departments Registered</div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm hover:-translate-y-2 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
+        <div className="bg-white border border-[#4c1d76] p-6 rounded-3xl shadow-sm hover:shadow-[0_0_20px_rgba(76,29,118,0.4)] transition-all duration-300 relative overflow-hidden group">
           <div className="flex items-center justify-between mb-4 relative z-10">
             <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center border border-slate-200 group-hover:scale-110 transition-transform">
               <Users className="w-6 h-6 text-slate-700" />

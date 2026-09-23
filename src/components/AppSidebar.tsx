@@ -56,7 +56,6 @@ function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
   if (role === 'emergency') {
     return [
       { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard, colorClass: 'bg-indigo-600' },
-      { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle, colorClass: 'bg-red-600' },
       { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-[#fdf4ff]0' },
     ]
   }
@@ -65,10 +64,8 @@ function navItemsFor(role: Role, pendingApprovals: number): NavItem[] {
     { href: '/dashboard/admin', label: 'Overview', icon: LayoutDashboard, colorClass: 'bg-[#3D1165]' },
     { href: '/dashboard/admin/approvals', label: 'Admin Approvals', icon: CheckSquare, colorClass: 'bg-[#af1591]' },
     { href: '/dashboard/admin/fleet', label: 'Screens & Fleet', icon: Monitor, colorClass: 'bg-[#9f2176]' },
-    { href: '/dashboard/admin/announcements', label: 'Broadcast Catalog', icon: ListOrdered, colorClass: 'bg-[#512a74]' },
     { href: '/dashboard/admin/calendar', label: 'Calendar', icon: Calendar, colorClass: 'bg-[#cfa2f7] text-[#3D1165]' },
-    { href: '/dashboard/admin/emergency', label: 'Emergency Alert', icon: AlertTriangle, colorClass: 'bg-red-600' },
-    { href: '/dashboard/admin/audit', label: 'Audit Log', icon: ScrollText, colorClass: 'bg-[#fdf4ff]0' },
+    { href: '/dashboard/admin/audit', label: 'Audit Log & Catalog', icon: ScrollText, colorClass: 'bg-[#fdf4ff]0' },
   ]
 }
 
@@ -86,7 +83,7 @@ export function AppSidebar({
   const roleInfo = ROLE_DISPLAY[role] || { title: role, tag: 'User', color: 'bg-[#e5e7eb] text-[#1e1e2e]' }
 
   return (
-    <aside className="w-[260px] shrink-0 bg-gradient-to-b from-[#1c0836] via-[#3D1165] to-[#1c0836] border-r border-white/5 text-[#ffffff] flex flex-col h-screen sticky top-0 select-none z-30 shadow-[4px_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
+    <aside className="w-[260px] shrink-0 bg-gradient-to-b from-[#2e0d4a] via-[#4c1d76] to-[#2e0d4a] border-r border-white/5 text-[#ffffff] flex flex-col h-screen sticky top-0 select-none z-30 shadow-[4px_0_30px_rgba(0,0,0,0.5)] relative overflow-hidden">
       {/* Background Glows Removed */}
 
       {/* Brand Header */}
@@ -180,17 +177,7 @@ export function AppSidebar({
           )
         })}
 
-        {role === 'emergency' && (
-          <div className="pt-6 px-1">
-            <Link
-              href="/dashboard/admin/emergency"
-              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-[#ffffff] rounded-xl text-sm font-extrabold shadow-[0_8px_25px_rgba(220,38,38,0.5),inset_0_1px_0_0_rgba(255,255,255,0.2)] border border-red-400/30 transition-all duration-300 hover:-translate-y-0.5 group"
-            >
-              <AlertTriangle className="w-4 h-4 shrink-0 animate-pulse group-hover:scale-110 transition-transform" />
-              <span className="tracking-wide">Broadcast Alert</span>
-            </Link>
-          </div>
-        )}
+        {/* Removed Broadcast Alert button */}
       </nav>
 
       {/* User Footer Profile */}
