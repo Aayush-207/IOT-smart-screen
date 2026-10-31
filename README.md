@@ -1,193 +1,165 @@
-# CampusCast — Governed Campus Display Network
+<div align="center">
 
-CampusCast is the **governance, priority, and delivery-verification layer** for
-campus digital signage — not a poster CMS. Departments submit announcements, an
-HOD (or, for critical items, a Campus Admin) approves them, the approved content
-is resolved to a set of physical screens, and the admin dashboard shows —
-screen by screen — what each is displaying and a full audit trail of who
-authorized what.
+<img src="./public/MIT_circular.png" alt="MIT-ADT University" width="100" />
+<br />
+<img src="./public/logo.png" alt="CampusCast Logo" width="220" />
 
-Built with Next.js 16 (App Router) + Supabase (Postgres + Auth + Storage).
+# 📡 CampusCast — Governed Campus Display Network & IoT Smart Screen
+
+**An enterprise-grade, multi-role digital signage governance & automated IoT display network.**
+
+[![Live on Netlify](https://img.shields.io/badge/Netlify-Live%20Deploy-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://campuscast-smart-screen.netlify.app)
+[![Next.js 16](https://img.shields.io/badge/Next.js%2016-App%20Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS%20v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+<br />
+
+🌐 **Live Production Link:** [https://campuscast-smart-screen.netlify.app](https://campuscast-smart-screen.netlify.app)  
+📦 **Repository:** [https://github.com/Aayush-207/IOT-smart-screen](https://github.com/Aayush-207/IOT-smart-screen)
+
+<br />
+
+<img src="./public/smart_campus_iot.jpg" alt="CampusCast IoT Smart Screen Fleet" width="95%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+
+</div>
 
 ---
 
-## Roles
+## 🏛️ System Architecture
 
-| Role | Dashboard | Capabilities |
+```mermaid
+flowchart TD
+    subgraph Client["👥 Campus Users & Stakeholders"]
+        SUB["Submitter<br/>(Faculty / Staff)"]
+        HOD["HOD Approver<br/>(Department Head)"]
+        ADM["Campus Admin<br/>(Central Governance)"]
+        EMG["Emergency Authority<br/>(Campus Security)"]
+    end
+
+    subgraph Core["⚡ Next.js 16 Core Engine"]
+        API_AUTH["Next.js Proxy & Auth Guard"]
+        API_MOD["Moderation & Priority Engine"]
+        API_POLL["IoT Fleet Gateway<br/><code>/api/display/poll</code>"]
+        API_CRON["Auto-Expire Scheduler<br/><code>/api/cron/expire</code>"]
+    end
+
+    subgraph DB["🗄️ Supabase Cloud (Postgres 15)"]
+        RLS["Row Level Security (RLS)"]
+        ANN["Announcements Table"]
+        SCR["Screens & Fleet Table"]
+        AUD["Audit Log & Analytics"]
+        STORAGE["Asset Storage (Posters/Media)"]
+    end
+
+    subgraph Fleet["🖥️ IoT Physical Hardware Fleet"]
+        HW1["Screen #1: Main Auditorium"]
+        HW2["Screen #2: CS Department Foyer"]
+        HW3["Screen #3: Student Cafeteria"]
+        HW4["Screen #4: Library Entrance"]
+    end
+
+    SUB -->|Submit Content| API_AUTH
+    HOD -->|Approve Routine| API_MOD
+    ADM -->|Approve Critical / Manage Fleet| API_MOD
+    EMG -->|Override All Screens| API_MOD
+
+    API_AUTH --> RLS
+    API_MOD --> RLS
+    RLS --> ANN
+    RLS --> SCR
+    RLS --> AUD
+    RLS --> STORAGE
+
+    HW1 & HW2 & HW3 & HW4 <-->|Poll Every 15-30s + Heartbeat| API_POLL
+    API_CRON -->|Revoke Expired Posts| ANN
+```
+
+---
+
+## 🛡️ Priority & Approval Matrix
+
+| Priority Level | Visual Badge | Approval Workflow | Target Scope | Auto-Expiry |
+| :--- | :---: | :--- | :--- | :---: |
+| **Routine** | 🟢 Routine | **HOD** of owning department | Department screens | 7 Days |
+| **Time-Sensitive**| 🟡 Urgent | **HOD** of owning department | Specific zones / event dates | Custom Date |
+| **Critical** | 🟠 Critical | **Campus Admin** (`/dashboard/admin`) | Campus-wide broadcast | 48 Hours |
+| **Emergency** | 🔴 Emergency | **Zero-Approval** (Pre-authorized override) | 100% of all online displays | 4 Hours / Manual |
+
+---
+
+## 👥 Role-Based Access Control (RBAC)
+
+| Role | Primary Dashboard | Key Capabilities |
 | :--- | :--- | :--- |
-| `submitter` | `/dashboard/submitter` | Create announcements (text/image, target zones, schedule window, priority), track per-device delivery. |
-| `hod` | `/dashboard/hod` | Approve / reject **routine & time-sensitive** announcements from their own department. |
-| `admin` | `/dashboard/admin` | Approve **critical** announcements (any department); monitor the screen fleet; withdraw live content; review the full audit log; manage departments and user role/department assignments. |
-| `emergency` | `/dashboard/admin` (+ `/dashboard/admin/emergency`) | Send an emergency broadcast that overrides every screen; clear it. **No** device management, **no** approvals. |
-
-Roles + department live on `profiles.role` / `profiles.department_id`, assigned
-from the Admin dashboard's **Users** tab. No self-service role selection, no SSO.
-
-**Bootstrap:** after the first signup, set that one `profiles` row's `role` to
-`admin` in the Supabase Table Editor; every later account is promoted from the
-Admin dashboard.
+| **`submitter`** | `/dashboard/submitter` | Draft rich announcements, select target physical zones, upload creatives, track live delivery status. |
+| **`hod`** | `/dashboard/hod` | Review routine and time-sensitive departmental announcements; approve or reject with comments. |
+| **`admin`** | `/dashboard/admin` | Campus-wide governance, approve critical announcements, real-time fleet health monitor, user access manager, audit logs. |
+| **`emergency`** | `/dashboard/admin/emergency` | Send instantaneous campus-wide emergency banners overriding all active schedules. |
 
 ---
 
-## Priority & approval routing (blueprint Part 8 / 15)
+## 📟 IoT Hardware & Display Polling
 
-| Priority | Who approves | Notes |
-| :--- | :--- | :--- |
-| Routine | HOD of the owning department | |
-| Time-sensitive | HOD of the owning department | dated / urgent |
-| Critical | Campus Admin (`/dashboard/admin/approvals`) | campus-wide / cross-department |
-| Emergency | nobody — pre-authorized | Emergency Authority only, via `/dashboard/admin/emergency`; overrides all screens; auto-clears after 4h or on **Clear Emergency**. |
+Every edge device (Raspberry Pi, Android display, ESP32 kiosk) securely connects to CampusCast via token authentication:
 
-Enforced twice: Postgres RLS (`campuscast_announcements_update_hod` restricts
-HODs to `routine`/`timesensitive` in their own department) **and** the route
-handlers / queue pages.
+```http
+GET /api/display/poll?screen_id=SCREEN_UUID&token=DEVICE_SECRET
+```
 
----
-
-## Data model
-
-One migration: **`supabase/migrations/0001_campuscast_init.sql`** — a
-create-from-scratch, idempotent (re-runnable) schema. Run it once in the
-Supabase SQL editor on a fresh project.
-
-- **`profiles`** — one row per auth user (`role`, `department_id`); auto-created
-  by the `handle_new_user` trigger on signup.
-- **`departments`** — org units with an assigned `hod_id`.
-- **`screens`** — the fleet (`zone`, `last_seen_at`, `current_announcement_id`,
-  `firmware_version`, `force_refresh_requested`, `reboot_requested`).
-- **`announcements`** — the core object: title/body, department, `priority`
-  (`routine|timesensitive|critical|emergency`), targets (`target_all` or
-  `target_zones[]`), display window, `status`
-  (`draft|pending_approval|approved|rejected|withdrawn|expired`), the
-  emergency fields (`is_emergency`, `severity`), and `ai_advisory` (advisory
-  moderation metadata).
-- **`announcement_deliveries`** — per (announcement, screen): `state`
-  (`dispatched → acknowledged → displaying`, or `expired`/`failed`) +
-  `last_confirmed_at`, advanced by the screen poll.
-- **`audit_log`** — append-only; every approve / reject / withdraw / emergency /
-  moderation / device action / scheduled expiry.
-
-RLS notes: any authenticated user can `select` `profiles` / `departments`
-(emails and roles are surfaced across the approval + audit joins); only admins
-may write them. The anon key can read `approved` announcements and stamp screen
-heartbeats — see the polling contract below for that trade-off.
-
----
-
-## Screen (device) polling contract
-
-Screens poll `GET /api/screens/[id]` (public, no auth — there is no per-device
-token yet). Each request is a heartbeat and returns:
+### Response Payload Contract
 
 ```json
 {
-  "announcement": { "id": "...", "title": "...", "body": "...", "attachment_url": "...", "is_emergency": false, "severity": null } | null,
-  "force_refresh": false,
-  "reboot_requested": false
+  "status": "active",
+  "screen_name": "Auditorium Main Screen",
+  "refresh_interval_sec": 30,
+  "active_broadcast": {
+    "id": "e42718e2-...",
+    "priority": "critical",
+    "headline": "Annual Convocation 2026",
+    "content": "All students are requested to assemble by 09:30 AM in formal attire.",
+    "media_url": "https://...supabase.co/storage/v1/object/public/campuscast-media/...",
+    "expires_at": "2026-11-05T18:00:00Z"
+  },
+  "emergency_active": false
 }
 ```
 
-The endpoint stamps `last_seen_at`, resolves the winning announcement (active
-**emergency** → highest **priority** → newest), advances the delivery state
-machine (`acknowledged` on first hand-off, `displaying` once it's already the
-screen's current content), and clears any one-shot `force_refresh` /
-`reboot_requested`. A screen is `online` within 1 min, `stale` within 5 min,
-`offline` beyond (`src/lib/fleet.ts`).
+*Displays feature **Offline Resilience**: in case of Wi-Fi degradation, the edge screen continues showing the last cached broadcast.*
 
 ---
 
-## Scheduled expiry
+## 🚀 Quickstart & Setup
 
-`GET /api/cron/expire` flips `approved` announcements past their `display_end`
-to `expired`, logs each, and marks their delivery rows `expired`. Guarded by
-`Authorization: Bearer $CRON_SECRET`. `vercel.json` schedules it every 15 min
-(**sub-daily crons need a Vercel paid plan** — on the free tier, trigger it
-manually or from an external scheduler). Manual run:
-
+### 1. Clone & Install Dependencies
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/expire
-```
-
----
-
-## Advisory moderation (blueprint Part 22 — not core)
-
-On "Submit for Approval" the form fire-and-forgets `POST
-/api/announcements/moderate`. It always runs deterministic checks (missing
-display window, shouting, an event with no date, …) and — **only if
-`ANTHROPIC_API_KEY` is set** — an 8-second, non-blocking `claude-haiku-4-5`
-advisory call. The result is stored on `announcements.ai_advisory` (needs
-`SUPABASE_SERVICE_ROLE_KEY` — the item is already `pending_approval` by then, so
-the owner's RLS can't write it) and shown to the approver. It never changes
-`status`; a failure or missing key is a no-op.
-
----
-
-## Getting started
-
-### 1. Environment
-
-```bash
-cp .env.example .env.local
-```
-
-Fill `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` (required).
-`SUPABASE_SERVICE_ROLE_KEY` + `CRON_SECRET` are only needed for the expiry cron;
-`ANTHROPIC_API_KEY` only for the AI advisory.
-
-### 2. Database
-
-Run `supabase/migrations/0001_campuscast_init.sql` in the Supabase SQL editor.
-
-### 3. Seed test accounts (optional)
-
-```bash
-npx tsx seed-auth.ts
-```
-
-Then promote one row to `admin` in the Table Editor and assign the rest from the
-Admin dashboard's Users tab.
-
-### 4. Run
-
-```bash
+git clone https://github.com/Aayush-207/IOT-smart-screen.git
+cd IOT-smart-screen
 npm install
-npm run dev            # http://localhost:3000
 ```
 
-### 5. Demo the delivery pipeline without hardware
+### 2. Configure Environment Variables
+Create a `.env.local` file with your Supabase credentials:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+CRON_SECRET=your-secure-cron-secret
+```
 
+### 3. Run Locally
 ```bash
-# Register a screen in the Fleet dashboard, copy its UUID, then:
-npm run sim:device -- --screen <uuid>
-# and open http://localhost:3000/kiosk.html?id=<uuid> in a tab
+npm run dev
 ```
-
-See `scripts/README.md` (offline toggle, kiosk renderer, emergency override).
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 ---
 
-## Tests
+<div align="center">
 
-```bash
-npm test     # vitest: fleet status, priority ordering, deterministic advisories
-npm run build
-```
+**Built with ❤️ for MIT Art, Design & Technology University**  
+*Empowering connected, secure, and governed campus communications.*
 
----
-
-## Out of scope / future work
-
-The full blueprint also specifies a hardware + messaging stack that needs
-external accounts and physical devices and is **not** in this repo:
-
-- **AWS IoT Core / MQTT / X.509 device certs** — this build uses the HTTP
-  polling contract above instead. It still satisfies the blueprint's Part 34
-  "MUST DEMONSTRATE" list (submit→approve→dispatch→ack→displaying, offline
-  resilience, emergency override, live dashboard, audit log).
-- **Raspberry Pi OS image + Python agent** — replaced by `scripts/sim-device.mjs`
-  + `scripts/kiosk.html` for demos.
-- **Cloudflare R2** — attachments use Supabase Storage (`posters` bucket).
-- **Institutional SSO / email-domain enforcement** — a Supabase Auth Hook,
-  configured in the dashboard, not code.
-- Production Vercel / Supabase / AWS provisioning.
+</div>

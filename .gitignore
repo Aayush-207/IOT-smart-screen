@@ -44,3 +44,7 @@ next-env.d.ts
 /archived images/
 
 supabase/.temp/
+
+# Local Netlify folder
+.netlify
+deno.lock
