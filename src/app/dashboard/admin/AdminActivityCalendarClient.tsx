@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -20,8 +20,10 @@ import {
   Compass,
   GraduationCap,
   CalendarDays,
-  Check,
   ChevronDown,
+  Building2,
+  Users,
+  Check,
 } from 'lucide-react'
 import {
   MonthCalendarData,
@@ -35,15 +37,16 @@ interface AdminActivityCalendarClientProps {
   initialMonthsData: Record<string, MonthCalendarData>
 }
 
+// Sophisticated, calm icons matching university tone (no eye-straining neons)
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  'Holiday & Festival': <PartyPopper className="w-3.5 h-3.5 text-[#ef2045] shrink-0" />,
-  'Tech & Hackathons': <Laptop className="w-3.5 h-3.5 text-indigo-500 shrink-0" />,
-  'Sports & Athletics': <Trophy className="w-3.5 h-3.5 text-[#00eaff] shrink-0" />,
-  'Workshops & Seminars': <BookOpen className="w-3.5 h-3.5 text-[#af1591] shrink-0" />,
-  'Cultural & Campus Life': <Sparkles className="w-3.5 h-3.5 text-fuchsia-500 shrink-0" />,
-  'Trek & Adventure': <Compass className="w-3.5 h-3.5 text-teal-500 shrink-0" />,
-  'Alumni & Careers': <GraduationCap className="w-3.5 h-3.5 text-sky-500 shrink-0" />,
-  'Academic & General': <Award className="w-3.5 h-3.5 text-slate-400 shrink-0" />,
+  'Tech & Hackathons': <Laptop className="w-3.5 h-3.5 text-purple-600 shrink-0" />,
+  'Workshops & Seminars': <BookOpen className="w-3.5 h-3.5 text-violet-600 shrink-0" />,
+  'Sports & Athletics': <Trophy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />,
+  'Holiday & Festival': <PartyPopper className="w-3.5 h-3.5 text-rose-500 shrink-0" />,
+  'Cultural & Campus Life': <Sparkles className="w-3.5 h-3.5 text-fuchsia-600 shrink-0" />,
+  'Trek & Adventure': <Compass className="w-3.5 h-3.5 text-teal-600 shrink-0" />,
+  'Alumni & Careers': <GraduationCap className="w-3.5 h-3.5 text-sky-600 shrink-0" />,
+  'Academic & General': <Award className="w-3.5 h-3.5 text-slate-500 shrink-0" />,
 }
 
 export function AdminActivityCalendarClient({
@@ -117,7 +120,6 @@ export function AdminActivityCalendarClient({
     }
   }
 
-  // Categories list
   const categoriesList = useMemo(() => {
     return Object.keys(CATEGORY_STYLES)
   }, [])
@@ -133,7 +135,7 @@ export function AdminActivityCalendarClient({
     return { total: events.length, tech, sports, workshops, holidays, cultural }
   }, [currentMonthData])
 
-  // Filter months by semester term if filtered
+  // Filter months by semester term
   const filteredMonths = useMemo(() => {
     if (activeTerm === 'All') return MONTH_CONFIGS
     return MONTH_CONFIGS.filter((m) => m.term === activeTerm)
@@ -148,8 +150,9 @@ export function AdminActivityCalendarClient({
       const q = searchQuery.toLowerCase()
       const titleMatch = event.title.toLowerCase().includes(q)
       const clubMatch = event.club ? event.club.toLowerCase().includes(q) : false
+      const deptMatch = event.department ? event.department.toLowerCase().includes(q) : false
       const catMatch = event.category.toLowerCase().includes(q)
-      if (!titleMatch && !clubMatch && !catMatch) return false
+      if (!titleMatch && !clubMatch && !deptMatch && !catMatch) return false
     }
     return true
   }
@@ -171,99 +174,111 @@ export function AdminActivityCalendarClient({
   const sheetUrl = `https://docs.google.com/spreadsheets/d/1DUIFEJNlvkBvof1FB5jK4tF35tyD9Err8PF-ozT6SW8/edit?gid=${activeMonthConfig.gid}#gid=${activeMonthConfig.gid}`
 
   return (
-    <div className="bg-white  border border-slate-200  rounded-xl shadow-sm overflow-hidden animate-fade-in-up">
-      {/* Top Header & Structured Navigation */}
-      <div className="p-4 sm:p-5 border-b border-slate-200  space-y-4">
-        {/* ROW 1: Title & Main Actions */}
+    <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_24px_rgba(76,29,118,0.04)] overflow-hidden animate-fade-in-up">
+      {/* ── TOP HEADER / CONTROLS ── */}
+      <div className="p-5 md:p-6 border-b border-slate-100 bg-gradient-to-b from-white to-[#fbfaff] space-y-5">
+        {/* ROW 1: Month Title & Actions */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="p-2 rounded-xl bg-slate-100  text-slate-800 ">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#f4eefe] border border-[#4c1d76]/15 flex items-center justify-center text-[#4c1d76] shadow-xs">
               <CalendarIcon className="w-5 h-5" />
-            </span>
+            </div>
             <div>
-              <h2 className="text-lg font-medium text-slate-900  flex items-center gap-2">
-                <span>{activeMonthConfig.name}</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-200  bg-slate-50  text-slate-600 ">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                  {activeMonthConfig.name}
+                </h2>
+                <span className="text-[10px] font-semibold tracking-wide uppercase px-2.5 py-0.5 rounded-full bg-[#f4eefe] text-[#4c1d76] border border-[#4c1d76]/20">
                   {activeMonthConfig.term}
                 </span>
-              </h2>
-              <div className="text-[11px] font-mono uppercase tracking-wider text-slate-500  mt-0.5">
-                Academic Year 2026&ndash;2027
               </div>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                Academic Year 2026&ndash;2027 &bull; {currentMonthData.totalEvents} Total Events Scheduled
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Search Bar */}
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search events, clubs..."
+                placeholder="Search event, club, dept..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-7 py-1.5 rounded-lg text-xs bg-slate-50  border border-slate-200  text-slate-900  placeholder-slate-400 focus:outline-hidden focus:border-slate-400  transition-colors"
+                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#4c1d76] focus:ring-2 focus:ring-[#4c1d76]/10 shadow-2xs transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 "
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                  title="Clear search"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
+            {/* Live Refresh Button */}
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              title="Sync latest entries"
-              className="p-1.5 rounded-lg border border-slate-200  hover:bg-slate-100  transition-colors text-slate-700 "
+              title="Sync latest live Google Sheet data"
+              className={`p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#4c1d76] hover:border-[#4c1d76]/30 shadow-2xs transition-all flex items-center gap-1.5 text-xs font-semibold ${
+                refreshSuccess ? 'text-emerald-600 border-emerald-300 bg-emerald-50/50' : ''
+              }`}
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-blue-500' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-[#4c1d76]' : ''}`} />
+              <span className="hidden sm:inline">{refreshSuccess ? 'Synced' : 'Refresh'}</span>
             </button>
+
+            {/* Open Google Sheet External Link */}
             <a
               href={sheetUrl}
               target="_blank"
               rel="noopener noreferrer"
-              title="Open Google Sheet"
-              className="p-1.5 rounded-lg border border-slate-200  hover:bg-slate-100  transition-colors text-slate-700 "
+              title="Open current month in Google Sheets"
+              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#4c1d76] hover:border-[#4c1d76]/30 shadow-2xs transition-all flex items-center gap-1.5 text-xs font-semibold"
             >
               <ExternalLink className="w-4 h-4 opacity-70" />
+              <span className="hidden sm:inline">Sheets</span>
             </a>
           </div>
         </div>
 
-        {/* ROW 2: Filters, View Toggles, Jump */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+        {/* ROW 2: Month Navigation & View Toggles */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2">
+          {/* Month Steppers & Pill List */}
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
             {/* Term Tabs */}
-            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100  border border-slate-200  shrink-0 text-xs">
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100/90 border border-slate-200/80 shrink-0">
               {(['All', 'Odd Semester', 'Even Semester'] as const).map((term) => (
                 <button
                   key={term}
                   onClick={() => setActiveTerm(term)}
-                  className={`px-2 py-1 rounded-md transition-all font-mono text-[10px] ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
                     activeTerm === term
-                      ? 'bg-white  text-slate-900  font-semibold shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-900 '
+                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                      : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  {term === 'All' ? 'All' : term.split(' ')[0]}
+                  {term === 'All' ? 'All' : term.replace(' Semester', '')}
                 </button>
               ))}
             </div>
 
-            <div className="w-px h-5 bg-slate-200  mx-1 shrink-0" />
+            <div className="w-px h-6 bg-slate-200 mx-1 shrink-0" />
 
-            {/* Steppers & Month Pills */}
+            {/* Month Steppers */}
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={handlePrevMonth}
                 disabled={MONTH_CONFIGS[0].id === selectedMonthId}
-                className="p-1 rounded-md border border-slate-200  hover:bg-slate-100  disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-700 "
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 transition-colors shadow-2xs"
+                title="Previous Month"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
 
               {filteredMonths.map((month) => {
@@ -273,18 +288,18 @@ export function AdminActivityCalendarClient({
                   <button
                     key={month.id}
                     onClick={() => setSelectedMonthId(month.id)}
-                    className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 border ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border ${
                       isActive
-                        ? 'bg-[#121826] text-white   border-[#121826]  shadow-xs font-semibold'
-                        : 'bg-slate-50  text-slate-600  border-slate-200  hover:text-slate-900 '
+                        ? 'bg-[#4c1d76] text-white border-[#4c1d76] shadow-sm'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-[#fcfaff] hover:text-[#4c1d76] hover:border-[#4c1d76]/30'
                     }`}
                   >
                     <span>{month.shortName.split(' ')[0]}</span>
                     <span
-                      className={`font-mono text-[9px] px-1 py-0.5 rounded-sm ${
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
                         isActive
-                          ? 'bg-white/20 text-white  '
-                          : 'bg-slate-200/70  text-slate-500 '
+                          ? 'bg-white/20 text-white font-bold'
+                          : 'bg-slate-100 text-slate-500'
                       }`}
                     >
                       {mData?.totalEvents ?? '...'}
@@ -296,30 +311,35 @@ export function AdminActivityCalendarClient({
               <button
                 onClick={handleNextMonth}
                 disabled={MONTH_CONFIGS[MONTH_CONFIGS.length - 1].id === selectedMonthId}
-                className="p-1 rounded-md border border-slate-200  hover:bg-slate-100  disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-slate-700 "
+                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 transition-colors shadow-2xs"
+                title="Next Month"
               >
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Quick Jump Dropdown */}
+          {/* Jump Dropdown & Grid/Agenda View Selector */}
+          <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
+            {/* Quick Month Jump Menu */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200  bg-slate-50  hover:bg-slate-100  text-[11px] text-slate-900  font-medium flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs text-slate-700 font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
               >
                 <span>Jump</span>
-                <ChevronDown className="w-3 h-3 opacity-60" />
+                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
               </button>
 
               {isDropdownOpen && (
                 <div
-                  className="absolute right-0 mt-1 z-30 w-48 rounded-xl bg-white  border border-slate-200  shadow-xl py-1 divide-y divide-slate-100  animate-scale-up"
+                  className="absolute right-0 mt-1.5 z-30 w-52 rounded-2xl bg-white border border-slate-200 shadow-xl py-1.5 animate-scale-up"
                   onClick={() => setIsDropdownOpen(false)}
                 >
-                  <div className="p-1 max-h-64 overflow-y-auto scrollbar-none">
+                  <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
+                    Select Month
+                  </div>
+                  <div className="p-1 max-h-64 overflow-y-auto custom-scrollbar">
                     {MONTH_CONFIGS.map((m) => {
                       const isSelected = m.id === selectedMonthId
                       const count = monthsData[m.id]?.totalEvents || 0
@@ -327,17 +347,23 @@ export function AdminActivityCalendarClient({
                         <button
                           key={m.id}
                           onClick={() => {
-                            setSelectedMonthId(m.id);
-                            setIsDropdownOpen(false);
+                            setSelectedMonthId(m.id)
+                            setIsDropdownOpen(false)
                           }}
-                          className={`w-full text-left px-2 py-1.5 rounded-md text-[11px] flex items-center justify-between transition-colors ${
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors ${
                             isSelected
-                              ? 'bg-[#121826] text-white   font-semibold'
-                              : 'text-slate-700  hover:bg-slate-100 '
+                              ? 'bg-[#4c1d76] text-white font-bold'
+                              : 'text-slate-700 hover:bg-[#f8f5ff] hover:text-[#4c1d76]'
                           }`}
                         >
                           <span>{m.name}</span>
-                          <span className="font-mono text-[9px] opacity-70">{count} events</span>
+                          <span
+                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                              isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {count}
+                          </span>
                         </button>
                       )
                     })}
@@ -346,47 +372,47 @@ export function AdminActivityCalendarClient({
               )}
             </div>
 
-            {/* View mode toggle */}
-            <div className="flex items-center p-0.5 bg-slate-100  border border-slate-200  rounded-lg text-xs">
+            {/* Grid / Agenda Toggle */}
+            <div className="flex items-center p-1 bg-slate-100/90 border border-slate-200/80 rounded-xl text-xs">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all text-[11px] ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all text-xs ${
                   viewMode === 'grid'
-                    ? 'bg-white  text-slate-900  shadow-xs'
-                    : 'text-slate-600  hover:text-slate-900 '
+                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <LayoutGrid className="w-3 h-3" />
-                <span className="hidden sm:inline">Grid</span>
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Grid</span>
               </button>
               <button
                 onClick={() => setViewMode('agenda')}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all text-[11px] ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all text-xs ${
                   viewMode === 'agenda'
-                    ? 'bg-white  text-slate-900  shadow-xs'
-                    : 'text-slate-600  hover:text-slate-900 '
+                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <List className="w-3 h-3" />
-                <span className="hidden sm:inline">Agenda</span>
+                <List className="w-3.5 h-3.5" />
+                <span>Agenda</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* ROW 3: Categories & Compact Stats */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 border-t border-slate-100  pt-3">
-          {/* Category Pill Filters */}
+        {/* ROW 3: Category Filter Pills & Key Counters */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          {/* Category Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
             <button
               onClick={() => setSelectedCategory('ALL')}
-              className={`px-2 py-1 rounded-full text-[10px] font-mono shrink-0 transition-all border ${
+              className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all border ${
                 selectedCategory === 'ALL'
-                  ? 'bg-[#121826] text-white   border-[#121826]  font-medium'
-                  : 'bg-slate-50  text-slate-600  border-slate-200  hover:text-slate-900 '
+                  ? 'bg-[#4c1d76] text-white border-[#4c1d76] shadow-xs'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
-              All
+              All Categories
             </button>
             {categoriesList.map((catKey) => {
               const isSelected = selectedCategory === catKey
@@ -395,59 +421,59 @@ export function AdminActivityCalendarClient({
                 <button
                   key={catKey}
                   onClick={() => setSelectedCategory(catKey)}
-                  className={`px-2 py-1 rounded-full text-[10px] font-mono shrink-0 transition-all border flex items-center gap-1 ${
+                  className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all border flex items-center gap-1.5 ${
                     isSelected
-                      ? `${style.badgeClass} border-current font-medium shadow-2xs`
-                      : 'bg-slate-50  text-slate-600  border-slate-200  hover:text-slate-900 '
+                      ? `${style.badgeClass} ring-2 ring-[#4c1d76]/20 font-bold shadow-2xs`
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${style.dotClass}`} />
+                  <span className={`w-2 h-2 rounded-full ${style.dotClass}`} />
                   <span>{catKey.split(' ')[0]}</span>
                 </button>
               )
             })}
           </div>
 
-          {/* Compact Stats */}
-          <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono shrink-0">
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100  border border-slate-200  text-slate-700 ">
-              <CalendarDays className="w-3 h-3 opacity-70" />
-              <span>{stats.total} Total</span>
+          {/* Clean, Non-Garish Metric Pills */}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium shrink-0">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700">
+              <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
+              <span><strong>{stats.total}</strong> Total</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-50  border border-indigo-100  text-indigo-700 ">
-              <Laptop className="w-3 h-3 opacity-70" />
-              <span>{stats.tech} Tech</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50/80 border border-purple-200 text-purple-900">
+              <Laptop className="w-3.5 h-3.5 text-purple-600" />
+              <span><strong>{stats.tech}</strong> Tech</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#00eaff]/10  border border-[#00eaff]/10  text-[#00eaff] ">
-              <Trophy className="w-3 h-3 opacity-70" />
-              <span>{stats.sports} Sports</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50/80 border border-emerald-200 text-emerald-900">
+              <Trophy className="w-3.5 h-3.5 text-emerald-600" />
+              <span><strong>{stats.sports}</strong> Sports</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#af1591]/10  border border-[#af1591]/10  text-[#af1591] ">
-              <BookOpen className="w-3 h-3 opacity-70" />
-              <span>{stats.workshops} Workshop</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-50/80 border border-violet-200 text-violet-900">
+              <BookOpen className="w-3.5 h-3.5 text-violet-600" />
+              <span><strong>{stats.workshops}</strong> Workshop</span>
             </div>
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#ffeaea]  border border-[#ffeaea]  text-[#ef2045] ">
-              <PartyPopper className="w-3 h-3 opacity-70" />
-              <span>{stats.holidays} Holiday</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50/80 border border-rose-200 text-rose-900">
+              <PartyPopper className="w-3.5 h-3.5 text-rose-600" />
+              <span><strong>{stats.holidays}</strong> Holiday</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main View Area */}
+      {/* ── MAIN CONTENT VIEW ── */}
       {viewMode === 'grid' ? (
         /* Calendar Grid View */
-        <div className="p-4 sm:p-6 overflow-x-auto">
-          <div className="min-w-[760px]">
-            {/* Weekday headers */}
-            <div className="grid grid-cols-7 gap-1.5 mb-2 text-center">
+        <div className="p-4 sm:p-6 overflow-x-auto bg-[#faf9fc]">
+          <div className="min-w-[780px]">
+            {/* Weekday Column Headers */}
+            <div className="grid grid-cols-7 gap-2 mb-2.5 text-center">
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName, idx) => (
                 <div
                   key={dayName}
-                  className={`py-2 text-[11px] font-mono font-medium uppercase tracking-wider rounded-md ${
+                  className={`py-2 text-xs font-bold uppercase tracking-wider rounded-xl border ${
                     idx === 0
-                      ? 'text-[#ef2045]  bg-[#ffeaea]/40 '
-                      : 'text-slate-500  bg-slate-50/70 '
+                      ? 'text-rose-700 bg-rose-50/70 border-rose-100'
+                      : 'text-slate-600 bg-white border-slate-200/70'
                   }`}
                 >
                   {dayName}
@@ -456,15 +482,15 @@ export function AdminActivityCalendarClient({
             </div>
 
             {/* Weeks Grid */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {(currentMonthData.weeks || []).map((week, wIdx) => (
-                <div key={wIdx} className="grid grid-cols-7 gap-1.5">
+                <div key={wIdx} className="grid grid-cols-7 gap-2">
                   {week.map((day, dIdx) => {
                     if (!day) {
                       return (
                         <div
                           key={`empty-${wIdx}-${dIdx}`}
-                          className="min-h-[105px] rounded-lg bg-slate-50/40  border border-slate-100 "
+                          className="min-h-[116px] rounded-2xl bg-slate-50/60 border border-slate-100"
                         />
                       )
                     }
@@ -473,57 +499,50 @@ export function AdminActivityCalendarClient({
                     const hasHoliday = day.events.some(
                       (e) => e.category === 'Holiday & Festival'
                     )
-                    const hasActiveFilter =
-                      searchQuery.trim() !== '' || selectedCategory !== 'ALL'
                     const isToday = day.dateStr === todayStr
+                    const isSunday = dIdx === 0
 
                     return (
                       <div
                         key={day.dateStr}
                         onClick={() => setActiveDetailDay(day)}
-                        className={`min-h-[110px] p-2 rounded-lg border transition-all cursor-pointer flex flex-col justify-between group ${
+                        className={`min-h-[116px] p-2.5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group relative ${
                           day.isCurrentMonth
                             ? isToday
-                              ? 'bg-blue-50/50  border-blue-400  shadow-[0_0_0_1px_rgba(59,130,246,0.5)] hover:border-blue-500'
+                              ? 'bg-[#faf6ff] border-[#4c1d76] shadow-[0_0_0_1.5px_rgba(76,29,118,0.4)] hover:shadow-md'
                               : hasHoliday
-                                ? 'bg-[#ffeaea]/30  border-[#ef2045]/30  hover:border-[#ef2045] '
-                                : 'bg-white  border-slate-200/80  hover:border-slate-300  hover:shadow-xs'
-                            : 'bg-slate-50/50  border-slate-100  opacity-40 hover:opacity-75'
+                              ? 'bg-rose-50/30 border-rose-200/60 hover:border-rose-300 hover:shadow-sm'
+                              : 'bg-white border-slate-200/80 hover:border-[#4c1d76]/40 hover:shadow-[0_4px_16px_rgba(76,29,118,0.06)] hover:-translate-y-0.5'
+                            : 'bg-slate-50/40 border-slate-100 opacity-40 hover:opacity-75'
                         }`}
                       >
-                        {/* Day header */}
-                        <div className="flex items-center justify-between mb-1">
+                        {/* Day Card Header */}
+                        <div className="flex items-center justify-between mb-1.5">
                           <span
-                            className={`font-mono text-xs font-semibold px-1.5 py-0.5 rounded ${
+                            className={`text-xs font-bold px-2 py-0.5 rounded-lg transition-colors ${
                               isToday
-                                ? 'text-white bg-blue-600'
+                                ? 'bg-[#4c1d76] text-white shadow-2xs font-extrabold'
                                 : hasHoliday
-                                ? 'text-[#ef2045]  bg-[#ffeaea]/70 '
-                                : dIdx === 0
-                                ? 'text-[#ef2045] '
+                                ? 'text-rose-700 bg-rose-100/70'
+                                : isSunday
+                                ? 'text-rose-700 bg-rose-50/50'
                                 : day.isCurrentMonth
-                                ? 'text-slate-900 '
-                                : 'text-slate-400 '
+                                ? 'text-slate-800 group-hover:text-[#4c1d76]'
+                                : 'text-slate-400'
                             }`}
                           >
                             {day.dayNum}
                           </span>
 
                           {matchingEvents.length > 0 && (
-                            <span
-                              className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                                hasActiveFilter
-                                  ? 'bg-blue-100 text-blue-800   font-medium'
-                                  : 'bg-slate-100  text-slate-600 '
-                              }`}
-                            >
+                            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md bg-[#f4eefe] text-[#4c1d76] border border-[#4c1d76]/15">
                               {matchingEvents.length}
                             </span>
                           )}
                         </div>
 
-                        {/* Events Preview Chips */}
-                        <div className="space-y-1 flex-1 overflow-hidden my-0.5">
+                        {/* Event Chips List */}
+                        <div className="space-y-1.5 flex-1 overflow-hidden my-1">
                           {matchingEvents.slice(0, 2).map((ev, eIdx) => {
                             const style =
                               CATEGORY_STYLES[ev.category] ||
@@ -532,24 +551,24 @@ export function AdminActivityCalendarClient({
                               <div
                                 key={eIdx}
                                 title={ev.title}
-                                className={`text-[10px] px-1.5 py-0.5 rounded border truncate transition-colors font-medium flex items-center gap-1 ${style.badgeClass}`}
+                                className={`text-[10px] px-2 py-1 rounded-lg border truncate font-semibold flex items-center gap-1.5 shadow-2xs transition-colors ${style.badgeClass}`}
                               >
-                                <span className={`w-1 h-1 rounded-full shrink-0 ${style.dotClass}`} />
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dotClass}`} />
                                 <span className="truncate">{ev.title}</span>
                               </div>
                             )
                           })}
 
                           {matchingEvents.length > 2 && (
-                            <div className="text-[9px] font-mono text-slate-500  pl-1 font-medium group-hover:text-slate-900  transition-colors">
+                            <div className="text-[10px] font-bold text-[#4c1d76] bg-[#f4eefe]/70 px-2 py-0.5 rounded-md border border-[#4c1d76]/15 text-center">
                               +{matchingEvents.length - 2} more
                             </div>
                           )}
                         </div>
 
-                        {/* Footer hover indicator */}
-                        <div className="text-[9px] font-mono text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex justify-end">
-                          <span>View Details &rarr;</span>
+                        {/* Subtle Footer */}
+                        <div className="text-[9px] font-semibold text-slate-400 group-hover:text-[#4c1d76] transition-colors flex justify-end pt-1">
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity">Details &rarr;</span>
                         </div>
                       </div>
                     )
@@ -560,45 +579,47 @@ export function AdminActivityCalendarClient({
           </div>
         </div>
       ) : (
-        /* Agenda / List View */
-        <div className="p-4 sm:p-6 divide-y divide-slate-100  max-h-[640px] overflow-y-auto">
+        /* Agenda / Timeline View */
+        <div className="p-5 sm:p-6 divide-y divide-slate-100 max-h-[640px] overflow-y-auto custom-scrollbar bg-white">
           {agendaDays.length === 0 ? (
-            <div className="py-12 text-center text-slate-400  font-mono text-xs">
-              No campus events match your current search and category filters.
+            <div className="py-16 text-center text-slate-400 text-xs font-medium">
+              No campus activities or events match your current filter parameters.
             </div>
           ) : (
             agendaDays.map(({ day, filteredEvents }) => {
               const hasHoliday = day.events.some((e) => e.category === 'Holiday & Festival')
               const isToday = day.dateStr === todayStr
+              const isSunday = day.dayOfWeek.toLowerCase().startsWith('sun')
+
               return (
-                <div key={day.dateStr} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-3 sm:gap-6">
+                <div key={day.dateStr} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-4 sm:gap-6">
                   {/* Date Badge */}
                   <div className="sm:w-36 shrink-0">
                     <div
-                      className={`inline-flex sm:flex flex-col p-2.5 rounded-lg border text-left ${
+                      className={`p-3 rounded-2xl border text-left shadow-2xs ${
                         isToday
-                          ? 'bg-blue-50  border-blue-400 '
-                          : hasHoliday
-                          ? 'bg-[#ffeaea]  border-[#ef2045]/30 '
-                          : 'bg-slate-50  border-slate-200/80 '
+                          ? 'bg-[#f4eefe] border-[#4c1d76]/30 text-[#4c1d76]'
+                          : hasHoliday || isSunday
+                          ? 'bg-rose-50/60 border-rose-200 text-rose-800'
+                          : 'bg-slate-50 border-slate-200 text-slate-800'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className={`text-xl font-bold font-mono leading-none ${isToday ? 'text-blue-700 ' : 'text-slate-900 '}`}>
+                        <span className="text-2xl font-extrabold leading-none">
                           {day.dayNum}
                         </span>
-                        <span className={`text-[10px] font-mono uppercase tracking-wider ${isToday ? 'text-blue-600  font-semibold' : 'text-slate-500 '}`}>
+                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">
                           {day.dayOfWeek.slice(0, 3)}
                         </span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500  mt-1">
+                      <span className="text-[11px] font-medium opacity-80 block mt-1">
                         {activeMonthConfig.name}
                       </span>
                     </div>
                   </div>
 
                   {/* Day Events List */}
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-2.5">
                     {filteredEvents.map((ev, eIdx) => {
                       const style =
                         CATEGORY_STYLES[ev.category] ||
@@ -607,34 +628,37 @@ export function AdminActivityCalendarClient({
                         <div
                           key={eIdx}
                           onClick={() => setActiveDetailDay(day)}
-                          className={`p-3 rounded-lg border transition-all cursor-pointer hover:shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white  border-slate-200/70  hover:border-slate-300  ${style.borderClass} border-l-4`}
+                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer hover:shadow-sm hover:border-[#4c1d76]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border-slate-200/80 ${style.borderClass} border-l-[3.5px]`}
                         >
-                          <div className="space-y-1">
-                            <div className="text-xs font-medium text-slate-900  flex items-center gap-1.5">
-                              {CATEGORY_ICONS[ev.category] || <Award className="w-3.5 h-3.5 text-slate-400" />}
+                          <div className="space-y-1.5">
+                            <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                              {CATEGORY_ICONS[ev.category] || <Award className="w-4 h-4 text-slate-400" />}
                               <span>{ev.title}</span>
                             </div>
-                            <div className="flex flex-wrap items-center gap-1.5">
+
+                            <div className="flex flex-wrap items-center gap-2">
                               <span
-                                className={`text-[10px] font-mono px-2 py-0.5 rounded border ${style.badgeClass}`}
+                                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md border ${style.badgeClass}`}
                               >
                                 {ev.category}
                               </span>
                               {ev.club && (
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100  border border-slate-200  text-slate-600 ">
-                                  Club: {ev.club}
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1">
+                                  <Users className="w-3 h-3 text-slate-400" />
+                                  <span>{ev.club}</span>
                                 </span>
                               )}
                               {ev.department && (
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50  border border-indigo-200  text-indigo-700 ">
-                                  Dept: {ev.department}
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#f4eefe] border border-[#4c1d76]/20 text-[#4c1d76] flex items-center gap-1">
+                                  <Building2 className="w-3 h-3 text-[#4c1d76]/70" />
+                                  <span>{ev.department}</span>
                                 </span>
                               )}
                             </div>
                           </div>
 
-                          <div className="text-[10px] font-mono text-slate-400 shrink-0 self-end sm:self-center">
-                            Inspect &rarr;
+                          <div className="text-xs font-bold text-[#4c1d76] shrink-0 self-end sm:self-center opacity-80 hover:opacity-100">
+                            Details &rarr;
                           </div>
                         </div>
                       )
@@ -647,17 +671,17 @@ export function AdminActivityCalendarClient({
         </div>
       )}
 
-      {/* Category Legend & Sheet Info Footer */}
-      <div className="p-4 sm:p-5 bg-slate-50/70  border-t border-slate-200 ">
+      {/* ── FOOTER LEGEND ── */}
+      <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200/80">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 ">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Legend:
             </span>
             {categoriesList.map((catKey) => {
               const style = CATEGORY_STYLES[catKey]
               return (
-                <div key={catKey} className="flex items-center gap-1.5 text-[11px] text-slate-600 ">
+                <div key={catKey} className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
                   <span className={`w-2 h-2 rounded-full ${style.dotClass}`} />
                   <span>{catKey}</span>
                 </div>
@@ -665,35 +689,35 @@ export function AdminActivityCalendarClient({
             })}
           </div>
 
-          <div className="text-[11px] font-mono text-slate-400  flex items-center gap-2">
+          <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
             <span>Month GID: {activeMonthConfig.gid}</span>
           </div>
         </div>
       </div>
 
-      {/* Day Details Modal */}
+      {/* ── DAY DETAILS MODAL ── */}
       {activeDetailDay && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-fade-in"
           onClick={() => setActiveDetailDay(null)}
         >
           <div
-            className="bg-white  border border-slate-200  rounded-xl max-w-lg w-full max-h-[85vh] shadow-2xl overflow-hidden flex flex-col animate-scale-up"
+            className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full max-h-[85vh] shadow-2xl overflow-hidden flex flex-col animate-scale-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-200  flex items-center justify-between">
+            <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-white to-[#faf7ff] flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-blue-600 ">
-                    Day Schedule Details
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#4c1d76] bg-[#f4eefe] px-2.5 py-0.5 rounded-full border border-[#4c1d76]/20">
+                    Schedule Details
                   </span>
-                  <span className="text-slate-400">&bull;</span>
-                  <span className="font-mono text-[10px] text-slate-500">
+                  <span className="text-slate-300">&bull;</span>
+                  <span className="text-xs font-semibold text-slate-500">
                     {activeDetailDay.dayOfWeek}
                   </span>
                 </div>
-                <h3 className="text-lg font-normal text-slate-900 ">
+                <h3 className="text-lg font-bold text-slate-900">
                   {new Date(activeDetailDay.dateStr).toLocaleDateString('en-US', {
                     weekday: 'long',
                     month: 'long',
@@ -704,16 +728,17 @@ export function AdminActivityCalendarClient({
               </div>
               <button
                 onClick={() => setActiveDetailDay(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-900  hover:bg-slate-100  transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                title="Close"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Events Content */}
-            <div className="p-5 overflow-y-auto space-y-3 divide-y divide-slate-100 ">
+            <div className="p-6 overflow-y-auto space-y-3.5 divide-y divide-slate-100 custom-scrollbar">
               {activeDetailDay.events.length === 0 ? (
-                <div className="py-8 text-center text-slate-400  font-mono text-xs">
+                <div className="py-12 text-center text-slate-400 text-xs font-medium">
                   No campus activities or holidays scheduled on this date.
                 </div>
               ) : (
@@ -722,31 +747,30 @@ export function AdminActivityCalendarClient({
                     CATEGORY_STYLES[ev.category] ||
                     CATEGORY_STYLES['Academic & General']
                   return (
-                    <div key={idx} className="pt-3 first:pt-0 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-start gap-2">
-                          <span className="mt-0.5">{CATEGORY_ICONS[ev.category]}</span>
-                          <h4 className="text-sm font-medium text-slate-900  leading-snug">
+                    <div key={idx} className="pt-3.5 first:pt-0 space-y-2">
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                          {CATEGORY_ICONS[ev.category]}
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900 leading-snug">
                             {ev.title}
                           </h4>
+                          <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md border mt-1.5 ${style.badgeClass}`}>
+                            {ev.category}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 pl-6">
-                        <span
-                          className={`text-[10px] font-mono px-2 py-0.5 rounded border ${style.badgeClass}`}
-                        >
-                          {ev.category}
-                        </span>
-
+                      <div className="flex flex-wrap items-center gap-2 pl-9 pt-0.5">
                         {ev.club && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100  border border-slate-200  text-slate-600 ">
-                            Club: <strong className="font-semibold">{ev.club}</strong>
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700">
+                            Club: <strong className="font-bold text-slate-900">{ev.club}</strong>
                           </span>
                         )}
                         {ev.department && (
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-50  border border-indigo-200  text-indigo-700 ">
-                            Department: <strong className="font-semibold">{ev.department}</strong>
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-[#f4eefe] border border-[#4c1d76]/20 text-[#4c1d76]">
+                            Department: <strong className="font-bold text-[#4c1d76]">{ev.department}</strong>
                           </span>
                         )}
                       </div>
@@ -757,13 +781,13 @@ export function AdminActivityCalendarClient({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50  border-t border-slate-200  flex items-center justify-between">
-              <span className="text-xs font-mono text-slate-500 ">
+            <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">
                 {activeDetailDay.events.length} {activeDetailDay.events.length === 1 ? 'event' : 'events'} recorded
               </span>
               <button
                 onClick={() => setActiveDetailDay(null)}
-                className="px-4 py-1.5 text-xs font-medium rounded-lg bg-[#121826] text-white   hover:opacity-90 transition-opacity"
+                className="px-5 py-2 text-xs font-bold rounded-xl bg-[#4c1d76] text-white hover:bg-[#3d1561] transition-colors shadow-xs"
               >
                 Close
               </button>
