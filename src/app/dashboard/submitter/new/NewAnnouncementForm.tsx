@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { UploadCloud, Eye, Monitor, Smartphone, Building2, Clock, Sparkles } from 'lucide-react'
+import { UploadCloud, Eye, Monitor, Smartphone, Building2, Clock, Sparkles, AlertCircle } from 'lucide-react'
 import { PRIORITY_LABEL, type Priority } from '@/lib/priority'
 
 interface Department {

@@ -358,6 +358,13 @@ export function FleetMonitoringClient({
     setScreensList(initialScreens)
   }, [initialScreens])
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh()
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [router])
+
   // 1 screen functional & online (Main Lobby Screen 01), remaining screens offline
   const withStatus = useMemo(
     () =>

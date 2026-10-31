@@ -1,3 +1,4 @@
+import Link from 'next/link'
 'use client'
 
 import { useState } from 'react'
@@ -193,9 +194,9 @@ export function AdminOverviewDashboard({ totalDepartments }: { totalDepartments:
                                 </div>
                               ))}
                               {club.events.length > 3 && (
-                                <button className="w-full mt-3 py-2 text-[10px] font-extrabold uppercase tracking-wider text-[#4c1d76] hover:bg-[#4c1d76]/10 rounded-lg transition-colors flex items-center justify-center gap-1 border border-transparent hover:border-[#4c1d76]/20">
+                                <Link href="/dashboard/admin/calendar" className="w-full mt-3 py-2 text-[10px] font-extrabold uppercase tracking-wider text-[#4c1d76] hover:bg-[#4c1d76]/10 rounded-lg transition-colors flex items-center justify-center gap-1 border border-transparent hover:border-[#4c1d76]/20">
                                   View All {club.events.length} Events <ExternalLink className="w-3 h-3 ml-0.5" />
-                                </button>
+                                </Link>
                               )}
                             </div>
                           )}

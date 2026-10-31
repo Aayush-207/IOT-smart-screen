@@ -219,7 +219,11 @@ export function VideoWallClient({
   allActiveAnnouncements?: any[]
   userId: string
 }) {
-  const [screens] = useState(initialScreens)
+  const [screens, setScreens] = useState(initialScreens)
+
+  useEffect(() => {
+    setScreens(initialScreens)
+  }, [initialScreens])
   const [query, setQuery] = useState('')
   const [selectedZone, setSelectedZone] = useState('all')
   const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'stale' | 'offline'>('all')

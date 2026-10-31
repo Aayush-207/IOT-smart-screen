@@ -1,7 +1,7 @@
 import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getAllMonthsCalendarData, CATEGORY_STYLES, CATEGORY_ICONS, CalendarDay } from '@/lib/activityCalendar'
+import { getAllMonthsCalendarData, CATEGORY_STYLES, CalendarDay } from '@/lib/activityCalendar'
 import { Calendar as CalendarIcon, Award, MapPin } from 'lucide-react'
 
 export default async function SubmitterEventsPage() {

@@ -503,10 +503,10 @@ function parseMonthSheet(rows: string[][], monthCfg: MonthConfig): MonthCalendar
   }
 }
 
-export async function fetchClubsMapping(): Promise<Record<string, string>> {
+export async function fetchClubsMapping(forceFresh = false): Promise<Record<string, string>> {
   const url = `https://docs.google.com/spreadsheets/d/1DUIFEJNlvkBvof1FB5jK4tF35tyD9Err8PF-ozT6SW8/export?format=csv&gid=380806459`
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } })
+    const res = await fetch(url, forceFresh ? { cache: 'no-store' } : { next: { revalidate: 3600 } })
     if (!res.ok) return {}
     const csvText = await res.text()
     const rows = parseCSV(csvText)
@@ -599,11 +599,12 @@ function applyClubsMapping(data: MonthCalendarData, clubsMap: Record<string, str
 
 export async function fetchCalendarMonthData(
   config: MonthConfig,
-  clubsMap: Record<string, string> = {}
+  clubsMap: Record<string, string> = {},
+  forceFresh = false
 ): Promise<MonthCalendarData> {
   const url = `https://docs.google.com/spreadsheets/d/1DUIFEJNlvkBvof1FB5jK4tF35tyD9Err8PF-ozT6SW8/export?format=csv&gid=${config.gid}`
   try {
-    const res = await fetch(url, { next: { revalidate: 300 } })
+    const res = await fetch(url, forceFresh ? { cache: 'no-store' } : { next: { revalidate: 300 } })
     if (!res.ok) {
       throw new Error(`Failed to fetch sheet: HTTP ${res.status}`)
     }
@@ -634,33 +635,31 @@ export async function fetchCalendarMonthData(
   }
 }
 
-export async function getAllMonthsCalendarData(): Promise<
+export async function getAllMonthsCalendarData(forceFresh = false): Promise<
   Record<string, MonthCalendarData>
 > {
-  const clubsMap = await fetchClubsMapping()
+  const clubsMap = await fetchClubsMapping(forceFresh)
 
-  // Pre-loaded fallback provides instantaneous response for all 9 months
-  const fallbackMap: Record<string, MonthCalendarData> = {}
-  if (fallbackData?.months && Array.isArray(fallbackData.months)) {
-    for (const item of fallbackData.months) {
-      if (item?.id && item?.data) {
-        const data = JSON.parse(JSON.stringify(item.data)) as MonthCalendarData
-        applyClubsMapping(data, clubsMap)
-        fallbackMap[item.id] = data
+  try {
+    const entries = await Promise.all(
+      MONTH_CONFIGS.map(async (cfg) => {
+        const data = await fetchCalendarMonthData(cfg, clubsMap, forceFresh)
+        return [cfg.id, data] as const
+      })
+    )
+    return Object.fromEntries(entries)
+  } catch (err) {
+    console.warn('[ActivityCalendar] Live fetch failed, using fallback:', err)
+    const fallbackMap: Record<string, MonthCalendarData> = {}
+    if (fallbackData?.months && Array.isArray(fallbackData.months)) {
+      for (const item of fallbackData.months) {
+        if (item?.id && item?.data) {
+          const data = JSON.parse(JSON.stringify(item.data)) as MonthCalendarData
+          applyClubsMapping(data, clubsMap)
+          fallbackMap[item.id] = data
+        }
       }
     }
-  }
-
-  // If fallback has all configs, return immediately for instant server rendering
-  if (Object.keys(fallbackMap).length >= MONTH_CONFIGS.length) {
     return fallbackMap
   }
-
-  const entries = await Promise.all(
-    MONTH_CONFIGS.map(async (cfg) => {
-      const data = await fetchCalendarMonthData(cfg, clubsMap)
-      return [cfg.id, data] as const
-    })
-  )
-  return Object.fromEntries(entries)
 }

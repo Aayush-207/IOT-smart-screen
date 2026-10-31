@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const calendarData = await getAllMonthsCalendarData()
+    const calendarData = await getAllMonthsCalendarData(true)
     return NextResponse.json({
       success: true,
       months: MONTH_CONFIGS,
