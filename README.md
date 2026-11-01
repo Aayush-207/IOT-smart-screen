@@ -1,27 +1,44 @@
 <div align="center">
 
-<img src="./public/MIT_circular.png" alt="MIT-ADT University" width="100" />
-<br />
-<img src="./public/logo.png" alt="CampusCast Logo" width="220" />
+# 📡 CampusCast — IoT Smart Screen & Digital Signage Network
 
-# 📡 CampusCast — Governed Campus Display Network & IoT Smart Screen
+**An enterprise-grade governance, priority routing, and delivery network for campus digital displays.**
 
-**An enterprise-grade, multi-role digital signage governance & automated IoT display network.**
-
-[![Live on Netlify](https://img.shields.io/badge/Netlify-Live%20Deploy-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://campuscast-smart-screen.netlify.app)
+[![Live Production](https://img.shields.io/badge/Netlify-Live%20Deployment-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://campuscast-smart-screen.netlify.app)
 [![Next.js 16](https://img.shields.io/badge/Next.js%2016-App%20Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%26%20Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS%20v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 <br />
 
-🌐 **Live Production Link:** [https://campuscast-smart-screen.netlify.app](https://campuscast-smart-screen.netlify.app)  
-📦 **Repository:** [https://github.com/Aayush-207/IOT-smart-screen](https://github.com/Aayush-207/IOT-smart-screen)
+### 🌐 [https://campuscast-smart-screen.netlify.app](https://campuscast-smart-screen.netlify.app)
 
+</div>
+
+---
+
+## 🖥️ Live Application Preview
+
+<div align="center">
+
+### 1. Central Admin & Governance Overview
+*Real-time overview of active broadcasts, approval queues, and system telemetry.*
 <br />
+<img src="./public/screenshots/admin-dashboard.png" alt="Admin Overview Dashboard" width="95%" style="border-radius: 8px; border: 1px solid #333;" />
 
-<img src="./public/smart_campus_iot.jpg" alt="CampusCast IoT Smart Screen Fleet" width="95%" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.3);" />
+<br /><br />
+
+### 2. IoT Fleet Monitor & Display Telemetry
+*Live health monitoring, heartbeat tracking, and zone allocation across physical smart screens.*
+<br />
+<img src="./public/screenshots/fleet.png" alt="IoT Screen Fleet Management" width="95%" style="border-radius: 8px; border: 1px solid #333;" />
+
+<br /><br />
+
+### 3. Academic & Event Calendar
+*Synchronized campus schedules and event timelines routed to dedicated departmental screens.*
+<br />
+<img src="./public/screenshots/calendar.png" alt="Academic Calendar" width="95%" style="border-radius: 8px; border: 1px solid #333;" />
 
 </div>
 
@@ -31,89 +48,89 @@
 
 ```mermaid
 flowchart TD
-    subgraph Client["👥 Campus Users & Stakeholders"]
-        SUB["Submitter<br/>(Faculty / Staff)"]
+    subgraph Users["👥 Campus Stakeholders"]
+        SUB["Submitter<br/>(Faculty & Staff)"]
         HOD["HOD Approver<br/>(Department Head)"]
         ADM["Campus Admin<br/>(Central Governance)"]
         EMG["Emergency Authority<br/>(Campus Security)"]
     end
 
     subgraph Core["⚡ Next.js 16 Core Engine"]
-        API_AUTH["Next.js Proxy & Auth Guard"]
-        API_MOD["Moderation & Priority Engine"]
-        API_POLL["IoT Fleet Gateway<br/><code>/api/display/poll</code>"]
-        API_CRON["Auto-Expire Scheduler<br/><code>/api/cron/expire</code>"]
+        AUTH["Proxy & Auth Middleware"]
+        MOD["Priority & Advisory Engine"]
+        POLL_API["IoT Gateway API<br/><code>/api/display/poll</code>"]
+        CRON["Auto-Expiry Daemon<br/><code>/api/cron/expire</code>"]
     end
 
-    subgraph DB["🗄️ Supabase Cloud (Postgres 15)"]
+    subgraph Cloud["🗄️ Supabase Cloud (Postgres 15)"]
         RLS["Row Level Security (RLS)"]
-        ANN["Announcements Table"]
-        SCR["Screens & Fleet Table"]
-        AUD["Audit Log & Analytics"]
-        STORAGE["Asset Storage (Posters/Media)"]
+        TBL_ANN["Announcements"]
+        TBL_FLEET["Screens & Heartbeats"]
+        TBL_AUDIT["Immutable Audit Trail"]
+        MEDIA["Media Storage"]
     end
 
-    subgraph Fleet["🖥️ IoT Physical Hardware Fleet"]
-        HW1["Screen #1: Main Auditorium"]
-        HW2["Screen #2: CS Department Foyer"]
-        HW3["Screen #3: Student Cafeteria"]
-        HW4["Screen #4: Library Entrance"]
+    subgraph Hardware["📟 Physical Edge Displays"]
+        D1["Screen: Main Auditorium"]
+        D2["Screen: Engineering Foyer"]
+        D3["Screen: Central Cafeteria"]
+        D4["Screen: Library Entrance"]
     end
 
-    SUB -->|Submit Content| API_AUTH
-    HOD -->|Approve Routine| API_MOD
-    ADM -->|Approve Critical / Manage Fleet| API_MOD
-    EMG -->|Override All Screens| API_MOD
+    SUB -->|Create Post| AUTH
+    HOD -->|Approve Routine| MOD
+    ADM -->|Approve Critical / Manage Fleet| MOD
+    EMG -->|Override All Screens| MOD
 
-    API_AUTH --> RLS
-    API_MOD --> RLS
-    RLS --> ANN
-    RLS --> SCR
-    RLS --> AUD
-    RLS --> STORAGE
+    AUTH --> RLS
+    MOD --> RLS
+    RLS --> TBL_ANN
+    RLS --> TBL_FLEET
+    RLS --> TBL_AUDIT
+    RLS --> MEDIA
 
-    HW1 & HW2 & HW3 & HW4 <-->|Poll Every 15-30s + Heartbeat| API_POLL
-    API_CRON -->|Revoke Expired Posts| ANN
+    D1 & D2 & D3 & D4 <-->|Poll Every 15-30s + Heartbeat| POLL_API
+    CRON -->|Revoke Expired Content| TBL_ANN
 ```
 
 ---
 
-## 🛡️ Priority & Approval Matrix
+## 🛡️ Priority & Approval Routing
 
-| Priority Level | Visual Badge | Approval Workflow | Target Scope | Auto-Expiry |
-| :--- | :---: | :--- | :--- | :---: |
-| **Routine** | 🟢 Routine | **HOD** of owning department | Department screens | 7 Days |
-| **Time-Sensitive**| 🟡 Urgent | **HOD** of owning department | Specific zones / event dates | Custom Date |
-| **Critical** | 🟠 Critical | **Campus Admin** (`/dashboard/admin`) | Campus-wide broadcast | 48 Hours |
-| **Emergency** | 🔴 Emergency | **Zero-Approval** (Pre-authorized override) | 100% of all online displays | 4 Hours / Manual |
+| Priority Level | Visual Tag | Approver | Target Scope | Expiry Behavior |
+| :--- | :---: | :--- | :--- | :--- |
+| **Routine** | 🟢 Routine | **HOD** of owning department | Departmental screens | 7 Days |
+| **Time-Sensitive**| 🟡 Urgent | **HOD** of owning department | Specified zones / event dates | Scheduled event end |
+| **Critical** | 🟠 Critical | **Campus Admin** (`/dashboard/admin`) | Campus-wide screens | 48 Hours |
+| **Emergency** | 🔴 Emergency | **Zero-Approval** (Instant Override) | 100% of all online screens | 4 Hours / Manual Clear |
 
 ---
 
 ## 👥 Role-Based Access Control (RBAC)
 
-| Role | Primary Dashboard | Key Capabilities |
+| Role | Primary Dashboard | Permissions & Capabilities |
 | :--- | :--- | :--- |
-| **`submitter`** | `/dashboard/submitter` | Draft rich announcements, select target physical zones, upload creatives, track live delivery status. |
-| **`hod`** | `/dashboard/hod` | Review routine and time-sensitive departmental announcements; approve or reject with comments. |
-| **`admin`** | `/dashboard/admin` | Campus-wide governance, approve critical announcements, real-time fleet health monitor, user access manager, audit logs. |
-| **`emergency`** | `/dashboard/admin/emergency` | Send instantaneous campus-wide emergency banners overriding all active schedules. |
+| **`submitter`** | `/dashboard/submitter` | Draft announcements, attach media creatives, select target physical zones, track live broadcast status. |
+| **`hod`** | `/dashboard/hod` | Review departmental routine & time-sensitive items; approve or reject with audit comments. |
+| **`admin`** | `/dashboard/admin` | Campus-wide governance, approve critical announcements, monitor IoT screen fleet, manage user roles, review audit logs. |
+| **`emergency`** | `/dashboard/admin/emergency` | Dispatch high-priority emergency alerts that immediately take over all physical screens. |
 
 ---
 
-## 📟 IoT Hardware & Display Polling
+## 📟 IoT Edge Display Polling Contract
 
-Every edge device (Raspberry Pi, Android display, ESP32 kiosk) securely connects to CampusCast via token authentication:
+Smart display kiosks securely poll the central server over authenticated HTTP:
 
 ```http
 GET /api/display/poll?screen_id=SCREEN_UUID&token=DEVICE_SECRET
 ```
 
-### Response Payload Contract
+### JSON Response Specification
 
 ```json
 {
   "status": "active",
-  "screen_name": "Auditorium Main Screen",
+  "screen_name": "Main Auditorium Screen",
   "refresh_interval_sec": 30,
   "active_broadcast": {
     "id": "e42718e2-...",
@@ -127,39 +144,12 @@ GET /api/display/poll?screen_id=SCREEN_UUID&token=DEVICE_SECRET
 }
 ```
 
-*Displays feature **Offline Resilience**: in case of Wi-Fi degradation, the edge screen continues showing the last cached broadcast.*
-
----
-
-## 🚀 Quickstart & Setup
-
-### 1. Clone & Install Dependencies
-```bash
-git clone https://github.com/Aayush-207/IOT-smart-screen.git
-cd IOT-smart-screen
-npm install
-```
-
-### 2. Configure Environment Variables
-Create a `.env.local` file with your Supabase credentials:
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-CRON_SECRET=your-secure-cron-secret
-```
-
-### 3. Run Locally
-```bash
-npm run dev
-```
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+*Displays feature **Offline Resilience**: in case of network interruptions, the edge display continues rendering the last securely cached broadcast.*
 
 ---
 
 <div align="center">
 
-**Built with ❤️ for MIT Art, Design & Technology University**  
-*Empowering connected, secure, and governed campus communications.*
+**Live Production Link:** [https://campuscast-smart-screen.netlify.app](https://campuscast-smart-screen.netlify.app)
 
 </div>
