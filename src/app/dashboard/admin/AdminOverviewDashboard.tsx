@@ -143,14 +143,14 @@ export function AdminOverviewDashboard({ totalDepartments }: { totalDepartments:
           </div>
         </div>
 
-        {/* Master Detail Split View - Contained Height */}
-        <div className="flex flex-col md:flex-row h-[620px] bg-[#faf8ff] overflow-hidden">
+        {/* Master Detail Split View - Sized to fit all 11 Institutes comfortably without scroll */}
+        <div className="flex flex-col md:flex-row h-auto md:h-[860px] bg-[#faf8ff] overflow-hidden">
           
           {/* Left Column (Master): Schools / Institutes list */}
           <div className="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-[#4c1d76]/10 bg-white flex flex-col h-full shrink-0">
-            <div className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-              <span>Institutes ({ORG_DATA.length})</span>
-              <span className="text-[10px] text-slate-400 font-medium">Select to view</span>
+            <div className="px-5 py-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+              <span>Institutes &amp; Schools ({ORG_DATA.length})</span>
+              <span className="text-[10px] text-slate-400 font-medium">All Institutes</span>
             </div>
             
             <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5 custom-scrollbar">
@@ -292,40 +292,40 @@ export function AdminOverviewDashboard({ totalDepartments }: { totalDepartments:
                             </div>
                           </div>
 
-                          {/* Events Section with Contained Internal Scroll */}
-                          <div className="pt-3 border-t border-slate-100">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400 flex items-center gap-1">
-                                <CalendarDays className="w-3 h-3 text-[#4c1d76]" /> Scheduled Activities
+                          {/* Events Section with Contained Internal Scroll - Extended Height */}
+                          <div className="pt-3 border-t border-slate-100 flex-1 flex flex-col">
+                            <div className="flex items-center justify-between mb-2.5">
+                              <span className="text-[10px] font-extrabold tracking-wider uppercase text-slate-400 flex items-center gap-1.5">
+                                <CalendarDays className="w-3.5 h-3.5 text-[#4c1d76]" /> Scheduled Activities
                               </span>
-                              {club.events.length > 2 && (
+                              {club.events.length > 3 && (
                                 <span className="text-[10px] text-slate-400 font-medium">
-                                  Scroll to view all
+                                  Scroll for all {club.events.length}
                                 </span>
                               )}
                             </div>
                             
                             {club.events.length === 0 ? (
-                              <div className="p-3 bg-slate-50/70 rounded-xl border border-slate-100 border-dashed text-center">
+                              <div className="p-4 bg-slate-50/70 rounded-xl border border-slate-100 border-dashed text-center flex-1 flex items-center justify-center">
                                 <p className="text-[11px] text-slate-400 font-medium">No events scheduled right now.</p>
                               </div>
                             ) : (
-                              <div className="max-h-[145px] overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+                              <div className="max-h-[230px] overflow-y-auto custom-scrollbar space-y-2 pr-1.5">
                                 {club.events.map(evt => (
                                   <div
                                     key={evt.id}
-                                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 border border-slate-100 hover:bg-[#fcfaff] hover:border-[#4c1d76]/20 transition-colors"
+                                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/90 border border-slate-100 hover:bg-[#fcfaff] hover:border-[#4c1d76]/25 transition-all"
                                   >
                                     <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                                      <div className="w-6 h-6 rounded-md bg-white border border-[#4c1d76]/15 flex items-center justify-center shrink-0 text-[#4c1d76]">
-                                        <CalendarDays className="w-3 h-3" />
+                                      <div className="w-7 h-7 rounded-lg bg-[#f4eefe] border border-[#4c1d76]/20 flex items-center justify-center shrink-0 text-[#4c1d76]">
+                                        <CalendarDays className="w-3.5 h-3.5" />
                                       </div>
                                       <div className="min-w-0">
                                         <p className="text-xs font-bold text-slate-800 truncate">{evt.name}</p>
                                         <p className="text-[10px] font-medium text-slate-400 truncate">{evt.category}</p>
                                       </div>
                                     </div>
-                                    <div className="text-[10px] font-bold text-[#4c1d76] bg-white px-2 py-0.5 rounded-md border border-[#4c1d76]/15 shrink-0 whitespace-nowrap shadow-2xs">
+                                    <div className="text-[10px] font-bold text-[#4c1d76] bg-white px-2.5 py-1 rounded-lg border border-[#4c1d76]/20 shrink-0 whitespace-nowrap shadow-2xs">
                                       {evt.dateStr.split(',')[0]}
                                     </div>
                                   </div>
@@ -336,7 +336,7 @@ export function AdminOverviewDashboard({ totalDepartments }: { totalDepartments:
                             {/* View in Calendar Footer Action */}
                             <Link
                               href="/dashboard/admin/calendar"
-                              className="mt-2.5 pt-2 border-t border-slate-50 text-[11px] font-bold text-[#4c1d76] hover:text-[#320f52] flex items-center justify-between group/link transition-colors"
+                              className="mt-3 pt-2.5 border-t border-slate-50 text-[11px] font-bold text-[#4c1d76] hover:text-[#320f52] flex items-center justify-between group/link transition-colors"
                             >
                               <span>View in ATE Calendar</span>
                               <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 transition-transform" />
