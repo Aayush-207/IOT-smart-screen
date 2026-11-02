@@ -89,27 +89,20 @@ export default async function AdminDashboardPage() {
       {/* Main Organizational Dashboard Overview with Interactive Hover Cards */}
       <AdminOverviewDashboard departments={departments || []} />
 
-      {/* Collapsible Departments & Permissions Section */}
+      {/* Department & Role Management Section - Permanently Expanded */}
       {!isEmergencyRole && (
-        <details className="group pt-4 border-t border-slate-200">
-          <summary className="cursor-pointer list-none flex items-center justify-between py-2 select-none">
-            <div>
-              <h2 className="text-sm font-bold text-slate-800 group-hover:text-[#4c1d76] transition-colors flex items-center gap-2">
-                <span>Departments &amp; Role Management</span>
-                <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                  {(departments || []).length} Departments
-                </span>
-              </h2>
-              <p className="text-[11px] text-slate-400 mt-0.5">Click to expand user roles and department head assignments</p>
-            </div>
-            <span className="text-xs text-[#4c1d76] font-semibold group-open:rotate-180 transition-transform duration-200">
-              ▼
-            </span>
-          </summary>
-          <div className="pt-4">
-            <OrgManagementClient initialDepartments={departments || []} initialProfiles={profiles || []} />
+        <div className="pt-6 border-t border-slate-200">
+          <div className="mb-4">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span>Departments &amp; Role Management</span>
+              <span className="text-[10px] font-semibold text-[#4c1d76] bg-[#f4eefe] px-2.5 py-0.5 rounded-full border border-[#4c1d76]/20">
+                {(departments || []).length} Departments
+              </span>
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">Manage department heads, role authorizations, and user assignments.</p>
           </div>
-        </details>
+          <OrgManagementClient initialDepartments={departments || []} initialProfiles={profiles || []} />
+        </div>
       )}
     </div>
   )
