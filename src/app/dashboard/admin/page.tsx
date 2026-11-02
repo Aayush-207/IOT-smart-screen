@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { Monitor, AlertTriangle } from 'lucide-react'
 import { OrgManagementClient } from './OrgManagementClient'
 import { ClearEmergencyButton } from '@/components/ClearEmergencyButton'
-import { AnalyticsClient } from './analytics/AnalyticsClient'
 import { AdminOverviewDashboard } from './AdminOverviewDashboard'
 
 export const dynamic = 'force-dynamic'
@@ -22,9 +21,6 @@ export default async function AdminDashboardPage() {
     { data: departments },
     { data: profiles },
     { data: screens },
-    { data: announcements },
-    { data: deliveries },
-    { data: auditRows },
     { data: activeEmergencies },
   ] = await Promise.all([
     supabase
@@ -40,19 +36,6 @@ export default async function AdminDashboardPage() {
       .order('name'),
     supabase
       .from('announcements')
-      .select('id, title, status, priority, is_emergency, department_id, target_all, target_zones, created_at')
-      .neq('status', 'withdrawn')
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('announcement_deliveries')
-      .select('id, state, announcement_id, screen_id, last_confirmed_at'),
-    supabase
-      .from('audit_log')
-      .select('id, action, created_at')
-      .order('created_at', { ascending: false })
-      .limit(200),
-    supabase
-      .from('announcements')
       .select('id, title, body, severity')
       .eq('is_emergency', true)
       .eq('status', 'approved')
@@ -63,28 +46,22 @@ export default async function AdminDashboardPage() {
   const totalScreens = (screens || []).length
 
   return (
-    <div className="space-y-8 max-w-6xl pb-16 text-slate-900  animate-fade-in-up">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200 ">
+    <div className="space-y-6 max-w-6xl pb-16 text-slate-900 animate-fade-in-up">
+      {/* Streamlined Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-wider border border-slate-200  text-slate-900  bg-slate-100 ">
-              Command Mesh
-            </span>
-            <span className="text-xs font-mono text-slate-500 ">{totalScreens} Display Nodes Active</span>
-          </div>
-          <h1 className="text-2xl font-normal tracking-tight text-slate-900 ">
-            System Overview &amp; Network
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            System Overview
           </h1>
-          <p className="text-sm text-slate-600  max-w-2xl mt-1.5 leading-relaxed">
-            Central orchestration console for digital screen nodes, authorization queues, live telemetry analytics, and emergency overrides.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Campus displays, institutes, student clubs, and scheduled activities.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/dashboard/admin/fleet"
-            className="px-5 py-2 rounded-full bg-[#121826] text-white   text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-sm"
+            className="px-4 py-2 rounded-xl bg-[#4c1d76] hover:bg-[#39125b] text-white text-xs font-semibold transition-all flex items-center gap-2 shadow-sm"
           >
             <Monitor className="w-3.5 h-3.5" /> Screens &amp; Fleet ({totalScreens})
           </Link>
@@ -93,14 +70,14 @@ export default async function AdminDashboardPage() {
 
       {/* Active Emergency Alert Banner */}
       {(activeEmergencies || []).length > 0 && (
-        <div className="p-6 rounded-xl bg-[#ffeaea]  border border-[#ef2045]/30  flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
-          <div className="flex items-start gap-3">
+        <div className="p-4 rounded-xl bg-[#ffeaea] border border-[#ef2045]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-3">
             <div className="p-2 rounded-full bg-[#ef2045] text-white shrink-0 animate-bounce">
               <AlertTriangle className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] ">Active Campus Emergency Broadcast</span>
-              <p className="text-sm text-slate-900  mt-0.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-[#ef2045] font-bold">Active Campus Emergency Broadcast</span>
+              <p className="text-sm font-semibold text-slate-900 mt-0.5">
                 &ldquo;{activeEmergencies![0].body || activeEmergencies![0].title}&rdquo;
               </p>
             </div>
@@ -109,31 +86,30 @@ export default async function AdminDashboardPage() {
         </div>
       )}
 
-      {/* New Organizational Dashboard Overview */}
-      <AdminOverviewDashboard totalDepartments={(departments || []).length} />
+      {/* Main Organizational Dashboard Overview with Interactive Hover Cards */}
+      <AdminOverviewDashboard departments={departments || []} />
 
-      {/* Analytics & Telemetry Embedded Section */}
-      <AnalyticsClient
-        announcements={announcements || []}
-        screens={screens || []}
-        departments={departments || []}
-        deliveries={deliveries || []}
-        auditRows={auditRows || []}
-        isEmbedded={true}
-      />
-
-      {/* Organization Hierarchy Section */}
+      {/* Collapsible Departments & Permissions Section */}
       {!isEmergencyRole && (
-        <div className="pt-6 border-t border-slate-200 ">
-          <div className="mb-4">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-slate-500 ">Governance</span>
-            <h2 className="text-base font-semibold text-slate-900 ">
-              Departments &amp; Permissions
-            </h2>
-            <p className="text-xs text-slate-500  mt-0.5">Assign department heads and manage system authorizations.</p>
+        <details className="group pt-4 border-t border-slate-200">
+          <summary className="cursor-pointer list-none flex items-center justify-between py-2 select-none">
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 group-hover:text-[#4c1d76] transition-colors flex items-center gap-2">
+                <span>Departments &amp; Role Management</span>
+                <span className="text-[10px] font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                  {(departments || []).length} Departments
+                </span>
+              </h2>
+              <p className="text-[11px] text-slate-400 mt-0.5">Click to expand user roles and department head assignments</p>
+            </div>
+            <span className="text-xs text-[#4c1d76] font-semibold group-open:rotate-180 transition-transform duration-200">
+              ▼
+            </span>
+          </summary>
+          <div className="pt-4">
+            <OrgManagementClient initialDepartments={departments || []} initialProfiles={profiles || []} />
           </div>
-          <OrgManagementClient initialDepartments={departments || []} initialProfiles={profiles || []} />
-        </div>
+        </details>
       )}
     </div>
   )
