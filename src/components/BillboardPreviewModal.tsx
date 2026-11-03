@@ -62,13 +62,20 @@ export function BillboardPreviewModal({
 
           <div className="flex items-center gap-2">
             {/* Orientation toggles */}
-            <div className="flex bg-[#141414] p-1 rounded-full border border-[#212327] text-xs">
+            <div className="relative flex bg-[#141414] p-1 rounded-full border border-[#212327] text-xs">
+              <div
+                className={`absolute inset-y-1 rounded-full bg-[#ffffff] shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  orientation === 'landscape'
+                    ? 'left-1 w-[calc(50%-4px)]'
+                    : 'left-[calc(50%+2px)] w-[calc(50%-4px)]'
+                }`}
+              />
               <button
                 type="button"
                 onClick={() => setOrientation('landscape')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all cursor-pointer ${
+                className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1 rounded-full transition-colors duration-200 cursor-pointer ${
                   orientation === 'landscape'
-                    ? 'bg-[#ffffff] text-[#0a0a0a] font-medium'
+                    ? 'text-[#0a0a0a] font-medium'
                     : 'text-[#7d8187] hover:text-[#ffffff]'
                 }`}
               >
@@ -77,9 +84,9 @@ export function BillboardPreviewModal({
               <button
                 type="button"
                 onClick={() => setOrientation('portrait')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all cursor-pointer ${
+                className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1 rounded-full transition-colors duration-200 cursor-pointer ${
                   orientation === 'portrait'
-                    ? 'bg-[#ffffff] text-[#0a0a0a] font-medium'
+                    ? 'text-[#0a0a0a] font-medium'
                     : 'text-[#7d8187] hover:text-[#ffffff]'
                 }`}
               >
@@ -101,10 +108,10 @@ export function BillboardPreviewModal({
         {/* Modal Body / Simulated Hardware Screen */}
         <div className="flex-1 p-6 overflow-auto bg-[#0a0a0a] flex flex-col items-center justify-center relative">
           <div
-            className={`@container transition-all duration-300 relative rounded-2xl border-4 border-[#212327] shadow-[0_0_50px_rgba(0,0,0,0.8)] bg-black overflow-hidden flex flex-col shrink-0 ${
+            className={`@container transition-[width,height,max-width,max-height] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] relative rounded-2xl border-4 border-[#212327] shadow-[0_0_50px_rgba(0,0,0,0.8)] bg-black overflow-hidden flex flex-col shrink-0 ${
               orientation === 'landscape'
-                ? 'w-full max-w-2xl aspect-[16/9]'
-                : 'w-auto h-[65vh] aspect-[9/16]'
+                ? 'w-full max-w-2xl h-[380px] sm:h-[420px]'
+                : 'w-[230px] sm:w-[260px] h-[410px] sm:h-[462px]'
             }`}
           >
             {/* Top Billboard Status Bar */}

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import Link from 'next/link'
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -23,7 +24,8 @@ import {
   ChevronDown,
   Building2,
   Users,
-  Check,
+  ArrowUpRight,
+  ArrowLeft,
 } from 'lucide-react'
 import {
   MonthCalendarData,
@@ -37,16 +39,16 @@ interface AdminActivityCalendarClientProps {
   initialMonthsData: Record<string, MonthCalendarData>
 }
 
-// Sophisticated, calm icons matching university tone (no eye-straining neons)
+// Sophisticated, clean icons matching Donezo's modern iconography
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  'Tech & Hackathons': <Laptop className="w-3.5 h-3.5 text-purple-600 shrink-0" />,
-  'Workshops & Seminars': <BookOpen className="w-3.5 h-3.5 text-violet-600 shrink-0" />,
-  'Sports & Athletics': <Trophy className="w-3.5 h-3.5 text-emerald-600 shrink-0" />,
-  'Holiday & Festival': <PartyPopper className="w-3.5 h-3.5 text-rose-500 shrink-0" />,
-  'Cultural & Campus Life': <Sparkles className="w-3.5 h-3.5 text-fuchsia-600 shrink-0" />,
-  'Trek & Adventure': <Compass className="w-3.5 h-3.5 text-teal-600 shrink-0" />,
-  'Alumni & Careers': <GraduationCap className="w-3.5 h-3.5 text-sky-600 shrink-0" />,
-  'Academic & General': <Award className="w-3.5 h-3.5 text-slate-500 shrink-0" />,
+  'Tech & Hackathons': <Laptop className="w-4 h-4 text-purple-600 shrink-0" />,
+  'Workshops & Seminars': <BookOpen className="w-4 h-4 text-violet-600 shrink-0" />,
+  'Sports & Athletics': <Trophy className="w-4 h-4 text-emerald-600 shrink-0" />,
+  'Holiday & Festival': <PartyPopper className="w-4 h-4 text-rose-500 shrink-0" />,
+  'Cultural & Campus Life': <Sparkles className="w-4 h-4 text-fuchsia-600 shrink-0" />,
+  'Trek & Adventure': <Compass className="w-4 h-4 text-teal-600 shrink-0" />,
+  'Alumni & Careers': <GraduationCap className="w-4 h-4 text-sky-600 shrink-0" />,
+  'Academic & General': <Award className="w-4 h-4 text-slate-500 shrink-0" />,
 }
 
 export function AdminActivityCalendarClient({
@@ -174,108 +176,259 @@ export function AdminActivityCalendarClient({
   const sheetUrl = `https://docs.google.com/spreadsheets/d/1DUIFEJNlvkBvof1FB5jK4tF35tyD9Err8PF-ozT6SW8/edit?gid=${activeMonthConfig.gid}#gid=${activeMonthConfig.gid}`
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/90 shadow-[0_4px_24px_rgba(76,29,118,0.04)] overflow-hidden animate-fade-in-up">
-      {/* ── TOP HEADER / CONTROLS ── */}
-      <div className="p-5 md:p-6 border-b border-slate-100 bg-gradient-to-b from-white to-[#fbfaff] space-y-5">
-        {/* ROW 1: Month Title & Actions */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-[#f4eefe] border border-[#4c1d76]/15 flex items-center justify-center text-[#4c1d76] shadow-xs">
-              <CalendarIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                  {activeMonthConfig.name}
-                </h2>
-                <span className="text-[10px] font-semibold tracking-wide uppercase px-2.5 py-0.5 rounded-full bg-[#f4eefe] text-[#4c1d76] border border-[#4c1d76]/20">
-                  {activeMonthConfig.term}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
-                Academic Year 2026&ndash;2027 &bull; {currentMonthData.totalEvents} Total Events Scheduled
-              </p>
+    <div className="space-y-6 font-sans w-full">
+      {/* ── 1. DONEZO-STYLE TOP HEADER ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Link
+              href="/dashboard/admin"
+              className="p-1 rounded-full text-slate-400 hover:text-[#4c1d76] hover:bg-[#f4eefe] transition-colors"
+              title="Back to Overview"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            <span className="px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#f4eefe] text-[#4c1d76] border border-[#4c1d76]/20 font-sans">
+              MIT-ADT University
+            </span>
+            <span className="text-xs font-semibold text-slate-400 font-sans">
+              Academic Schedule &bull; AY 2026&ndash;2027
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-sans">
+            Calendar
+          </h1>
+          <p className="text-sm text-slate-400 max-w-xl mt-1 font-normal font-sans">
+            Plan, prioritize, and track institutional activities and department schedules with ease.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Donezo-style Pill Search Bar with ⌘F */}
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search task or event..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-12 py-2.5 rounded-full text-xs font-sans bg-white border border-slate-200/90 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#4c1d76] focus:ring-2 focus:ring-[#4c1d76]/15 shadow-2xs transition-all"
+            />
+            {searchQuery ? (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <span className="absolute right-3.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-[9px] font-mono font-bold text-slate-400 pointer-events-none">
+                ⌘F
+              </span>
+            )}
+          </div>
+
+          {/* Primary Donezo-style Pill Button: Sync Live */}
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className={`px-5 py-2.5 rounded-full bg-[#4c1d76] hover:bg-[#39125b] text-white text-xs font-semibold shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer btn-press font-sans ${
+              refreshSuccess ? 'bg-emerald-600 hover:bg-emerald-700' : ''
+            }`}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{refreshSuccess ? 'Synced' : '+ Sync Schedule'}</span>
+          </button>
+
+          {/* Secondary Outlined Pill Button: Google Sheets */}
+          <a
+            href={sheetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-2.5 rounded-full bg-white border border-slate-200 hover:border-[#4c1d76]/40 text-slate-700 hover:text-[#4c1d76] text-xs font-semibold shadow-2xs hover:bg-[#faf8ff] transition-all flex items-center gap-2 font-sans"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+            <span>Import / Sheets</span>
+          </a>
+        </div>
+      </div>
+
+      {/* ── 2. DONEZO-STYLE 4 STATS CARDS ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {/* Card 1: Featured Hero Card (Deep Purple Gradient) */}
+        <div className="bg-gradient-to-br from-[#4c1d76] via-[#3b1259] to-[#25093b] text-white rounded-[24px] p-6 shadow-md relative overflow-hidden flex flex-col justify-between group">
+          <div className="absolute top-0 right-0 w-44 h-44 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none" />
+
+          <div className="flex items-center justify-between relative z-10">
+            <span className="text-sm font-medium text-white/90 font-sans">Total Events</span>
+            <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center backdrop-blur-xs transition-transform group-hover:scale-110">
+              <ArrowUpRight className="w-4 h-4" />
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search event, club, dept..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#4c1d76] focus:ring-2 focus:ring-[#4c1d76]/10 shadow-2xs transition-all"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                  title="Clear search"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
+          <div className="my-3 relative z-10">
+            <div className="text-4xl font-extrabold text-white tracking-tight font-sans">
+              {currentMonthData.totalEvents}
             </div>
+          </div>
 
-            {/* Live Refresh Button */}
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              title="Sync latest live Google Sheet data"
-              className={`p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#4c1d76] hover:border-[#4c1d76]/30 shadow-2xs transition-all flex items-center gap-1.5 text-xs font-semibold ${
-                refreshSuccess ? 'text-emerald-600 border-emerald-300 bg-emerald-50/50' : ''
-              }`}
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-[#4c1d76]' : ''}`} />
-              <span className="hidden sm:inline">{refreshSuccess ? 'Synced' : 'Refresh'}</span>
-            </button>
-
-            {/* Open Google Sheet External Link */}
-            <a
-              href={sheetUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Open current month in Google Sheets"
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#4c1d76] hover:border-[#4c1d76]/30 shadow-2xs transition-all flex items-center gap-1.5 text-xs font-semibold"
-            >
-              <ExternalLink className="w-4 h-4 opacity-70" />
-              <span className="hidden sm:inline">Sheets</span>
-            </a>
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/10 text-white/90 text-xs font-medium font-sans">
+              <span className="w-3.5 h-3.5 rounded-full bg-white/25 flex items-center justify-center text-[9px] font-bold">✓</span>
+              <span>Active in {activeMonthConfig.shortName}</span>
+            </div>
           </div>
         </div>
 
-        {/* ROW 2: Month Navigation & View Toggles */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2">
-          {/* Month Steppers & Pill List */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
-            {/* Term Tabs */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100/90 border border-slate-200/80 shrink-0">
-              {(['All', 'Odd Semester', 'Even Semester'] as const).map((term) => (
+        {/* Card 2: Tech & Hackathons (Crisp White Donezo Card) */}
+        <div className="bg-white border border-slate-100 rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-slate-800 font-sans">Tech &amp; Hackathons</span>
+            <div className="w-8 h-8 rounded-full border border-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-50 transition-transform group-hover:scale-110">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="my-3">
+            <div className="text-4xl font-extrabold text-slate-900 tracking-tight font-sans">
+              {stats.tech}
+            </div>
+          </div>
+
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-200/80 bg-purple-50/50 text-purple-900 text-xs font-semibold font-sans">
+              <span className="w-2 h-2 rounded-full bg-purple-600" />
+              <span>Coding &amp; Hackathons</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Sports & Athletics (Crisp White Donezo Card) */}
+        <div className="bg-white border border-slate-100 rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-slate-800 font-sans">Sports &amp; Athletics</span>
+            <div className="w-8 h-8 rounded-full border border-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-50 transition-transform group-hover:scale-110">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="my-3">
+            <div className="text-4xl font-extrabold text-slate-900 tracking-tight font-sans">
+              {stats.sports}
+            </div>
+          </div>
+
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-200/80 bg-emerald-50/50 text-emerald-900 text-xs font-semibold font-sans">
+              <span className="w-2 h-2 rounded-full bg-emerald-600" />
+              <span>Tournaments &amp; Meets</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Workshops & Seminars (Crisp White Donezo Card) */}
+        <div className="bg-white border border-slate-100 rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md transition-all flex flex-col justify-between group">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-bold text-slate-800 font-sans">Workshops &amp; Seminars</span>
+            <div className="w-8 h-8 rounded-full border border-slate-200 text-slate-600 flex items-center justify-center hover:bg-slate-50 transition-transform group-hover:scale-110">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="my-3">
+            <div className="text-4xl font-extrabold text-slate-900 tracking-tight font-sans">
+              {stats.workshops}
+            </div>
+          </div>
+
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-violet-200/80 bg-violet-50/50 text-violet-900 text-xs font-semibold font-sans">
+              <span className="w-2 h-2 rounded-full bg-violet-600" />
+              <span>Faculty &amp; Seminars</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── 3. FULL WIDTH CALENDAR CARD (All side sections removed as requested) ── */}
+      <div className="w-full bg-white rounded-[28px] border border-slate-100/90 shadow-[0_2px_16px_rgba(0,0,0,0.03)] p-6 md:p-8 space-y-6">
+        {/* Controls Bar */}
+        <div className="space-y-4 pb-4 border-b border-slate-100">
+          {/* Row 1: Month Name & Navigation Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#f4eefe] border border-[#4c1d76]/15 flex items-center justify-center text-[#4c1d76]">
+                <CalendarIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-slate-900 font-sans tracking-tight">
+                    {activeMonthConfig.name}
+                  </h2>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#f4eefe] text-[#4c1d76] border border-[#4c1d76]/20 font-sans">
+                    {activeMonthConfig.term}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 font-medium font-sans mt-0.5">
+                  {currentMonthData.totalEvents} Total Events Scheduled &bull; Google Sheets Sync
+                </p>
+              </div>
+            </div>
+
+            {/* View Selector (Grid vs Agenda in Donezo pill) */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Term Selector in rounded-full pill container */}
+              <div className="flex items-center p-0.5 rounded-full bg-slate-100 border border-slate-200/80">
+                {(['All', 'Odd Semester', 'Even Semester'] as const).map((term) => (
+                  <button
+                    key={term}
+                    onClick={() => setActiveTerm(term)}
+                    className={`px-3.5 py-1 rounded-full text-xs font-semibold font-sans transition-all cursor-pointer ${
+                      activeTerm === term
+                        ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    {term === 'All' ? 'All' : term.replace(' Semester', '')}
+                  </button>
+                ))}
+              </div>
+
+              {/* Grid / Agenda Switcher */}
+              <div className="flex items-center p-0.5 rounded-full bg-slate-100 border border-slate-200/80 text-xs">
                 <button
-                  key={term}
-                  onClick={() => setActiveTerm(term)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    activeTerm === term
-                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                  onClick={() => setViewMode('grid')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1 rounded-full font-semibold font-sans transition-all text-xs cursor-pointer ${
+                    viewMode === 'grid'
+                      ? 'bg-[#4c1d76] text-white shadow-xs font-bold'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  {term === 'All' ? 'All' : term.replace(' Semester', '')}
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Grid</span>
                 </button>
-              ))}
+                <button
+                  onClick={() => setViewMode('agenda')}
+                  className={`flex items-center gap-1.5 px-3.5 py-1 rounded-full font-semibold font-sans transition-all text-xs cursor-pointer ${
+                    viewMode === 'agenda'
+                      ? 'bg-[#4c1d76] text-white shadow-xs font-bold'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <List className="w-3.5 h-3.5" />
+                  <span>Agenda</span>
+                </button>
+              </div>
             </div>
+          </div>
 
-            <div className="w-px h-6 bg-slate-200 mx-1 shrink-0" />
-
-            {/* Month Steppers */}
-            <div className="flex items-center gap-1.5 shrink-0">
+          {/* Row 2: Month Carousel Steppers & Month Pills */}
+          <div className="flex items-center justify-between gap-3 pt-1">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
               <button
                 onClick={handlePrevMonth}
                 disabled={MONTH_CONFIGS[0].id === selectedMonthId}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 transition-colors shadow-2xs"
+                className="w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 transition-colors shadow-2xs flex items-center justify-center shrink-0 cursor-pointer"
                 title="Previous Month"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -288,18 +441,16 @@ export function AdminActivityCalendarClient({
                   <button
                     key={month.id}
                     onClick={() => setSelectedMonthId(month.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border ${
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold font-sans transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                       isActive
-                        ? 'bg-[#4c1d76] text-white border-[#4c1d76] shadow-sm'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-[#fcfaff] hover:text-[#4c1d76] hover:border-[#4c1d76]/30'
+                        ? 'bg-[#4c1d76] text-white shadow-xs font-bold'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-[#faf8ff] hover:text-[#4c1d76] hover:border-[#4c1d76]/30'
                     }`}
                   >
                     <span>{month.shortName.split(' ')[0]}</span>
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
-                        isActive
-                          ? 'bg-white/20 text-white font-bold'
-                          : 'bg-slate-100 text-slate-500'
+                      className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                        isActive ? 'bg-white/20 text-white font-bold' : 'bg-slate-100 text-slate-500'
                       }`}
                     >
                       {mData?.totalEvents ?? '...'}
@@ -311,21 +462,18 @@ export function AdminActivityCalendarClient({
               <button
                 onClick={handleNextMonth}
                 disabled={MONTH_CONFIGS[MONTH_CONFIGS.length - 1].id === selectedMonthId}
-                className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 transition-colors shadow-2xs"
+                className="w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed text-slate-600 transition-colors shadow-2xs flex items-center justify-center shrink-0 cursor-pointer"
                 title="Next Month"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          </div>
 
-          {/* Jump Dropdown & Grid/Agenda View Selector */}
-          <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
-            {/* Quick Month Jump Menu */}
-            <div className="relative">
+            {/* Jump Dropdown */}
+            <div className="relative shrink-0">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs text-slate-700 font-semibold flex items-center gap-1.5 shadow-2xs transition-colors"
+                className="px-3.5 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-xs text-slate-700 font-semibold font-sans flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
               >
                 <span>Jump</span>
                 <ChevronDown className="w-3.5 h-3.5 opacity-60" />
@@ -336,7 +484,7 @@ export function AdminActivityCalendarClient({
                   className="absolute right-0 mt-1.5 z-30 w-52 rounded-2xl bg-white border border-slate-200 shadow-xl py-1.5 animate-scale-up"
                   onClick={() => setIsDropdownOpen(false)}
                 >
-                  <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1">
+                  <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-1 font-sans">
                     Select Month
                   </div>
                   <div className="p-1 max-h-64 overflow-y-auto custom-scrollbar">
@@ -350,7 +498,7 @@ export function AdminActivityCalendarClient({
                             setSelectedMonthId(m.id)
                             setIsDropdownOpen(false)
                           }}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors ${
+                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-sans flex items-center justify-between transition-colors cursor-pointer ${
                             isSelected
                               ? 'bg-[#4c1d76] text-white font-bold'
                               : 'text-slate-700 hover:bg-[#f8f5ff] hover:text-[#4c1d76]'
@@ -358,7 +506,7 @@ export function AdminActivityCalendarClient({
                         >
                           <span>{m.name}</span>
                           <span
-                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
                               isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                             }`}
                           >
@@ -371,45 +519,16 @@ export function AdminActivityCalendarClient({
                 </div>
               )}
             </div>
-
-            {/* Grid / Agenda Toggle */}
-            <div className="flex items-center p-1 bg-slate-100/90 border border-slate-200/80 rounded-xl text-xs">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all text-xs ${
-                  viewMode === 'grid'
-                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span>Grid</span>
-              </button>
-              <button
-                onClick={() => setViewMode('agenda')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-semibold transition-all text-xs ${
-                  viewMode === 'agenda'
-                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                    : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                <List className="w-3.5 h-3.5" />
-                <span>Agenda</span>
-              </button>
-            </div>
           </div>
-        </div>
 
-        {/* ROW 3: Category Filter Pills & Key Counters */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-3 border-t border-slate-100">
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
+          {/* Row 3: Category Pills (Donezo-style rounded-full chips) */}
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1">
             <button
               onClick={() => setSelectedCategory('ALL')}
-              className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all border ${
+              className={`px-3.5 py-1 rounded-full text-xs font-semibold font-sans shrink-0 transition-all cursor-pointer ${
                 selectedCategory === 'ALL'
-                  ? 'bg-[#4c1d76] text-white border-[#4c1d76] shadow-xs'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-[#4c1d76] text-white shadow-xs font-bold'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               All Categories
@@ -421,7 +540,7 @@ export function AdminActivityCalendarClient({
                 <button
                   key={catKey}
                   onClick={() => setSelectedCategory(catKey)}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all border flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1 rounded-full text-xs font-semibold font-sans shrink-0 transition-all flex items-center gap-1.5 border cursor-pointer ${
                     isSelected
                       ? `${style.badgeClass} ring-2 ring-[#4c1d76]/20 font-bold shadow-2xs`
                       : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
@@ -433,291 +552,241 @@ export function AdminActivityCalendarClient({
               )
             })}
           </div>
-
-          {/* Clean, Non-Garish Metric Pills */}
-          <div className="flex flex-wrap items-center gap-2 text-xs font-medium shrink-0">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700">
-              <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-              <span><strong>{stats.total}</strong> Total</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50/80 border border-purple-200 text-purple-900">
-              <Laptop className="w-3.5 h-3.5 text-purple-600" />
-              <span><strong>{stats.tech}</strong> Tech</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50/80 border border-emerald-200 text-emerald-900">
-              <Trophy className="w-3.5 h-3.5 text-emerald-600" />
-              <span><strong>{stats.sports}</strong> Sports</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-violet-50/80 border border-violet-200 text-violet-900">
-              <BookOpen className="w-3.5 h-3.5 text-violet-600" />
-              <span><strong>{stats.workshops}</strong> Workshop</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-50/80 border border-rose-200 text-rose-900">
-              <PartyPopper className="w-3.5 h-3.5 text-rose-600" />
-              <span><strong>{stats.holidays}</strong> Holiday</span>
-            </div>
-          </div>
         </div>
-      </div>
 
-      {/* ── MAIN CONTENT VIEW ── */}
-      {viewMode === 'grid' ? (
-        /* Calendar Grid View */
-        <div className="p-4 sm:p-6 overflow-x-auto bg-[#faf9fc]">
-          <div className="min-w-[780px]">
-            {/* Weekday Column Headers */}
-            <div className="grid grid-cols-7 gap-2 mb-2.5 text-center">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName, idx) => (
-                <div
-                  key={dayName}
-                  className={`py-2 text-xs font-bold uppercase tracking-wider rounded-xl border ${
-                    idx === 0
-                      ? 'text-rose-700 bg-rose-50/70 border-rose-100'
-                      : 'text-slate-600 bg-white border-slate-200/70'
-                  }`}
-                >
-                  {dayName}
-                </div>
-              ))}
-            </div>
-
-            {/* Weeks Grid */}
-            <div className="space-y-2">
-              {(currentMonthData.weeks || []).map((week, wIdx) => (
-                <div key={wIdx} className="grid grid-cols-7 gap-2">
-                  {week.map((day, dIdx) => {
-                    if (!day) {
-                      return (
-                        <div
-                          key={`empty-${wIdx}-${dIdx}`}
-                          className="min-h-[116px] rounded-2xl bg-slate-50/60 border border-slate-100"
-                        />
-                      )
-                    }
-
-                    const matchingEvents = day.events.filter(filterEvent)
-                    const hasHoliday = day.events.some(
-                      (e) => e.category === 'Holiday & Festival'
-                    )
-                    const isToday = day.dateStr === todayStr
-                    const isSunday = dIdx === 0
-
-                    return (
-                      <div
-                        key={day.dateStr}
-                        onClick={() => setActiveDetailDay(day)}
-                        className={`min-h-[116px] p-2.5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group relative ${
-                          day.isCurrentMonth
-                            ? isToday
-                              ? 'bg-[#faf6ff] border-[#4c1d76] shadow-[0_0_0_1.5px_rgba(76,29,118,0.4)] hover:shadow-md'
-                              : hasHoliday
-                              ? 'bg-rose-50/30 border-rose-200/60 hover:border-rose-300 hover:shadow-sm'
-                              : 'bg-white border-slate-200/80 hover:border-[#4c1d76]/40 hover:shadow-[0_4px_16px_rgba(76,29,118,0.06)] hover:-translate-y-0.5'
-                            : 'bg-slate-50/40 border-slate-100 opacity-40 hover:opacity-75'
-                        }`}
-                      >
-                        {/* Day Card Header */}
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span
-                            className={`text-xs font-bold px-2 py-0.5 rounded-lg transition-colors ${
-                              isToday
-                                ? 'bg-[#4c1d76] text-white shadow-2xs font-extrabold'
-                                : hasHoliday
-                                ? 'text-rose-700 bg-rose-100/70'
-                                : isSunday
-                                ? 'text-rose-700 bg-rose-50/50'
-                                : day.isCurrentMonth
-                                ? 'text-slate-800 group-hover:text-[#4c1d76]'
-                                : 'text-slate-400'
-                            }`}
-                          >
-                            {day.dayNum}
-                          </span>
-
-                          {matchingEvents.length > 0 && (
-                            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-md bg-[#f4eefe] text-[#4c1d76] border border-[#4c1d76]/15">
-                              {matchingEvents.length}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Event Chips List */}
-                        <div className="space-y-1.5 flex-1 overflow-hidden my-1">
-                          {matchingEvents.slice(0, 2).map((ev, eIdx) => {
-                            const style =
-                              CATEGORY_STYLES[ev.category] ||
-                              CATEGORY_STYLES['Academic & General']
-                            return (
-                              <div
-                                key={eIdx}
-                                title={ev.title}
-                                className={`text-[10px] px-2 py-1 rounded-lg border truncate font-semibold flex items-center gap-1.5 shadow-2xs transition-colors ${style.badgeClass}`}
-                              >
-                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dotClass}`} />
-                                <span className="truncate">{ev.title}</span>
-                              </div>
-                            )
-                          })}
-
-                          {matchingEvents.length > 2 && (
-                            <div className="text-[10px] font-bold text-[#4c1d76] bg-[#f4eefe]/70 px-2 py-0.5 rounded-md border border-[#4c1d76]/15 text-center">
-                              +{matchingEvents.length - 2} more
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Subtle Footer */}
-                        <div className="text-[9px] font-semibold text-slate-400 group-hover:text-[#4c1d76] transition-colors flex justify-end pt-1">
-                          <span className="opacity-0 group-hover:opacity-100 transition-opacity">Details &rarr;</span>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Agenda / Timeline View */
-        <div className="p-5 sm:p-6 divide-y divide-slate-100 max-h-[640px] overflow-y-auto custom-scrollbar bg-white">
-          {agendaDays.length === 0 ? (
-            <div className="py-16 text-center text-slate-400 text-xs font-medium">
-              No campus activities or events match your current filter parameters.
-            </div>
-          ) : (
-            agendaDays.map(({ day, filteredEvents }) => {
-              const hasHoliday = day.events.some((e) => e.category === 'Holiday & Festival')
-              const isToday = day.dateStr === todayStr
-              const isSunday = day.dayOfWeek.toLowerCase().startsWith('sun')
-
-              return (
-                <div key={day.dateStr} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-4 sm:gap-6">
-                  {/* Date Badge */}
-                  <div className="sm:w-36 shrink-0">
-                    <div
-                      className={`p-3 rounded-2xl border text-left shadow-2xs ${
-                        isToday
-                          ? 'bg-[#f4eefe] border-[#4c1d76]/30 text-[#4c1d76]'
-                          : hasHoliday || isSunday
-                          ? 'bg-rose-50/60 border-rose-200 text-rose-800'
-                          : 'bg-slate-50 border-slate-200 text-slate-800'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-2xl font-extrabold leading-none">
-                          {day.dayNum}
-                        </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">
-                          {day.dayOfWeek.slice(0, 3)}
-                        </span>
-                      </div>
-                      <span className="text-[11px] font-medium opacity-80 block mt-1">
-                        {activeMonthConfig.name}
-                      </span>
-                    </div>
+        {/* ── CALENDAR VIEW CONTENT ── */}
+        {viewMode === 'grid' ? (
+          /* Full Width Month Calendar Grid */
+          <div className="overflow-x-auto">
+            <div className="min-w-[850px]">
+              {/* Weekday Column Headers */}
+              <div className="grid grid-cols-7 gap-2.5 mb-2.5 text-center">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName, idx) => (
+                  <div
+                    key={dayName}
+                    className={`py-2 text-[11px] font-bold font-sans uppercase tracking-wider rounded-xl ${
+                      idx === 0
+                        ? 'text-rose-600 bg-rose-50/50'
+                        : 'text-slate-500 bg-slate-50'
+                    }`}
+                  >
+                    {dayName}
                   </div>
+                ))}
+              </div>
 
-                  {/* Day Events List */}
-                  <div className="flex-1 space-y-2.5">
-                    {filteredEvents.map((ev, eIdx) => {
-                      const style =
-                        CATEGORY_STYLES[ev.category] ||
-                        CATEGORY_STYLES['Academic & General']
+              {/* Weeks Grid */}
+              <div className="space-y-2.5">
+                {(currentMonthData.weeks || []).map((week, wIdx) => (
+                  <div key={wIdx} className="grid grid-cols-7 gap-2.5">
+                    {week.map((day, dIdx) => {
+                      if (!day) {
+                        return (
+                          <div
+                            key={`empty-${wIdx}-${dIdx}`}
+                            className="min-h-[120px] rounded-2xl bg-slate-50/40 border border-slate-100"
+                          />
+                        )
+                      }
+
+                      const matchingEvents = day.events.filter(filterEvent)
+                      const hasHoliday = day.events.some(
+                        (e) => e.category === 'Holiday & Festival'
+                      )
+                      const isToday = day.dateStr === todayStr
+                      const isSunday = dIdx === 0
+
                       return (
                         <div
-                          key={eIdx}
+                          key={day.dateStr}
                           onClick={() => setActiveDetailDay(day)}
-                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer hover:shadow-sm hover:border-[#4c1d76]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border-slate-200/80 ${style.borderClass} border-l-[3.5px]`}
+                          className={`min-h-[120px] p-3 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group relative ${
+                            day.isCurrentMonth
+                              ? isToday
+                                ? 'bg-[#faf6ff] border-[#4c1d76] shadow-[0_0_0_1.5px_rgba(76,29,118,0.4)] hover:shadow-md'
+                                : hasHoliday
+                                ? 'bg-rose-50/20 border-rose-200/60 hover:border-rose-300 hover:shadow-sm'
+                                : 'bg-white border-slate-200/70 hover:border-[#4c1d76]/40 hover:shadow-[0_4px_16px_rgba(76,29,118,0.06)] hover:-translate-y-0.5'
+                              : 'bg-slate-50/30 border-slate-100 opacity-40 hover:opacity-75'
+                          }`}
                         >
-                          <div className="space-y-1.5">
-                            <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                              {CATEGORY_ICONS[ev.category] || <Award className="w-4 h-4 text-slate-400" />}
-                              <span>{ev.title}</span>
-                            </div>
+                          {/* Day Header */}
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span
+                              className={`text-xs font-bold font-sans px-2.5 py-0.5 rounded-full transition-colors ${
+                                isToday
+                                  ? 'bg-[#4c1d76] text-white shadow-2xs font-extrabold'
+                                  : hasHoliday
+                                  ? 'text-rose-700 bg-rose-100/70'
+                                  : isSunday
+                                  ? 'text-rose-600 bg-rose-50/50'
+                                  : day.isCurrentMonth
+                                  ? 'text-slate-800 group-hover:text-[#4c1d76]'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {day.dayNum}
+                            </span>
 
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span
-                                className={`text-[10px] font-bold px-2.5 py-0.5 rounded-md border ${style.badgeClass}`}
-                              >
-                                {ev.category}
+                            {matchingEvents.length > 0 && (
+                              <span className="text-[10px] font-bold font-mono px-2 py-0.2 rounded-full bg-[#f4eefe] text-[#4c1d76] border border-[#4c1d76]/15">
+                                {matchingEvents.length}
                               </span>
-                              {ev.club && (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1">
-                                  <Users className="w-3 h-3 text-slate-400" />
-                                  <span>{ev.club}</span>
-                                </span>
-                              )}
-                              {ev.department && (
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-[#f4eefe] border border-[#4c1d76]/20 text-[#4c1d76] flex items-center gap-1">
-                                  <Building2 className="w-3 h-3 text-[#4c1d76]/70" />
-                                  <span>{ev.department}</span>
-                                </span>
-                              )}
-                            </div>
+                            )}
                           </div>
 
-                          <div className="text-xs font-bold text-[#4c1d76] shrink-0 self-end sm:self-center opacity-80 hover:opacity-100">
-                            Details &rarr;
+                          {/* Event Chips (Shows up to 3 in full width) */}
+                          <div className="space-y-1.5 flex-1 overflow-hidden my-1">
+                            {matchingEvents.slice(0, 3).map((ev, eIdx) => {
+                              const style =
+                                CATEGORY_STYLES[ev.category] ||
+                                CATEGORY_STYLES['Academic & General']
+                              return (
+                                <div
+                                  key={eIdx}
+                                  title={ev.title}
+                                  className={`text-[10px] px-2 py-1 rounded-lg border truncate font-medium font-sans flex items-center gap-1.5 shadow-2xs transition-colors ${style.badgeClass}`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dotClass}`} />
+                                  <span className="truncate">{ev.title}</span>
+                                </div>
+                              )
+                            })}
+
+                            {matchingEvents.length > 3 && (
+                              <div className="text-[9px] font-bold font-sans text-[#4c1d76] bg-[#f4eefe]/80 px-2.5 py-0.5 rounded-full border border-[#4c1d76]/15 text-center">
+                                +{matchingEvents.length - 3} more
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Hover prompt */}
+                          <div className="text-[9px] font-semibold text-slate-400 group-hover:text-[#4c1d76] transition-colors flex justify-end">
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity">Details &rarr;</span>
                           </div>
                         </div>
                       )
                     })}
                   </div>
-                </div>
-              )
-            })
-          )}
-        </div>
-      )}
-
-      {/* ── FOOTER LEGEND ── */}
-      <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200/80">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Legend:
-            </span>
-            {categoriesList.map((catKey) => {
-              const style = CATEGORY_STYLES[catKey]
-              return (
-                <div key={catKey} className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                  <span className={`w-2 h-2 rounded-full ${style.dotClass}`} />
-                  <span>{catKey}</span>
-                </div>
-              )
-            })}
+                ))}
+              </div>
+            </div>
           </div>
+        ) : (
+          /* Full Width Agenda Timeline View */
+          <div className="divide-y divide-slate-100 max-h-[700px] overflow-y-auto custom-scrollbar">
+            {agendaDays.length === 0 ? (
+              <div className="py-16 text-center text-slate-400 text-xs font-medium font-sans">
+                No campus activities match your current filter parameters.
+              </div>
+            ) : (
+              agendaDays.map(({ day, filteredEvents }) => {
+                const hasHoliday = day.events.some((e) => e.category === 'Holiday & Festival')
+                const isToday = day.dateStr === todayStr
+                const isSunday = day.dayOfWeek.toLowerCase().startsWith('sun')
 
-          <div className="text-[11px] font-mono text-slate-400 flex items-center gap-2">
-            <span>Month GID: {activeMonthConfig.gid}</span>
+                return (
+                  <div key={day.dateStr} className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row gap-4 sm:gap-6">
+                    <div className="sm:w-36 shrink-0">
+                      <div
+                        className={`p-3.5 rounded-2xl border text-left shadow-2xs ${
+                          isToday
+                            ? 'bg-[#f4eefe] border-[#4c1d76]/30 text-[#4c1d76]'
+                            : hasHoliday || isSunday
+                            ? 'bg-rose-50/60 border-rose-200 text-rose-800'
+                            : 'bg-slate-50 border-slate-200 text-slate-800'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-2xl font-extrabold leading-none font-sans">
+                            {day.dayNum}
+                          </span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 font-sans">
+                            {day.dayOfWeek.slice(0, 3)}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-medium opacity-80 block mt-1 font-sans">
+                          {activeMonthConfig.name}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 space-y-2.5">
+                      {filteredEvents.map((ev, eIdx) => {
+                        const style =
+                          CATEGORY_STYLES[ev.category] ||
+                          CATEGORY_STYLES['Academic & General']
+                        return (
+                          <div
+                            key={eIdx}
+                            onClick={() => setActiveDetailDay(day)}
+                            className={`p-4 rounded-2xl border transition-all cursor-pointer hover:shadow-sm hover:border-[#4c1d76]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border-slate-200/80 ${style.borderClass} border-l-[3.5px]`}
+                          >
+                            <div className="space-y-1.5">
+                              <div className="text-sm font-bold text-slate-900 flex items-center gap-2 font-sans">
+                                {CATEGORY_ICONS[ev.category] || <Award className="w-4 h-4 text-slate-400" />}
+                                <span>{ev.title}</span>
+                              </div>
+
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border font-sans ${style.badgeClass}`}
+                                >
+                                  {ev.category}
+                                </span>
+                                {ev.club && (
+                                  <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1 font-sans">
+                                    <Users className="w-3 h-3 text-slate-400" />
+                                    <span>{ev.club}</span>
+                                  </span>
+                                )}
+                                {ev.department && (
+                                  <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-[#f4eefe] border border-[#4c1d76]/20 text-[#4c1d76] flex items-center gap-1 font-sans">
+                                    <Building2 className="w-3 h-3 text-[#4c1d76]/70" />
+                                    <span>{ev.department}</span>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="text-xs font-bold text-[#4c1d76] shrink-0 self-end sm:self-center font-sans opacity-80 hover:opacity-100">
+                              Details &rarr;
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })
+            )}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* ── DAY DETAILS MODAL ── */}
+      {/* ── 4. DONEZO-STYLE DAY DETAILS MODAL ── */}
       {activeDetailDay && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in"
           onClick={() => setActiveDetailDay(null)}
         >
           <div
-            className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full max-h-[85vh] shadow-2xl overflow-hidden flex flex-col animate-scale-up"
+            className="bg-white border border-slate-100 rounded-[28px] max-w-lg w-full max-h-[85vh] shadow-2xl overflow-hidden flex flex-col animate-scale-up font-sans"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-white to-[#faf7ff] flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#4c1d76] bg-[#f4eefe] px-2.5 py-0.5 rounded-full border border-[#4c1d76]/20">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#4c1d76] bg-[#f4eefe] px-2.5 py-0.5 rounded-full border border-[#4c1d76]/20 font-sans">
                     Schedule Details
                   </span>
                   <span className="text-slate-300">&bull;</span>
-                  <span className="text-xs font-semibold text-slate-500">
+                  <span className="text-xs font-semibold text-slate-500 font-sans">
                     {activeDetailDay.dayOfWeek}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-bold text-slate-900 font-sans">
                   {new Date(activeDetailDay.dateStr).toLocaleDateString('en-US', {
                     weekday: 'long',
                     month: 'long',
@@ -728,17 +797,17 @@ export function AdminActivityCalendarClient({
               </div>
               <button
                 onClick={() => setActiveDetailDay(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                className="w-8 h-8 rounded-full border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors flex items-center justify-center cursor-pointer"
                 title="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Events Content */}
             <div className="p-6 overflow-y-auto space-y-3.5 divide-y divide-slate-100 custom-scrollbar">
               {activeDetailDay.events.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-xs font-medium">
+                <div className="py-12 text-center text-slate-400 text-xs font-medium font-sans">
                   No campus activities or holidays scheduled on this date.
                 </div>
               ) : (
@@ -748,28 +817,28 @@ export function AdminActivityCalendarClient({
                     CATEGORY_STYLES['Academic & General']
                   return (
                     <div key={idx} className="pt-3.5 first:pt-0 space-y-2">
-                      <div className="flex items-start gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-200/80 flex items-center justify-center shrink-0 mt-0.5">
                           {CATEGORY_ICONS[ev.category]}
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                          <h4 className="text-sm font-bold text-slate-900 leading-snug font-sans">
                             {ev.title}
                           </h4>
-                          <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md border mt-1.5 ${style.badgeClass}`}>
+                          <span className={`inline-block text-[10px] font-bold px-2.5 py-0.5 rounded-full border mt-1.5 font-sans ${style.badgeClass}`}>
                             {ev.category}
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 pl-9 pt-0.5">
+                      <div className="flex flex-wrap items-center gap-2 pl-11 pt-0.5">
                         {ev.club && (
-                          <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700">
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-sans">
                             Club: <strong className="font-bold text-slate-900">{ev.club}</strong>
                           </span>
                         )}
                         {ev.department && (
-                          <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-[#f4eefe] border border-[#4c1d76]/20 text-[#4c1d76]">
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-[#f4eefe] border border-[#4c1d76]/20 text-[#4c1d76] font-sans">
                             Department: <strong className="font-bold text-[#4c1d76]">{ev.department}</strong>
                           </span>
                         )}
@@ -781,15 +850,15 @@ export function AdminActivityCalendarClient({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
+            <div className="p-5 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500 font-sans">
                 {activeDetailDay.events.length} {activeDetailDay.events.length === 1 ? 'event' : 'events'} recorded
               </span>
               <button
                 onClick={() => setActiveDetailDay(null)}
-                className="px-5 py-2 text-xs font-bold rounded-xl bg-[#4c1d76] text-white hover:bg-[#3d1561] transition-colors shadow-xs"
+                className="px-6 py-2 text-xs font-bold rounded-full bg-[#4c1d76] text-white hover:bg-[#3d1561] transition-colors shadow-sm cursor-pointer font-sans"
               >
-                Close
+                Done
               </button>
             </div>
           </div>

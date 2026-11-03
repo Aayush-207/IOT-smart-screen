@@ -237,13 +237,21 @@ export function NewAnnouncementForm({
               <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_0_2px_rgba(16,185,129,0.2)] animate-pulse" /> 
               LIVE PREVIEW
             </span>
-            <div className="flex bg-slate-200/50 p-1 rounded-lg">
+            <div className="relative flex bg-slate-200/60 p-1 rounded-xl">
+              {/* Sliding pill indicator */}
+              <div
+                className={`absolute inset-y-1 rounded-lg bg-white shadow-xs transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  orientation === 'landscape'
+                    ? 'left-1 w-[calc(50%-4px)]'
+                    : 'left-[calc(50%+2px)] w-[calc(50%-4px)]'
+                }`}
+              />
               <button
                 type="button"
                 onClick={() => setOrientation('landscape')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+                className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-colors duration-200 cursor-pointer ${
                   orientation === 'landscape'
-                    ? 'bg-white text-slate-900 shadow-sm'
+                    ? 'text-slate-900'
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
@@ -252,9 +260,9 @@ export function NewAnnouncementForm({
               <button
                 type="button"
                 onClick={() => setOrientation('portrait')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+                className={`relative z-10 flex items-center justify-center gap-1.5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-colors duration-200 cursor-pointer ${
                   orientation === 'portrait'
-                    ? 'bg-white text-slate-900 shadow-sm'
+                    ? 'text-slate-900'
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
@@ -264,8 +272,10 @@ export function NewAnnouncementForm({
           </div>
 
           <div className="flex-1 p-6 flex flex-col items-center justify-center bg-slate-100">
-            <div className={`@container bg-slate-900 rounded-xl flex flex-col justify-between p-[2cqw] text-center text-white overflow-hidden relative transition-all duration-500 ease-in-out shadow-xl border-4 border-slate-800 shrink-0 ${
-              orientation === 'landscape' ? 'w-full aspect-[16/9]' : 'w-[55%] aspect-[9/16]'
+            <div className={`@container bg-slate-900 rounded-xl flex flex-col justify-between p-[2cqw] text-center text-white overflow-hidden relative shadow-xl border-4 border-slate-800 shrink-0 transition-[width,height,max-width,max-height] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              orientation === 'landscape'
+                ? 'w-full max-w-[370px] h-[208px]'
+                : 'w-[195px] h-[346px]'
             }`}>
               {attachmentPreview || existing?.attachment_url ? (
                 <img

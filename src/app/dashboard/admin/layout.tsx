@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div 
-      className={`h-screen flex overflow-hidden bg-slate-100 text-slate-900 transition-colors duration-200 ${plusJakarta.variable} ${spaceGrotesk.variable} ${plusJakarta.className}`}
+      className={`h-screen flex overflow-hidden bg-[#f8f9fb] text-slate-900 transition-colors duration-200 ${plusJakarta.variable} ${spaceGrotesk.variable} ${plusJakarta.className}`}
       style={{
         '--font-geist-sans': 'var(--font-admin-sans)',
         '--font-inter': 'var(--font-admin-sans)',
@@ -39,4 +39,3 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     </div>
   )
 }
-
