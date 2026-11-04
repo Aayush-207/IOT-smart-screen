@@ -63,8 +63,9 @@ export async function runAiAdvisory(text: string): Promise<string | null> {
     const client = new Anthropic({ apiKey })
     const res = await client.messages.create(
       {
-        model: 'claude-3-5-haiku-latest',
-        max_tokens: 400,
+        model: 'claude-haiku-5-5',
+        max_tokens: 1024,
+        output_config: { effort: 'low' },
         system:
           'You are an advisory reviewer for a campus digital-signage system. ' +
           'Given an announcement\'s title and body, list any potential issues a human approver should double-check: ' +

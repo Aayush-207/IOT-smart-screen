@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CheckSquare } from 'lucide-react'
 import { HodRecentSubmissionsClient } from './HodRecentSubmissionsClient'
+import { HOD_APPROVABLE } from '@/lib/priority'
 
 export default async function HodDashboardPage() {
   const supabase = await createClient()
@@ -35,7 +36,8 @@ export default async function HodDashboardPage() {
       .from('announcements')
       .select('id', { count: 'exact', head: true })
       .eq('department_id', profile.department_id)
-      .eq('status', 'pending_approval'),
+      .eq('status', 'pending_approval')
+      .in('priority', HOD_APPROVABLE),
     supabase
       .from('announcements')
       .select('id', { count: 'exact', head: true })
@@ -51,7 +53,7 @@ export default async function HodDashboardPage() {
   ])
 
   return (
-    <div className="space-y-8 max-w-5xl pb-16 animate-fade-in-up font-[family-name:var(--font-inter)]">
+    <div className="space-y-8 max-w-5xl pb-16 animate-fade-in-up font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200">
         <div>

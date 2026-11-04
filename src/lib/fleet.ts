@@ -6,15 +6,31 @@ export type DeviceStatus = 'online' | 'stale' | 'offline'
 export type DeliveryState = 'delivered' | 'pending' | 'failed'
 export type AnnouncementDisplayStatus = 'scheduled' | 'archived' | 'live' | string
 
-export function deviceStatus(lastSeenAt: string | null | undefined, screenName?: string): DeviceStatus {
-  if (screenName && (screenName === 'Main Lobby Screen 01' || screenName.toLowerCase().includes('main lobby'))) {
-    return 'online'
-  }
+export function deviceStatus(lastSeenAt: string | null | undefined): DeviceStatus {
   if (!lastSeenAt) return 'offline'
   const age = Date.now() - new Date(lastSeenAt).getTime()
   if (age < STALE_AFTER_MS) return 'online'
   if (age < OFFLINE_AFTER_MS) return 'stale'
   return 'offline'
+}
+
+// Single source of truth for "does this announcement belong on this screen",
+// shared by the device endpoint and the dashboards.
+// ponytail: substring match so older rows targeting "Engineering Wing" still reach
+// zone "Engineering"; a zone name inside another (e.g. "Lab" / "Collaboration") would
+// over-match. Switch to exact zone ids if that ever happens.
+export function isScreenTargeted(
+  a: { target_all?: boolean | null; target_zones?: string[] | null },
+  screen: { name?: string | null; zone?: string | null; location?: string | null }
+): boolean {
+  if (a.target_all) return true
+  const fields = [screen.name, screen.zone, screen.location]
+    .map((f) => (f || '').trim().toLowerCase())
+    .filter(Boolean)
+  return (a.target_zones || []).some((z) => {
+    const target = String(z || '').trim().toLowerCase()
+    return !!target && fields.some((f) => f.includes(target) || target.includes(f))
+  })
 }
 
 export function deliveryState(

@@ -363,7 +363,7 @@ export function HodScreensClient({
   const onlineCount = screens.filter((s) => s.isOnline).length
 
   return (
-    <div className="space-y-6 text-slate-900 animate-fade-in-up pb-12 font-[family-name:var(--font-inter)]">
+    <div className="space-y-6 text-slate-900 animate-fade-in-up pb-12 font-sans">
       <style>{`
         @keyframes eventReveal {
           0% {

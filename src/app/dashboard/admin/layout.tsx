@@ -1,16 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AppSidebar } from '@/components/AppSidebar'
-import { Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google'
+import { Manrope, Space_Grotesk } from 'next/font/google'
 
-const plusJakarta = Plus_Jakarta_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
-  variable: '--font-admin-sans',
+  variable: '--font-manrope',
+  display: 'swap',
 })
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-admin-mono',
+  display: 'swap',
 })
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -23,11 +25,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div 
-      className={`h-screen flex overflow-hidden bg-[#f8f9fb] text-slate-900 transition-colors duration-200 ${plusJakarta.variable} ${spaceGrotesk.variable} ${plusJakarta.className}`}
+      className={`h-screen flex overflow-hidden bg-[#f8f9fb] text-slate-900 transition-colors duration-200 ${manrope.variable} ${spaceGrotesk.variable} ${manrope.className}`}
       style={{
-        '--font-geist-sans': 'var(--font-admin-sans)',
-        '--font-inter': 'var(--font-admin-sans)',
-        '--font-sans': 'var(--font-admin-sans)',
+        '--font-geist-sans': 'var(--font-manrope)',
+        '--font-inter': 'var(--font-manrope)',
+        '--font-sans': 'var(--font-manrope)',
+        '--font-admin-sans': 'var(--font-manrope)',
+        '--font-manrope': 'var(--font-manrope)',
         '--font-geist-mono': 'var(--font-admin-mono)',
         '--font-mono': 'var(--font-admin-mono)'
       } as React.CSSProperties}

@@ -32,7 +32,7 @@ export default async function AnalyticsPage() {
       .order('name'),
     supabase
       .from('departments')
-      .select('id, name, code')
+      .select('id, name')
       .order('name'),
     supabase
       .from('announcement_deliveries')

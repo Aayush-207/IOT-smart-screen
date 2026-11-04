@@ -265,7 +265,7 @@ export function VideoWallClient({
   const withStatus = useMemo(() => {
     return screens.map((s) => ({
       ...s,
-      _status: deviceStatus(s.last_seen_at, s.name),
+      _status: deviceStatus(s.last_seen_at),
     }))
   }, [screens])
 
@@ -320,7 +320,8 @@ export function VideoWallClient({
     setBusyId(screenId)
     setBusyType('refresh')
     try {
-      await supabase.from('screens').update({ last_seen_at: new Date().toISOString() }).eq('id', screenId)
+      const { error } = await supabase.from('screens').update({ force_refresh_requested: true }).eq('id', screenId)
+      if (error) throw error
       await logAudit(supabase, {
         actorId: userId,
         action: 'refreshed_screen',
@@ -342,6 +343,8 @@ export function VideoWallClient({
     setBusyId(screenId)
     setBusyType('reboot')
     try {
+      const { error } = await supabase.from('screens').update({ reboot_requested: true }).eq('id', screenId)
+      if (error) throw error
       await logAudit(supabase, {
         actorId: userId,
         action: 'rebooted_screen',

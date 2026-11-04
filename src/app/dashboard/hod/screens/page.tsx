@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createPublicClient } from '@/lib/supabase/public'
 import { redirect } from 'next/navigation'
+import { deviceStatus, isScreenTargeted } from '@/lib/fleet'
 import { HodScreensClient } from './HodScreensClient'
 
 export const dynamic = 'force-dynamic'
@@ -47,30 +48,7 @@ export default async function HodScreensPage() {
   const getActiveContentsForScreen = (screen: { name: string; zone?: string; location?: string }) => {
     if (!liveAnnouncements || liveAnnouncements.length === 0) return []
 
-    const matches = liveAnnouncements.filter((a) => {
-      // If broadcasted to all screens
-      if (a.target_all) return true
-
-      // If targeted to specific zones or screen names
-      if (Array.isArray(a.target_zones) && a.target_zones.length > 0) {
-        return a.target_zones.some((z: string) => {
-          const zoneStr = String(z || '').trim().toLowerCase()
-          return (
-            zoneStr === screen.name.toLowerCase() ||
-            (screen.zone && zoneStr === screen.zone.toLowerCase()) ||
-            (screen.location && zoneStr === screen.location.toLowerCase()) ||
-            screen.name.toLowerCase().includes(zoneStr) ||
-            (screen.zone && screen.zone.toLowerCase().includes(zoneStr)) ||
-            (screen.location && screen.location.toLowerCase().includes(zoneStr)) ||
-            zoneStr.includes(screen.name.toLowerCase()) ||
-            (screen.zone && zoneStr.includes(screen.zone.toLowerCase())) ||
-            (screen.location && zoneStr.includes(screen.location.toLowerCase()))
-          )
-        })
-      }
-
-      return false
-    })
+    const matches = liveAnnouncements.filter((a) => isScreenTargeted(a, screen))
 
     return matches.map((match) => ({
       id: match.id,
@@ -109,7 +87,7 @@ export default async function HodScreensPage() {
   const activeScreensList = dbScreens && dbScreens.length > 0 ? dbScreens : defaultScreens
 
   const screens = activeScreensList.map((s: any) => {
-    const isOnline = Boolean(s.last_seen_at)
+    const isOnline = deviceStatus(s.last_seen_at) === 'online'
     return {
       id: s.id,
       name: s.name,

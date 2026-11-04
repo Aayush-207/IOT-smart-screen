@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AppSidebar } from '@/components/AppSidebar'
+import { HOD_APPROVABLE } from '@/lib/priority'
 
 export default async function HodLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -16,11 +17,12 @@ export default async function HodLayout({ children }: { children: React.ReactNod
       .select('id', { count: 'exact', head: true })
       .eq('department_id', profile.department_id)
       .eq('status', 'pending_approval')
+      .in('priority', HOD_APPROVABLE)
     pendingApprovals = count || 0
   }
 
   return (
-    <div className="h-screen flex overflow-hidden bg-white text-slate-900 font-[family-name:var(--font-inter)] transition-colors duration-200">
+    <div className="h-screen flex overflow-hidden bg-white text-slate-900 font-sans transition-colors duration-200">
       <AppSidebar role="hod" userEmail={user.email || ''} pendingApprovals={pendingApprovals} />
       <main className="flex-1 min-w-0 h-screen overflow-y-auto px-6 py-8 md:px-10">
         <div className="max-w-6xl mx-auto">{children}</div>

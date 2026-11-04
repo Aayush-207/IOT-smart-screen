@@ -2,8 +2,17 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { StatusBadge } from '@/components/StatusBadge'
-import { announcementDisplayStatus } from '@/lib/fleet'
+import { announcementDisplayStatus, isScreenTargeted } from '@/lib/fleet'
 import { ArrowLeft, Monitor, Clock, Tv, Calendar, AlertCircle } from 'lucide-react'
+
+// Placeholder nodes shown only while no screens are registered.
+function defaultNodes() {
+  return [
+    { id: 'mock-1', name: 'Main Lobby Screen 01', location: 'Engineering Block A', zone: 'Engineering Wing', last_seen_at: new Date().toISOString() },
+    { id: 'mock-2', name: 'Library Entrance Node', location: 'Central Library', zone: 'Library Atrium', last_seen_at: new Date(Date.now() - 6000).toISOString() },
+    { id: 'mock-3', name: 'Cafeteria Kiosk Display', location: 'Student Center', zone: 'Student Cafeteria', last_seen_at: new Date(Date.now() - 15000).toISOString() },
+  ]
+}
 
 export default async function DeliveryDetailPage({
   params,
@@ -24,18 +33,12 @@ export default async function DeliveryDetailPage({
 
   if (!announcement) return notFound()
 
-  const defaultNodes = [
-    { id: 'mock-1', name: 'Main Lobby Screen 01', location: 'Engineering Block A', zone: 'Engineering Wing', last_seen_at: new Date().toISOString() },
-    { id: 'mock-2', name: 'Library Entrance Node', location: 'Central Library', zone: 'Library Atrium', last_seen_at: new Date(Date.now() - 6000).toISOString() },
-    { id: 'mock-3', name: 'Cafeteria Kiosk Display', location: 'Student Center', zone: 'Student Cafeteria', last_seen_at: new Date(Date.now() - 15000).toISOString() }
-  ]
-
   let targetScreens: any[] = []
   const { data: dbScreens } = await supabase.from('screens').select('*').order('name')
   if (dbScreens && dbScreens.length > 0) {
     targetScreens = dbScreens
   } else {
-    targetScreens = defaultNodes
+    targetScreens = defaultNodes()
   }
 
   const { data: deliveries } = await supabase
@@ -134,19 +137,7 @@ export default async function DeliveryDetailPage({
             {targetScreens.map((screen) => {
               const delivery = deliveries?.find((d: any) => d.screen_id === screen.id)
               
-              const isSpecified = Boolean(
-                announcement.target_all ||
-                !announcement.target_zones ||
-                announcement.target_zones.length === 0 ||
-                announcement.target_zones.some((z: string) =>
-                  z === screen.name ||
-                  z === screen.zone ||
-                  z === screen.location ||
-                  z.toLowerCase() === screen.name.toLowerCase() ||
-                  z.toLowerCase() === screen.zone.toLowerCase() ||
-                  z.toLowerCase() === screen.location.toLowerCase()
-                )
-              )
+              const isSpecified = isScreenTargeted(announcement, screen)
 
               const isApproved = announcement.status === 'approved'
               const state = isApproved

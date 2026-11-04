@@ -1,6 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { comparePriority } from '@/lib/priority'
+import { isScreenTargeted } from '@/lib/fleet'
 
 // Public device endpoint — polled from Raspberry Pi agents and from browser
 // kiosk pages on arbitrary origins, so it is CORS-open and never cached.
@@ -26,7 +28,7 @@ export function OPTIONS() {
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -35,15 +37,15 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid screen ID format' }, { status: 400, headers: CORS })
     }
 
-    const supabase = await createClient()
+    // Always the anon role: devices have no session, and a logged-in browser's
+    // cookies must not change what a screen is served or whether it can heartbeat.
+    const supabase = createPublicClient()
     const now = new Date()
     const nowIso = now.toISOString()
 
-    const _deviceTokenHeader = request.headers.get('x-device-token') || request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-
     const { data: screen, error: screenError } = await supabase
       .from('screens')
-      .select('id, zone, current_announcement_id, force_refresh_requested, reboot_requested')
+      .select('id, name, location, zone, current_announcement_id, force_refresh_requested, reboot_requested')
       .eq('id', id)
       .single()
 
@@ -88,7 +90,7 @@ export async function GET(
     let eligible: Candidate[] = []
 
     // 2. Otherwise the highest-priority approved announcement targeting this
-    //    screen. Zone matching is done in JS so zone names with spaces /
+    //    screen. Matching is done in JS so zone names with spaces /
     //    punctuation can't break a PostgREST filter string.
     if (!chosen) {
       const { data: candidates } = await supabase
@@ -98,9 +100,7 @@ export async function GET(
         .eq('is_emergency', false)
 
       eligible = (candidates || []).filter((c) => {
-        if (!inWindow(c)) return false
-        if (c.target_all) return true
-        return !!screen.zone && Array.isArray(c.target_zones) && c.target_zones.includes(screen.zone)
+        return inWindow(c) && isScreenTargeted(c, screen)
       })
 
       eligible.sort((a, b) => {
@@ -126,7 +126,15 @@ export async function GET(
       // dispatched -> acknowledged (first poll that returns it) -> displaying
       // (a later poll where it was already the screen's current content).
       const state = screen.current_announcement_id === chosen.id ? 'displaying' : 'acknowledged'
-      await supabase
+      // Upsert needs to read the existing row, which RLS denies to anon, so
+      // delivery tracking uses the service role when it is configured.
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+      const deliveries = serviceKey
+        ? createServiceClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          })
+        : supabase
+      const { error: deliveryError } = await deliveries
         .from('announcement_deliveries')
         .upsert(
           {
@@ -137,6 +145,7 @@ export async function GET(
           },
           { onConflict: 'announcement_id,screen_id' }
         )
+      if (deliveryError) console.error('delivery upsert failed:', deliveryError.message)
     }
 
     const mapItem = (item: Candidate) => ({

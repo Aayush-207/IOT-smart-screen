@@ -5,31 +5,18 @@ import { LogOut, Loader2 } from 'lucide-react'
 
 export function LogoutButton() {
   const [signingOut, setSigningOut] = useState(false)
+  const label = signingOut ? 'Signing out' : 'Sign out'
 
   return (
-    <form
-      action="/auth/signout"
-      method="post"
-      className="w-full"
-      onSubmit={() => setSigningOut(true)}
-    >
-      <button 
+    <form action="/auth/signout" method="post" className="shrink-0" onSubmit={() => setSigningOut(true)}>
+      <button
         type="submit"
         disabled={signingOut}
-        className="w-full px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-neutral-200 dark:bg-[#0a0a0a] dark:hover:bg-[#ffffff]/10 border border-neutral-300 dark:border-[#212327] text-neutral-600 hover:text-neutral-900 dark:text-[#7d8187] dark:hover:text-[#ffffff] transition-all flex items-center justify-center gap-2 text-xs font-normal cursor-pointer disabled:opacity-60"
-        title="Sign Out of CampusCast"
+        aria-label={label}
+        title={label}
+        className="w-9 h-9 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 outline-none focus-visible:ring-2 focus-visible:ring-white/70 transition-colors cursor-pointer disabled:opacity-60"
       >
-        {signingOut ? (
-          <>
-            <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-600 dark:text-neutral-400" />
-            <span>Signing Out…</span>
-          </>
-        ) : (
-          <>
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
-          </>
-        )}
+        {signingOut ? <Loader2 className="w-[18px] h-[18px] animate-spin" /> : <LogOut className="w-[18px] h-[18px]" strokeWidth={1.75} />}
       </button>
     </form>
   )

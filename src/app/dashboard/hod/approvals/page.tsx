@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ApprovalQueueClient } from './ApprovalQueueClient'
+import { HOD_APPROVABLE } from '@/lib/priority'
 
 export default async function ApprovalQueuePage() {
   const supabase = await createClient()
@@ -23,7 +24,7 @@ export default async function ApprovalQueuePage() {
     .select('*, profiles!announcements_submitted_by_fkey(email), departments(name)')
     .eq('department_id', profile.department_id)
     .eq('status', 'pending_approval')
-    .in('priority', ['routine', 'timesensitive'])
+    .in('priority', HOD_APPROVABLE)
     .order('created_at', { ascending: true })
 
   return (

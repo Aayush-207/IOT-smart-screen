@@ -182,8 +182,9 @@
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
-    const SUPABASE_URL = 'https://dglhzjvlukuabdgjbmfk.supabase.co';
-  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRnbGh6anZsdWt1YWJkZ2pibWZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5Nzk5NzAsImV4cCI6MjEwNTU1NTk3MH0.uTv7LbLthkuKuGSmnETkmzOmhMaYSz9uRC344Vtg1EM';
+  // Device contract: every poll of this endpoint is the heartbeat, and it resolves
+  // targeting, schedule windows, priority and emergency override server-side.
+  const API_BASE = '';
 
   const slideTrack = document.getElementById('slide-track');
   const fsHint = document.getElementById('fs-hint');
@@ -272,52 +273,20 @@
   const urlParams = new URLSearchParams(window.location.search);
   const screenId = urlParams.get('id') || '9bf9fb2e-0d18-456a-b20b-a9e5be9e9ecf';
 
-  // Heartbeat ping: automatically marks Main Lobby Screen 01 as actively online in Supabase
-  async function pingHeartbeat() {
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/screens?id=eq.${screenId}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_ANON,
-          'Authorization': `Bearer ${SUPABASE_ANON}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ last_seen_at: new Date().toISOString() })
-      });
-    } catch (_) {}
-  }
-
-  // Fetch Live Approved Posters from Supabase
+  // Poll this screen's playlist
   async function fetchLivePosters() {
-    pingHeartbeat();
     try {
-      const endpoint = `${SUPABASE_URL}/rest/v1/announcements?select=id,title,body,priority,attachment_url,display_start,display_end,target_zones,target_all,created_at&status=eq.approved&order=created_at.desc`;
-      
-      const res = await fetch(endpoint, {
-        headers: {
-          'apikey': SUPABASE_ANON,
-          'Authorization': `Bearer ${SUPABASE_ANON}`
-        }
-      });
-      
+      const res = await fetch(`${API_BASE}/api/screens/${encodeURIComponent(screenId)}`, { cache: 'no-store' });
       if (!res.ok) throw new Error('Network response not ok');
       const data = await res.json();
 
-      const nowTime = Date.now();
-      const active = (data || []).filter(item => {
-        if (item.display_end && new Date(item.display_end).getTime() < nowTime) return false;
-        if (item.display_start && new Date(item.display_start).getTime() > nowTime) return false;
-        // Target filtering: include if broadcast to all or targeted to Main Lobby Screen 01 / Engineering Wing
-        if (item.target_all) return true;
-        if (Array.isArray(item.target_zones) && item.target_zones.length > 0) {
-          return item.target_zones.some(z => {
-            const s = String(z || '').toLowerCase();
-            return s.includes('lobby') || s.includes('engineering') || s.includes('screen 01') || s.includes('all');
-          });
-        }
-        return true;
-      });
+      // Pending force-refresh / reboot from the Fleet dashboard (consumed by this poll).
+      if (data.force_refresh || data.reboot_requested) {
+        window.location.reload();
+        return;
+      }
+
+      const active = data.playlist || [];
 
       const oldIds = posters.map(p => p.id).join(',');
       const newIds = active.map(p => p.id).join(',');
@@ -329,6 +298,9 @@
           try { localStorage.removeItem('campuscast_pure_posters'); } catch (_) {}
           buildStandby();
         }
+      } else if (posters.length === 0 && !slideTrack.children.length) {
+        // First poll came back empty: nothing "changed", but the screen must not stay blank.
+        buildStandby();
       }
     } catch (err) {
       if (posters.length === 0) {
@@ -342,7 +314,7 @@
     slideTrack.innerHTML = `
       <div class="slide-item">
         <div class="text-billboard">
-          <div class="tag">● Engineering Hall Atrium (Node 02) &bull; Hardware Online</div>
+          <div class="tag">● Standby</div>
           <div class="title" style="font-size: clamp(2rem, 5vw, 3rem);">CampusCast Display</div>
           <div class="body" style="font-size: 14px; color: #a1a1aa; line-height: 1.6;">
             Screen Canvas: <strong style="color: #fff;">1672 &times; 941 px (16:9)</strong><br>
@@ -353,6 +325,12 @@
     `;
     currentIndex = 0;
     updateTrack(false);
+  }
+
+  function esc(value) {
+    const el = document.createElement('div');
+    el.textContent = value == null ? '' : String(value);
+    return el.innerHTML.replace(/"/g, '&quot;');
   }
 
   function buildCarousel() {
@@ -373,8 +351,8 @@
         return `
           <div class="slide-item">
             <img 
-              src="${p.attachment_url}" 
-              alt="${p.title}" 
+              src="${esc(p.attachment_url)}" 
+              alt="${esc(p.title)}" 
               class="poster-img" 
               loading="eager"
             />
@@ -384,9 +362,9 @@
         return `
           <div class="slide-item">
             <div class="text-billboard">
-              <div class="tag">${p.priority || 'Campus'} Announcement</div>
-              <div class="title">${p.title}</div>
-              <div class="body">${p.body || ''}</div>
+              <div class="tag">${esc(p.priority || 'Campus')} Announcement</div>
+              <div class="title">${esc(p.title)}</div>
+              <div class="body">${esc(p.body)}</div>
             </div>
           </div>
         `;

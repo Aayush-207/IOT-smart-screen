@@ -31,12 +31,14 @@ export function NewAnnouncementForm({
   defaultDepartmentId,
   departments,
   zones,
+  onlineZones,
   existing,
 }: {
   userId: string
   defaultDepartmentId: string
   departments: Department[]
   zones: string[]
+  onlineZones: string[]
   existing: any | null
 }) {
   const supabase = createClient()
@@ -96,31 +98,11 @@ export function NewAnnouncementForm({
     setTargetZones((prev) => (prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone]))
   }
 
-  const targetScreens = React.useMemo(() => {
-    return zones.map((zone) => {
-      const zLower = zone.toLowerCase()
-      const isOnline =
-        zLower.includes('engineering') ||
-        zLower.includes('lobby') ||
-        zLower.includes('screen 01') ||
-        zone === 'Main Lobby Screen 01'
-
-      let label = zone
-      if (zLower.includes('engineering') || zLower.includes('lobby') || zLower.includes('screen 01')) {
-        label = 'Main Lobby Screen 01 (Engineering Wing)'
-      } else if (zLower.includes('library')) {
-        label = 'Library Entrance Node (Library Atrium)'
-      } else if (zLower.includes('cafeteria') || zLower.includes('student')) {
-        label = 'Cafeteria Kiosk Display (Student Cafeteria)'
-      }
-
-      return {
-        value: zone,
-        label,
-        isOnline,
-      }
-    })
-  }, [zones])
+  const targetScreens = zones.map((zone) => ({
+    value: zone,
+    label: zone,
+    isOnline: onlineZones.includes(zone),
+  }))
 
   const selectAllZones = () => {
     setTargetAll(false)
@@ -139,7 +121,7 @@ export function NewAnnouncementForm({
       return
     }
     if (mode === 'approval' && !targetAll && targetZones.length === 0) {
-      setError('Select at least one target screen (e.g. Main Lobby Screen 01).')
+      setError('Select at least one target screen.')
       return
     }
     const effectiveStart = displayStart || new Date().toISOString()
@@ -161,25 +143,8 @@ export function NewAnnouncementForm({
         attachmentUrl = publicUrl
       }
 
-      const normalizedTargetZones = targetAll
-        ? []
-        : Array.from(
-            new Set(
-              targetZones.flatMap((z) => {
-                const zLower = z.toLowerCase()
-                if (zLower.includes('engineering') || zLower.includes('lobby') || zLower.includes('screen 01')) {
-                  return ['Engineering Wing', 'Main Lobby Screen 01']
-                }
-                if (zLower.includes('library')) {
-                  return ['Library Atrium', 'Library Entrance Node']
-                }
-                if (zLower.includes('cafeteria') || zLower.includes('student')) {
-                  return ['Student Cafeteria', 'Cafeteria Kiosk Display']
-                }
-                return [z]
-              })
-            )
-          )
+      // Only real zones: drafts saved earlier may hold names no screen uses.
+      const normalizedTargetZones = targetAll ? [] : targetZones.filter((z) => zones.includes(z))
 
       const payload = {
         title: title.trim(),
@@ -228,7 +193,7 @@ export function NewAnnouncementForm({
   }
 
   return (
-    <div className="flex flex-col xl:flex-row gap-8 max-w-[1400px] w-full mx-auto animate-fade-in items-start relative font-[family-name:var(--font-inter)]">
+    <div className="flex flex-col xl:flex-row gap-8 max-w-[1400px] w-full mx-auto animate-fade-in items-start relative font-sans">
       {/* Live Mini Billboard Agent Console Card (Right Col) */}
       <div className="w-full xl:w-[420px] shrink-0 space-y-6 order-1 xl:order-2 xl:sticky xl:top-24">
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">

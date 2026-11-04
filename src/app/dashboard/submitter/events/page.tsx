@@ -66,7 +66,7 @@ export default async function SubmitterEventsPage() {
             Upcoming Events
           </h1>
           <p className="text-[#7D7D7D] mt-2">
-            Review this week's scheduled activities, workshops, and holidays to align your announcements.
+            Review this week&apos;s scheduled activities, workshops, and holidays to align your announcements.
           </p>
         </div>
       </div>

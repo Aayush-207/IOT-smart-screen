@@ -22,7 +22,7 @@ export function LoginFormClient({ message }: { message?: string }) {
   }
 
   return (
-    <div className="w-full space-y-8 font-[family-name:var(--font-inter)]">
+    <div className="w-full space-y-8 font-sans">
       {/* Demo Roles - Modern Flat Bento style */}
       <div className="space-y-3">
         <div className="flex items-center justify-between pb-3">

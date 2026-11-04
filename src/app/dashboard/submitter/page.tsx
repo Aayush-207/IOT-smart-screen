@@ -32,7 +32,7 @@ export default async function SubmitterDashboardPage() {
   const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1)
 
   return (
-    <div className="space-y-8 animate-fade-in-up font-[family-name:var(--font-inter)]">
+    <div className="space-y-8 animate-fade-in-up font-sans">
       {/* Top Header Section */}
       <div className="flex justify-between items-end mb-8 relative z-10">
         <div>
@@ -155,7 +155,7 @@ export default async function SubmitterDashboardPage() {
                           {formatDate(a.created_at)}
                         </td>
                         <td className="py-4 px-6 text-right">
-                          {status === 'live' || status === 'archived' || status === 'scheduled' ? (
+                          {status === 'live' || status === 'archived' || status === 'scheduled' || status === 'expired' ? (
                             <Link 
                               href={`/dashboard/submitter/${a.id}`}
                               className="inline-flex items-center gap-1 text-sm font-semibold text-slate-700 hover:text-[#0a0a0a] opacity-0 group-hover:opacity-100 transition-opacity"

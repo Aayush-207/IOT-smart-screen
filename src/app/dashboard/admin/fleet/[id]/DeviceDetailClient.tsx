@@ -28,7 +28,7 @@ export function DeviceDetailClient({
 
   const supabase = createClient()
   const router = useRouter()
-  const status = deviceStatus(screen.last_seen_at, screen.name)
+  const status = deviceStatus(screen.last_seen_at)
 
   const handleForceRefresh = async () => {
     setLoading('refresh')

@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import Script from 'next/script';
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const lora = Lora({
-  variable: "--font-lora",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
   display: "swap",
 });
@@ -32,7 +26,13 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${lora.variable} h-full antialiased`}
+      className={`${manrope.variable} ${manrope.className} h-full antialiased`}
+      style={{
+        '--font-manrope': 'var(--font-manrope)',
+        '--font-inter': 'var(--font-manrope)',
+        '--font-sans': 'var(--font-manrope)',
+        '--font-lora': 'var(--font-manrope)',
+      } as React.CSSProperties}
     >
       <head>
         <script id="theme-script"
@@ -55,7 +55,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className="min-h-full flex flex-col font-sans bg-[var(--canvas)] text-[var(--ink)] selection:bg-[#ffffff] selection:text-[#0a0a0a]"
+        className={`${manrope.className} min-h-full flex flex-col font-sans bg-[var(--canvas)] text-[var(--ink)] selection:bg-[#ffffff] selection:text-[#0a0a0a]`}
       >
         {children}
       </body>

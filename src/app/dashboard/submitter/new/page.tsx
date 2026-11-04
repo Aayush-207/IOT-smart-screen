@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { NewAnnouncementForm } from './NewAnnouncementForm'
+import { deviceStatus } from '@/lib/fleet'
 
 export default async function NewAnnouncementPage({
   searchParams,
@@ -20,11 +21,14 @@ export default async function NewAnnouncementPage({
 
   const { data: departments } = await supabase.from('departments').select('id, name').order('name')
 
-  const { data: screens } = await supabase.from('screens').select('zone')
-  let dbZones = Array.from(new Set((screens || []).map((s: any) => s.zone).filter(Boolean))).sort() as string[]
+  const { data: screens } = await supabase.from('screens').select('zone, last_seen_at')
+  const onlineZones = (screens || [])
+    .filter((s: any) => s.zone && deviceStatus(s.last_seen_at) === 'online')
+    .map((s: any) => s.zone as string)
+  const dbZones = Array.from(new Set((screens || []).map((s: any) => s.zone).filter(Boolean))).sort() as string[]
   
   // Use mock screens if DB is empty for demonstration
-  let zones = dbZones.length > 0 ? dbZones : [
+  const zones = dbZones.length > 0 ? dbZones : [
     'Main Lobby Screen 01',
     'Library Entrance Node',
     'Cafeteria Kiosk Display'
@@ -60,6 +64,7 @@ export default async function NewAnnouncementPage({
         defaultDepartmentId={profile?.department_id || ''}
         departments={departments || []}
         zones={zones as string[]}
+        onlineZones={onlineZones}
         existing={existing}
       />
     </>

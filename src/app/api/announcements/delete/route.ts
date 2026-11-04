@@ -44,40 +44,14 @@ export async function POST(request: Request) {
     }
 
     // 3. Establish elevated client to bypass RLS restrictions
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const clientToUse = serviceKey
+      ? createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        })
+      : userClient
 
-    let elevatedClient = null
-
-    if (serviceKey && serviceKey !== 'your-service-role-key-here') {
-      elevatedClient = createSupabaseClient(url, serviceKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
-      })
-    } else {
-      // Fallback to Admin role sign-in
-      const adminSessionClient = createSupabaseClient(url, anonKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
-      })
-      const { error: adminLoginErr } = await adminSessionClient.auth.signInWithPassword({
-        email: 'campus.admin@gmail.com',
-        password: 'password123',
-      })
-      if (!adminLoginErr) {
-        elevatedClient = adminSessionClient
-      }
-    }
-
-    const clientToUse = elevatedClient || userClient
-
-    // Delete associated deliveries first if any
-    try {
-      await clientToUse.from('announcement_deliveries').delete().eq('announcement_id', id)
-    } catch {
-      // Non-blocking
-    }
-
-    // Attempt direct delete
+    // Attempt direct delete (announcement_deliveries rows cascade)
     let deleteSucceeded = false
     const { error: delError, count } = await clientToUse
       .from('announcements')
@@ -90,7 +64,7 @@ export async function POST(request: Request) {
 
     // If direct delete was blocked or didn't delete, mark as withdrawn (standard CampusCast withdrawal)
     if (!deleteSucceeded) {
-      const { error: updateErr } = await clientToUse
+      const { data: withdrawn, error: updateErr } = await clientToUse
         .from('announcements')
         .update({
           status: 'withdrawn',
@@ -98,9 +72,14 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString(),
         })
         .eq('id', id)
+        .select('id')
 
       if (updateErr) {
         throw updateErr
+      }
+      // RLS blocks report success with zero rows; don't tell the user it worked.
+      if (!withdrawn?.length) {
+        return NextResponse.json({ ok: false, error: 'You do not have permission to delete this announcement.' }, { status: 403 })
       }
     }
 

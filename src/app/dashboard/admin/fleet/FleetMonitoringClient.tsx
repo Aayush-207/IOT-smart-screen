@@ -368,16 +368,8 @@ export function FleetMonitoringClient({
     return () => clearInterval(interval)
   }, [router])
 
-  // 1 screen functional & online (Main Lobby Screen 01), remaining screens offline
   const withStatus = useMemo(
-    () =>
-      screensList.map((s) => {
-        const isOnline = s.name === 'Main Lobby Screen 01' || (s.last_seen_at && Date.now() - new Date(s.last_seen_at).getTime() < 120000)
-        return {
-          ...s,
-          _status: (isOnline ? 'online' : 'offline') as DeviceStatus,
-        }
-      }),
+    () => screensList.map((s) => ({ ...s, _status: deviceStatus(s.last_seen_at) })),
     [screensList]
   )
 
@@ -411,7 +403,6 @@ export function FleetMonitoringClient({
           name: name.trim(),
           location: location.trim(),
           zone: zone.trim() || location.trim(),
-          last_seen_at: new Date().toISOString(),
         })
         .select()
         .single()
@@ -465,12 +456,12 @@ export function FleetMonitoringClient({
   const handleForceRefreshInline = async (screenId: string, screenName: string) => {
     setBusyId(screenId)
     setBusyType('refresh')
-    const now = new Date().toISOString()
     try {
-      await supabase
+      const { error } = await supabase
         .from('screens')
-        .update({ last_seen_at: now, force_refresh_requested: true })
+        .update({ force_refresh_requested: true })
         .eq('id', screenId)
+      if (error) throw error
 
       await logAudit(supabase, {
         actorId: userId,
@@ -479,11 +470,9 @@ export function FleetMonitoringClient({
         targetId: screenId,
         targetLabel: screenName,
       })
-      setScreensList((prev) =>
-        prev.map((s) => (s.id === screenId ? { ...s, last_seen_at: now } : s))
-      )
     } catch (e) {
       console.error(e)
+      alert('Failed to request refresh.')
     } finally {
       setBusyId(null)
       setBusyType(null)
@@ -495,6 +484,8 @@ export function FleetMonitoringClient({
     setBusyId(screenId)
     setBusyType('reboot')
     try {
+      const { error } = await supabase.from('screens').update({ reboot_requested: true }).eq('id', screenId)
+      if (error) throw error
       await logAudit(supabase, {
         actorId: userId,
         action: 'rebooted_screen',

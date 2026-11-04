@@ -46,7 +46,7 @@ export default async function HodDepartmentEventsPage() {
   const totalEvents = deptDays.reduce((acc, curr) => acc + curr.events.length, 0)
 
   return (
-    <div className="space-y-8 animate-fade-in-up font-[family-name:var(--font-inter)]">
+    <div className="space-y-8 animate-fade-in-up font-sans">
       {/* Top Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 relative z-10">
         <div>

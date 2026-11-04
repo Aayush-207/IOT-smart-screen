@@ -34,7 +34,7 @@ export default async function AuditLogPage() {
   ])
 
   // Fetch announcements to enrich audit log with poster visual and duration
-  let announcementMap: Record<string, any> = {}
+  const announcementMap: Record<string, any> = {}
 
   if (allAnnouncements) {
     allAnnouncements.forEach((a: any) => {

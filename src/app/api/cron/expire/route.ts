@@ -53,7 +53,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ expired: 0, ids: [] })
   }
 
-  await supabase.from('announcements').update({ status: 'expired', updated_at: nowIso }).in('id', ids)
+  const { error: updateError } = await supabase
+    .from('announcements')
+    .update({ status: 'expired', updated_at: nowIso })
+    .in('id', ids)
+  if (updateError) {
+    console.error('expire job: update failed', updateError)
+    return NextResponse.json({ error: updateError.message }, { status: 500 })
+  }
   await supabase.from('announcement_deliveries').update({ state: 'expired' }).in('announcement_id', ids)
   await supabase.from('audit_log').insert(
     (due || []).map((a) => ({

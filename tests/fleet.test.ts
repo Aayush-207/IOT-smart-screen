@@ -4,6 +4,7 @@ import {
   deliveryState,
   relativeTime,
   announcementDisplayStatus,
+  isScreenTargeted,
 } from "../src/lib/fleet";
 
 describe("deviceStatus", () => {
@@ -129,5 +130,25 @@ describe("announcementDisplayStatus", () => {
         display_end: past(2),
       })
     ).toBe("archived");
+  });
+});
+
+describe("isScreenTargeted", () => {
+  const screen = { name: "Engineering Hall Atrium (Node 02)", zone: "Engineering", location: "Engineering Complex B2" };
+
+  it("matches broadcast-to-all and the screen's own zone", () => {
+    expect(isScreenTargeted({ target_all: true, target_zones: [] }, screen)).toBe(true);
+    expect(isScreenTargeted({ target_zones: ["engineering"] }, screen)).toBe(true);
+  });
+
+  it("still matches rows saved with the older zone aliases", () => {
+    expect(isScreenTargeted({ target_zones: ["Engineering Wing", "Main Lobby Screen 01"] }, screen)).toBe(true);
+  });
+
+  it("does not match other zones, empty targets, or crash on a null zone", () => {
+    expect(isScreenTargeted({ target_zones: ["Library"] }, screen)).toBe(false);
+    expect(isScreenTargeted({ target_zones: [] }, screen)).toBe(false);
+    expect(isScreenTargeted({ target_zones: [""] }, screen)).toBe(false);
+    expect(isScreenTargeted({ target_zones: ["Library"] }, { name: "Foo", zone: null, location: "" })).toBe(false);
   });
 });

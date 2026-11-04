@@ -49,7 +49,7 @@ export function AnalyticsClient({
   const screenStats = useMemo(() => {
     const counts: Record<DeviceStatus, number> = { online: 0, stale: 0, offline: 0 }
     screens.forEach((s) => {
-      const status = deviceStatus(s.last_seen_at, s.name) as DeviceStatus
+      const status = deviceStatus(s.last_seen_at) as DeviceStatus
       counts[status]++
     })
     const total = screens.length
@@ -113,7 +113,7 @@ export function AnalyticsClient({
   const estimatedDailyReach = useMemo(() => {
     let total = 0
     screens.forEach((s) => {
-      const status = deviceStatus(s.last_seen_at, s.name)
+      const status = deviceStatus(s.last_seen_at)
       if (status !== 'offline') {
         const zoneKey = (s.zone || s.location || '').toLowerCase()
         let match = 2000
